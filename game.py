@@ -11,7 +11,6 @@ class Game:
         self.gameDeck = None
         self.x = 0
         self.direction = 1
-
     def randomSim(self, amountOfPlayers):
         self.grabDeck = deck.standardDeck()
         self.grabDeck.shuffle()
@@ -54,15 +53,16 @@ class Game:
 
     def grabCard(self):
         if len(self.grabDeck.cards) > 0:
-            _card = self.grabDeck.cards[-1]
-            del self.grabDeck.cards[-1]
+            _card = self.grabDeck.topCard()
+            self.grabDeck.removeTopCard()
             return _card
         elif len(self.gameDeck.cards) > 1:
             print("RESHUFFLING")
             self.grabDeck.cards = self.gameDeck.cards[0:-1]
+            self.grabDeck.shuffle()
             del self.gameDeck.cards[0:-1]
-            _card = self.grabDeck.cards[-1]
-            del self.grabDeck.cards[-1]
+            _card = self.grabDeck.topCard()
+            self.grabDeck.removeTopCard()
             return _card
         else:
             return None

@@ -14,6 +14,13 @@ class Deck:
         for _card in self.cards:
             _card.vocalize()
 
+    def topCard(self):
+        return self.cards[-1]
+
+    def removeTopCard(self):
+        if self.cards is not None:
+            del self.cards[-1]
+
 
 def standardDeck():
     cards = []
@@ -26,4 +33,3 @@ def standardDeck():
     cards.append(card.Card(48))
     cards.append(card.Card(48))
     return Deck(cards)
-

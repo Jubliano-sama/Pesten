@@ -16,3 +16,5 @@ class Agent:
     def printCards(self):
         self.mydeck.vocalize()
     def throwCard(self, game):
+        return self.randCompatible(self, game.gameDeck.topCard())
+        pass
