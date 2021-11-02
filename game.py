@@ -9,8 +9,12 @@ class Game:
         self.players = []
         self.grabDeck = None
         self.gameDeck = None
-        self.x = 0
-        self.direction = 1
+        self.currentPlayerIndex = 0
+        self.penaltyAmount = 0
+        self.direction = 1  # 1=clockwise -1=anti-clockwise
+
+    # simulates game with random agents
+    # TO DO move game logic to separate function, outside of class
     def randomSim(self, amountOfPlayers):
         self.grabDeck = deck.standardDeck()
         self.grabDeck.shuffle()
@@ -28,27 +32,47 @@ class Game:
         i = 0
 
         while i < 100:
-            _card = self.players[self.x].randCompatible(self.gameDeck.cards[-1])
-            print("player", self.x)
-            if _card is not None:
-                self.throwCard(_card)
-            else:
-                print("cannot throw")
-                _grabcard = self.grabCard()
-                if _grabcard is not None:
-                    print("grabbed card:")
-                    _grabcard.vocalize()
-                    self.players[self.x].mydeck.cards.append(_grabcard)
-                    if _grabcard.compatible(self.gameDeck.cards[-1]) and uniform(0, 1) > 0.5:
-                        self.throwCard(_grabcard)
+
+            nextCard = self.players[self.currentPlayerIndex].playCard(self)
+            currentPlayer = self.players[self.currentPlayerIndex]
+
+            print("player", self.currentPlayerIndex)
+            # checks if there are cards to be grabbed(joker/2)
+            if self.penaltyAmount > 0:
+                    # if players next action is playing the same card as the penalty card, add up penalty amounts
+                if nextCard is not None:
+                    if nextCard.truenumber == self.gameDeck.topCard().truenumber:
+                       self.throwCard(nextCard)
+                    else:
+                        print("grabbing penalty cards:", self.penaltyAmount)
+                        for i in range(self.penaltyAmount):
+                            currentPlayer.addCard(self.grabCard())
+                            self.penaltyAmount = 0
                 else:
-                    print("no cards available")
-                    break
-            self.x += self.direction
-            if self.x >= amountOfPlayers:
-                self.x = self.x - amountOfPlayers
-            elif self.x <= -1:
-                self.x = amountOfPlayers + self.x
+                    print("grabbing penalty cards", self.penaltyAmount)
+                    for i in range(self.penaltyAmount):
+                        currentPlayer.addCard(self.grabCard())
+                        self.penaltyAmount = 0
+            else:
+                if nextCard is not None:
+                    self.throwCard(nextCard)
+                else:
+                    print("cannot throw")
+                    _grabcard = self.grabCard()
+                    if _grabcard is not None:
+                        print("grabbed card:")
+                        _grabcard.vocalize()
+                        self.players[self.currentPlayerIndex].mydeck.cards.append(_grabcard)
+                        if _grabcard.compatible(self.gameDeck.cards[-1]) and uniform(0, 1) > 0.5:
+                            self.throwCard(_grabcard)
+                    else:
+                        print("no cards available")
+                        break
+            self.currentPlayerIndex += self.direction
+            if self.currentPlayerIndex >= amountOfPlayers:
+                self.currentPlayerIndex = self.currentPlayerIndex - amountOfPlayers
+            elif self.currentPlayerIndex <= -1:
+                self.currentPlayerIndex = amountOfPlayers + self.currentPlayerIndex
             i += 1
 
     def grabCard(self):
@@ -72,28 +96,23 @@ class Game:
         _card.vocalize()
 
         self.gameDeck.cards.append(_card)
-        self.players[self.x].mydeck.cards.remove(_card)
+        self.players[self.currentPlayerIndex].mydeck.cards.remove(_card)
         if _card.truenumber == 7:
-            self.x -= self.direction
+            self.currentPlayerIndex -= self.direction
         elif _card.truenumber == 8:
-            self.x += self.direction
+            self.currentPlayerIndex += self.direction
         elif _card.truenumber == 1:
             self.direction *= -1
         # joker
         elif _card.truenumber == 0:
-            pass
+            self.penaltyAmount += 5
         # boer
         elif _card.truenumber == 0:
             self.gameDeck.cards.append(card.Card(sort=randint(0, 4)))
             print(self.gameDeck.cards[-1].sort)
         elif _card.truenumber == 2:
-            pass
-
-    def handleNextPlayerGrab(self, grabAmount, _card, currentPlayer):
-        #handle joker and 2s
-        #recursion?
-        pass
+            self.penaltyAmount += 2
 
     def calculateNextPlayer(self, currentPlayer):
-        #return next player
+        # return next player
         pass

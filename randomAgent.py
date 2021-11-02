@@ -8,13 +8,15 @@ class Agent:
         self.mydeck = deck.Deck(_deck.cards[0:7])
         del _deck.cards[0:7]
 
-    def randCompatible(self, card):
+    def randCompatible(self, compCard):
+        self.mydeck.shuffle()
         for _card in self.mydeck.cards:
-            if card.compatible(_card):
+            if compCard.compatible(_card):
                 return _card
         return None
     def printCards(self):
         self.mydeck.vocalize()
-    def throwCard(self, game):
-        return self.randCompatible(self, game.gameDeck.topCard())
-        pass
+    def addCard(self, card):
+        self.mydeck.cards.append(card)
+    def playCard(self, game):
+        return self.randCompatible(game.gameDeck.topCard())
