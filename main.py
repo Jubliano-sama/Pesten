@@ -4,8 +4,8 @@ import game
 
 
 def simRandomGame(playerAmount):
-    _game = game.Game()
-    _game.randomSim(playerAmount)
+    _game = game.Game(5)
+    _game.randomSim()
 
 
 for i in range(1):

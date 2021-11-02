@@ -5,21 +5,22 @@ from random import uniform, randint
 
 
 class Game:
-    def __init__(self):
+    def __init__(self, playerAmount):
         self.players = []
         self.grabDeck = None
         self.gameDeck = None
         self.currentPlayerIndex = 0
         self.penaltyAmount = 0
+        self.amountOfPlayers = playerAmount
         self.direction = 1  # 1=clockwise -1=anti-clockwise
 
     # simulates game with random agents
     # TO DO move game logic to separate function, outside of class
-    def randomSim(self, amountOfPlayers):
+    def randomSim(self):
         self.grabDeck = deck.standardDeck()
         self.grabDeck.shuffle()
 
-        for i in range(amountOfPlayers):
+        for i in range(self.amountOfPlayers):
             self.players.append(randomAgent.Agent(self.grabDeck))
         self.gameDeck = deck.Deck([self.grabDeck.cards[-1]])
         del self.grabDeck.cards[-1]
@@ -29,13 +30,11 @@ class Game:
                 or self.gameDeck.cards[-1].truenumber == 8 or self.gameDeck.cards[-1].truenumber == 2:
             self.gameDeck.cards.append(self.grabDeck.cards[-1])
             del self.grabDeck.cards[-1]
-        i = 0
+        turn = 0
 
-        while i < 100:
-
+        while turn < 1000:
             nextCard = self.players[self.currentPlayerIndex].playCard(self)
             currentPlayer = self.players[self.currentPlayerIndex]
-
             print("player", self.currentPlayerIndex)
             # checks if there are cards to be grabbed(joker/2)
             if self.penaltyAmount > 0:
@@ -45,7 +44,7 @@ class Game:
                        self.throwCard(nextCard)
                     else:
                         print("grabbing penalty cards:", self.penaltyAmount)
-                        for i in range(self.penaltyAmount):
+                        for penalties in range(self.penaltyAmount):
                             currentPlayer.addCard(self.grabCard())
                             self.penaltyAmount = 0
                 else:
@@ -68,12 +67,13 @@ class Game:
                     else:
                         print("no cards available")
                         break
-            self.currentPlayerIndex += self.direction
-            if self.currentPlayerIndex >= amountOfPlayers:
-                self.currentPlayerIndex = self.currentPlayerIndex - amountOfPlayers
-            elif self.currentPlayerIndex <= -1:
-                self.currentPlayerIndex = amountOfPlayers + self.currentPlayerIndex
-            i += 1
+            self.currentPlayerIndex = self.calculateNextPlayer(self.currentPlayerIndex, self.direction)
+            print("turn",turn)
+            turn += 1
+
+            if len(currentPlayer.mydeck.cards) == 0:
+                print("player", self.currentPlayerIndex, "wins")
+                break
 
     def grabCard(self):
         if len(self.grabDeck.cards) > 0:
@@ -108,11 +108,16 @@ class Game:
             self.penaltyAmount += 5
         # boer
         elif _card.truenumber == 0:
-            self.gameDeck.cards.append(card.Card(sort=randint(0, 4)))
+            self.gameDeck.cards.append(self.players[self.currentPlayerIndex].changeSort())
             print(self.gameDeck.cards[-1].sort)
         elif _card.truenumber == 2:
             self.penaltyAmount += 2
 
-    def calculateNextPlayer(self, currentPlayer):
+    def calculateNextPlayer(self, playerIndex, direction):
         # return next player
-        pass
+        playerIndex += direction
+        if playerIndex >= self.amountOfPlayers:
+            playerIndex = playerIndex - self.amountOfPlayers
+        elif playerIndex <= -1:
+            playerIndex = self.amountOfPlayers + playerIndex
+        return playerIndex
