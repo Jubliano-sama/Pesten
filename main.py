@@ -4,9 +4,9 @@ import game
 
 
 def simRandomGame(playerAmount):
-    _game = game.Game(5)
+    _game = game.Game(4)
     _game.randomSim()
 
 
-for i in range(1):
+for i in range(10000):
     simRandomGame(4)

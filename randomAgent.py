@@ -1,24 +1,28 @@
 import card
 import deck
 from random import randint
+import logging
+import logging
 
 class Agent:
-    def __init__(self, _deck):
-        self.gamedeck = _deck
-        self.mydeck = deck.Deck(_deck.cards[0:7])
-        del _deck.cards[0:7]
+    def __init__(self):
+        self.mydeck = deck.Deck([])
 
-    def randCompatible(self, compCard):
-        self.mydeck.shuffle()
-        for _card in self.mydeck.cards:
-            if compCard.compatible(_card):
-                return _card
-        return None
     def changeSort(self):
-        return card.Card(sort=randint(0,6))
+        return card.sorts[randint(0, 4)]
     def printCards(self):
         self.mydeck.vocalize()
-    def addCard(self, card):
-        self.mydeck.cards.append(card)
-    def playCard(self, game):
-        return self.randCompatible(game.gameDeck.topCard())
+    def addCard(self, _card):
+        if not isinstance(_card, card.Card):
+            logging.error("None card detected")
+        self.mydeck.cards.append(_card)
+    def playCard(self, sort, truenumber):
+        if len(self.mydeck.cards) != 0:
+            self.mydeck.shuffle()
+            for _card in self.mydeck.cards:
+                if _card.compatible(sort=sort, truenumber=truenumber):
+                    return _card
+            return None
+        else:
+            logging.debug("No cards?")
+            print("ik heb geen kaarten?")

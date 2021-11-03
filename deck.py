@@ -21,6 +21,9 @@ class Deck:
         if self.cards is not None:
             del self.cards[-1]
 
+    def cardCount(self):
+        return len(self.cards)
+
 
 def standardDeck():
     cards = []
