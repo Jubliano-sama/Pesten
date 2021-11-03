@@ -60,6 +60,10 @@ class Game:
             currentPlayer = self.players[ self.currentPlayerIndex]
             logging.debug("Player: " + str(self.currentPlayerIndex) + " who has " + str(currentPlayer.mydeck.cardCount()) + " card(s)")
             _card = currentPlayer.playCard(self.currentSort, self.currentTrueNumber)
+            lastCard = False
+            if currentPlayer.mydeck.cardCount() == 1:
+                lastCard = True
+                logging.debug("last card was set to true")
             #print(turn)
             # checks if player has to grab penalty cards
             if self.penaltyAmount > 0:
@@ -70,8 +74,9 @@ class Game:
                         self.penaltyAmount = 0
                         if self.gameEnded == True:
                             break
+                        self.changeSort(currentPlayer.changeSort())
                     else:
-                        self.throwCard(_card, currentPlayer)
+                        self.throwCard(_card, currentPlayer, lastCard)
                 else:
                     self.grabMultipleCards(self.penaltyAmount, currentPlayer)
                     self.penaltyAmount = 0
@@ -79,16 +84,18 @@ class Game:
                     if self.gameEnded == True:
                         break
             else:
-                self.throwCard(_card, currentPlayer)
+                self.throwCard(_card, currentPlayer, lastCard)
             turn += 1
             if currentPlayer.mydeck.cardCount() == 0:
                 self.winner = self.currentPlayerIndex
                 self.gameEnded = True
                 logging.info("Player: " + str(self.winner) + " has won!")
                 break
-
             self.currentPlayerIndex = self.calculateNextPlayer(self.currentPlayerIndex, self.direction)
-        return [self.winner, turn]
+
+        if self.winner is None:
+            logging.debug("Game ended in a draw!")
+        return turn
 
     def grabMultipleCards(self, amount, player):
         logging.debug("grabbing " + str(amount) + " cards")
@@ -121,11 +128,20 @@ class Game:
         self.currentSort = newSort
         logging.debug(("SORT CHANGED:", self.currentSort))
 
-    def throwCard(self, _card, player):
+    def throwCard(self, _card, player, lastCard):
         if _card is None:
             logging.debug("Player does not play a card")
             self.grabCard(player)
             return
+        if lastCard is True:
+            logging.debug("on the last card")
+            if _card.truenumber == 7 or _card.truenumber == 8 or _card.truenumber == 1 or _card.truenumber == 0 or _card.truenumber == 13 or _card.truenumber == 2:
+                logging.debug("Last card played is pestkaart: " + _card.toString() + ", grabbing two penalty cards")
+                self.grabCard(player)
+                if self.gameEnded is not True:
+                    self.grabCard(player)
+                else:
+                    return
 
         logging.debug("threw card:")
         logging.debug(_card.toString())

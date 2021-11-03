@@ -17,6 +17,7 @@ class Agent:
             logging.error("None card detected")
         self.mydeck.cards.append(_card)
     def playCard(self, sort, truenumber):
+        logging.debug("trying to play card")
         if len(self.mydeck.cards) != 0:
             self.mydeck.shuffle()
             for _card in self.mydeck.cards:
