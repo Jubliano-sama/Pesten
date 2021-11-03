@@ -1,4 +1,4 @@
-import numpy as np
+from numpy import random
 import card
 
 
@@ -8,7 +8,7 @@ class Deck:
         self.count = len(cards)
 
     def shuffle(self):
-        np.random.shuffle(self.cards)
+        random.shuffle(self.cards)
 
     def vocalize(self):
         for _card in self.cards:

@@ -88,7 +88,6 @@ class Game:
                 break
 
             self.currentPlayerIndex = self.calculateNextPlayer(self.currentPlayerIndex, self.direction)
-
         return [self.winner, turn]
 
     def grabMultipleCards(self, amount, player):
