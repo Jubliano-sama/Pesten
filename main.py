@@ -2,12 +2,17 @@ import deck
 import randomAgent
 import game
 import logging
+from numpy import zeros
 
 turns = 0
+winners = zeros(4)
 def simRandomGame(playerAmount):
     global turns
+    global winners
     _game = game.Game(4)
-    turn = _game.randomSim()
+    data = _game.randomSim()
+    turn = data[0]
+    winners[data[1]] += 1
     turns += turn
 
 logging.critical("simulations started")
@@ -20,3 +25,4 @@ for i in range(games):
         print("games done: " + str(amount))
 logging.critical("simulations done")
 print(turns//games)
+print(winners)

@@ -63,23 +63,27 @@ class Game:
             lastCard = False
             if currentPlayer.mydeck.cardCount() == 1:
                 lastCard = True
-                logging.debug("last card was set to true")
-            #print(turn)
+            # print(turn)
             # checks if player has to grab penalty cards
             if self.penaltyAmount > 0:
                 if _card is not None:
+                    # if the card the player wants to play is the same as the penalty card, play the card, else grab
+                    # cards
                     if _card.truenumber != self.currentTrueNumber:
                         self.grabMultipleCards(self.penaltyAmount, currentPlayer)
                         #check if there werent enough cards to grab, ending the game in a draw
                         self.penaltyAmount = 0
-                        if self.gameEnded == True:
+                        if self.gameEnded:
                             break
-                        self.changeSort(currentPlayer.changeSort())
+                        if self.currentTrueNumber == 0:
+                            self.changeSort(currentPlayer.changeSort())
                     else:
                         self.throwCard(_card, currentPlayer, lastCard)
                 else:
                     self.grabMultipleCards(self.penaltyAmount, currentPlayer)
                     self.penaltyAmount = 0
+                    if self.currentTrueNumber == 0:
+                        self.changeSort(currentPlayer.changeSort())
                     # check if there werent enough cards to grab, ending the game in a draw
                     if self.gameEnded == True:
                         break
@@ -95,7 +99,7 @@ class Game:
 
         if self.winner is None:
             logging.debug("Game ended in a draw!")
-        return turn
+        return [turn, self.winner]
 
     def grabMultipleCards(self, amount, player):
         logging.debug("grabbing " + str(amount) + " cards")
@@ -134,7 +138,6 @@ class Game:
             self.grabCard(player)
             return
         if lastCard is True:
-            logging.debug("on the last card")
             if _card.truenumber == 7 or _card.truenumber == 8 or _card.truenumber == 1 or _card.truenumber == 0 or _card.truenumber == 13 or _card.truenumber == 2:
                 logging.debug("Last card played is pestkaart: " + _card.toString() + ", grabbing two penalty cards")
                 self.grabCard(player)
