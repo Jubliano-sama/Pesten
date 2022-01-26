@@ -3,14 +3,20 @@ import deck
 from random import randint
 import logging
 import logging
+import torch
 
 
 class Agent:
     def __init__(self):
         self.mydeck = deck.Deck([])
 
+    def returnState(self):
+        # returns state
+        pass
+
     def changeSort(self):
-        return card.sorts[randint(0, 4)]
+        # return sort
+        pass
 
     def printCards(self):
         self.mydeck.vocalize()
@@ -22,11 +28,8 @@ class Agent:
 
     def playCard(self, sort, truenumber):
         if len(self.mydeck.cards) != 0:
-            self.mydeck.shuffle()
-            for _card in self.mydeck.cards:
-                if _card.compatible(sort=sort, truenumber=truenumber):
-                    return _card
-            return None
+            # return card to play
+            pass
         else:
             logging.debug("No cards?")
             print("ik heb geen kaarten?")

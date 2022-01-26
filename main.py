@@ -2,6 +2,7 @@ import deck
 import randomAgent
 import game
 import logging
+import torch
 from numpy import zeros
 
 turns = 0

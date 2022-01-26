@@ -30,7 +30,7 @@ class Game:
             self.players.append(randomAgent.Agent())
         return self.sim()
 
-    def sim(self):
+    def sim(self, train=False):
         if len(self.players) < 2:
             logging.critical("Cannot start game without or with only one player(s)")
             return
@@ -96,6 +96,10 @@ class Game:
                 logging.info("Player: " + str(self.winner) + " has won!")
                 break
             self.currentPlayerIndex = self.calculateNextPlayer(self.currentPlayerIndex, self.direction)
+
+        if(train == True and self.currentPlayerIndex == 0):
+            # save AI state to memory
+            pass
 
         if self.winner is None:
             logging.debug("Game ended in a draw!")
