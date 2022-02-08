@@ -1,21 +1,39 @@
 import card
 import deck
 from random import randint
+import numpy
 import logging
 import logging
 import torch
+import game
 
 
 class Agent:
-    def __init__(self):
+    def __init__(self, _game):
         self.mydeck = deck.Deck([])
+        self.type = "AI"
+        self._game = _game
 
-    def returnState(self):
-        # returns state
-        pass
+    def obs(self):
+        # returns obs
+        _obs = numpy.zeros(shape = [120])
+        for _card in self.mydeck.cards:
+            _obs[_card.truenumber] += 1
+            if _card.compatible(self._game.currentSort, self._game.currentTrueNumber):
+                _obs[_card.truenumber + 50] += 1
+        for x in range(100, 105):
+            _obs[x] = self._game.sortsPlayed[x - 100]
+        players = self._game.players
+        y = 105
+        for x in players:
+            _obs[y] = x.mydeck.cardCount()
+            y += 1
+        return _obs
 
     def changeSort(self):
         # return sort
+        print("AI is not game ready yet")
+
         pass
 
     def printCards(self):
@@ -27,9 +45,4 @@ class Agent:
         self.mydeck.cards.append(_card)
 
     def playCard(self, sort, truenumber):
-        if len(self.mydeck.cards) != 0:
-            # return card to play
-            pass
-        else:
-            logging.debug("No cards?")
-            print("ik heb geen kaarten?")
+        print("AI is not game ready yet")

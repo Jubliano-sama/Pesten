@@ -8,6 +8,7 @@ import logging
 class Agent:
     def __init__(self):
         self.mydeck = deck.Deck([])
+        self.type = "Random"
 
     def changeSort(self):
         return card.sorts[randint(0, 4)]

@@ -2,6 +2,7 @@ import deck
 import randomAgent
 import game
 import logging
+import network
 import torch
 from numpy import zeros
 
@@ -15,8 +16,8 @@ def simRandomGame(playerAmount):
     turn = data[0]
     winners[data[1]] += 1
     turns += turn
-
-logging.critical("simulations started")
+"""
+ logging.critical("simulations started")
 amount = -100
 games = 100000
 for i in range(games):
@@ -27,3 +28,12 @@ for i in range(games):
 logging.critical("simulations done")
 print(turns//games)
 print(winners)
+"""
+
+_game = game.Game(4)
+obs = _game.reset()
+net = network.FeedForwardNN(120, 54)
+pre_action = net.forward()
+
+_game.step(20)
+
