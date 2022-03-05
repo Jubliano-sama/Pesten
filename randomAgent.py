@@ -10,7 +10,7 @@ class Agent:
         self.type = "Random"
 
     def changeSort(self):
-        return card.sorts[randint(0, 4)]
+        return card.sorts[randint(0, 3)]
 
     def remove(self, _card):
         for c in self.mydeck.cards:

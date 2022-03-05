@@ -62,7 +62,7 @@ class PPO:
         # Algorithm hyperparameters
         self.timesteps_per_batch = 1000  # Number of timesteps to run per batch
         self.max_timesteps_per_episode = 1600  # Max number of timesteps per episode
-        self.n_updates_per_iteration = 5  # Number of times to update actor/critic per iteration
+        self.n_updates_per_iteration = 3  # Number of times to update actor/critic per iteration
         self.lr = 0.005  # Learning rate of actor optimizer
         self.gamma = 0.95  # Discount factor to be applied when calculating Rewards-To-Go
         self.clip = 0.2  # Recommended 0.2, helps define the threshold to clip the ratio during SGA
@@ -121,7 +121,7 @@ class PPO:
         batch_rews = []
         batch_rtgs = []
         batch_lens = []
-
+        batch_masks = []
         # Episodic data. Keeps track of rewards per episode, will get cleared
         # upon each new episode
         ep_rews = []
@@ -129,49 +129,32 @@ class PPO:
         t = 0  # Keeps track of how many timesteps we've run so far this batch
 
         # Keep simulating until we've run more than or equal to specified timesteps per batch
-        while t < 3000:
+        while t < 20000:
             ep_rews = []  # rewards collected per episode
-
-            # Reset the environment. sNote that obs is short for observation.
-            _game = game.Game(4)
+            _game = game.Game(3)
             _game.players.append(randomAgent.Agent())
             _game.players.append(randomAgent.Agent())
             _game.players.append(neuralAgent.Agent(_game))
-            _game.players.append(randomAgent.Agent())
-
-            obs = _game.reset(2)[0]
-            done = False
-
-            # Run an episode for a maximum of max_timesteps_per_episode timesteps
-            ep_t2 = 1
-            for ep_t in range(100):
-
-                # Calculate action and make a step in the env.
-                # Note that rew is short for reward.
-                action, log_prob = self.get_action(obs, _game.players[0])
-                # has to grab card
-                if action == -1:
-                    obs, rew, done = _game.step(-1)
+            _game.players[2].nn = self.actor
+            result = _game.auto_sim()
+            ep_obs = _game.players[2].episode_obs
+            episode_len = len(ep_obs)
+            t += episode_len
+            if episode_len > 0:
+                ep_act = _game.players[2].episode_act
+                batch_lens.append(episode_len)
+                ep_rews = np.zeros(shape=[episode_len])
+                if result[1] is None:
+                    pass
+                elif result[1] == 2:
+                    ep_rews[-1] = 1
                 else:
-                    # Track observations in this batch
-                    batch_obs.append(obs)
-                    obs, rew, done = _game.step(action)
-                    t += 1  # Increment timesteps ran this batch so far
-                    ep_t2 += 1
-                    # Track recent reward, action, and action log probability
-                    ep_rews.append(rew)
-                    batch_acts.append(action)
-                    batch_log_probs.append(log_prob)
-                # If the environment tells us the episode is terminated, break
-                if done:
-                    break
-                # Track episodic lengths and rewards
-            if len(ep_rews) > 0:
-                if ep_rews[-1] == 0:
-                    ep_rews[-1] = -0.5
-                batch_lens.append(ep_t2)
+                    ep_rews[-1] = -1
                 batch_rews.append(ep_rews)
-
+                batch_obs.extend(ep_obs)
+                batch_acts.extend(ep_act)
+                batch_log_probs.extend(_game.players[2].episode_logprobs)
+                batch_masks.extend(_game.players[2].episode_mask)
         # Reshape data as tensors in the shape specified in function description, before returning
         batch_obs = torch.tensor(batch_obs, dtype=torch.float)
         batch_acts = torch.tensor(batch_acts, dtype=torch.float)
@@ -181,7 +164,7 @@ class PPO:
         self.logger['batch_rews'] = batch_rews
         self.logger['batch_lens'] = batch_lens
 
-        return batch_obs, batch_acts, batch_log_probs, batch_rtgs, batch_lens
+        return batch_obs, batch_acts, batch_log_probs, batch_rtgs, batch_lens, batch_masks
 
     # creates a boolean mask for actions
     def action_mask(self, batch_obs=None, single_obs=None):
@@ -197,7 +180,7 @@ class PPO:
                     compatible_cards = obs[50:100]
                     for x in range(0, 50):
                         if compatible_cards[x] == 0:
-                            mask[y][x] = 0
+                           mask[y][x] = 0
                     for x in range(50, 54):
                         mask[y][x] = 0
                 else:
