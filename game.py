@@ -6,7 +6,7 @@ import numpy
 from random import uniform, randint
 
 logging.basicConfig(filename='gamepest.log', format='%(asctime)s - %(levelname)s - %(message)s',
-                    level=logging.DEBUG)
+                    level=logging.CRITICAL)
 
 
 class Game:
@@ -34,29 +34,25 @@ class Game:
             self.players.append(randomAgent.Agent())
         return self.auto_sim()
 
-    def reset(self):
-        self.players = []
+    def reset(self, neuralIndex):
         self.gameEnded = False
         self.changeSortTurn = False
         self.winner = None
         self.turn = 0
         self.direction = 1
         self.sortsPlayed = numpy.zeros(shape=[5])
-
-        self.players.append(neuralAgent.Agent(self))
-        self.players.append(randomAgent.Agent())
-        self.players.append(randomAgent.Agent())
-        self.players.append(randomAgent.Agent())
-
+        self.neuralIndex = neuralIndex
         self.grabDeck = deck.standardDeck()
         self.grabDeck.shuffle()
         #add shuffled cards to player decks
         for player in self.players:
+            player.mydeck.cards = []
             for i in range(7):
-                player.addCard(self.grabDeck.topCard())
+                _card = self.grabDeck.topCard()
+                player.addCard(_card)
                 self.grabDeck.removeTopCard()
         self.gameDeck = deck.Deck([self.grabDeck.cards[-1]])
-        del self.grabDeck.cards[-1]
+        self.grabDeck.removeTopCard()
         # generate top card
         while self.gameDeck.cards[-1].truenumber == 13 or self.gameDeck.cards[-1].truenumber == 0 or \
                 self.gameDeck.cards[-1].truenumber == 1 or self.gameDeck.cards[-1].truenumber == 7 \
@@ -67,25 +63,53 @@ class Game:
         self.currentSort = self.gameDeck.topCard().sort
         self.currentTrueNumber = self.gameDeck.topCard().truenumber
         self.turn = 0
+        while self.currentPlayerIndex != neuralIndex:
+            logging.debug("Turn: " + str(self.turn))
+            self.currentPlayer = self.players[self.currentPlayerIndex]
+            logging.debug("Player: " + str(self.currentPlayerIndex) + " who has " + str(
+                self.currentPlayer.mydeck.cardCount()) + " card(s)")
+            _card = self.currentPlayer.playCard(self.currentSort, self.currentTrueNumber)
+            self.simTurn(_card)
+            if self.changeSortTurn == True:
+                self.changeSort(self.currentPlayer.changeSort())
+                self.changeSortTurn = False
+            self.currentPlayerIndex = self.calculateNextPlayer(self.currentPlayerIndex, self.direction)
+        return self.players[neuralIndex].obs(), int(self.winner == neuralIndex), self.gameEnded
+
 
     def step(self, action):
+        if action > -1:
+            action = action.item()
         logging.debug("Turn: " + str(self.turn))
         self.currentPlayer = self.players[self.currentPlayerIndex]
         logging.debug("Player: " + str(self.currentPlayerIndex) + " who has " + str(
             self.currentPlayer.mydeck.cardCount()) + " card(s)")
-        if action < 50:
+        if 0 <= action < 50:
             # action is card to throw
             _card = card.Card(number=action)
             self.simTurn(_card)
             if self.changeSortTurn == True:
-                return self.currentPlayer.obs(), 0, self.gameEnded
+                _obs = self.players[self.neuralIndex].obs()
+                reward = 0
+                if self.gameEnded:
+                    if self.winner == self.neuralIndex:
+                        reward = 1
+                    elif self.winner is None:
+                        reward = 0
+                    else:
+                        reward = -1
+                return _obs, reward, self.gameEnded
         elif self.changeSortTurn:
-            self.currentSort == card.sorts[action - 50]
+            self.changeSort(card.sorts[action - 50])
             self.changeSortTurn = False
+        elif action < 0:
+            self.simTurn(None)
+        else:
+            print("ERROR: Action out of bounds")
 
         self.currentPlayerIndex = self.calculateNextPlayer(self.currentPlayerIndex, self.direction)
 
-        while self.players[self.currentPlayerIndex].type != "AI" and not self.gameEnded:
+        while self.currentPlayerIndex != self.neuralIndex and not self.gameEnded:
             logging.debug("Turn: " + str(self.turn))
             self.currentPlayer = self.players[self.currentPlayerIndex]
             logging.debug("Player: " + str(self.currentPlayerIndex) + " who has " + str(self.currentPlayer.mydeck.cardCount()) + " card(s)")
@@ -95,7 +119,15 @@ class Game:
                 self.changeSort(self.currentPlayer.changeSort())
                 self.changeSortTurn = False
             self.currentPlayerIndex = self.calculateNextPlayer(self.currentPlayerIndex, self.direction)
-        return self.players[self.currentPlayerIndex].obs(), int(self.gameEnded), self.gameEnded
+        reward = 0
+        if self.gameEnded:
+            if self.winner == self.neuralIndex:
+                reward = 1
+            elif self.winner is None:
+                reward = 0
+            else:
+                reward = -1
+        return self.players[self.neuralIndex].obs(), reward, self.gameEnded
 
 
     def simTurn(self, _card):
@@ -115,6 +147,7 @@ class Game:
                     self.penaltyAmount = 0
                     if self.currentTrueNumber == 0 and self.gameEnded == False:
                         self.changeSortTurn = True
+                        self.currentPlayerIndex -= self.direction
                 else:
                     self.throwCard(_card, self.currentPlayer, lastCard)
             else:
@@ -122,6 +155,7 @@ class Game:
                 self.penaltyAmount = 0
                 if self.currentTrueNumber == 0:
                     self.changeSortTurn = True
+                    self.currentPlayerIndex -= self.direction
                 # check if there werent enough cards to grab, ending the game in a draw
                 if self.gameEnded == True:
                     logging.info("Game ended in a draw!")
@@ -234,6 +268,7 @@ class Game:
 
     def changeSort(self, newSort):
         self.currentSort = newSort
+        self.changeSortTurn = False
         logging.debug(("SORT CHANGED:", self.currentSort))
 
     def throwCard(self, _card, player, lastCard):
@@ -241,6 +276,8 @@ class Game:
             logging.debug("Player does not play a card")
             self.grabCard(player)
             return
+        if not _card.compatible(self.currentSort, self.currentTrueNumber):
+            print("card is not compatible????")
         if lastCard is True:
             if _card.truenumber == 7 or _card.truenumber == 8 or _card.truenumber == 1 or _card.truenumber == 0 or _card.truenumber == 13 or _card.truenumber == 2:
                 logging.debug("Last card played is pestkaart: " + _card.toString() + ", grabbing two penalty cards")
@@ -256,7 +293,7 @@ class Game:
         self.currentSort = _card.sort
         self.sortsPlayed[card.sorts.index(self.currentSort)] += 1
         self.currentTrueNumber = _card.truenumber
-        self.players[self.currentPlayerIndex].mydeck.cards.remove(_card)
+        player.remove(_card)
         if _card.truenumber == 7:
             self.currentPlayerIndex -= self.direction
         elif _card.truenumber == 8:

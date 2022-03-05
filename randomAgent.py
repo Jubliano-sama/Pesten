@@ -2,7 +2,6 @@ import card
 import deck
 from random import randint
 import logging
-import logging
 
 
 class Agent:
@@ -12,6 +11,12 @@ class Agent:
 
     def changeSort(self):
         return card.sorts[randint(0, 4)]
+
+    def remove(self, _card):
+        for c in self.mydeck.cards:
+            if c.number == _card.number:
+                self.mydeck.cards.remove(c)
+                break
 
     def printCards(self):
         self.mydeck.vocalize()

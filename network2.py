@@ -38,6 +38,6 @@ class FeedForwardNN(nn.Module):
         activation1 = F.relu(self.layer1(obs))
         activation2 = F.relu(self.layer2(activation1))
         activation3 = F.relu(self.layer3(activation2))
-        output = torch.abs(self.layer4(activation3))
+        output = self.layer4(activation3)
 
         return output

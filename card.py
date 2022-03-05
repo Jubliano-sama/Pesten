@@ -19,6 +19,10 @@ class Card:
                 print("Error: out of bounds (dat is ginne kaart maat)")
         if sort is not None:
             self.sort = sorts[sort]
+    def __eq__(self, other):
+        if other.number == self.number:
+            return True
+        return False
     def toString(self):
         if 1 < self.truenumber < 11:
             return str(self.truenumber) + " " + self.sort
