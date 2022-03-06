@@ -24,10 +24,8 @@ class PPO:
 
         # Initialize hyperparameters for training with PPO
         self._init_hyperparameters()
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         # Initialize actor and critic networks
         self.actor = network.FeedForwardNN(121, 55)  # ALG STEP 1
-        self.actor.to(self.device)
         self.critic = network2.FeedForwardNN(121, 1)
         try:
             self.actor.load_state_dict(torch.load('./ppo_actor.pth'))
@@ -113,6 +111,7 @@ class PPO:
         batch_rtgs = torch.tensor(batch_rtgs, dtype=torch.float)
 
         return batch_rtgs
+
 
     # generates the data for the AI to train on
     def generate_data(self):

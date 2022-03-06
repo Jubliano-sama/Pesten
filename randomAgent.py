@@ -8,7 +8,6 @@ class Agent:
     def __init__(self):
         self.mydeck = deck.Deck([])
         self.type = "Random"
-
     def changeSort(self):
         return card.sorts[randint(0, 3)]
 
@@ -25,7 +24,6 @@ class Agent:
         if not isinstance(_card, card.Card):
             logging.error("None card detected")
         self.mydeck.cards.append(_card)
-
     def playCard(self, sort, truenumber):
         if len(self.mydeck.cards) != 0:
             self.mydeck.shuffle()

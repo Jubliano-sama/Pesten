@@ -9,6 +9,7 @@ import game
 from network import FeedForwardNN
 from torch.distributions import Categorical
 
+
 class Agent:
     def __init__(self, _game):
         self.mydeck = deck.Deck([])
@@ -21,10 +22,10 @@ class Agent:
         self.amount_of_steps = 0
         self.episode_logprobs = []
         self.changesortbool = False
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
     def obs(self):
         # returns obs
-        _obs = numpy.zeros(shape=[121])
+        _obs = torch.zeros(size=[121], requires_grad=False)
         # adds one to element corresponding to either cards in deck(0,50) and cards in deck compatible(50,100)
         for _card in self.mydeck.cards:
             _obs[_card.number] += 1
@@ -73,6 +74,7 @@ class Agent:
             logging.error("None card detected")
         self.mydeck.cards.append(_card)
 
+    @profile
     def playCard(self, sort, truenumber):
         self.amount_of_steps += 1
         _obs = self.obs()
@@ -83,7 +85,7 @@ class Agent:
             dist = Categorical(action)
             sample = dist.sample()
             self.episode_logprobs.append(dist.log_prob(sample).detach())
-            self.episode_obs.append(_obs)
+            self.episode_obs.append(_obs.detach().numpy())
             self.episode_act.append(sample)
             self.episode_mask.append(mask.detach().numpy())
             if sample.item() == 54:
@@ -91,43 +93,20 @@ class Agent:
             return card.Card(sample.item())
         else:
             return None
-
-
-    def action_mask(self, batch_obs=None, single_obs=None):
-        if batch_obs is None and single_obs is None:
-            print("ERROR: need at least one input")
-        elif batch_obs is not None and single_obs is not None:
-            print("ERROR: can only handle one input at a time")
-        elif batch_obs is not None:
-            mask = torch.ones(size=(len(batch_obs), 54))  # creates a mask with all values enabled by default
-            y = 0
-            for obs in batch_obs:
-                if obs[105] == 0:
-                    compatible_cards = obs[50:100]
-                    for x in range(0, 50):
-                        if compatible_cards[x] == 0:
-                            mask[y][x] = 0
-                    for x in range(50, 54):
-                        mask[y][x] = 0
-                else:
-                    for x in range(0, 50):
-                        mask[y][x] = 0
-                y += 1
-
-            return mask
+    @profile
+    def action_mask(self, single_obs):
+        single_obs = single_obs.numpy().tolist()
+        mask = numpy.ones(shape=[55])
+        if single_obs[105] == 0:
+            for x in range(50, 100):
+                if single_obs[x] == 0:
+                    mask[x-50] = 0
+            for x in range(50, 54):
+                mask[x] = 0
+            r = randint(0, 63)
+            mask[54] = 1 if r == 0 else 0
         else:
-            mask = torch.ones(size=[55])
-            if single_obs[105] == 0:
-                compatible_cards = single_obs[50:100]
-                for x in range(0, 50):
-                    if compatible_cards[x] == 0:
-                        mask[x] = 0
-                for x in range(50, 54):
-                    mask[x] = 0
-                r = randint(0,63)
-                mask[54] = 1 if r == 0 else 0
-            else:
-                for x in range(0, 50):
-                    mask[x] = 0
-                mask[54] = 0
-            return mask
+            for x in range(0, 50):
+                mask[x] = 0
+            mask[54] = 0
+        return torch.tensor(mask, requires_grad=False, dtype=torch.int8)

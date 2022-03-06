@@ -27,7 +27,6 @@ class Game:
         self.turn = 0
         self.direction = 1  # 1=clockwise -1=anti-clockwise
         self.sortsPlayed = numpy.zeros(shape=[5])
-
     def simTurn(self, _card):
 
         lastCard = False
@@ -98,7 +97,6 @@ class Game:
         turn = 0
         self.currentSort = self.gameDeck.topCard().sort
         self.currentTrueNumber = self.gameDeck.topCard().truenumber
-
     def auto_sim(self):
         self.reset()
         while not self.gameEnded:
