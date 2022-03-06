@@ -33,8 +33,9 @@ class FeedForwardNN(nn.Module):
 				output - the output of our forward pass
 		"""
         # Convert observation to tensor if it's a numpy array
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         if isinstance(obs, np.ndarray):
-            obs = torch.tensor(obs, dtype=torch.float)
+            obs = torch.tensor(obs, dtype=torch.float).to(device)
         activation1 = F.relu(self.layer1(obs))
         activation2 = F.relu(self.layer2(activation1))
         activation3 = F.relu(self.layer3(activation2))

@@ -21,6 +21,7 @@ class Agent:
         self.amount_of_steps = 0
         self.episode_logprobs = []
         self.changesortbool = False
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     def obs(self):
         # returns obs
         _obs = numpy.zeros(shape=[121])
@@ -52,7 +53,7 @@ class Agent:
         _obs = self.obs()
         self.changesortbool = False
         action = self.nn.forward(_obs)
-        mask = torch.zeros(size=[54])
+        mask = torch.zeros(size=[55])
         for x in range(50, 54):
             mask[x] = 1
         self.episode_mask.append(mask)
@@ -78,15 +79,15 @@ class Agent:
         action = self.nn.forward(_obs)
         mask = self.action_mask(single_obs=_obs)
         action = mask * action
-        self.episode_mask.append(mask)
-        if torch.count_nonzero(action) > 0:
+        if torch.count_nonzero(action[:54]) > 0:
             dist = Categorical(action)
             sample = dist.sample()
             self.episode_logprobs.append(dist.log_prob(sample).detach())
             self.episode_obs.append(_obs)
             self.episode_act.append(sample)
-            if sample.item() > 49:
-                pass
+            self.episode_mask.append(mask)
+            if sample.item() == 54:
+                return None
             return card.Card(sample.item())
         else:
             return None
@@ -112,9 +113,10 @@ class Agent:
                     for x in range(0, 50):
                         mask[y][x] = 0
                 y += 1
+
             return mask
         else:
-            mask = torch.ones(size=[54])
+            mask = torch.ones(size=[55])
             if single_obs[105] == 0:
                 compatible_cards = single_obs[50:100]
                 for x in range(0, 50):
@@ -122,7 +124,10 @@ class Agent:
                         mask[x] = 0
                 for x in range(50, 54):
                     mask[x] = 0
+                r = randint(0,63)
+                mask[54] = 1 if r == 0 else 0
             else:
                 for x in range(0, 50):
                     mask[x] = 0
+                mask[54] = 0
             return mask

@@ -53,6 +53,8 @@ for x in range(10):
         obs = _game.step(-1)[0]
         print("no actions available")
 """
+
+print(torch.cuda.is_available())
 _ppo = ppo.PPO()
 _ppo.learn()
 

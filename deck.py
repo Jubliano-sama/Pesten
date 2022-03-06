@@ -1,6 +1,6 @@
 from numpy import random
 import card
-
+import numpy
 
 class Deck:
     def __init__(self, cards):
@@ -8,6 +8,8 @@ class Deck:
         self.count = len(cards)
 
     def shuffle(self):
+        #rng = numpy.random.RandomState(69)
+        #rng.shuffle(self.cards)
         random.shuffle(self.cards)
 
     def vocalize(self):

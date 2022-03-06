@@ -145,9 +145,16 @@ class Game:
 
     def throwCard(self, _card, player, lastCard):
         if _card is None:
-            logging.debug("Player does not play a card")
+            logging.debug("Player has to grab a card")
             _card = self.grabCard(player)
-            self.canPlayGrabbedCard = _card.compatible(self.currentSort, self.currentTrueNumber)
+            if self.gameEnded:
+                return
+            if _card.compatible(self.currentSort, self.currentTrueNumber):
+                potentialPlay = player.playCard(self.currentSort, self.currentTrueNumber)
+                if potentialPlay is not None:
+                    if potentialPlay.compatible(self.currentSort, self.currentTrueNumber):
+                        logging.debug("Player plays grabbed card")
+                        self.throwCard(_card, player, False)
             return
         if not _card.compatible(self.currentSort, self.currentTrueNumber):
             print("card is not compatible????")

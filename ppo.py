@@ -24,9 +24,10 @@ class PPO:
 
         # Initialize hyperparameters for training with PPO
         self._init_hyperparameters()
-
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         # Initialize actor and critic networks
-        self.actor = network.FeedForwardNN(121, 54)  # ALG STEP 1
+        self.actor = network.FeedForwardNN(121, 55)  # ALG STEP 1
+        self.actor.to(self.device)
         self.critic = network2.FeedForwardNN(121, 1)
         try:
             self.actor.load_state_dict(torch.load('./ppo_actor.pth'))
@@ -61,11 +62,11 @@ class PPO:
         # Initialize default values for hyperparameters
         # Algorithm hyperparameters
         self.timesteps_per_batch = 1000  # Number of timesteps to run per batch
-        self.max_timesteps_per_episode = 1600  # Max number of timesteps per episode
-        self.n_updates_per_iteration = 3  # Number of times to update actor/critic per iteration
+        self.max_timesteps_per_episode = 10000  # Max number of timesteps per episode
+        self.n_updates_per_iteration = 5  # Number of times to update actor/critic per iteration
         self.lr = 0.005  # Learning rate of actor optimizer
         self.gamma = 0.95  # Discount factor to be applied when calculating Rewards-To-Go
-        self.clip = 0.2  # Recommended 0.2, helps define the threshold to clip the ratio during SGA
+        self.clip = 0.2
 
         # Miscellaneous parameters
         self.render = True  # If we should render during rollout
@@ -74,7 +75,7 @@ class PPO:
 
     def get_action(self, state, agent):
         state = torch.tensor(state, dtype=torch.float)
-        action_probs = self.actor(state)
+        action_probs = self.actor(state.to(self.device))
         action_probs = action_probs * self.action_mask(single_obs=state)
         if torch.count_nonzero(action_probs) == 0:
             return -1, -1
@@ -121,6 +122,7 @@ class PPO:
         batch_rews = []
         batch_rtgs = []
         batch_lens = []
+        amountOfWins = 0
         batch_masks = []
         # Episodic data. Keeps track of rewards per episode, will get cleared
         # upon each new episode
@@ -128,8 +130,9 @@ class PPO:
 
         t = 0  # Keeps track of how many timesteps we've run so far this batch
 
+        AI = neuralAgent.Agent(None)
         # Keep simulating until we've run more than or equal to specified timesteps per batch
-        while t < 20000:
+        while t < self.max_timesteps_per_episode:
             ep_rews = []  # rewards collected per episode
             _game = game.Game(3)
             _game.players.append(randomAgent.Agent())
@@ -148,6 +151,7 @@ class PPO:
                     pass
                 elif result[1] == 2:
                     ep_rews[-1] = 1
+                    amountOfWins += 1
                 else:
                     ep_rews[-1] = -1
                 batch_rews.append(ep_rews)
@@ -155,12 +159,12 @@ class PPO:
                 batch_acts.extend(ep_act)
                 batch_log_probs.extend(_game.players[2].episode_logprobs)
                 batch_masks.extend(_game.players[2].episode_mask)
+        print("Win Rate: " + str(amountOfWins/len(batch_lens)))
         # Reshape data as tensors in the shape specified in function description, before returning
         batch_obs = torch.tensor(batch_obs, dtype=torch.float)
         batch_acts = torch.tensor(batch_acts, dtype=torch.float)
         batch_log_probs = torch.tensor(batch_log_probs, dtype=torch.float)
         batch_rtgs = self.compute_rtgs(batch_rews)  # ALG STEP 4
-
         self.logger['batch_rews'] = batch_rews
         self.logger['batch_lens'] = batch_lens
 
@@ -202,7 +206,7 @@ class PPO:
                     mask[x] = 0
             return mask
 
-    def evaluate(self, batch_obs, batch_acts):
+    def evaluate(self, batch_obs, batch_acts, batch_masks):
         """
             Estimate the values of each observation, and the log probs of
             each action in the most recent batch with the most recent
@@ -223,15 +227,7 @@ class PPO:
         # This segment of code is similar to that in get_action()
         mean = self.actor(batch_obs)
         mean2 = mean.detach().clone()
-        mask = self.action_mask(batch_obs=batch_obs)
-        mean = mean * mask
-        for x in range(len(mean)):
-            if torch.count_nonzero(mean[x]) == 0:
-                print("huh")
-                print(mean[x])
-                print(mean2[x])
-                print(mask[x])
-
+        mean = mean * torch.tensor([item.cpu().detach().numpy() for item in batch_masks])
         dist = Categorical(mean)
         log_probs = dist.log_prob(batch_acts)
         # Return the value vector V of each observation in the batch
@@ -252,7 +248,7 @@ class PPO:
         i_so_far = 0  # Iterations ran so far
         while True:  # ALG STEP 2
             # Autobots, roll out (just kidding, we're collecting our batch simulations here)
-            batch_obs, batch_acts, batch_log_probs, batch_rtgs, batch_lens = self.generate_data()  # ALG STEP 3
+            batch_obs, batch_acts, batch_log_probs, batch_rtgs, batch_lens, batch_masks = self.generate_data()  # ALG STEP 3
 
             # Calculate how many timesteps we collected this batch
             t_so_far += np.sum(batch_lens)
@@ -265,7 +261,7 @@ class PPO:
             self.logger['i_so_far'] = i_so_far
 
             # Calculate advantage at k-th iteration
-            V, _ = self.evaluate(batch_obs, batch_acts)
+            V, _ = self.evaluate(batch_obs, batch_acts, batch_masks)
             A_k = batch_rtgs - V.detach()  # ALG STEP 5
 
             # One of the only tricks I use that isn't in the pseudocode. Normalizing advantages
@@ -277,7 +273,7 @@ class PPO:
             # This is the loop where we update our network for some n epochs
             for _ in range(self.n_updates_per_iteration):  # ALG STEP 6 & 7
                 # Calculate V_phi and pi_theta(a_t | s_t)
-                V, curr_log_probs = self.evaluate(batch_obs, batch_acts)
+                V, curr_log_probs = self.evaluate(batch_obs, batch_acts, batch_masks)
 
                 # Calculate the ratio pi_theta(a_t | s_t) / pi_theta_k(a_t | s_t)
                 # NOTE: we just subtract the logs, which is the same as
