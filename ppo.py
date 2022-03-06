@@ -165,6 +165,7 @@ class PPO:
         batch_acts = torch.tensor(batch_acts, dtype=torch.float)
         batch_log_probs = torch.tensor(batch_log_probs, dtype=torch.float)
         batch_rtgs = self.compute_rtgs(batch_rews)  # ALG STEP 4
+        batch_masks = torch.tensor(batch_masks, dtype=torch.int)
         self.logger['batch_rews'] = batch_rews
         self.logger['batch_lens'] = batch_lens
 
@@ -227,7 +228,7 @@ class PPO:
         # This segment of code is similar to that in get_action()
         mean = self.actor(batch_obs)
         mean2 = mean.detach().clone()
-        mean = mean * torch.tensor([item.cpu().detach().numpy() for item in batch_masks])
+        mean = mean * batch_masks
         dist = Categorical(mean)
         log_probs = dist.log_prob(batch_acts)
         # Return the value vector V of each observation in the batch

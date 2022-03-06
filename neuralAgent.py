@@ -56,7 +56,7 @@ class Agent:
         mask = torch.zeros(size=[55])
         for x in range(50, 54):
             mask[x] = 1
-        self.episode_mask.append(mask)
+        self.episode_mask.append(mask.detach().numpy())
         action = mask * action
         dist = Categorical(action)
         sample = dist.sample()
@@ -85,7 +85,7 @@ class Agent:
             self.episode_logprobs.append(dist.log_prob(sample).detach())
             self.episode_obs.append(_obs)
             self.episode_act.append(sample)
-            self.episode_mask.append(mask)
+            self.episode_mask.append(mask.detach().numpy())
             if sample.item() == 54:
                 return None
             return card.Card(sample.item())
