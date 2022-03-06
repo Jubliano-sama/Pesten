@@ -39,6 +39,7 @@ class Agent:
         for x in players:
             _obs[y] = x.mydeck.cardCount()
             y += 1
+        # _obs[120] = _game.direction
         return _obs
 
     def remove(self, _card):
@@ -53,16 +54,16 @@ class Agent:
         self.changesortbool = True
         _obs = self.obs()
         self.changesortbool = False
-        action = self.nn.forward(_obs)
-        mask = torch.zeros(size=[55])
+        action = self.nn(_obs)
+        mask = torch.zeros(size=[55], requires_grad=False)
         for x in range(50, 54):
             mask[x] = 1
-        self.episode_mask.append(mask.detach().numpy())
+        self.episode_mask.append(mask.numpy())
         action = mask * action
         dist = Categorical(action)
         sample = dist.sample()
         self.episode_logprobs.append(dist.log_prob(sample).detach())
-        self.episode_obs.append(_obs)
+        self.episode_obs.append(_obs.numpy())
         self.episode_act.append(sample)
         return card.sorts[sample.item() - 50]
 
@@ -74,33 +75,32 @@ class Agent:
             logging.error("None card detected")
         self.mydeck.cards.append(_card)
 
-    @profile
     def playCard(self, sort, truenumber):
         self.amount_of_steps += 1
         _obs = self.obs()
-        action = self.nn.forward(_obs)
+        action = self.nn(_obs)
         mask = self.action_mask(single_obs=_obs)
         action = mask * action
         if torch.count_nonzero(action[:54]) > 0:
             dist = Categorical(action)
             sample = dist.sample()
             self.episode_logprobs.append(dist.log_prob(sample).detach())
-            self.episode_obs.append(_obs.detach().numpy())
+            self.episode_obs.append(_obs.numpy())
             self.episode_act.append(sample)
-            self.episode_mask.append(mask.detach().numpy())
+            self.episode_mask.append(mask.numpy())
             if sample.item() == 54:
                 return None
             return card.Card(sample.item())
         else:
             return None
-    @profile
+
     def action_mask(self, single_obs):
         single_obs = single_obs.numpy().tolist()
         mask = numpy.ones(shape=[55])
         if single_obs[105] == 0:
             for x in range(50, 100):
                 if single_obs[x] == 0:
-                    mask[x-50] = 0
+                    mask[x - 50] = 0
             for x in range(50, 54):
                 mask[x] = 0
             r = randint(0, 63)

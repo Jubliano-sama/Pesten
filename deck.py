@@ -28,6 +28,9 @@ class Deck:
 
 
 def standardDeck():
+    """
+    :return: standard deck of cards
+    """
     cards = []
     # 11 = koning #12 = koningin #1=aas 13= boer 0=joker
     for number in range(0, 50):

@@ -6,7 +6,7 @@ import numpy
 from random import uniform, randint
 
 logging.basicConfig(filename='gamepest.log', format='%(asctime)s - %(levelname)s - %(message)s',
-                    level=logging.CRITICAL)
+                    level=logging.DEBUG)
 
 
 class Game:
@@ -27,8 +27,12 @@ class Game:
         self.turn = 0
         self.direction = 1  # 1=clockwise -1=anti-clockwise
         self.sortsPlayed = numpy.zeros(shape=[5])
-    def simTurn(self, _card):
 
+    def simTurn(self, _card):
+        """
+        Simulates one turn using a given card
+        :param _card: card to try to play
+        """
         lastCard = False
         if self.currentPlayer.mydeck.cardCount() == 1:
             lastCard = True
@@ -63,6 +67,9 @@ class Game:
             logging.info("Player: " + str(self.winner) + " has won!")
 
     def reset(self):
+        """
+        Makes sure game parameters are reset and prepares game to start
+        """
         self.currentPlayer = None
         self.canPlayGrabbedCard = False
         self.currentPlayerIndex = 0
@@ -79,24 +86,28 @@ class Game:
         if len(self.players) < 2:
             logging.critical("Cannot start game without or with only one player(s)")
             return
-        self.grabDeck = deck.standardDeck()
+
+        self.grabDeck = deck.standardDeck() # generate grab deck
         self.grabDeck.shuffle()
         # add shuffled cards to player decks
         for player in self.players:
             for i in range(7):
                 player.addCard(self.grabDeck.topCard())
                 self.grabDeck.removeTopCard()
+        # generate top card
         self.gameDeck = deck.Deck([self.grabDeck.cards[-1]])
         self.grabDeck.removeTopCard()
-        # generate top card
-        while self.gameDeck.cards[-1].truenumber == 13 or self.gameDeck.cards[-1].truenumber == 0 or \
-                self.gameDeck.cards[-1].truenumber == 1 or self.gameDeck.cards[-1].truenumber == 7 \
-                or self.gameDeck.cards[-1].truenumber == 8 or self.gameDeck.cards[-1].truenumber == 2:
-            self.gameDeck.cards.append(self.grabDeck.cards[-1])
-            self.grabDeck.removeTopCard()
-        turn = 0
+        topcard = self.gameDeck.topCard()
+        while topcard.truenumber == 13 or topcard.truenumber == 0 or \
+                topcard.truenumber == 1 or topcard.truenumber == 7 \
+                or topcard.truenumber == 8 or topcard.truenumber == 2:
+            self.gameDeck.cards.append(self.grabDeck.topCard())  # places copy of top card of grab deck on game deck
+            self.grabDeck.removeTopCard()  # removes top card of grab deck
+            topcard = self.gameDeck.topCard()
+
         self.currentSort = self.gameDeck.topCard().sort
         self.currentTrueNumber = self.gameDeck.topCard().truenumber
+
     def auto_sim(self):
         self.reset()
         while not self.gameEnded:
@@ -117,11 +128,16 @@ class Game:
                 return
 
     def grabCard(self, player):
+        """
+        Grabs a card from the grab deck and adds it to the designated players deck
+        :param player: player to give card to
+        :return: copy of card it grabbed from the deck
+        """
         _card = None
         if self.grabDeck.cardCount() > 0:
             _card = self.grabDeck.topCard()
             self.grabDeck.removeTopCard()
-            logging.debug("grabbed card:"  + _card.toString())
+            logging.debug("grabbed card:" + _card.toString())
             player.addCard(_card)
         elif self.gameDeck.cardCount() > 1:
             logging.debug("RESHUFFLING")
@@ -136,21 +152,28 @@ class Game:
             logging.debug("There are no cards left to grab")
             self.gameEnded = True
         return _card
+
     def changeSort(self, newSort):
         self.currentSort = newSort
         self.changeSortTurn = False
         logging.debug(("SORT CHANGED:", self.currentSort))
 
     def throwCard(self, _card, player, lastCard):
+        """
+        Places card on game deck and handles the corresponding consequences
+        :param _card: card to play
+        :param player: player that wants to play the card
+        :param lastCard: whether player is on the last card or not
+        """
         if _card is None:
             logging.debug("Player has to grab a card")
             _card = self.grabCard(player)
-            if self.gameEnded:
+            if self.gameEnded:  # check if there were any cards to grab
                 return
-            if _card.compatible(self.currentSort, self.currentTrueNumber):
+            if _card.compatible(self.currentSort, self.currentTrueNumber):  # checks if grabbed card can be played
                 potentialPlay = player.playCard(self.currentSort, self.currentTrueNumber)
-                if potentialPlay is not None:
-                    if potentialPlay.compatible(self.currentSort, self.currentTrueNumber):
+                if potentialPlay is not None:  # checks if player wants to play card
+                    if potentialPlay == _card: # checks if the card the player wants to play is the card it grabbed
                         logging.debug("Player plays grabbed card")
                         self.throwCard(_card, player, False)
             return
@@ -186,8 +209,14 @@ class Game:
             self.changeSort(self.currentPlayer.changeSort())
         elif _card.truenumber == 2:
             self.penaltyAmount += 2
+
     def calculateNextPlayer(self, playerIndex, direction):
-        # return next player
+        """
+        Calculates next player index
+        :param playerIndex: the index to calculate from
+        :param direction: the direction to calculate with
+        :return: the calculated index
+        """
         playerIndex += direction
         if playerIndex >= self.amountOfPlayers:
             playerIndex = playerIndex - self.amountOfPlayers

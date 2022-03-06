@@ -60,9 +60,9 @@ class PPO:
         # Initialize default values for hyperparameters
         # Algorithm hyperparameters
         self.timesteps_per_batch = 1000  # Number of timesteps to run per batch
-        self.max_timesteps_per_episode = 10000  # Max number of timesteps per episode
-        self.n_updates_per_iteration = 5  # Number of times to update actor/critic per iteration
-        self.lr = 0.005  # Learning rate of actor optimizer
+        self.max_timesteps_per_episode = 50000  # Max number of timesteps per episode
+        self.n_updates_per_iteration = 20  # Number of times to update actor/critic per iteration
+        self.lr = 0.010  # Learning rate of actor optimizer
         self.gamma = 0.95  # Discount factor to be applied when calculating Rewards-To-Go
         self.clip = 0.2
 
@@ -70,19 +70,6 @@ class PPO:
         self.render = True  # If we should render during rollout
         self.render_every_i = 10  # Only render every n iterations
         self.save_freq = 1  # How often we save in number of iterations
-
-    def get_action(self, state, agent):
-        state = torch.tensor(state, dtype=torch.float)
-        action_probs = self.actor(state.to(self.device))
-        action_probs = action_probs * self.action_mask(single_obs=state)
-        if torch.count_nonzero(action_probs) == 0:
-            return -1, -1
-        dist = Categorical(action_probs)
-
-        action = dist.sample()
-        action_logprob = dist.log_prob(action)
-
-        return action.detach(), action_logprob.detach()
 
     def compute_rtgs(self, batch_rews):
         """
@@ -111,7 +98,6 @@ class PPO:
         batch_rtgs = torch.tensor(batch_rtgs, dtype=torch.float)
 
         return batch_rtgs
-
 
     # generates the data for the AI to train on
     def generate_data(self):
@@ -158,7 +144,7 @@ class PPO:
                 batch_acts.extend(ep_act)
                 batch_log_probs.extend(_game.players[2].episode_logprobs)
                 batch_masks.extend(_game.players[2].episode_mask)
-        print("Win Rate: " + str(amountOfWins/len(batch_lens)))
+        print("Win Rate: " + str(amountOfWins / len(batch_lens)))
         # Reshape data as tensors in the shape specified in function description, before returning
         batch_obs = torch.tensor(batch_obs, dtype=torch.float)
         batch_acts = torch.tensor(batch_acts, dtype=torch.float)
@@ -184,7 +170,7 @@ class PPO:
                     compatible_cards = obs[50:100]
                     for x in range(0, 50):
                         if compatible_cards[x] == 0:
-                           mask[y][x] = 0
+                            mask[y][x] = 0
                     for x in range(50, 54):
                         mask[y][x] = 0
                 else:
@@ -226,7 +212,6 @@ class PPO:
         # Calculate the log probabilities of batch actions using most recent actor network.
         # This segment of code is similar to that in get_action()
         mean = self.actor(batch_obs)
-        mean2 = mean.detach().clone()
         mean = mean * batch_masks
         dist = Categorical(mean)
         log_probs = dist.log_prob(batch_acts)
