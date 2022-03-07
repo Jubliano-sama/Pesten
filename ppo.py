@@ -26,6 +26,8 @@ class PPO:
         self._init_hyperparameters()
         # Initialize actor and critic networks
         self.actor = network.FeedForwardNN(121, 55)  # ALG STEP 1
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.actor.to(self.device)
         self.critic = network2.FeedForwardNN(121, 1)
         try:
             self.actor.load_state_dict(torch.load('./ppo_actor.pth'))
@@ -60,10 +62,10 @@ class PPO:
         # Initialize default values for hyperparameters
         # Algorithm hyperparameters
         self.timesteps_per_batch = 1000  # Number of timesteps to run per batch
-        self.max_timesteps_per_episode = 50000  # Max number of timesteps per episode
-        self.n_updates_per_iteration = 20  # Number of times to update actor/critic per iteration
-        self.lr = 0.010  # Learning rate of actor optimizer
-        self.gamma = 0.95  # Discount factor to be applied when calculating Rewards-To-Go
+        self.max_timesteps_per_episode = 10000  # Max number of timesteps per episode
+        self.n_updates_per_iteration = 15  # Number of times to update actor/critic per iteration
+        self.lr = 0.005  # Learning rate of actor optimizer
+        self.gamma = 0.90  # Discount factor to be applied when calculating Rewards-To-Go
         self.clip = 0.2
 
         # Miscellaneous parameters
@@ -116,6 +118,7 @@ class PPO:
         t = 0  # Keeps track of how many timesteps we've run so far this batch
 
         AI = neuralAgent.Agent(None)
+        self.actor.to(torch.device("cpu"))
         # Keep simulating until we've run more than or equal to specified timesteps per batch
         while t < self.max_timesteps_per_episode:
             ep_rews = []  # rewards collected per episode
@@ -153,7 +156,7 @@ class PPO:
         batch_masks = torch.tensor(batch_masks, dtype=torch.int)
         self.logger['batch_rews'] = batch_rews
         self.logger['batch_lens'] = batch_lens
-
+        self.actor.to(torch.device(self.device))
         return batch_obs, batch_acts, batch_log_probs, batch_rtgs, batch_lens, batch_masks
 
     # creates a boolean mask for actions
@@ -207,11 +210,11 @@ class PPO:
                 log_probs - the log probabilities of the actions taken in batch_acts given batch_obs
         """
         # Query critic network for a value V for each batch_obs. Shape of V should be same as batch_rtgs
-        V = self.critic(batch_obs).squeeze()
+        V = self.critic(batch_obs.to(torch.device("cpu"))).squeeze()
 
         # Calculate the log probabilities of batch actions using most recent actor network.
         # This segment of code is similar to that in get_action()
-        mean = self.actor(batch_obs)
+        mean = self.actor(batch_obs.to(self.device)).to(torch.device("cpu"))
         mean = mean * batch_masks
         dist = Categorical(mean)
         log_probs = dist.log_prob(batch_acts)

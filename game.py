@@ -6,7 +6,7 @@ import numpy
 from random import uniform, randint
 
 logging.basicConfig(filename='gamepest.log', format='%(asctime)s - %(levelname)s - %(message)s',
-                    level=logging.DEBUG)
+                    level=logging.CRITICAL)
 
 
 class Game:

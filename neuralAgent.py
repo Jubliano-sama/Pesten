@@ -22,6 +22,7 @@ class Agent:
         self.amount_of_steps = 0
         self.episode_logprobs = []
         self.changesortbool = False
+        self.device = torch.device("cpu")
 
     def obs(self):
         # returns obs
@@ -81,7 +82,9 @@ class Agent:
         action = self.nn(_obs)
         mask = self.action_mask(single_obs=_obs)
         action = mask * action
-        if torch.count_nonzero(action[:54]) > 0:
+        possibleActions = torch.count_nonzero(action[:54])
+        logging.debug("AI can play " + str(possibleActions) + " cards")
+        if possibleActions > 0:
             dist = Categorical(action)
             sample = dist.sample()
             self.episode_logprobs.append(dist.log_prob(sample).detach())
