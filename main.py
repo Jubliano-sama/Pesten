@@ -1,5 +1,5 @@
 import deck
-import randomAgent, neuralAgent
+import randomAgent, trainAgent
 import game
 import logging
 import network
@@ -57,5 +57,6 @@ for x in range(10):
 print(torch.cuda.is_available())
 torch.manual_seed(69)
 _ppo = ppo.PPO()
+print(_ppo.test())
 _ppo.learn()
 

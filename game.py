@@ -1,7 +1,7 @@
 import deck
 import card
 import logging
-import randomAgent, neuralAgent
+import randomAgent, trainAgent
 import numpy
 from random import uniform, randint
 

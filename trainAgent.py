@@ -16,6 +16,11 @@ class Agent:
         self.type = "AI"
         self.nn = FeedForwardNN(121, 54)
         self.game = _game
+        self.episode_obs = []
+        self.episode_mask = []
+        self.episode_act = []
+        self.amount_of_steps = 0
+        self.episode_logprobs = []
         self.changesortbool = False
         self.device = torch.device("cpu")
 
@@ -46,6 +51,7 @@ class Agent:
         print("card not found")
 
     def changeSort(self):
+        self.amount_of_steps += 1
         self.changesortbool = True
         _obs = self.obs()
         self.changesortbool = False
@@ -53,9 +59,14 @@ class Agent:
         mask = torch.zeros(size=[55], requires_grad=False)
         for x in range(50, 54):
             mask[x] = 1
+        self.episode_mask.append(mask.numpy())
         action = mask * action
-        sample = torch.argmax(action)
-        return card.sorts[sample - 50]
+        dist = Categorical(action)
+        sample = dist.sample()
+        self.episode_logprobs.append(dist.log_prob(sample).detach())
+        self.episode_obs.append(_obs.numpy())
+        self.episode_act.append(sample)
+        return card.sorts[sample.item() - 50]
 
     def printCards(self):
         self.mydeck.vocalize()
@@ -66,14 +77,20 @@ class Agent:
         self.mydeck.cards.append(_card)
 
     def playCard(self, sort, truenumber):
+        self.amount_of_steps += 1
         _obs = self.obs()
         action = self.nn(_obs)
         mask = self.action_mask(single_obs=_obs)
         action = mask * action
         possibleActions = torch.count_nonzero(action[:54])
-        logging.debug("AI can play " + str(possibleActions.item()) + " cards")
+        logging.debug("AI can play " + str(possibleActions) + " cards")
         if possibleActions > 0:
-            sample = torch.argmax(action)
+            dist = Categorical(action)
+            sample = dist.sample()
+            self.episode_logprobs.append(dist.log_prob(sample).detach())
+            self.episode_obs.append(_obs.numpy())
+            self.episode_act.append(sample)
+            self.episode_mask.append(mask.numpy())
             if sample.item() == 54:
                 return None
             return card.Card(sample.item())
