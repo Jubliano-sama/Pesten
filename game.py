@@ -111,6 +111,7 @@ class Game:
     def auto_sim(self):
         self.reset()
         while not self.gameEnded:
+            logging.debug("Turn: " + str(self.turn))
             logging.debug("Player " + str(self.currentPlayerIndex))
             self.currentPlayer = self.players[self.currentPlayerIndex]
             self.simTurn(self.currentPlayer.playCard(self.currentSort, self.currentTrueNumber))

@@ -18,7 +18,7 @@ class FeedForwardNN(nn.Module):
 				None
 		"""
         super(FeedForwardNN, self).__init__()
-        hidden_neurons = 128
+        hidden_neurons = 256
         self.layer1 = nn.Linear(in_dim, hidden_neurons)
         self.layer2 = nn.Linear(hidden_neurons, hidden_neurons)
         self.layer3 = nn.Linear(hidden_neurons, hidden_neurons)
@@ -39,6 +39,6 @@ class FeedForwardNN(nn.Module):
         activation1 = F.relu(self.layer1(obs))
         activation2 = F.relu(self.layer2(activation1))
         activation3 = F.relu(self.layer3(activation2))
-        output = torch.abs(self.layer4(activation3))
+        output = F.relu(self.layer4(activation3)) + 1e-6
 
         return output

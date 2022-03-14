@@ -35,7 +35,13 @@ class Agent:
         for x in players:
             _obs[y] = x.mydeck.cardCount()
             y += 1
-        # _obs[120] = _game.direction
+        i = -1
+        for x in range(len(self.game.players)):
+            if self.game.players[x] == self:
+                i = x
+                break
+        _obs[119] = i
+        _obs[120] = self.game.direction
         return _obs
 
     def remove(self, _card):
@@ -75,6 +81,7 @@ class Agent:
         if possibleActions > 0:
             sample = torch.argmax(action)
             if sample.item() == 54:
+                logging.debug("AI willingly passes")
                 return None
             return card.Card(sample.item())
         else:
@@ -89,7 +96,7 @@ class Agent:
                     mask[x - 50] = 0
             for x in range(50, 54):
                 mask[x] = 0
-            mask[54] = 1
+            mask[54] = 0
         else:
             for x in range(0, 50):
                 mask[x] = 0

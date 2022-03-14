@@ -18,6 +18,7 @@ class Agent:
         self.game = _game
         self.episode_obs = []
         self.episode_mask = []
+        self.episode_act_probs = []
         self.episode_act = []
         self.amount_of_steps = 0
         self.episode_logprobs = []
@@ -40,7 +41,13 @@ class Agent:
         for x in players:
             _obs[y] = x.mydeck.cardCount()
             y += 1
-        # _obs[120] = _game.direction
+        i = -1
+        for x in range(len(self.game.players)):
+            if self.game.players[x] == self:
+                i = x
+                break
+        _obs[119] = i
+        _obs[120] = self.game.direction
         return _obs
 
     def remove(self, _card):
@@ -83,7 +90,7 @@ class Agent:
         mask = self.action_mask(single_obs=_obs)
         action = mask * action
         possibleActions = torch.count_nonzero(action[:54])
-        logging.debug("AI can play " + str(possibleActions) + " cards")
+        logging.debug("AI can play " + str(possibleActions.item()) + " cards")
         if possibleActions > 0:
             dist = Categorical(action)
             sample = dist.sample()
@@ -106,7 +113,7 @@ class Agent:
                     mask[x - 50] = 0
             for x in range(50, 54):
                 mask[x] = 0
-            mask[54] = 1
+            mask[54] = 0
         else:
             for x in range(0, 50):
                 mask[x] = 0

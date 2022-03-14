@@ -4,7 +4,7 @@ sorts = ("harten", "ruiten", "schoppen", "klaveren", "special")
 
 
 class Card:
-    def __init__(self, number=None, sort=None):
+    def __init__(self, number=None, sort=None, trueNumber=None):
         self.truenumber = -1
         if number is not None:
             self.number = number
@@ -19,8 +19,17 @@ class Card:
                 self.truenumber = 0
             else:
                 print("Error: out of bounds (dat is ginne kaart maat)")
+            return
         if sort is not None:
-            self.sort = sorts[sort]
+            self.sort = sort
+        if trueNumber is not None:
+            self.truenumber = trueNumber
+            if 0 < self.truenumber < 13:
+                self.number = self.truenumber * (sorts.index(self.sort) + 1)
+            elif self.truenumber == 0:
+                self.number = 49
+            elif self.truenumber == 13:
+                self.number = 48
 
     def __eq__(self, other):
         """
