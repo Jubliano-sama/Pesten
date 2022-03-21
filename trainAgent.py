@@ -113,7 +113,7 @@ class Agent:
                     mask[x - 50] = 0
             for x in range(50, 54):
                 mask[x] = 0
-            mask[54] = 0
+            mask[54] = 1
         else:
             for x in range(0, 50):
                 mask[x] = 0

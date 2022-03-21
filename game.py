@@ -5,6 +5,7 @@ import randomAgent, trainAgent
 import numpy
 from random import uniform, randint
 
+# configuring logging, CRITICAL means log nothing except critical errors.
 logging.basicConfig(filename='gamepest.log', format='%(asctime)s - %(levelname)s - %(message)s',
                     level=logging.CRITICAL)
 
@@ -132,7 +133,7 @@ class Game:
         """
         Grabs a card from the grab deck and adds it to the designated players deck
         :param player: player to give card to
-        :return: copy of card it grabbed from the deck
+        :return: grabbedCard - copy of card it grabbed from the deck
         """
         _card = None
         if self.grabDeck.cardCount() > 0:

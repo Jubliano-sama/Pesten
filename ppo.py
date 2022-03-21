@@ -1,14 +1,18 @@
+import time
+
+import numpy as np
 import torch
 import torch.nn as nn
-from torch.distributions import MultivariateNormal
 from torch.distributions import Categorical
-import game, trainAgent, randomAgent, neuralAgent
-import numpy as np
 from torch.optim import Adam
-import time
-import network, network2
-import card
-import torch.nn.functional as F
+
+import game
+import network
+import network2
+import neuralAgent
+import randomAgent
+import trainAgent
+
 
 class PPO:
     def __init__(self):
@@ -33,7 +37,7 @@ class PPO:
             self.actor.load_state_dict(torch.load('./ppo_actor.pth'))
             self.critic.load_state_dict(torch.load('./ppo_critic.pth'))
         except:
-            pass
+            print("Cannot load existing models.")
 
         # Initialize optimizers for actor and critic
         self.actor_optim = Adam(self.actor.parameters(), lr=self.lr)
@@ -62,11 +66,11 @@ class PPO:
         # Initialize default values for hyperparameters
         # Algorithm hyperparameters
         self.timesteps_per_batch = 50000  # Number of timesteps to run per batch
-        self.max_timesteps_per_episode = 200000  # Max number of timesteps per episode
+        self.max_timesteps_per_episode = 250000  # Max number of timesteps per episode
         self.current_timesteps_per_episode = self.max_timesteps_per_episode
-        self.n_updates_per_iteration = 10  # Number of times to update actor/critic per iteration
-        self.lr = 0.002  # Learning rate of actor optimizer
-        self.gamma = 0.97     # Discount factor to be applied when calculating Rewards-To-Go
+        self.n_updates_per_iteration = 5  # Number of times to update actor/critic per iteration
+        self.lr = 0.0005  # Learning rate of actor optimizer
+        self.gamma = 0.97  # Discount factor to be applied when calculating Rewards-To-Go
         self.clip = 0.2
 
         # Miscellaneous parameters
@@ -78,9 +82,9 @@ class PPO:
         """
             Compute the Reward-To-Go of each timestep in a batch given the rewards.
             Parameters:
-                batch_rews - the rewards in a batch, Shape: (number of episodes, number of timesteps per episode)
+                batch_rews: the rewards in a batch, Shape: (number of episodes, number of timesteps per episode)
             Return:
-                batch_rtgs - the rewards to go, Shape: (number of timesteps in batch)
+                batch_rtgs: the rewards to go, Shape: (number of timesteps in batch)
         """
         # The rewards-to-go (rtg) per episode per batch to return.
         # The shape will be (num timesteps per episode)
@@ -102,28 +106,30 @@ class PPO:
 
         return batch_rtgs
 
-    # generates the data for the AI to train on
     def generate_data(self):
+        """
+            Generates data to train on.
+
+            :return:
+                -batch_obs: the observations collected.
+                -batch_acts: the acts collected.
+                -batch_log_probs: the log probs of the actions chosen.
+                -batch_rtgs: the calculated rewards.
+                -batch_lens: the lengths of the episodes.
+                -batch_masks: the masks used to filter actions.
+        """
         batch_obs = []
         batch_acts = []
         batch_log_probs = []
         batch_rews = []
-        batch_rtgs = []
         batch_lens = []
-        amountOfWins = 0
         batch_masks = []
-        # Episodic data. Keeps track of rewards per episode, will get cleared
-        # upon each new episode
-        ep_rews = []
 
         t = 0  # Keeps track of how many timesteps we've run so far this batch
-
-        AI = trainAgent.Agent(None)
         self.actor.to(torch.device("cpu"))
         self.actor.eval()
         # Keep simulating until we've run more than or equal to specified timesteps per batch
         while t < self.current_timesteps_per_episode:
-            ep_rews = []  # rewards collected per episode
             _game = game.Game(4)
             _game.players.append(trainAgent.Agent(_game))
             _game.players.append(trainAgent.Agent(_game))
@@ -148,11 +154,11 @@ class PPO:
                         batch_log_probs.extend(_game.players[x].episode_logprobs)
                         batch_masks.extend(_game.players[x].episode_mask)
                         if result[1] is None:
-                            rewards[-1] = -0.15 - 0.01 * episode_len
+                            rewards[-1] = -0.15 - 0.25 * 0.01 * episode_len
                         elif result[1] == x:
                             rewards[-1] = 1 - 0.01 * episode_len
                         else:
-                            rewards[-1] = -1/3 - 1/3 * 0.01 * episode_len
+                            rewards[-1] = -1 / 3 - 1 / 3 * 0.01 * episode_len
                         batch_rews.append(rewards)
             else:
                 x = np.random.randint(0, 3)
@@ -167,11 +173,11 @@ class PPO:
                     batch_log_probs.extend(_game.players[x].episode_logprobs)
                     batch_masks.extend(_game.players[x].episode_mask)
                     if result[1] is None:
-                        rewards[-1] = -0.2
-                    elif result[1] == x:
-                        rewards[-1] = 1.5
-                    else:
                         rewards[-1] = -1 / 3
+                    elif result[1] == x:
+                        rewards[-1] = 1
+                    else:
+                        rewards[-1] = -1
                     batch_rews.append(rewards)
         # Reshape data as tensors in the shape specified in function description, before returning
         batch_obs = torch.tensor(batch_obs, dtype=torch.float)
@@ -191,9 +197,11 @@ class PPO:
         wins = 0
         losses = 0
         draws = 0
+        games = 50000
+        printAmount = 50
         self.actor.to(torch.device("cpu"))
         self.actor.eval()
-        for x in range(10000):
+        for x in range(games):
             ind = np.random.randint(0, 3)
             _game = game.Game(4)
             for y in range(ind):
@@ -204,27 +212,30 @@ class PPO:
                 _game.players.append(randomAgent.Agent())
             result = _game.auto_sim()
             if result[1] is None:
-                draws += 1
+                draws += 1 / games * 100
             elif result[1] == 0:
-                wins += 1
+                wins += 1 / games * 100
             else:
-                losses += 1
-        return wins, losses, draws
-
+                losses += 1 / games * 100
+            if x % printAmount == 0:
+                print(f"Test games so far: {round(x / games * 100, 2)}%", end='\r')
+        return round(wins, 1), round(losses, 1), round(draws, 1)
 
     def evaluate(self, batch_obs, batch_acts, batch_masks):
         """
             Estimate the values of each observation, and the log probs of
             each action in the most recent batch with the most recent
             iteration of the actor network. Should be called from learn.
-            Parameters:
-                batch_obs - the observations from the most recently collected batch as a tensor.
-                            Shape: (number of timesteps in batch, dimension of observation)
-                batch_acts - the actions from the most recently collected batch as a tensor.
-                            Shape: (number of timesteps in batch, dimension of action)
-            Return:
-                V - the predicted values of batch_obs
-                log_probs - the log probabilities of the actions taken in batch_acts given batch_obs
+
+            :param batch_obs: the observations from the most recently collected batch as a tensor.
+                        Shape - (number of timesteps in batch, dimension of observation)
+            :param batch_acts: the actions from the most recently collected batch as a tensor.
+                        Shape - (number of timesteps in batch, dimension of action)
+            :param batch_masks: the masks used to process the actions.
+                        Shape - (number of timesteps in batch, dimension of action)
+            :returns:
+                - V: the predicted values of batch_obs.
+                - log_probs: the log probabilities of the actions taken in batch_acts given batch_obs.
         """
         # Query critic network for a value V for each batch_obs. Shape of V should be same as batch_rtgs
         V = self.critic(batch_obs.to(torch.device("cpu"))).squeeze()
@@ -234,7 +245,7 @@ class PPO:
         mean = self.actor(batch_obs.to(self.device)).to(torch.device("cpu"))
         mean = mean * batch_masks
         mean2 = mean.clone()
-        #torch.cuda.synchronize()
+        # torch.cuda.synchronize()
         dist = Categorical(mean)
         log_probs = dist.log_prob(batch_acts)
         for mea in mean:
@@ -242,16 +253,12 @@ class PPO:
                 print(mea)
         # Return the value vector V of each observation in the batch
         # and log probabilities log_probs of each action in the batch
-       #torch.cuda.synchronize()
+        # torch.cuda.synchronize()
         return V, log_probs, dist.entropy()
 
     def learn(self):
         """
             Train the actor and critic networks. Here is where the main PPO algorithm resides.
-            Parameters:
-                total_timesteps - the total number of timesteps to train for
-            Return:
-                None
         """
         print(f"Learning... Running {40} timesteps per episode, ", end='')
         print(f"{10000} timesteps per batch for a total of {20000} timesteps")
@@ -295,7 +302,7 @@ class PPO:
                 ratios = torch.exp(curr_log_probs - batch_log_probs)
                 ratio = torch.mean(torch.pow(ratios, 2) - 1).item()
                 print("Ratio: " + str(ratio))
-                #if ratio > 0.08:
+                # if ratio > 0.08:
                 #    break
                 # Calculate surrogate losses.
                 surr1 = ratios * A_k
@@ -305,7 +312,7 @@ class PPO:
                 # NOTE: we take the negative min of the surrogate losses because we're trying to maximize
                 # the performance function, but Adam minimizes the loss. So minimizing the negative
                 # performance function maximizes it.
-                actor_loss = (-torch.min(surr1, surr2)).mean() - 0.02 * entropy.mean()
+                actor_loss = (-torch.min(surr1, surr2)).mean() - 0.04 * entropy.mean()
                 critic_loss = nn.MSELoss()(V, batch_rtgs)
 
                 # Calculate gradients and perform backward propagation for actor network
@@ -329,15 +336,11 @@ class PPO:
                 torch.save(self.actor.state_dict(), './ppo_actor.pth')
                 torch.save(self.critic.state_dict(), './ppo_critic.pth')
             if i_so_far % 10 == 0:
-                print(self.test())
+                print(str(self.test()) + "                                           ")
 
     def _log_summary(self):
         """
             Print to stdout what we've logged so far in the most recent batch.
-            Parameters:
-                None
-            Return:
-                None
         """
         # Calculate logging values. I use a few python shortcuts to calculate each value
         # without explaining since it's not too important to PPO; feel free to look it over,

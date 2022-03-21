@@ -28,9 +28,9 @@ class FeedForwardNN(nn.Module):
         """
 			Runs a forward pass on the neural network.
 			Parameters:
-				obs - observation to pass as input
+				obs: observation to pass as input
 			Return:
-				output - the output of our forward pass
+				output: the output of our forward pass
 		"""
         # Convert observation to tensor if it's a numpy array
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
