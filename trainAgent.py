@@ -89,7 +89,7 @@ class Agent:
         action = self.nn(_obs)
         mask = self.action_mask(single_obs=_obs)
         action = mask * action
-        possibleActions = torch.count_nonzero(action[:54])
+        possibleActions = torch.count_nonzero(action[:50])
         logging.debug("AI can play " + str(possibleActions.item()) + " cards")
         if possibleActions > 0:
             dist = Categorical(action)
@@ -113,7 +113,7 @@ class Agent:
                     mask[x - 50] = 0
             for x in range(50, 54):
                 mask[x] = 0
-            mask[54] = 1
+            mask[54] = 0
         else:
             for x in range(0, 50):
                 mask[x] = 0

@@ -65,17 +65,12 @@ class PPO:
         """
         # Initialize default values for hyperparameters
         # Algorithm hyperparameters
-        self.timesteps_per_batch = 50000  # Number of timesteps to run per batch
-        self.max_timesteps_per_episode = 250000  # Max number of timesteps per episode
+        self.max_timesteps_per_episode = 5000  # Max number of timesteps per episode
         self.current_timesteps_per_episode = self.max_timesteps_per_episode
-        self.n_updates_per_iteration = 5  # Number of times to update actor/critic per iteration
-        self.lr = 0.0005  # Learning rate of actor optimizer
+        self.n_updates_per_iteration = 10  # Number of times to update actor/critic per iteration
+        self.lr = 0.001  # Learning rate of actor optimizer
         self.gamma = 0.97  # Discount factor to be applied when calculating Rewards-To-Go
         self.clip = 0.2
-
-        # Miscellaneous parameters
-        self.render = True  # If we should render during rollout
-        self.render_every_i = 10  # Only render every n iterations
         self.save_freq = 1  # How often we save in number of iterations
 
     def compute_rtgs(self, batch_rews):
@@ -154,11 +149,11 @@ class PPO:
                         batch_log_probs.extend(_game.players[x].episode_logprobs)
                         batch_masks.extend(_game.players[x].episode_mask)
                         if result[1] is None:
-                            rewards[-1] = -0.15 - 0.25 * 0.01 * episode_len
+                            rewards[-1] = -0.125 * (1 - 0.01 * episode_len)
                         elif result[1] == x:
                             rewards[-1] = 1 - 0.01 * episode_len
                         else:
-                            rewards[-1] = -1 / 3 - 1 / 3 * 0.01 * episode_len
+                            rewards[-1] = -1/3 * (1 + 0.01 * episode_len)
                         batch_rews.append(rewards)
             else:
                 x = np.random.randint(0, 3)
@@ -173,11 +168,11 @@ class PPO:
                     batch_log_probs.extend(_game.players[x].episode_logprobs)
                     batch_masks.extend(_game.players[x].episode_mask)
                     if result[1] is None:
-                        rewards[-1] = -1 / 3
+                        rewards[-1] = -1 / 3 - 0.01 * episode_len
                     elif result[1] == x:
-                        rewards[-1] = 1
+                        rewards[-1] = 1 - 0.01 * episode_len
                     else:
-                        rewards[-1] = -1
+                        rewards[-1] = -1 - 0.01 * episode_len
                     batch_rews.append(rewards)
         # Reshape data as tensors in the shape specified in function description, before returning
         batch_obs = torch.tensor(batch_obs, dtype=torch.float)
@@ -198,6 +193,7 @@ class PPO:
         losses = 0
         draws = 0
         games = 50000
+        amountOfTurns = 0
         printAmount = 50
         self.actor.to(torch.device("cpu"))
         self.actor.eval()
@@ -219,7 +215,8 @@ class PPO:
                 losses += 1 / games * 100
             if x % printAmount == 0:
                 print(f"Test games so far: {round(x / games * 100, 2)}%", end='\r')
-        return round(wins, 1), round(losses, 1), round(draws, 1)
+            amountOfTurns += _game.turn
+        return round(wins, 1), round(losses, 1), round(draws, 1), round(amountOfTurns / games, 1)
 
     def evaluate(self, batch_obs, batch_acts, batch_masks):
         """
@@ -260,8 +257,8 @@ class PPO:
         """
             Train the actor and critic networks. Here is where the main PPO algorithm resides.
         """
-        print(f"Learning... Running {40} timesteps per episode, ", end='')
-        print(f"{10000} timesteps per batch for a total of {20000} timesteps")
+        print(f"Learning... Running {1000} timesteps per episode, ", end='')
+        print(f"{self.timesteps_per_batch} timesteps per batch.")
         t_so_far = 0  # Timesteps simulated so far
         i_so_far = 0  # Iterations ran so far
         while True:  # ALG STEP 2
@@ -312,7 +309,7 @@ class PPO:
                 # NOTE: we take the negative min of the surrogate losses because we're trying to maximize
                 # the performance function, but Adam minimizes the loss. So minimizing the negative
                 # performance function maximizes it.
-                actor_loss = (-torch.min(surr1, surr2)).mean() - 0.04 * entropy.mean()
+                actor_loss = (-torch.min(surr1, surr2)).mean() - 0.02 * entropy.mean()
                 critic_loss = nn.MSELoss()(V, batch_rtgs)
 
                 # Calculate gradients and perform backward propagation for actor network

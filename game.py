@@ -112,11 +112,14 @@ class Game:
     def auto_sim(self):
         self.reset()
         while not self.gameEnded:
-            logging.debug("Turn: " + str(self.turn))
-            logging.debug("Player " + str(self.currentPlayerIndex))
-            self.currentPlayer = self.players[self.currentPlayerIndex]
-            self.simTurn(self.currentPlayer.playCard(self.currentSort, self.currentTrueNumber))
-            self.currentPlayerIndex = self.calculateNextPlayer(self.currentPlayerIndex, self.direction)
+            if self.turn < 1000:
+                logging.debug("Turn: " + str(self.turn))
+                logging.debug("Player " + str(self.currentPlayerIndex))
+                self.currentPlayer = self.players[self.currentPlayerIndex]
+                self.simTurn(self.currentPlayer.playCard(self.currentSort, self.currentTrueNumber))
+                self.currentPlayerIndex = self.calculateNextPlayer(self.currentPlayerIndex, self.direction)
+            else:
+                self.gameEnded = True
         if self.winner is None:
             logging.debug("Game ended in a draw!")
         return [self.turn, self.winner]

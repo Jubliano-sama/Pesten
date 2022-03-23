@@ -22,6 +22,6 @@ def simRandomGame(playerAmount):
 print(torch.cuda.is_available())
 torch.manual_seed(69)
 _ppo = ppo.PPO()
-#print(str(_ppo.test()) + "                                           ")
+print(str(_ppo.test()) + "                                           ")
 _ppo.learn()
 
