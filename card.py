@@ -40,7 +40,9 @@ class Card:
         if other.number == self.number:
             return True
         return False
-
+    
+    def __hash__(self):
+        return hash(self.number)
     def toString(self):
         if 1 < self.truenumber < 11:
             return str(self.truenumber) + " " + self.sort
