@@ -199,7 +199,7 @@ class PPO_Supervised:
 
     def _init_hyperparameters(self):
         self.max_timesteps_per_episode = 5000
-        self.n_updates_per_iteration = 8
+        self.n_updates_per_iteration = 20
         self.lr = 0.001
         self.gamma = 0.9
         self.clip = 0.2
@@ -231,6 +231,7 @@ class PPO_Supervised:
         batch_log_probs = []
         batch_rewards = []
         batch_lens = []
+        wins = 0  # track wins per batch
         for ep in range(num_episodes):
             print(f"  generating training episode {ep+1}/{num_episodes}...")
             g = game.Game([])
@@ -250,6 +251,7 @@ class PPO_Supervised:
             if len(rl_agent.episode_obs) > 0:
                 if g.winner == g.players.index(rl_agent):
                     rl_agent.episode_rewards[-1] += 1.0
+                    wins += 1  # count a win
                     print("we WON!")
                 elif g.winner is None:
                     rl_agent.episode_rewards[-1] += 0.0
@@ -262,11 +264,12 @@ class PPO_Supervised:
             batch_rewards.extend(rl_agent.episode_rewards)
             batch_lens.append(len(rl_agent.episode_obs))
             print(f"    episode {ep+1} finished: {len(rl_agent.episode_obs)} step(s), winner = {g.winner}, total turns = {g.turn_count}")
+        win_rate = (wins / num_episodes) * 100
+        print(f"[Data Generation] Data generation complete. win rate: {win_rate:.2f}%\n")
         batch_obs = torch.tensor(batch_obs, dtype=torch.float, device=self.device)
         batch_actions = torch.tensor(batch_actions, dtype=torch.long, device=self.device)
         batch_log_probs = torch.tensor(batch_log_probs, dtype=torch.float, device=self.device)
         batch_rewards = torch.tensor(batch_rewards, dtype=torch.float, device=self.device)
-        print("[Data Generation] Data generation complete.\n")
         return batch_obs, batch_actions, batch_log_probs, batch_rewards, batch_lens
 
     def learn(self, num_iterations=10, episodes_per_iter=10, temperature=1.0):
@@ -321,11 +324,11 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(description="PPO RL training for pretrained supervised agent with shaping rewards and evaluation against a RandomAgent")
     parser.add_argument("--iterations", type=int, default=10, help="Number of training iterations")
-    parser.add_argument("--episodes", type=int, default=500, help="Episodes per iteration")
+    parser.add_argument("--episodes", type=int, default=100, help="Episodes per iteration")
     parser.add_argument("--temperature", type=float, default=1.0, help="Temperature for action selection")
     args = parser.parse_args()
 
-    ppo = PPO_Supervised(use_pretrained=True, pretrained_path="supervised_agent_V1.pth")
+    ppo = PPO_Supervised(use_pretrained=False, pretrained_path="supervised_agent_V1.pth")
     ppo.learn(num_iterations=args.iterations, episodes_per_iter=args.episodes, temperature=args.temperature)
 
 if __name__ == "__main__":
