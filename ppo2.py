@@ -1,15 +1,3 @@
-"""
-ppo2.py
-
-a runnable ppo implementation specialized for further training a pretrained supervised agent,
-with shaping rewards:
-  +0.1 for every card lost,
-  -0.02 for every card gained, and
-  -0.05 penalty for every pass.
-additionally, samples where the agent’s legal move is ONLY “pass” (i.e. only one choice)
-are filtered out so they aren’t used for training.
-"""
-
 import time
 import numpy as np
 import torch
@@ -17,6 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.distributions import Categorical
 import os
+from tqdm import tqdm
 
 import game
 import network2
@@ -104,7 +93,6 @@ class RL_SupervisedAgent:
         logits = self.actor(obs_batched).squeeze(0)
         mask = self.get_action_mask(obs)
         masked_logits = torch.where(mask.bool(), logits, torch.tensor(-1e15, device=self.device))
-        # if in eval mode, force near-greedy behavior
         if self.eval_mode:
             temperature = 1e-3
         scaled_logits = masked_logits / temperature
@@ -122,12 +110,10 @@ class RL_SupervisedAgent:
         if int(legal_mask.sum().item()) == 1:
             return None
         observation = observation.to(self.device)
-        # override temperature for eval mode
         if self.eval_mode:
             temperature = 1e-3
         action, log_prob = self.act_rl(observation, temperature)
         shaping_reward = self.compute_shaping_reward(action)
-        # record training sample (even during eval, though you might choose not to)
         self.episode_obs.append(observation.detach().cpu().numpy())
         self.episode_logprobs.append(log_prob.detach().cpu().item() if log_prob is not None else None)
         if len(self.episode_rewards) > 0:
@@ -141,7 +127,6 @@ class RL_SupervisedAgent:
         observation[105] = 1
         observation = observation.to(self.device)
         mask = self.get_action_mask(observation)
-        # for eval mode, force greedy action selection
         temp = 1e-3 if self.eval_mode else 1.0
         action, log_prob = self.act_rl(observation, temperature=temp)
         shaping_reward = self.compute_shaping_reward(action)
@@ -223,7 +208,6 @@ class PPO_Supervised:
         self.lr = 0.001
         self.gamma = 0.9
         self.clip = 0.2
-        # save every n iterations (can be set via cli)
         self.save_freq = 1
 
     def get_action_mask(self, obs):
@@ -253,16 +237,14 @@ class PPO_Supervised:
         batch_rewards = []
         batch_lens = []
         wins = 0
-        for ep in range(num_episodes):
-            print(f"  generating training episode {ep+1}/{num_episodes}...")
+        for ep in tqdm(range(num_episodes), desc="data gen episodes", leave=True):
             g = game.Game([])
             agents = []
             rl_agent = RL_SupervisedAgent(g, self.actor, self.device)
-            # training mode: ensure eval_mode is false
             rl_agent.eval_mode = False
-            import randomAgent
+            import smartAgent
             for _ in range(1):
-                agents.append(randomAgent.Agent())
+                agents.append(smartAgent.Agent())
             agents.append(rl_agent)
             g.players = agents
             g.num_players = len(agents)
@@ -274,18 +256,15 @@ class PPO_Supervised:
                 if g.winner == g.players.index(rl_agent):
                     rl_agent.episode_rewards[-1] += 1.0
                     wins += 1
-                    print("we WON!")
                 elif g.winner is None:
                     rl_agent.episode_rewards[-1] += 0.0
                 else:
                     rl_agent.episode_rewards[-1] += -1.0
-                    print("we LOST!")
             batch_obs.extend(rl_agent.episode_obs)
             batch_actions.extend(rl_agent.episode_act)
             batch_log_probs.extend(rl_agent.episode_logprobs)
             batch_rewards.extend(rl_agent.episode_rewards)
             batch_lens.append(len(rl_agent.episode_obs))
-            print(f"    episode {ep+1} finished: {len(rl_agent.episode_obs)} step(s), winner = {g.winner}, total turns = {g.turn_count}")
         win_rate = (wins / num_episodes) * 100
         print(f"[data generation] complete. win rate: {win_rate:.2f}%\n")
         batch_obs = torch.tensor(batch_obs, dtype=torch.float, device=self.device)
@@ -295,17 +274,15 @@ class PPO_Supervised:
         return batch_obs, batch_actions, batch_log_probs, batch_rewards, batch_lens
 
     def evaluate_policy(self, num_episodes=10):
-        # set models to eval mode and force greedy behavior in agent
         self.actor.eval()
         self.critic.eval()
         print(f"\n[evaluation] starting evaluation for {num_episodes} episode(s)...")
         wins = 0
         total_turns = 0
-        for ep in range(num_episodes):
+        for ep in tqdm(range(num_episodes), desc="evaluation episodes", leave=True):
             g = game.Game([])
             agents = []
             rl_agent = RL_SupervisedAgent(g, self.actor, self.device)
-            # set evaluation flag to force near-greedy actions
             rl_agent.eval_mode = True
             rl_agent.reset_episode()
             import smartAgent
@@ -320,18 +297,17 @@ class PPO_Supervised:
             total_turns += g.turn_count
             if g.winner is not None and g.winner == g.players.index(rl_agent):
                 wins += 1
-            print(f"  eval episode {ep+1}/{num_episodes} finished: turns = {g.turn_count}, winner = {g.winner}")
         win_rate = (wins / num_episodes) * 100
         avg_turns = total_turns / num_episodes
         print(f"[evaluation] complete. win rate: {win_rate:.2f}%, avg turns: {avg_turns:.2f}\n")
-        # revert models back to training mode
         self.actor.train()
         self.critic.train()
 
     def learn(self, num_iterations=10, episodes_per_iter=10, temperature=1.0, eval_freq=5, eval_episodes=10):
         print(f"\n[training] starting training for {num_iterations} iteration(s), {episodes_per_iter} episode(s) per iteration.\n")
-        for it in range(num_iterations):
-            print(f"[training] iteration {it+1}/{num_iterations} started...")
+        for it in tqdm(range(num_iterations), desc="training iterations"):
+            self.actor.train()
+            tqdm.write(f"[training] iteration {it+1}/{num_iterations} started...")
             batch_obs, batch_actions, batch_log_probs, batch_rewards, ep_lens = self.generate_data(episodes_per_iter, temperature)
             rtgs = []
             idx = 0
@@ -348,7 +324,7 @@ class PPO_Supervised:
             values = self.critic(batch_obs).squeeze()
             advantages = rtgs - values.detach()
             advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
-            for update in range(self.n_updates_per_iteration):
+            for update in tqdm(range(self.n_updates_per_iteration), desc="policy updates", leave=False):
                 values = self.critic(batch_obs).squeeze()
                 logits = self.actor(batch_obs)
                 masks = torch.stack([self.get_action_mask(o) for o in batch_obs])
@@ -366,12 +342,11 @@ class PPO_Supervised:
                 total_loss.backward()
                 self.actor_optim.step()
                 self.critic_optim.step()
-                print(f"    [update {update+1}/{self.n_updates_per_iteration}] actor loss: {actor_loss.item():.5f}, critic loss: {critic_loss.item():.5f}")
+                tqdm.write(f"    [update {update+1}/{self.n_updates_per_iteration}] actor loss: {actor_loss.item():.5f}, critic loss: {critic_loss.item():.5f}")
             avg_ep_len = np.mean(ep_lens)
-            print(f"[training] iteration {it+1} complete: avg episode length = {avg_ep_len:.2f}")
+            tqdm.write(f"[training] iteration {it+1} complete: avg episode length = {avg_ep_len:.2f}")
             if (it+1) % eval_freq == 0:
                 self.evaluate_policy(num_episodes=eval_episodes)
-            # save checkpoints with iteration info and enforce max saves
             if (it+1) % self.save_freq == 0:
                 ckpt_iter = it + 1
                 actor_file = f"./ppo_actor_{ckpt_iter}.pth"
@@ -396,10 +371,10 @@ class PPO_Supervised:
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="ppo rl training for pretrained supervised agent with shaping rewards and evaluation against a randomagent")
-    parser.add_argument("--iterations", type=int, default=1, help="number of training iterations")
-    parser.add_argument("--episodes", type=int, default=100, help="episodes per iteration")
+    parser.add_argument("--iterations", type=int, default=100, help="number of training iterations")
+    parser.add_argument("--episodes", type=int, default=1000, help="episodes per iteration")
     parser.add_argument("--temperature", type=float, default=1.0, help="temperature for action selection during training")
-    parser.add_argument("--eval_freq", type=int, default=1, help="perform evaluation every n iterations")
+    parser.add_argument("--eval_freq", type=int, default=10, help="perform evaluation every n iterations")
     parser.add_argument("--eval_episodes", type=int, default=1000, help="number of evaluation episodes")
     parser.add_argument("--save_freq", type=int, default=1, help="save checkpoint every n iterations")
     parser.add_argument("--max_saves", type=int, default=10, help="maximum number of checkpoint saves to keep")
