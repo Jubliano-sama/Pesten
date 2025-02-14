@@ -175,7 +175,7 @@ class PPO_Supervised:
         self.saved_checkpoints = []
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.actor = DenseSkipNet(input_dim=121, output_dim=55).to(self.device)
-        self.critic = DenseSkipNet(input_dim=121, output_dim=55, dropout_prob=0.1).to(self.device)
+        self.critic = DenseSkipNet(input_dim=121, output_dim=1, dropout_prob=0.0).to(self.device)
         self.actor_optim = optim.Adam(self.actor.parameters(), lr=self.lr)
         self.critic_optim = optim.Adam(self.critic.parameters(), lr=self.lr)
         if use_pretrained:
