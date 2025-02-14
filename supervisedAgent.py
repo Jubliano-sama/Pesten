@@ -6,7 +6,7 @@ import deck
 import numpy as np
 
 class DenseSkipNet(nn.Module):
-    def __init__(self, input_dim=121, hidden_dims=None, output_dim=55, dropout_prob=0.3):
+    def __init__(self, input_dim=121, hidden_dims=None, output_dim=55, dropout_prob=0.0):
         super(DenseSkipNet, self).__init__()
         if hidden_dims is None:
             hidden_dims = [128, 128, 128, 128, 128, 128, 128]
@@ -45,7 +45,7 @@ class SupervisedAgent:
         self.model = DenseSkipNet(dropout_prob=0.3).to(self.device)
         self.game = game_instance
         self.mydeck = deck.Deck([])
-
+    
     def obs(self):
         obs = torch.zeros(121, dtype=torch.float)
         for card_obj in self.mydeck.cards:

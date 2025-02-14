@@ -336,16 +336,16 @@ def main():
     parser.add_argument('--collect_batch', type=int, default=1000, help='Batch size for parallel data collection (number of games per pool task; default: 10)')
     parser.add_argument('--train_epochs', type=int, default=5, help='Number of supervised training epochs per iteration (default: 5)')
     parser.add_argument('--eval_games', type=int, default=1000, help='Number of evaluation games (default: 1000)')
-    parser.add_argument('--eval_batch', type=int, default=10000, help='Batch size for parallel evaluation (default: 10)')
+    parser.add_argument('--eval_batch', type=int, default=1000, help='Batch size for parallel evaluation (default: 10)')
     parser.add_argument('--iterations', type=int, default=1, help='Number of training iterations for batched learning (default: 10)')
-    parser.add_argument('--batch_games', type=int, default=50000, help='Number of games to simulate per training iteration (default: 100)')
+    parser.add_argument('--batch_games', type=int, default=2000, help='Number of games to simulate per training iteration (default: 100)')
     args = parser.parse_args()
 
     print("Starting batched training...")
     supervised_agent = supervisedAgent.SupervisedAgent()
     # Create a persistent optimizer so we do not lose momentum across iterations.
     optimizer = optim.AdamW(supervised_agent.model.parameters(), lr=0.001, weight_decay=3e-5)
-    supervised_agent.model.load_state_dict(torch.load("supervised_agent_V1.pth"))
+    #supervised_agent.model.load_state_dict(torch.load("supervised_agent_V1.pth"))
     for it in range(args.iterations):
          print(f"\nIteration {it+1}/{args.iterations}: Collecting training data from {args.batch_games} game(s)...")
          training_data = parallel_data_collection(args.batch_games, args.collect_batch)

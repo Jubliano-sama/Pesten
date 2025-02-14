@@ -5,6 +5,16 @@ import time
 import game
 import randomAgent
 import smartAgent
+import supervisedAgent  # new import for supervised agent
+import torch
+
+# wrapper to ensure each supervised agent loads its state dict and gets its own instance
+class SupervisedAgentWrapper(supervisedAgent.SupervisedAgent):
+    def __init__(self, game_instance):
+        super().__init__(game_instance)
+        # load the state dict so each instance has its own weights
+        self.model.load_state_dict(torch.load("ppo_actor.pth", map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu")))
+        self.model.eval()
 
 def simulate_game(agent_classes):
     """
@@ -81,15 +91,17 @@ def process_results(results, execution_time, label):
 def main():
     parser = argparse.ArgumentParser(description='Simulate games between agents.')
     parser.add_argument('-n', '--num_games', type=int, default=1, help='Total number of games to simulate (default: 1)')
-    parser.add_argument('--agents', type=str, default='smart,random', help='Comma-separated list of agents (smart, random)')
+    parser.add_argument('--agents', type=str, default='smart,random', help='Comma-separated list of agents (smart, random, supervised)')
     parser.add_argument('--batch_size', type=int, default=10, help='Batch size for parallel execution (default: 10)')
     parser.add_argument('--parallel', action='store_true', help='Run in parallel using multiprocessing')
 
     args = parser.parse_args()
 
+    # extend mapping to include supervised agent via our wrapper
     agent_mapping = {
         'smart': smartAgent.Agent,
         'random': randomAgent.Agent,
+        'supervised': SupervisedAgentWrapper,
     }
     
     agent_names = [name.strip().lower() for name in args.agents.split(',')]
