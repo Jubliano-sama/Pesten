@@ -9,7 +9,7 @@ import card
 logging.basicConfig(
     filename='gamepest.log',
     format='%(asctime)s - %(levelname)s - %(message)s',
-    level=logging.CRITICAL
+    level=logging.WARNING
 )
 
 
