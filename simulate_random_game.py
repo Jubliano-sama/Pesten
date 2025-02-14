@@ -13,7 +13,7 @@ class SupervisedAgentWrapper(supervisedAgent.SupervisedAgent):
     def __init__(self, game_instance):
         super().__init__(game_instance)
         # load the state dict so each instance has its own weights
-        self.model.load_state_dict(torch.load("ppo_actor.pth", map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu")))
+        self.model.load_state_dict(torch.load("ppo_actor_147.pth", map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu")))
         self.model.eval()
 
 def simulate_game(agent_classes):

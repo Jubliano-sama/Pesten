@@ -101,28 +101,9 @@ class SupervisedAgent:
         obs_batched = obs.unsqueeze(0)
         logits = self.model(obs_batched).squeeze(0)
         mask = self.get_action_mask(obs)
-        masked_logits = torch.where(mask.bool(), logits, torch.tensor(-1e9, device=self.device))
+        masked_logits = torch.where(mask.bool(), logits, torch.tensor(-1e12, device=self.device))
         action_index = torch.argmax(masked_logits).item()
-        return None if action_index == 54 or masked_logits[action_index] <= -1e9 else card.Card(action_index)
-
-
-    def act_rl(self, obs, temperature=1.0):
-        # ensure obs is a tensor on the right device
-        if not isinstance(obs, torch.Tensor):
-            obs = torch.tensor(obs, dtype=torch.float, device=self.device)
-        obs_batched = obs.unsqueeze(0)
-        logits = self.model(obs_batched).squeeze(0)
-        mask = self.get_action_mask(obs)
-        masked_logits = torch.where(mask.bool(), logits, torch.tensor(-1e9, device=self.device))
-        # apply temperature scaling
-        scaled_logits = masked_logits / temperature
-        dist = torch.distributions.Categorical(logits=scaled_logits)
-        action = dist.sample()
-        log_prob = dist.log_prob(action)
-        if action.item() == 54 or scaled_logits[action] <= -1e9:
-            return None, log_prob
-        else:
-            return card.Card(action.item()), log_prob
+        return None if action_index == 54 or masked_logits[action_index] <= -1e9 else (action_index if 50 <= action_index <= 53 else card.Card(action_index))
 
 
     def playCard(self, current_sort, current_true_number):
@@ -130,15 +111,11 @@ class SupervisedAgent:
         return self.act(observation)
 
     def changeSort(self):
-        # decide suit change using outputs 50-53
-        observation = self.obs().to(self.device)
-        observation[105] = 1.0  # flag for sort change
-        obs_batched = observation.unsqueeze(0)
-        logits = self.model(obs_batched).squeeze(0)
-        suit_logits = logits[50:54]
-        dist = torch.distributions.Categorical(logits=suit_logits)
-        suit_index = dist.sample().item()
-        return card.sorts[suit_index]
+        observation = self.obs()
+        observation[105] = 1
+        observation = observation.to(self.device)
+        action = self.act(observation)
+        return card.sorts[action - 50]
 
     def printCards(self):
         for c in self.mydeck.cards:
