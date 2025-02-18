@@ -10,7 +10,7 @@ from tqdm import tqdm
 import game
 import card
 import deck
-
+from random import shuffle
 from supervisedAgent import DenseSkipNet
 
 # enable bf16 autocast support
@@ -23,7 +23,7 @@ class RL_SupervisedAgent:
         self.actor = actor  # ppo actor network (DenseSkipNet)
         self.device = device
         self.mydeck = deck.Deck([])
-        self.type = "RL_supervised"
+        self.type = "rl_supervised"
         self.prev_hand_count = 0
         self.lastaction = None
         # buffers for training samples
@@ -33,6 +33,8 @@ class RL_SupervisedAgent:
         self.episode_act = []
         # flag for evaluation mode; when true, forces greedy (near-zero temperature)
         self.eval_mode = False
+        # new flag: if false, no data will be collected
+        self.collect_data = True
 
     def reset_episode(self):
         self.episode_obs = []
@@ -92,19 +94,17 @@ class RL_SupervisedAgent:
             obs = torch.tensor(obs, dtype=torch.float, device=self.device)
         obs = obs.to(self.device)
         obs_batched = obs.unsqueeze(0)
-        logits = self.actor(obs_batched).squeeze(0)
-        mask = self.get_action_mask(obs)
-        masked_logits = torch.where(mask.bool(), logits, torch.tensor(-1e15, device=self.device))
-        if self.eval_mode:
-            temperature = 1e-3
-        scaled_logits = masked_logits / temperature
-        dist = Categorical(logits=scaled_logits)
-        action = dist.sample()
-        log_prob = dist.log_prob(action)
-        if action.item() == 54:
-            return None, log_prob
-        else:
-            return action.item(), log_prob
+        with torch.amp.autocast('cuda', dtype=torch.bfloat16):
+            logits = self.actor(obs_batched).squeeze(0)
+            mask = self.get_action_mask(obs)
+            masked_logits = torch.where(mask.bool(), logits, torch.tensor(-1e15, device=self.device))
+            if self.eval_mode:
+                temperature = 1e-5
+            scaled_logits = masked_logits / temperature
+            dist = Categorical(logits=scaled_logits)
+            action = dist.sample()
+            log_prob = dist.log_prob(action)
+            return (None, log_prob) if action.item() == 54 else (action.item(), log_prob)
 
     def playCard(self, current_sort, current_true_number, temperature=1.0):
         observation = self.obs()
@@ -116,12 +116,13 @@ class RL_SupervisedAgent:
             temperature = 1e-3
         action, log_prob = self.act_rl(observation, temperature)
         shaping_reward = self.compute_shaping_reward(action)
-        self.episode_obs.append(observation.detach().cpu().numpy())
-        self.episode_logprobs.append(log_prob.detach().cpu().item() if log_prob is not None else None)
-        if len(self.episode_rewards) > 0:
-            self.episode_rewards[-1] += shaping_reward
-        self.episode_rewards.append(-0.1 if action is None else 0.0)
-        self.episode_act.append(action if action is not None else 54)
+        if self.collect_data:
+            self.episode_obs.append(observation.detach().cpu().numpy())
+            self.episode_logprobs.append(log_prob.detach().cpu().item() if log_prob is not None else None)
+            if len(self.episode_rewards) > 0:
+                self.episode_rewards[-1] += shaping_reward
+            self.episode_rewards.append(-0.1 if action is None else 0.0)
+            self.episode_act.append(action if action is not None else 54)
         return card.Card(action) if action is not None else None
 
     def changeSort(self):
@@ -132,12 +133,13 @@ class RL_SupervisedAgent:
         temp = 1e-3 if self.eval_mode else 1.0
         action, log_prob = self.act_rl(observation, temperature=temp)
         shaping_reward = self.compute_shaping_reward(action)
-        self.episode_obs.append(observation.detach().cpu().numpy())
-        self.episode_logprobs.append(log_prob.detach().cpu().item() if log_prob is not None else None)
-        if len(self.episode_rewards) > 0:
-            self.episode_rewards[-1] += shaping_reward
-        self.episode_rewards.append(0)
-        self.episode_act.append(action)
+        if self.collect_data:
+            self.episode_obs.append(observation.detach().cpu().numpy())
+            self.episode_logprobs.append(log_prob.detach().cpu().item() if log_prob is not None else None)
+            if len(self.episode_rewards) > 0:
+                self.episode_rewards[-1] += shaping_reward
+            self.episode_rewards.append(0)
+            self.episode_act.append(action)
         return card.sorts[action - 50]
 
     def addCard(self, _card):
@@ -165,7 +167,7 @@ class RL_SupervisedAgent:
 # --- student critic network ---
 class StudentCritic(nn.Module):
     """
-    a student critic network: a larger variant of DenseSkipNet with output_dim=1.
+    a student critic network: a larger variant of denseskipnet with output_dim=1.
     here we use 8 hidden layers of 256 units each.
     """
     def __init__(self, input_dim=121, output_dim=1):
@@ -179,37 +181,65 @@ class StudentCritic(nn.Module):
 # --- student network ---
 class StudentNet(nn.Module):
     """
-    student network: a larger variant of DenseSkipNet with an extra layer and doubled hidden widths.
+    student network: a larger variant of denseskipnet with an extra layer and doubled hidden widths.
     here we use 8 hidden layers of 256 units each.
     """
     def __init__(self, input_dim=121, output_dim=55):
         super(StudentNet, self).__init__()
         hidden_dims = [256] * 8
-        self.model = DenseSkipNet(input_dim=input_dim, hidden_dims=hidden_dims, output_dim=output_dim, dropout_prob=0.3)
+        self.model = DenseSkipNet(input_dim=input_dim, hidden_dims=hidden_dims, output_dim=output_dim)
     def forward(self, x):
         return self.model(x)
 
+def compute_gae(rewards, values, gamma_=0.97, lam=0.95):
+    """
+    compute generalized advantage estimation.
+    
+    args:
+        rewards (tensor): 1d tensor of rewards from a rollout.
+        values (tensor): 1d tensor of value estimates corresponding to the rewards.
+        gamma (float): discount factor.
+        lam (float): gae parameter controlling bias-variance tradeoff.
+        
+    returns:
+        advantages (tensor): computed advantage estimates.
+        returns (tensor): computed returns (advantages + values).
+    """
+    advantages = torch.zeros_like(rewards)
+    last_adv = 0.0
+    # assume values is same length as rewards; append one zero for bootstrap if needed
+    for t in reversed(range(len(rewards))):
+        next_val = values[t + 1] if t < len(rewards) - 1 else 0.0
+        delta = rewards[t] + gamma_ * next_val - values[t]
+        last_adv = delta + gamma_ * lam * last_adv
+        advantages[t] = last_adv
+    returns = advantages + values
+    return advantages, returns
 
 # --- ppo for the supervised agent ---
 class PPO_Supervised:
     def __init__(self, use_pretrained=True,
-                 actor_path="distilled_rl_agent_OLD.pth",
-                 critic_path="ppo_critic_NEW.pth",
+                 actor_path="distilled_rl_agent_old.pth",
+                 critic_path="ppo_critic_new.pth",
                  actor_opt_path="ppo_actor_opt.pth",
-                 critic_opt_path="ppo_critic_opt_NEW.pth",
+                 critic_opt_path="ppo_critic_opt_new.pth",
+                 old_save = ['28BEST','56BEST'],
                  max_saves=5):
         self._init_hyperparameters()
         self.max_saves = max_saves
-        self.saved_checkpoints = []
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.actor = StudentNet(input_dim=121, output_dim=55).to(self.device)
         self.critic = StudentCritic().to(self.device)
-        self.actor_optim = optim.AdamW(self.actor.parameters(), lr=self.lr, weight_decay=2e-5)
-        self.critic_optim = optim.AdamW(self.critic.parameters(), lr=self.lr, weight_decay=6e-5)
+        # add the base version to the saved list
+        self.saved_checkpoints = old_save
+        self.actor_optim = optim.AdamW(self.actor.parameters(), lr=self.lr, weight_decay=1e-5)
+        self.critic_optim = optim.AdamW(self.critic.parameters(), lr=self.lr, weight_decay=1e-5)
         if use_pretrained:
             try:
                 self.actor.load_state_dict(torch.load(actor_path, map_location=self.device))
                 print("loaded pretrained actor weights.")
+                self.saved_checkpoints.append(0)
+                torch.save(self.actor.state_dict(), "./ppo_actor_0.pth")
             except Exception as e:
                 print("failed to load pretrained actor weights:", e)
             try:
@@ -232,9 +262,8 @@ class PPO_Supervised:
 
     def _init_hyperparameters(self):
         self.max_timesteps_per_episode = 5000
-        self.n_updates_per_iteration = 6
-        self.lr = 0.0005
-        self.gamma = 0.96
+        self.n_updates_per_iteration = 8
+        self.lr = 0.0004
         self.clip = 0.2
         self.save_freq = 1
 
@@ -271,17 +300,31 @@ class PPO_Supervised:
                 episodes_for_set = num_episodes - (num_sets - 1) * (num_episodes // num_sets)
             print(f"[data generation] collecting {episodes_for_set} episode(s) for agent set {i+1}: {agent_set}")
             set_wins = 0
+            set_draws = 0
             for ep in tqdm(range(episodes_for_set), desc="data gen episodes", leave=True):
                 g = game.Game([])
                 agents = []
                 rl_agents = []
+                past_version_used = False  # ensure at most one past version per game
+                pastProbability = np.random.random() < 0.2
                 for typ in agent_set:
                     if typ.lower() in ['rl', 'self']:
-                        a = RL_SupervisedAgent(g, self.actor, self.device)
-                        a.eval_mode = False
+                        if (not past_version_used) and (pastProbability) and (len(self.saved_checkpoints) > 0):
+                            chosen_ckpt = np.random.choice(self.saved_checkpoints)
+                            past_actor = StudentNet(input_dim=121, output_dim=55).to(self.device)
+                            past_actor.load_state_dict(torch.load(f"./ppo_actor_{chosen_ckpt}.pth", map_location=self.device))
+                            a = RL_SupervisedAgent(g, past_actor, self.device)
+                            a.collect_data = False  # do not collect data from past version
+                            a.eval_mode = False
+                            past_version_used = True
+                        else:
+                            a = RL_SupervisedAgent(g, self.actor, self.device)
+                            a.collect_data = True
+                            a.eval_mode = False
                         a.reset_episode()
                         agents.append(a)
-                        rl_agents.append(a)
+                        if a.collect_data:
+                            rl_agents.append(a)
                     elif typ.lower() == 'smart':
                         import smartAgent
                         agents.append(smartAgent.Agent())
@@ -290,6 +333,7 @@ class PPO_Supervised:
                         agents.append(randomAgent.Agent())
                     else:
                         print(f"unknown agent type: {typ}")
+                shuffle(agents)
                 g.players = agents
                 g.num_players = len(agents)
                 g.reset()
@@ -304,6 +348,7 @@ class PPO_Supervised:
                             global_wins += 1
                         elif g.winner is None:
                             a.episode_rewards[-1] += 0.0
+                            set_draws += 1
                         else:
                             a.episode_rewards[-1] += -1.0
                         batch_obs.extend(a.episode_obs)
@@ -312,7 +357,7 @@ class PPO_Supervised:
                         batch_rewards.extend(a.episode_rewards)
                         batch_lens.append(len(a.episode_obs))
             set_win_rate = (set_wins / episodes_for_set) * 100
-            print(f"[data generation] agent set {i+1} win rate: {set_win_rate:.2f}% over {episodes_for_set} episodes")
+            print(f"[data generation] agent set {i+1} win rate: {set_win_rate:.2f}% draw rate: {set_draws/episodes_for_set * 100:.2f}% over {episodes_for_set} episodes")
         global_win_rate = (global_wins / num_episodes) * 100
         print(f"[data generation] complete. overall win rate: {global_win_rate:.2f}%\n")
         batch_obs = torch.tensor(batch_obs, dtype=torch.float, device=self.device)
@@ -341,10 +386,21 @@ class PPO_Supervised:
                 g = game.Game([])
                 agents = []
                 rl_agents = []
+                past_version_used = False  # ensure at most one past version in evaluation as well
                 for typ in agent_set:
                     if typ.lower() in ['rl', 'self']:
-                        a = RL_SupervisedAgent(g, self.actor, self.device)
-                        a.eval_mode = True
+                        if (False):
+                            chosen_ckpt = np.random.choice(self.saved_checkpoints)
+                            past_actor = StudentNet(input_dim=121, output_dim=55).to(self.device)
+                            past_actor.load_state_dict(torch.load(f"./ppo_actor_{chosen_ckpt}.pth", map_location=self.device))
+                            a = RL_SupervisedAgent(g, past_actor, self.device)
+                            a.collect_data = False
+                            a.eval_mode = True
+                            past_version_used = True
+                        else:
+                            a = RL_SupervisedAgent(g, self.actor, self.device)
+                            a.collect_data = True
+                            a.eval_mode = True
                         a.reset_episode()
                         agents.append(a)
                         rl_agents.append(a)
@@ -382,19 +438,10 @@ class PPO_Supervised:
             tqdm.write(f"[training] iteration {it+1}/{num_iterations} started...")
             batch_obs, batch_actions, batch_log_probs, batch_rewards, ep_lens = self.generate_data(
                 num_episodes=episodes_per_iter, temperature=temperature, agent_sets=agent_sets)
-            rtgs = []
-            idx = 0
-            for l in ep_lens:
-                ep_rewards = batch_rewards[idx:idx+l]
-                discounted = []
-                running = 0.0
-                for r in reversed(ep_rewards.tolist()):
-                    running = r + self.gamma * running
-                    discounted.insert(0, running)
-                rtgs.extend(discounted)
-                idx += l
-            rtgs = torch.tensor(rtgs, dtype=torch.float, device=self.device)
-            advantages = rtgs - self.critic(batch_obs).squeeze().detach()
+            # assuming batch_rewards is a 1d tensor and values = self.critic(batch_obs).squeeze()
+            advantages, rtgs = compute_gae(batch_rewards, self.critic(batch_obs).squeeze(), lam=0.95)
+            advantages = advantages.detach()
+            rtgs = rtgs.detach()
             advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
             for update in tqdm(range(self.n_updates_per_iteration), desc="policy updates", leave=False):
                 with torch.amp.autocast('cuda', dtype=torch.bfloat16):
@@ -409,7 +456,10 @@ class PPO_Supervised:
                     surr2 = torch.clamp(ratios, 1 - self.clip, 1 + self.clip) * advantages
                     actor_loss = -torch.min(surr1, surr2).mean()
                     critic_loss = nn.MSELoss()(values, rtgs)
-                    total_loss = actor_loss + 0.5 * critic_loss
+                    total_loss = actor_loss + 0.8 * critic_loss
+
+                    # compute approximate kl divergence: expectation_{a~old}[log(old_prob) - log(new_prob)]
+                    kl_div = torch.mean(batch_log_probs - new_log_probs)
 
                 self.actor_optim.zero_grad()
                 self.critic_optim.zero_grad()
@@ -417,7 +467,7 @@ class PPO_Supervised:
                 self.scaler.step(self.actor_optim)
                 self.scaler.step(self.critic_optim)
                 self.scaler.update()
-                tqdm.write(f"    [update {update+1}/{self.n_updates_per_iteration}] actor loss: {actor_loss.item():.5f}, critic loss: {critic_loss.item():.5f}")
+                tqdm.write(f"    [update {update+1}/{self.n_updates_per_iteration}] actor loss: {actor_loss.item():.5f}, critic loss: {critic_loss.item():.5f}, kl: {kl_div.item():.5f}")
             avg_ep_len = np.mean(ep_lens)
             tqdm.write(f"[training] iteration {it+1} complete: avg episode length = {avg_ep_len:.2f}")
             if (it+1) % eval_freq == 0:
@@ -458,11 +508,11 @@ def main():
     parser = argparse.ArgumentParser(
         description="ppo rl training for pretrained supervised agent with shaping rewards and evaluation against specified opponent sets")
     parser.add_argument("--iterations", type=int, default=1000, help="number of training iterations")
-    parser.add_argument("--episodes", type=int, default=500, help="episodes per iteration")
+    parser.add_argument("--episodes", type=int, default=1500, help="episodes per iteration")
     parser.add_argument("--temperature", type=float, default=1.0, help="temperature for action selection during training")
-    parser.add_argument("--eval_freq", type=int, default=10, help="perform evaluation every n iterations")
+    parser.add_argument("--eval_freq", type=int, default=7, help="perform evaluation every n iterations")
     parser.add_argument("--eval_episodes", type=int, default=4000, help="number of evaluation episodes")
-    parser.add_argument("--save_freq", type=int, default=10, help="save checkpoint every n iterations")
+    parser.add_argument("--save_freq", type=int, default=7, help="save checkpoint every n iterations")
     parser.add_argument("--max_saves", type=int, default=10, help="maximum number of checkpoint saves to keep")
     parser.add_argument("--agent_sets", type=str, default="smart,rl",
                         help="semicolon-separated sets of comma-separated agent types (each set must include at least one rl agent), e.g. \"smart,rl;random,rl\"")
@@ -479,10 +529,10 @@ def main():
         print(f" set {idx+1}: {aset}")
     
     ppo = PPO_Supervised(use_pretrained=True,
-                         actor_path="distilled_rl_agent_OLD.pth",
-                         critic_path="ppo_critic_NEW.pth",
-                         actor_opt_path="ppo_actor_opt.pth",
-                         critic_opt_path="ppo_critic_opt_NEW.pth",
+                         actor_path="ppo_actor_77BEST.pth",
+                         critic_path="ppo_critic_77BEST.pth",
+                         actor_opt_path="ppo_actor_opt_77BEST.pth",
+                         critic_opt_path="ppo_critic_opt_77BEST.pth",
                          max_saves=args.max_saves)
     ppo.save_freq = args.save_freq
     ppo.learn(num_iterations=args.iterations, episodes_per_iter=args.episodes, temperature=args.temperature,
