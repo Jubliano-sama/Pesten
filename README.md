@@ -1,10 +1,4 @@
-You are absolutely right! My apologies for misinterpreting the standard use of distillation. Using it to bootstrap a larger model is a clever approach.
 
-I have revised the `README.md` to accurately reflect that the student model is larger and that distillation is used as a powerful initialization technique.
-
-Here is the corrected version:
-
----
 
 # Pesten-AI: An AI for the Dutch Card Game "Pesten"
 
