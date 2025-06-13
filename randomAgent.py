@@ -4,7 +4,7 @@ from random import randint
 import logging
 
 
-class Agent:
+class AgentRandom:
     def __init__(self):
         self.mydeck = deck.Deck([])
         self.type = "Random"

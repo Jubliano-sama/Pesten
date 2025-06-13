@@ -2,6 +2,7 @@ import card
 import deck
 import logging
 import math
+import numpy as np
 
 class Agent:
     # The smart agent’s default parameters.
@@ -214,3 +215,114 @@ class Agent:
                 self.mydeck.cards.remove(c)
                 return
         logging.error("Card not found in hand")
+
+
+class SmarterAgent:
+    def __init__(self, game=None):
+        self.mydeck = deck.Deck([])  # Initialize empty deck for the agent's hand
+        self.game = game             # Store game instance for state access
+        self.type = "Smarter"        # Identifier for debugging/logging
+
+        # Scoring parameters (tunable via benchmarking)
+        self.hand_penalty = 1.0       # Penalty per card in hand
+        self.suit_bonus = 0.5         # Bonus for cards in the most common suit
+        self.special_bonus = {        # Bonuses for keeping special cards in hand
+            7: 2.0, 8: 1.5, 1: 1.0, 0: 1.5, 13: 1.0, 2: 1.0
+        }
+        self.skip_bonus = 5.0         # Base bonus for skipping a player (8)
+        self.reverse_bonus = 0.5      # Bonus for reversing direction (1)
+        self.penalty_bonus = 0.2      # Bonus per penalty point added (0, 2)
+        self.suit_change_bonus = 1.0  # Base bonus for changing suit (13)
+        self.suit_depletion_bonus = 0.1  # Bonus per depleted suit count
+        self.seven_bonus = 2.0        # Bonus for extra turn (7)
+
+    def addCard(self, _card):
+        """Add a card to the agent's hand."""
+        if _card is None:
+            print("Warning: Attempted to add None card")
+        else:
+            self.mydeck.cards.append(_card)
+
+    def remove(self, _card):
+        """Remove a specific card from the agent's hand."""
+        for c in self.mydeck.cards:
+            if c.number == _card.number:
+                self.mydeck.cards.remove(c)
+                return
+        print("Error: Card not found in hand")
+
+    def card_value(self, c, max_suit):
+        """Compute the value of a card based on its properties."""
+        value = 0
+        if c.sort == max_suit:
+            value += self.suit_bonus  # Bonus if it matches the dominant suit
+        if c.truenumber in self.special_bonus:
+            value += self.special_bonus[c.truenumber]  # Bonus for special cards
+        return value
+
+    def hand_value(self, hand):
+        """Evaluate the hand’s value: penalize size, reward special cards and suit concentration."""
+        if not hand:
+            return 0  # Empty hand is a win, but we score before that happens
+        suit_counts = {s: 0 for s in card.sorts[:4]}
+        for c in hand:
+            if c.sort in suit_counts:
+                suit_counts[c.sort] += 1
+        max_suit = max(suit_counts, key=suit_counts.get) if suit_counts else None
+        return sum(self.card_value(c, max_suit) for c in hand) - self.hand_penalty * len(hand)
+
+    def score_candidate(self, c, new_hand):
+        """Score a playable card based on its effect and resulting hand value."""
+        base_score = self.hand_value(new_hand)
+        if not self.game:  # Fallback if game instance isn’t available
+            return base_score + (self.special_bonus.get(c.truenumber, 0) * 0.5)
+        
+        if c.truenumber == 7:
+            # Extra turn bonus
+            return base_score + self.seven_bonus
+        elif c.truenumber == 8:
+            # Skip next player; more valuable if they have few cards
+            try:
+                next_idx = self.game.calculate_next_player(self.game.players.index(self), self.game.direction)
+                next_count = self.game.players[next_idx].mydeck.cardCount()
+                return base_score + self.skip_bonus / (next_count + 1)
+            except (ValueError, AttributeError):
+                return base_score + self.skip_bonus / 2  # Fallback
+        elif c.truenumber == 1:
+            # Reverse direction; small fixed bonus
+            return base_score + self.reverse_bonus
+        elif c.truenumber == 0:
+            # Add 5 to penalty
+            return base_score + self.penalty_bonus * 5
+        elif c.truenumber == 2:
+            # Add 2 to penalty
+            return base_score + self.penalty_bonus * 2
+        elif c.truenumber == 13:
+            # Choose most depleted suit
+            best_suit_idx = np.argmax(self.game.sorts_played[:4])
+            depletion_value = self.game.sorts_played[best_suit_idx]
+            return base_score + self.suit_change_bonus + depletion_value * self.suit_depletion_bonus
+        else:
+            # Normal card: favor depleted suits
+            suit_idx = card.sorts.index(c.sort)
+            return base_score + self.game.sorts_played[suit_idx] * self.suit_depletion_bonus
+
+    def playCard(self, current_sort, current_true_number):
+        """Choose the best playable card."""
+        playable = [c for c in self.mydeck.cards if c.compatible(current_sort, current_true_number)]
+        if not playable:
+            return None
+        scores = []
+        for c in playable:
+            new_hand = [card for card in self.mydeck.cards if card != c]
+            score = self.score_candidate(c, new_hand)
+            scores.append(score)
+        return playable[np.argmax(scores)]
+
+    def changeSort(self):
+        """Choose the most depleted suit when playing a 13."""
+        if not self.game or not hasattr(self.game, 'sorts_played'):
+            return card.sorts[0]  # Fallback to first suit
+        suits = card.sorts[:4]
+        best_suit_idx = np.argmax(self.game.sorts_played[:4])
+        return suits[best_suit_idx]

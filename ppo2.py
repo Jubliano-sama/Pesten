@@ -6,6 +6,7 @@ import torch.optim as optim
 from torch.distributions import Categorical
 import os
 from tqdm import tqdm
+import logging
 
 import game
 import card
@@ -90,6 +91,9 @@ class RL_SupervisedAgent:
         return torch.tensor(mask, device=self.device, dtype=torch.float)
 
     def act_rl(self, obs, temperature=1.0):
+        temperature = 0.8
+        if self.eval_mode:
+            temperature = 1e-5
         if not isinstance(obs, torch.Tensor):
             obs = torch.tensor(obs, dtype=torch.float, device=self.device)
         obs = obs.to(self.device)
@@ -98,12 +102,16 @@ class RL_SupervisedAgent:
             logits = self.actor(obs_batched).squeeze(0)
             mask = self.get_action_mask(obs)
             masked_logits = torch.where(mask.bool(), logits, torch.tensor(-1e15, device=self.device))
-            if self.eval_mode:
-                temperature = 1e-5
             scaled_logits = masked_logits / temperature
             dist = Categorical(logits=scaled_logits)
             action = dist.sample()
             log_prob = dist.log_prob(action)
+            if action.item() == 54:
+                if self.eval_mode:
+                    logging.warning("Agent passed in eval.")
+                else:
+                    logging.warning("Agent passed in train.")
+
             return (None, log_prob) if action.item() == 54 else (action.item(), log_prob)
 
     def playCard(self, current_sort, current_true_number, temperature=1.0):
@@ -115,12 +123,9 @@ class RL_SupervisedAgent:
         if self.eval_mode:
             temperature = 1e-3
         action, log_prob = self.act_rl(observation, temperature)
-        shaping_reward = self.compute_shaping_reward(action)
         if self.collect_data:
             self.episode_obs.append(observation.detach().cpu().numpy())
             self.episode_logprobs.append(log_prob.detach().cpu().item() if log_prob is not None else None)
-            if len(self.episode_rewards) > 0:
-                self.episode_rewards[-1] += shaping_reward
             self.episode_rewards.append(-0.1 if action is None else 0.0)
             self.episode_act.append(action if action is not None else 54)
         return card.Card(action) if action is not None else None
@@ -132,12 +137,9 @@ class RL_SupervisedAgent:
         mask = self.get_action_mask(observation)
         temp = 1e-3 if self.eval_mode else 1.0
         action, log_prob = self.act_rl(observation, temperature=temp)
-        shaping_reward = self.compute_shaping_reward(action)
         if self.collect_data:
             self.episode_obs.append(observation.detach().cpu().numpy())
             self.episode_logprobs.append(log_prob.detach().cpu().item() if log_prob is not None else None)
-            if len(self.episode_rewards) > 0:
-                self.episode_rewards[-1] += shaping_reward
             self.episode_rewards.append(0)
             self.episode_act.append(action)
         return card.sorts[action - 50]
@@ -223,7 +225,7 @@ class PPO_Supervised:
                  critic_path="ppo_critic_new.pth",
                  actor_opt_path="ppo_actor_opt.pth",
                  critic_opt_path="ppo_critic_opt_new.pth",
-                 old_save = ['28BEST','56BEST'],
+                 old_save = ['28run1','56run1', '28run2', '42run2', '56run2', '30run3', '80run3', '100run3'],
                  max_saves=5):
         self._init_hyperparameters()
         self.max_saves = max_saves
@@ -232,7 +234,7 @@ class PPO_Supervised:
         self.critic = StudentCritic().to(self.device)
         # add the base version to the saved list
         self.saved_checkpoints = old_save
-        self.actor_optim = optim.AdamW(self.actor.parameters(), lr=self.lr, weight_decay=1e-5)
+        self.actor_optim = optim.AdamW(self.actor.parameters(), lr=self.lr, weight_decay=3e-6)
         self.critic_optim = optim.AdamW(self.critic.parameters(), lr=self.lr, weight_decay=1e-5)
         if use_pretrained:
             try:
@@ -262,9 +264,9 @@ class PPO_Supervised:
 
     def _init_hyperparameters(self):
         self.max_timesteps_per_episode = 5000
-        self.n_updates_per_iteration = 8
-        self.lr = 0.0004
-        self.clip = 0.2
+        self.n_updates_per_iteration = 3
+        self.lr = 0.00003
+        self.clip = 0.1
         self.save_freq = 1
 
     def get_action_mask(self, obs):
@@ -315,7 +317,7 @@ class PPO_Supervised:
                             past_actor.load_state_dict(torch.load(f"./ppo_actor_{chosen_ckpt}.pth", map_location=self.device))
                             a = RL_SupervisedAgent(g, past_actor, self.device)
                             a.collect_data = False  # do not collect data from past version
-                            a.eval_mode = False
+                            a.eval_mode = True
                             past_version_used = True
                         else:
                             a = RL_SupervisedAgent(g, self.actor, self.device)
@@ -508,12 +510,12 @@ def main():
     parser = argparse.ArgumentParser(
         description="ppo rl training for pretrained supervised agent with shaping rewards and evaluation against specified opponent sets")
     parser.add_argument("--iterations", type=int, default=1000, help="number of training iterations")
-    parser.add_argument("--episodes", type=int, default=1500, help="episodes per iteration")
+    parser.add_argument("--episodes", type=int, default=1000, help="episodes per iteration")
     parser.add_argument("--temperature", type=float, default=1.0, help="temperature for action selection during training")
-    parser.add_argument("--eval_freq", type=int, default=7, help="perform evaluation every n iterations")
+    parser.add_argument("--eval_freq", type=int, default=10, help="perform evaluation every n iterations")
     parser.add_argument("--eval_episodes", type=int, default=4000, help="number of evaluation episodes")
-    parser.add_argument("--save_freq", type=int, default=7, help="save checkpoint every n iterations")
-    parser.add_argument("--max_saves", type=int, default=10, help="maximum number of checkpoint saves to keep")
+    parser.add_argument("--save_freq", type=int, default=10, help="save checkpoint every n iterations")
+    parser.add_argument("--max_saves", type=int, default=20, help="maximum number of checkpoint saves to keep")
     parser.add_argument("--agent_sets", type=str, default="smart,rl",
                         help="semicolon-separated sets of comma-separated agent types (each set must include at least one rl agent), e.g. \"smart,rl;random,rl\"")
     args = parser.parse_args()
@@ -529,10 +531,10 @@ def main():
         print(f" set {idx+1}: {aset}")
     
     ppo = PPO_Supervised(use_pretrained=True,
-                         actor_path="ppo_actor_77BEST.pth",
-                         critic_path="ppo_critic_77BEST.pth",
-                         actor_opt_path="ppo_actor_opt_77BEST.pth",
-                         critic_opt_path="ppo_critic_opt_77BEST.pth",
+                         actor_path="ppo_actor_100run3.pth",
+                         critic_path="ppo_critic_100run3.pth",
+                         actor_opt_path="ppo_actor_opt_100run3.pth",
+                         critic_opt_path="ppo_critic_opt_100run3.pth",
                          max_saves=args.max_saves)
     ppo.save_freq = args.save_freq
     ppo.learn(num_iterations=args.iterations, episodes_per_iter=args.episodes, temperature=args.temperature,
