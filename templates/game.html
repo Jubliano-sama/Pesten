@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Pesten Game - Room {{ room_code }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
@@ -88,10 +88,10 @@
             <div class="modal-content">
                 <h3>Choose a Suit</h3>
                 <div class="sort-options">
-                    <button class="sort-btn" data-sort="harten">♥️ Hearts</button>
-                    <button class="sort-btn" data-sort="ruiten">♦️ Diamonds</button>
-                    <button class="sort-btn" data-sort="schoppen">♠️ Spades</button>
-                    <button class="sort-btn" data-sort="klaveren">♣️ Clubs</button>
+                    <button class="sort-btn" data-sort="harten">♥️</button>
+                    <button class="sort-btn" data-sort="ruiten">♦️</button>
+                    <button class="sort-btn" data-sort="schoppen">♠️</button>
+                    <button class="sort-btn" data-sort="klaveren">♣️</button>
                 </div>
             </div>
         </div>
@@ -107,6 +107,19 @@
 
     <!-- Toast Notifications -->
     <div id="toast-container" class="toast-container"></div>
+
+    <!-- Game Popup Notifications -->
+    <div id="popup-container" class="popup-container"></div>
+
+    <!-- Win Screen Modal -->
+    <div id="win-modal" class="win-modal" style="display: none;">
+        <div class="win-modal-content">
+            <div class="win-celebration">🎉</div>
+            <h1 id="win-player-name" class="win-title">Player Wins!</h1>
+            <div id="win-message" class="win-message">Congratulations!</div>
+            <button id="win-close-btn" class="btn btn-primary win-close-btn">Close</button>
+        </div>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script src="{{ url_for('static', filename='js/game.js') }}"></script>

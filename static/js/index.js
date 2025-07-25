@@ -11,7 +11,6 @@ createRoomForm.addEventListener('submit', (e) => {
     e.preventDefault();
     
     const playerName = document.getElementById('player-name').value.trim();
-    const maxPlayers = parseInt(document.getElementById('max-players').value);
     
     if (!playerName) {
         showToast('Please enter your name', 'error');
@@ -24,8 +23,7 @@ createRoomForm.addEventListener('submit', (e) => {
     localStorage.setItem('playerName', playerName);
     
     socket.emit('create_room', {
-        player_name: playerName,
-        max_players: maxPlayers
+        player_name: playerName
     });
 });
 

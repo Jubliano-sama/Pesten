@@ -7,6 +7,9 @@ let playerId = localStorage.getItem('playerId');
 let roomCode = localStorage.getItem('roomCode') || document.getElementById('room-code').textContent;
 let selectedCard = null;
 let awaitingSortChoice = false;
+let lastCardWarnings = new Set(); // Track which players have been warned about having 1 card
+let turnTimer = null; // Current turn timer
+let timeLeft = 0; // Seconds left in current turn
 
 // DOM elements
 const lobbySection = document.getElementById('lobby-section');
@@ -27,6 +30,10 @@ const sortModal = document.getElementById('sort-modal');
 const logContent = document.getElementById('log-content');
 const drawPileCount = document.getElementById('draw-pile-count');
 const handCountElement = document.getElementById('hand-count');
+const winModal = document.getElementById('win-modal');
+const winPlayerName = document.getElementById('win-player-name');
+const winCloseBtn = document.getElementById('win-close-btn');
+const popupContainer = document.getElementById('popup-container');
 
 // Initialize game - get room code from URL if not in localStorage
 if (!roomCode) {
@@ -70,7 +77,14 @@ leaveGameBtn.addEventListener('click', () => {
 });
 
 passBtn.addEventListener('click', () => {
+    const currentPlayer = gameState.players.find(p => p.id === playerId);
+    if (currentPlayer && currentPlayer.is_observer) {
+        showToast("You are observing - cannot pass", 'info');
+        return;
+    }
+    
     if (!awaitingSortChoice) {
+        stopTurnTimer(); // Stop timer since we're making a move
         socket.emit('play_card', {
             room_code: roomCode,
             player_id: playerId,
@@ -83,6 +97,7 @@ passBtn.addEventListener('click', () => {
 document.querySelectorAll('.sort-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         const newSort = btn.dataset.sort;
+        stopTurnTimer(); // Stop timer since we're making a move
         socket.emit('change_sort', {
             room_code: roomCode,
             player_id: playerId,
@@ -91,6 +106,11 @@ document.querySelectorAll('.sort-btn').forEach(btn => {
         sortModal.style.display = 'none';
         awaitingSortChoice = false;
     });
+});
+
+// Win modal handlers
+winCloseBtn.addEventListener('click', () => {
+    winModal.style.display = 'none';
 });
 
 // Socket event handlers
@@ -166,11 +186,52 @@ socket.on('ai_move', (data) => {
 socket.on('sort_changed', (data) => {
     updateGameState(data.game_state);
     addLogEntry(`Suit changed to ${getSuitSymbol(data.new_sort)}`);
+    showGamePopup(`🎭 Suit changed to ${getSuitSymbol(data.new_sort)}!`, 'suit-change');
 });
 
 socket.on('player_left', (data) => {
     updateGameState(data.game_state);
     addLogEntry('A player left the room');
+});
+
+socket.on('player_auto_passed', (data) => {
+    console.log('⏰ Received auto-pass event:', data);
+    
+    // Check if it was our timeout
+    const currentPlayer = gameState?.players?.find(p => p.id === playerId);
+    const wasMyTimeout = data.player_name === currentPlayer?.name;
+    
+    console.log('⏰ Auto-pass details:', {
+        playerWhoTimedOut: data.player_name,
+        wasMyTimeout: wasMyTimeout,
+        newCurrentPlayerIndex: data.game_state.current_player_index,
+        newCurrentPlayer: data.game_state.players[data.game_state.current_player_index]?.name
+    });
+    
+    updateGameState(data.game_state);
+    addLogEntry(`⏰ ${data.player_name} timed out and auto-passed (${data.consecutive_timeouts}/3)`);
+    
+    if (wasMyTimeout) {
+        showToast('You timed out and auto-passed', 'warning');
+        console.log('⏰ My timeout - game should continue to next player');
+    } else {
+        showToast(`${data.player_name} auto-passed due to timeout`, 'warning');
+        console.log('⏰ Other player timed out - checking if it\'s now my turn');
+    }
+    
+    // Explicitly ensure all UI elements are updated after auto-pass
+    setTimeout(() => {
+        console.log('⏰ Force updating all UI after auto-pass');
+        updateGameInterface();
+    }, 100);
+});
+
+socket.on('player_kicked', (data) => {
+    updateGameState(data.game_state);
+    addLogEntry(`❌ ${data.player_name} was kicked: ${data.reason}`);
+    showToast(`${data.player_name} was kicked from the game`, 'error');
+    showGamePopup(`❌ ${data.player_name} was kicked for ${data.reason}!`, 'warning');
+    console.log('You got kicked');
 });
 
 socket.on('error', (data) => {
@@ -211,6 +272,25 @@ function updateGameState(newGameState) {
         }
     }
     
+    // Check for players with 1 card left (only during active game)
+    if (gameState.started && !gameState.game_over) {
+        gameState.players.forEach(player => {
+            const handSize = player.hand ? player.hand.length : player.hand_size;
+            if (handSize === 1 && !lastCardWarnings.has(player.id)) {
+                // Player just got down to 1 card
+                lastCardWarnings.add(player.id);
+                if (player.id === playerId) {
+                    showGamePopup('⚠️ Last card! You\'re almost out!', 'last-card');
+                } else {
+                    showGamePopup(`⚠️ ${player.name} has only 1 card left!`, 'warning');
+                }
+            } else if (handSize > 1 && lastCardWarnings.has(player.id)) {
+                // Player got more cards, remove from warning set
+                lastCardWarnings.delete(player.id);
+            }
+        });
+    }
+    
     if (!gameState.started) {
         updateLobby();
     } else {
@@ -223,11 +303,16 @@ function updateLobby() {
     
     gameState.players.forEach((player, index) => {
         const playerCard = document.createElement('div');
-        playerCard.className = `player-card ${player.is_ai ? 'ai' : ''}`;
+        playerCard.className = `player-card ${player.is_ai ? 'ai' : ''} ${player.is_observer ? 'observer' : ''}`;
+        
+        let statusText = player.is_ai ? '🤖 AI Player' : '👤 Human';
+        if (player.is_observer) {
+            statusText += ' 👁️ Observer';
+        }
         
         playerCard.innerHTML = `
             <div class="player-name">${player.name}</div>
-            <div class="player-status">${player.is_ai ? '🤖 AI Player' : '👤 Human'}</div>
+            <div class="player-status">${statusText}</div>
         `;
         
         playersListElement.appendChild(playerCard);
@@ -273,22 +358,31 @@ function updateOtherPlayers() {
         const turnOrder = getTurnOrder(myIndex, playerIndex, gameState.direction, gameState.players.length);
         
         const playerElement = document.createElement('div');
-        playerElement.className = `other-player ${isCurrentTurn ? 'current-player' : ''}`;
+        playerElement.className = `other-player ${isCurrentTurn ? 'current-player' : ''} ${player.is_observer ? 'observer' : ''}`;
         
-        const cardsHtml = Array(player.hand_size).fill(0).map(() => 
+        const cardsHtml = player.is_observer ? '' : Array(player.hand_size).fill(0).map(() => 
             '<div class="card-back-small">🂠</div>'
         ).join('');
         
         // Add turn order arrow
         const turnArrow = getTurnOrderArrow(turnOrder);
         
+        let playerNameDisplay = `${turnArrow} ${player.name} ${player.is_ai ? '🤖' : ''}`;
+        if (player.is_observer) {
+            playerNameDisplay += ' 👁️';
+        }
+        if (isCurrentTurn && !player.is_observer) {
+            playerNameDisplay += ' ⏰';
+        }
+        
+        const cardDisplay = player.is_observer ? '👁️ Observer' : `${player.hand_size} cards`;
+        
         playerElement.innerHTML = `
             <div class="other-player-info">
                 <div class="other-player-name">
-                    ${turnArrow} ${player.name} ${player.is_ai ? '🤖' : ''}
-                    ${isCurrentTurn ? '⏰' : ''}
+                    ${playerNameDisplay}
                 </div>
-                <div class="other-player-cards">${player.hand_size} cards</div>
+                <div class="other-player-cards">${cardDisplay}</div>
             </div>
             <div class="other-player-hand">
                 ${cardsHtml}
@@ -326,6 +420,11 @@ function updatePlayerHand() {
         }
         
         cardElement.addEventListener('click', () => {
+            if (currentPlayer.is_observer) {
+                showToast("You are observing - cannot play cards", 'info');
+                return;
+            }
+            
             if (gameState.current_player_index !== gameState.players.indexOf(currentPlayer)) {
                 showToast("It's not your turn!", 'error');
                 return;
@@ -351,6 +450,7 @@ function updatePlayerHand() {
             selectedCard = cardNum;
             
             // Play the card
+            stopTurnTimer(); // Stop timer since we're making a move
             socket.emit('play_card', {
                 room_code: roomCode,
                 player_id: playerId,
@@ -393,13 +493,95 @@ function updateTopCard() {
 function updateCurrentTurn() {
     const currentPlayer = gameState.players[gameState.current_player_index];
     if (currentPlayer) {
-        if (currentPlayer.id === playerId) {
-            currentTurnElement.textContent = "Your turn";
-            currentTurnElement.style.color = '#27ae60';
+        console.log('🔄 Turn update:', { 
+            currentPlayerName: currentPlayer.name, 
+            isMyTurn: currentPlayer.id === playerId,
+            isObserver: currentPlayer.is_observer,
+            isAI: currentPlayer.is_ai,
+            playerIndex: gameState.current_player_index,
+            totalPlayers: gameState.players.length
+        });
+        
+        if (currentPlayer.id === playerId && !currentPlayer.is_observer) {
+            // Start timer for my turn
+            console.log('🔄 Starting timer - it\'s my turn');
+            startTurnTimer();
         } else {
-            currentTurnElement.textContent = `${currentPlayer.name}'s turn`;
-            currentTurnElement.style.color = '#f39c12';
+            // Stop timer if it's not my turn
+            console.log('🔄 Stopping timer - not my turn or I\'m observing');
+            stopTurnTimer();
         }
+        
+        // Update the display
+        updateTurnDisplay();
+    } else {
+        console.warn('🔄 updateCurrentTurn: No current player found');
+    }
+}
+
+function updateTurnDisplay() {
+    const currentPlayer = gameState.players[gameState.current_player_index];
+    if (!currentPlayer) return;
+    
+    let turnText = '';
+    let color = '#f39c12';
+    
+    if (currentPlayer.id === playerId) {
+        turnText = "Your turn";
+        color = '#27ae60';
+    } else {
+        turnText = `${currentPlayer.name}'s turn`;
+        color = '#f39c12';
+    }
+    
+    // Add timer display if it's a human player and timer is running
+    if (!currentPlayer.is_ai && !currentPlayer.is_observer && turnTimer && timeLeft > 0) {
+        turnText += ` (${timeLeft}s)`;
+        
+        // Change color as time runs out
+        if (timeLeft <= 10) {
+            color = '#e74c3c'; // Red for urgency
+        } else if (timeLeft <= 20) {
+            color = '#f39c12'; // Orange for warning
+        }
+    }
+    
+    currentTurnElement.textContent = turnText;
+    currentTurnElement.style.color = color;
+}
+
+function startTurnTimer() {
+    console.log('⏱️ Starting turn timer');
+    stopTurnTimer(); // Clear any existing timer
+    timeLeft = 10;
+    updateTurnDisplay(); // Initial display
+    
+    turnTimer = setInterval(() => {
+        timeLeft--;
+        updateTurnDisplay(); // Update the display every second
+        
+        if (timeLeft <= 0) {
+            console.log('⏱️ Client timer expired, notifying server');
+            stopTurnTimer();
+            // Show that we're waiting for server response
+            currentTurnElement.textContent = "Time's up! Waiting for server...";
+            currentTurnElement.style.color = '#e74c3c';
+            
+            // Proactively notify server of timeout to avoid race condition
+            console.log('⏱️ Sending timeout signal to server');
+            socket.emit('player_timeout', {
+                room_code: roomCode,
+                player_id: playerId
+            });
+        }
+    }, 1000);
+}
+
+function stopTurnTimer() {
+    if (turnTimer) {
+        console.log('⏱️ Stopping turn timer');
+        clearInterval(turnTimer);
+        turnTimer = null;
     }
 }
 
@@ -522,6 +704,7 @@ function handleGameAction(action, details, actingPlayer = null) {
         case 'win':
             addLogEntry(`🎉 ${player.name} wins!`, true);
             showToast(`🎉 ${player.name} wins the game!`, 'success');
+            showWinModal(player.name);
             break;
             
         case 'draw_and_play_option':
@@ -545,6 +728,7 @@ function handleAIAction(action, details, actingPlayer = null) {
             addLogEntry(`🤖 ${player.name} played a card`);
             if (details.new_sort) {
                 addLogEntry(`🤖 ${player.name} changed suit to ${getSuitSymbol(details.new_sort)}`);
+                showGamePopup(`🎭 ${player.name} changed suit to ${getSuitSymbol(details.new_sort)}!`, 'suit-change');
             }
             break;
             
@@ -560,7 +744,14 @@ function handleAIAction(action, details, actingPlayer = null) {
             addLogEntry(`🤖 ${player.name} drew penalty cards`);
             if (details.new_sort) {
                 addLogEntry(`🤖 ${player.name} changed suit to ${getSuitSymbol(details.new_sort)}`);
+                showGamePopup(`🎭 ${player.name} changed suit to ${getSuitSymbol(details.new_sort)}!`, 'suit-change');
             }
+            break;
+            
+        case 'win':
+            addLogEntry(`🤖🎉 ${player.name} wins!`, true);
+            showToast(`🤖🎉 ${player.name} wins the game!`, 'success');
+            showWinModal(player.name);
             break;
     }
 }
@@ -569,6 +760,44 @@ function showSortModal() {
     console.log('🎭 Showing sort selection modal');
     awaitingSortChoice = true;
     sortModal.style.display = 'flex';
+}
+
+function showWinModal(playerName) {
+    console.log('🎉 Showing win modal for:', playerName);
+    
+    const currentPlayer = gameState.players.find(p => p.id === playerId);
+    const isWinner = currentPlayer && currentPlayer.name === playerName;
+    
+    if (isWinner) {
+        // You won - congratulations and become observer
+        winPlayerName.textContent = `You Win! 🎉`;
+        document.getElementById('win-message').textContent = 'Congratulations!';
+        document.getElementById('win-close-btn').textContent = 'Continue as Observer';
+    } else {
+        // Someone else won - just acknowledgment
+        winPlayerName.textContent = `${playerName} Wins! 🎉`;
+        document.getElementById('win-message').textContent = `${playerName} finished the game!`;
+        document.getElementById('win-close-btn').textContent = 'Continue Playing';
+    }
+    
+    winModal.style.display = 'flex';
+}
+
+function showGamePopup(message, type = 'default') {
+    console.log('📢 Showing game popup:', message, 'type:', type);
+    
+    const popup = document.createElement('div');
+    popup.className = `game-popup ${type}`;
+    popup.textContent = message;
+    
+    popupContainer.appendChild(popup);
+    
+    // Remove popup after animation completes (3 seconds total)
+    setTimeout(() => {
+        if (popup.parentNode) {
+            popup.parentNode.removeChild(popup);
+        }
+    }, 3000);
 }
 
 function getCardData(cardNum) {
@@ -613,6 +842,16 @@ function getCardData(cardNum) {
             symbol: '🃏',
             value: 'JKR',
             trueNumber: 0
+        };
+    } else if (cardNum >= 50 && cardNum <= 53) {
+        // Jack variants with specific suits (50=hearts, 51=diamonds, 52=spades, 53=clubs)
+        const suitIndex = cardNum - 50; // 0=hearts, 1=diamonds, 2=spades, 3=clubs
+        return {
+            suit: suits[suitIndex],
+            suitName: suitNames[suitIndex],
+            symbol: suitSymbols[suitIndex],
+            value: 'J',
+            trueNumber: 13
         };
     }
     
