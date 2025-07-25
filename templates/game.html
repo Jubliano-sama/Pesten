@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesten Game - Room {{ room_code }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+</head>
+<body>
+    <div class="game-container">
+        <header class="game-header">
+            <div class="room-info">
+                <h1>🃏 Pesten</h1>
+                <div class="room-code">Room: <span id="room-code">{{ room_code }}</span></div>
+            </div>
+            <div class="game-controls">
+                <button id="leave-game" class="btn btn-danger">Leave Game</button>
+            </div>
+        </header>
+
+        <!-- Lobby Section -->
+        <div id="lobby-section" class="lobby-section">
+            <div class="lobby-content">
+                <h2>Waiting for Players</h2>
+                <div class="players-list" id="players-list">
+                    <!-- Players will be populated here -->
+                </div>
+                <div class="lobby-controls">
+                    <button id="add-ai-btn" class="btn btn-secondary">Add AI Player</button>
+                    <button id="start-game-btn" class="btn btn-primary" disabled>Start Game</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Section -->
+        <div id="game-section" class="game-section" style="display: none;">
+            <!-- Other Players Area -->
+            <div class="other-players-area">
+                <div id="other-players" class="other-players">
+                    <!-- Other players will be rendered here -->
+                </div>
+            </div>
+
+            <!-- Game Table Area -->
+            <div class="game-table">
+                <div class="table-center">
+                    <div class="deck-area">
+                        <div class="draw-pile">
+                            <div class="card-back" id="draw-pile">
+                                <span id="draw-pile-count">0</span>
+                            </div>
+                        </div>
+                        <div class="discard-pile">
+                            <div id="top-card" class="card">
+                                <!-- Top card will be rendered here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="game-info">
+                        <div class="current-turn" id="current-turn">Waiting for game to start...</div>
+                        <div class="game-direction" id="game-direction">↻</div>
+                        <div class="penalty-info" id="penalty-info" style="display: none;">
+                            <span class="penalty-text">Penalty: +<span id="penalty-amount">0</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Player Hand Area -->
+            <div class="player-hand-area">
+                <div class="hand-info">
+                    <span id="player-name">You</span>
+                    <span id="hand-count">7 cards</span>
+                </div>
+                <div id="player-hand" class="player-hand">
+                    <!-- Player's cards will be rendered here -->
+                </div>
+                <div class="hand-controls">
+                    <button id="pass-btn" class="btn btn-secondary">Pass / Draw</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sort Selection Modal -->
+        <div id="sort-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h3>Choose a Suit</h3>
+                <div class="sort-options">
+                    <button class="sort-btn" data-sort="harten">♥️ Hearts</button>
+                    <button class="sort-btn" data-sort="ruiten">♦️ Diamonds</button>
+                    <button class="sort-btn" data-sort="schoppen">♠️ Spades</button>
+                    <button class="sort-btn" data-sort="klaveren">♣️ Clubs</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Log -->
+        <div class="game-log" id="game-log">
+            <div class="log-header">Game Log</div>
+            <div class="log-content" id="log-content">
+                <!-- Game events will be logged here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='js/game.js') }}"></script>
+</body>
+</html>

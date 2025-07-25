@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesten Online</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🃏 Pesten Online</h1>
+            <p>Play the classic Dutch card game with friends and AI opponents!</p>
+        </header>
+
+        <main>
+            <div class="menu-section">
+                <div class="card">
+                    <h2>Create New Room</h2>
+                    <form id="create-room-form">
+                        <div class="form-group">
+                            <label for="player-name">Your Name:</label>
+                            <input type="text" id="player-name" required maxlength="20" placeholder="Enter your name">
+                        </div>
+                        <div class="form-group">
+                            <label for="max-players">Max Players:</label>
+                            <select id="max-players">
+                                <option value="2">2 Players</option>
+                                <option value="3">3 Players</option>
+                                <option value="4" selected>4 Players</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Create Room</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2>Join Existing Room</h2>
+                    <form id="join-room-form">
+                        <div class="form-group">
+                            <label for="join-player-name">Your Name:</label>
+                            <input type="text" id="join-player-name" required maxlength="20" placeholder="Enter your name">
+                        </div>
+                        <div class="form-group">
+                            <label for="room-code">Room Code:</label>
+                            <input type="text" id="room-code" required maxlength="6" placeholder="Enter room code" style="text-transform: uppercase">
+                        </div>
+                        <button type="submit" class="btn btn-secondary">Join Room</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="rules-section">
+                <div class="card">
+                    <h2>How to Play Pesten</h2>
+                    <div class="rules-content">
+                        <h3>🎯 Objective</h3>
+                        <p>Be the first player to get rid of all your cards!</p>
+                        
+                        <h3>🃏 Card Basics</h3>
+                        <ul>
+                            <li>Each player starts with 7 cards</li>
+                            <li>Play cards that match the suit or number of the top card</li>
+                            <li>Draw a card if you can't play</li>
+                        </ul>
+                        
+                        <h3>🎴 Special Cards</h3>
+                        <ul>
+                            <li><strong>7:</strong> Play again</li>
+                            <li><strong>8:</strong> Skip next player</li>
+                            <li><strong>Ace:</strong> Reverse direction</li>
+                            <li><strong>2:</strong> Next player draws 2 cards</li>
+                            <li><strong>Jack:</strong> Change suit</li>
+                            <li><strong>Joker:</strong> Next player draws 5 cards + change suit</li>
+                        </ul>
+                        
+                        <h3>⚡ Penalty Rules</h3>
+                        <ul>
+                            <li>Playing a special card as your last card forces you to draw 2 more cards</li>
+                            <li>Penalty cards (2, Joker) stack - play the same number to pass the penalty</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="loading" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p>Connecting to game...</p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+</body>
+</html>
