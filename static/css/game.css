@@ -384,6 +384,152 @@
     font-weight: bold;
 }
 
+/* Win Modal */
+.win-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.win-modal-content {
+    background: linear-gradient(135deg, #f39c12 0%, #e74c3c 100%);
+    padding: 60px 40px;
+    border-radius: 20px;
+    text-align: center;
+    color: white;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    animation: winPulse 1s ease-in-out infinite alternate;
+    max-width: 90vw;
+}
+
+.win-celebration {
+    font-size: 5rem;
+    margin-bottom: 20px;
+    animation: bounce 1s ease-in-out infinite;
+}
+
+.win-title {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.win-message {
+    font-size: 1.5rem;
+    margin-bottom: 30px;
+    opacity: 0.9;
+}
+
+.win-close-btn {
+    font-size: 1.2rem;
+    padding: 15px 30px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid white;
+    color: white;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.win-close-btn:hover {
+    background: white;
+    color: #e74c3c;
+    transform: scale(1.05);
+}
+
+@keyframes winPulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.02); }
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Game Popup Notifications */
+.popup-container {
+    position: fixed;
+    top: 30%;
+    left: 100%;
+    transform: translate(-50%, -50%);
+    z-index: 999;
+    pointer-events: none;
+}
+
+.game-popup {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px 30px;
+    border-radius: 15px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    margin-bottom: 10px;
+    animation: popupSlideIn 0.5s ease-out forwards, popupFadeOut 0.5s ease-in 2.5s forwards;
+    transform: translateY(-50px);
+    opacity: 0;
+}
+
+.game-popup.suit-change {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.game-popup.last-card {
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    color: #333;
+    animation: popupSlideIn 0.5s ease-out forwards, popupPulse 0.3s ease-in-out 0.5s 3, popupFadeOut 0.5s ease-in 2.5s forwards;
+}
+
+.game-popup.warning {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+    color: #333;
+}
+
+@keyframes popupSlideIn {
+    0% {
+        transform: translateY(-50px) scale(0.8);
+        opacity: 0;
+    }
+    80% {
+        transform: translateY(5px) scale(1.05);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes popupFadeOut {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-20px) scale(0.9);
+        opacity: 0;
+    }
+}
+
+@keyframes popupPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .game-header {
@@ -425,5 +571,29 @@
     
     .sort-options {
         grid-template-columns: 1fr;
+    }
+    
+    .win-modal-content {
+        padding: 40px 20px;
+        margin: 20px;
+    }
+    
+    .win-celebration {
+        font-size: 3rem;
+    }
+    
+    .win-title {
+        font-size: 2rem;
+    }
+    
+    .win-message {
+        font-size: 1.2rem;
+    }
+    
+    .game-popup {
+        font-size: 1.2rem;
+        padding: 15px 20px;
+        margin: 0 10px;
+        max-width: 80vw;
     }
 }

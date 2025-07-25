@@ -56,6 +56,14 @@ def get_web_card_data(card_num: int) -> Dict[str, Any]:
             "truenumber": 0,
             "number": card_num
         }
+    elif card_num >= 50 and card_num <= 53:
+        # Jack variants with specific suits (50=hearts, 51=diamonds, 52=spades, 53=clubs)
+        suit_index = card_num - 50  # 0=hearts, 1=diamonds, 2=spades, 3=clubs
+        return {
+            "sort": sorts[suit_index],
+            "truenumber": 13,
+            "number": card_num
+        }
     else:
         return {
             "sort": "unknown",
@@ -141,10 +149,15 @@ class AIPlayer:
         
         # Player's hand (cards 0-49 at positions 0-49, compatible flags at 50-99)
         for card_num in player.hand:
-            if card_num <= 49:  # Ensure valid range (0-49)
-                obs[card_num] += 1
+            # Map Jack variants (50-53) to Jack (48) for AI observation
+            obs_card_num = card_num
+            if card_num >= 50 and card_num <= 53:
+                obs_card_num = 48  # All Jack variants treated as generic Jack for AI
+            
+            if obs_card_num <= 49:  # Ensure valid range (0-49)
+                obs[obs_card_num] += 1
                 if self._is_compatible(card_num, game_state.current_sort, game_state.current_true_number):
-                    obs[card_num + 50] += 1  # Compatible flags start at position 50
+                    obs[obs_card_num + 50] += 1  # Compatible flags start at position 50
         
         # Suits played (108-112)
         for i in range(5):
@@ -153,12 +166,11 @@ class AIPlayer:
         # Play mode flag (113)
         obs[113] = 0  # 0 = play card, 1 = change sort
         
-        # Other players' hand sizes (114-117)
+        # Other players' hand sizes (114-117) - truncate to max 4 players in observation
         player_idx = next(i for i, p in enumerate(game_state.players) if p.id == player.id)
-        for i in range(len(game_state.players)):
+        for i in range(min(len(game_state.players), 4)):  # Truncate to max 4 players
             relative_idx = (player_idx + i) % len(game_state.players)
-            if i < 4:  # Max 4 players
-                obs[114 + i] = len(game_state.players[relative_idx].hand)
+            obs[114 + i] = len(game_state.players[relative_idx].hand)
         
         # Player index and direction (118-119)
         obs[118] = player_idx
@@ -212,6 +224,13 @@ class AIPlayer:
             masked_logits = np.where(mask.astype(bool), logits, -1e9)
             action = np.argmax(masked_logits)
             
+            # Map action back to actual card in hand if it's a Jack
+            if action == 48 and not is_change_sort:
+                # Find actual Jack variant in player's hand
+                jack_variants = [card for card in player.hand if card >= 50 and card <= 53]
+                if jack_variants:
+                    action = jack_variants[0]  # Choose first available Jack variant
+            
             logger.info(f"AI MODEL CHOICE: action={action}, is_change_sort={is_change_sort}")
             return int(action)
             
@@ -227,7 +246,7 @@ class AIPlayer:
         # Find compatible cards
         compatible_cards = []
         for card_num in player.hand:
-            if card_num <= 49 and self._is_compatible(card_num, game_state.current_sort, game_state.current_true_number):
+            if card_num <= 53 and self._is_compatible(card_num, game_state.current_sort, game_state.current_true_number):
                 compatible_cards.append(card_num)
         
         if compatible_cards:
@@ -238,9 +257,8 @@ class AIPlayer:
 class GameRoom:
     """Manages a single game room with multiple players"""
     
-    def __init__(self, room_code: str, max_players: int = 4):
+    def __init__(self, room_code: str):
         self.room_code = room_code
-        self.max_players = max_players
         self.game_state = GameState(
             players=[],
             current_player_index=0,
@@ -261,8 +279,6 @@ class GameRoom:
         
     def add_player(self, player_name: str, socket_id: str, is_ai: bool = False) -> bool:
         """Add a player to the room"""
-        if len(self.game_state.players) >= self.max_players:
-            return False
         
         player = PlayerState(
             id=str(uuid.uuid4()),
@@ -295,12 +311,25 @@ class GameRoom:
     
     def _reset_game(self):
         """Reset game state and deal cards"""
-        # Create and shuffle deck to match deck.py standardDeck() exactly
-        all_cards = list(range(50))  # 0-49 are regular cards (matching deck.py range(0,50))
-        all_cards.append(49)  # Joker (card 49)
-        all_cards.append(48)  # Jack 1 (card 48)
-        all_cards.append(48)  # Jack 2 (card 48) 
-        all_cards.append(48)  # Jack 3 (card 48)
+        # Calculate number of decks needed: ceil((players * 7) / 54)
+        num_players = len(self.game_state.players)
+        cards_needed = num_players * 7
+        num_decks = max(1, (cards_needed + 53) // 54)  # Ceiling division, at least 1 deck
+        
+        logger.info(f"Game setup: {num_players} players, {cards_needed} cards needed, using {num_decks} deck(s)")
+        
+        # Create multiple decks if needed
+        all_cards = []
+        for deck_num in range(num_decks):
+            # Standard deck: 50 regular cards + 1 joker + 4 jacks
+            deck_cards = list(range(50))  # 0-49 are regular cards
+            deck_cards.append(49)  # Joker (card 49)
+            deck_cards.append(50)  # Jack of hearts (card 50)
+            deck_cards.append(51)  # Jack of diamonds (card 51) 
+            deck_cards.append(52)  # Jack of spades (card 52)
+            deck_cards.append(53)  # Jack of clubs (card 53)
+            all_cards.extend(deck_cards)
+        
         random.shuffle(all_cards)
         
         # Deal 7 cards to each player
@@ -587,8 +616,8 @@ class GameRoom:
         if self.game_state.penalty_amount > 0:
             # Check if AI can play matching penalty card
             action = self.ai_player.choose_action(current_player, self.game_state)
-            logger.info(f"AI penalty action: {action} (card in hand: {action in current_player.hand if action < 50 else 'pass/suit'})")
-            if action < 50:  # Playing a card (0-49)
+            logger.info(f"AI penalty action: {action} (card in hand: {action in current_player.hand if action <= 53 else 'pass/suit'})")
+            if action <= 53:  # Playing a card (0-53)
                 card_data = get_web_card_data(action)
                 if card_data["truenumber"] == self.game_state.current_true_number:
                     return self.play_card(current_player.id, action)
@@ -598,7 +627,7 @@ class GameRoom:
         else:
             # Normal play
             action = self.ai_player.choose_action(current_player, self.game_state)
-            logger.info(f"AI normal action: {action} (card in hand: {action in current_player.hand if action < 50 else 'pass/suit'})")
+            logger.info(f"AI normal action: {action} (card in hand: {action in current_player.hand if action <= 53 else 'pass/suit'})")
             if action == 54:  # Pass
                 return self.play_card(current_player.id, None)
             else:
@@ -657,9 +686,8 @@ def room(room_code):
 def handle_create_room(data):
     """Create a new game room"""
     player_name = data.get('player_name', 'Anonymous')
-    max_players = data.get('max_players', 4)
     
-    logger.info(f"Creating room for player '{player_name}' with max {max_players} players, socket: {request.sid}")
+    logger.info(f"Creating room for player '{player_name}', socket: {request.sid}")
     
     with rooms_lock:
         # Generate unique room code
@@ -671,7 +699,7 @@ def handle_create_room(data):
         logger.info(f"Generated room code: {room_code}")
         
         # Create room
-        game_room = GameRoom(room_code, max_players)
+        game_room = GameRoom(room_code)
         game_room.add_player(player_name, request.sid)
         game_rooms[room_code] = game_room
         
@@ -738,9 +766,7 @@ def handle_join_room(data):
             emit('error', {'message': 'Game already started'})
             return
         
-        if not game_room.add_player(player_name, request.sid):
-            emit('error', {'message': 'Room is full'})
-            return
+        game_room.add_player(player_name, request.sid)
         
         join_room(room_code)
         
@@ -779,12 +805,11 @@ def handle_add_ai_player(data):
             emit('error', {'message': 'Game already started'})
             return
         
-        ai_names = ["AI Jelle", "AI Luc", "AI Tadeema", "AI Ronald"]
+        ai_names = ["AI Jelle", "AI Luc", "AI Tadeema", "AI Ronald", "AI Ramon", "AI Remco", "AI Pim", "AI Lars", "AI Martin", "AI Levi", "AI Thomas"]
+        np.random.shuffle(ai_names)
         ai_name = ai_names[len([p for p in game_room.game_state.players if p.is_ai]) % len(ai_names)]
         
-        if not game_room.add_player(ai_name, None, is_ai=True):
-            emit('error', {'message': 'Room is full'})
-            return
+        game_room.add_player(ai_name, None, is_ai=True)
         
         socketio.emit('ai_player_added', {
             'ai_name': ai_name,
