@@ -10,7 +10,7 @@ let awaitingSortChoice = false;
 let lastCardWarnings = new Set(); // Track which players have been warned about having 1 card
 let turnTimer = null; // Current turn timer
 let timeLeft = 0; // Seconds left in current turn
-let lastDirectionChangeProcessed = false; // Track if we've already processed the current direction change
+let lastDirectionChanged = false; // Track the last direction_changed state
 
 // DOM elements
 const lobbySection = document.getElementById('lobby-section');
@@ -363,11 +363,9 @@ function updateGameInterface() {
 function updatePlayerQueue() {
     console.log('🔄 Updating player queue');
     
-    // Only trigger reversal animation once per direction change
-    const currentTurnCount = gameState.turn_count;
-    if (gameState.direction_changed && lastDirectionChange !== currentTurnCount) {
-        console.log('↩️ DIRECTION CHANGED - triggering reversal animation once');
-        lastDirectionChange = currentTurnCount;
+    // Only animate when direction_changed goes from false to true
+    if (gameState.direction_changed && !lastDirectionChanged) {
+        console.log('↩️ DIRECTION CHANGED - triggering reversal animation');
         
         // Trigger arrow wobble animation
         const arrows = playerQueueElement.querySelectorAll('.queue-arrow');
@@ -377,6 +375,9 @@ function updatePlayerQueue() {
             arrow.classList.add('wobble');
         });
     }
+    
+    // Update the last state
+    lastDirectionChanged = gameState.direction_changed;
     
     console.log('📊 GameState turn_order:', gameState.turn_order);
     
