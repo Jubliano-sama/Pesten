@@ -774,6 +774,7 @@ class GameRoom:
             self.game_state.direction *= -1
             # Set flag for client direction change animation (will be sent once and reset)
             self.game_state.direction_just_changed = True
+            logger.info(f"🔄 JACK PLAYED: Set direction_just_changed = True, new direction = {self.game_state.direction}")
             # Update turn order after direction change
             self._update_turn_order()
         elif card_data["truenumber"] == 0:  # Joker - +5 penalty
@@ -857,8 +858,7 @@ class GameRoom:
                 self.game_state.turn_count += 1
                 # Reset draw flag for new turn
                 self.game_state.has_drawn_this_turn = False
-                # Reset direction change flag on next turn (not immediately after sending)
-                self.game_state.direction_just_changed = False
+                # Don't reset direction_just_changed here - it should persist until after client gets the update
                 # Update turn order for clients
                 self._update_turn_order()
                 return
@@ -1247,6 +1247,8 @@ class GameRoom:
     
     def get_public_state(self, player_id: str = None) -> Dict[str, Any]:
         """Get public game state for clients"""
+        direction_changed_value = getattr(self.game_state, 'direction_just_changed', False)
+        logger.info(f"🌍 PUBLIC STATE: direction_changed = {direction_changed_value}")
         # Hide other players' hands
         public_players = []
         for i, player in enumerate(self.game_state.players):
@@ -1553,6 +1555,11 @@ def handle_play_card(data):
             'acting_player': {'name': acting_player.name, 'id': acting_player.id} if acting_player else None
         }, room=room_code)
         
+        # Reset direction change flag AFTER sending to clients
+        if game_room.game_state.direction_just_changed:
+            logger.info(f"🔄 AFTER UPDATE: Resetting direction_just_changed from True to False")
+            game_room.game_state.direction_just_changed = False
+        
         # Send updated private hands
         for player in game_room.game_state.players:
             if not player.is_ai and player.socket_id:
@@ -1596,6 +1603,11 @@ def handle_play_card(data):
                     'details': ai_result,
                     'acting_player': {'name': ai_player_before_turn.name, 'id': ai_player_before_turn.id}
                 }, room=room_code)
+                
+                # Reset direction change flag AFTER sending AI update to clients
+                if game_room.game_state.direction_just_changed:
+                    logger.info(f"🔄 AFTER AI UPDATE: Resetting direction_just_changed from True to False")
+                    game_room.game_state.direction_just_changed = False
                 
             elif ai_result and not ai_result.get('success', False):
                 logger.error(f"AI turn failed: {ai_result.get('error', 'Unknown error')}")

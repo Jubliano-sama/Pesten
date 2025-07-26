@@ -260,6 +260,7 @@ socket.on('error', (data) => {
 // Game logic functions
 function updateGameState(newGameState) {
     console.log('🔄 Updating game state:', newGameState);
+    console.log('🔍 CLIENT DEBUG: direction_changed =', newGameState.direction_changed);
     
     // Preserve current player's hand if it exists
     let preservedHand = null;
