@@ -234,9 +234,25 @@ socket.on('player_kicked', (data) => {
     console.log('You got kicked');
 });
 
+socket.on('game_tied', (data) => {
+    console.log('🤝 Game ended in a tie:', data);
+    updateGameState(data.game_state);
+    addLogEntry('🤝 Game ended in a tie - no more cards available!', true);
+    showToast('🤝 Game ended in a tie!', 'info');
+    showTieModal();
+});
+
 socket.on('error', (data) => {
     console.error('❌ Server error:', data);
     showToast(data.message, 'error');
+    
+    // Handle specific error types that might require client-side cleanup
+    if (data.message.includes('Invalid player name') || 
+        data.message.includes('Room is full') ||
+        data.message.includes('already taken')) {
+        // For player validation errors, we might want to redirect back to the main page
+        console.log('📝 Player validation error, might need to re-enter name');
+    }
 });
 
 // Game logic functions
@@ -553,7 +569,7 @@ function updateTurnDisplay() {
 function startTurnTimer() {
     console.log('⏱️ Starting turn timer');
     stopTurnTimer(); // Clear any existing timer
-    timeLeft = 10;
+    timeLeft = 60;
     updateTurnDisplay(); // Initial display
     
     turnTimer = setInterval(() => {
@@ -621,15 +637,16 @@ function isCardPlayable(cardNum) {
         penaltyAmount: gameState.penalty_amount
     });
     
-    // During penalty, only matching penalty cards can be played (but Jacks and Jokers are always exceptions)
+    // Invalid cards are never playable
+    if (cardData.trueNumber === -1 || cardData.suitName === 'invalid' || cardData.suitName === 'unknown') {
+        console.warn(`❌ Invalid card ${cardNum} is not playable`);
+        return false;
+    }
+    
+    // During penalty, ONLY matching penalty cards can be played (NO exceptions)
     if (gameState.penalty_amount > 0) {
-        // Jacks and Jokers are always playable, even during penalties
-        if (cardData.trueNumber === 0 || cardData.trueNumber === 13) {
-            console.log(`✅ Special card always playable even in penalty: ${cardData.trueNumber} (${cardData.value})`);
-            return true;
-        }
         const canPlay = cardData.trueNumber === gameState.current_true_number;
-        console.log(`⚠️ Penalty mode - can play: ${canPlay} (need ${gameState.current_true_number})`);
+        console.log(`⚠️ Penalty mode - can play: ${canPlay} (need exact match ${gameState.current_true_number}, have ${cardData.trueNumber})`);
         return canPlay;
     }
     
@@ -783,6 +800,27 @@ function showWinModal(playerName) {
     winModal.style.display = 'flex';
 }
 
+function showTieModal() {
+    console.log('🤝 Showing tie modal');
+    
+    // Reuse the win modal but with tie content
+    winPlayerName.textContent = `Game Tied! 🤝`;
+    document.getElementById('win-message').textContent = 'No more cards available - it\'s a tie!';
+    document.getElementById('win-close-btn').textContent = 'Back to Lobby';
+    
+    // Add special styling for tie
+    winModal.classList.add('tie-modal');
+    
+    winModal.style.display = 'flex';
+    
+    // Redirect to lobby after closing
+    winCloseBtn.onclick = () => {
+        winModal.style.display = 'none';
+        winModal.classList.remove('tie-modal');
+        window.location.href = '/';
+    };
+}
+
 function showGamePopup(message, type = 'default') {
     console.log('📢 Showing game popup:', message, 'type:', type);
     
@@ -808,6 +846,18 @@ function getCardData(cardNum) {
     const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'K', 'Q'];
     
     console.log(`🔍 Getting card data for: ${cardNum}`);
+    
+    // Validate card number
+    if (typeof cardNum !== 'number' || cardNum < 0 || cardNum > 53) {
+        console.warn(`❌ Invalid card number: ${cardNum}`);
+        return {
+            suit: 'invalid',
+            suitName: 'invalid',
+            symbol: '❌',
+            value: 'INV',
+            trueNumber: -1
+        };
+    }
     
     if (cardNum < 48) {
         // Regular cards 0-47 (4 suits × 12 cards each)
@@ -855,6 +905,8 @@ function getCardData(cardNum) {
         };
     }
     
+    // Should not reach here due to range check above, but safety fallback
+    console.error(`❌ Unexpected card number in valid range: ${cardNum}`);
     return {
         suit: 'unknown',
         suitName: 'unknown',

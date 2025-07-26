@@ -9,6 +9,8 @@ Supports room-based multiplayer, mixed human/AI games, and real-time updates via
 import os
 import json
 import random
+import re
+import secrets
 import string
 import uuid
 from typing import Dict, List, Optional, Any
@@ -29,6 +31,15 @@ from supervisedAgent import StudentNet
 # Custom card handling for web game
 def get_web_card_data(card_num: int) -> Dict[str, Any]:
     """Get card data matching original card.py exactly"""
+    # Validate card number range
+    if not isinstance(card_num, int):
+        logger.warning(f"Invalid card type: {type(card_num)}, expected int")
+        return {"sort": "unknown", "truenumber": -1, "number": card_num}
+    
+    if card_num < 0 or card_num > 53:
+        logger.warning(f"Invalid card number: {card_num}, expected 0-53")
+        return {"sort": "unknown", "truenumber": -1, "number": card_num}
+    
     sorts = ["harten", "ruiten", "schoppen", "klaveren", "special"]
     
     if card_num < 48:
@@ -65,6 +76,8 @@ def get_web_card_data(card_num: int) -> Dict[str, Any]:
             "number": card_num
         }
     else:
+        # Shouldn't reach here due to range check above, but safety fallback
+        logger.error(f"Unexpected card number in valid range: {card_num}")
         return {
             "sort": "unknown",
             "truenumber": -1,
@@ -72,10 +85,25 @@ def get_web_card_data(card_num: int) -> Dict[str, Any]:
         }
 
 def is_web_card_compatible(card_num: int, current_sort: str, current_true_number: int) -> bool:
-    """Check if web card is compatible with current table state"""
+    """Check if web card is compatible with current table state (basic compatibility, not penalty-aware)"""
     card_data = get_web_card_data(card_num)
     
-    # Jokers and Jacks are always compatible
+    # Invalid cards are never compatible
+    if card_data["truenumber"] == -1 or card_data["sort"] == "unknown":
+        logger.warning(f"Invalid card {card_num} is not compatible with anything")
+        return False
+    
+    # Validate current table state
+    if not isinstance(current_true_number, int) or current_true_number < 0 or current_true_number > 13:
+        logger.warning(f"Invalid current_true_number: {current_true_number}")
+        return False
+    
+    valid_sorts = ["harten", "ruiten", "schoppen", "klaveren", "special"]
+    if current_sort not in valid_sorts:
+        logger.warning(f"Invalid current_sort: {current_sort}")
+        return False
+    
+    # Jokers and Jacks are always compatible in normal play
     if card_data["truenumber"] == 0 or card_data["truenumber"] == 13:
         return True
     
@@ -88,8 +116,19 @@ def is_web_card_compatible(card_num: int, current_sort: str, current_true_number
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Generate or get secret key
+def get_secret_key():
+    """Get secret key from environment or generate a secure one"""
+    secret_key = os.environ.get('FLASK_SECRET_KEY')
+    if not secret_key:
+        # Generate a secure random secret key
+        secret_key = secrets.token_hex(32)
+        logger.warning("No FLASK_SECRET_KEY environment variable found, generated new secret key")
+        logger.info("Set FLASK_SECRET_KEY environment variable for production use")
+    return secret_key
+
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your_secret_key_here'
+app.config['SECRET_KEY'] = get_secret_key()
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Global state management
@@ -131,18 +170,52 @@ class AIPlayer:
     def __init__(self, model_path: str = "ppo_actor_100run3.pth"):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = None
+        self.model_loaded = False
+        self.fallback_reason = ""
+        
+        # Try multiple model paths
+        model_paths = [
+            model_path,
+            "ppo_actor_100run3.onnx",
+            "ppo_actor_80run3.onnx",
+            "models/" + model_path,
+            os.path.join(os.path.dirname(__file__), model_path)
+        ]
         
         # Load PyTorch model
-        try:
-            self.model = StudentNet(input_dim=121, output_dim=55).to(self.device)
-            if os.path.exists(model_path):
-                self.model.load_state_dict(torch.load(model_path, map_location=self.device))
+        for path in model_paths:
+            if not os.path.exists(path):
+                continue
+                
+            try:
+                self.model = StudentNet(input_dim=121, output_dim=55).to(self.device)
+                
+                # Try loading with different map locations for compatibility
+                try:
+                    self.model.load_state_dict(torch.load(path, map_location=self.device))
+                except RuntimeError as e:
+                    if "CUDA" in str(e):
+                        # Fallback to CPU if CUDA issues
+                        self.device = torch.device("cpu")
+                        self.model = self.model.to(self.device)
+                        self.model.load_state_dict(torch.load(path, map_location=self.device))
+                    else:
+                        raise e
+                
                 self.model.eval()
-                logger.info(f"Loaded PyTorch model: {model_path}")
-            else:
-                logger.warning(f"No model file found at {model_path}, using random strategy")
-        except Exception as e:
-            logger.error(f"Failed to load AI model: {e}, using random strategy")
+                self.model_loaded = True
+                logger.info(f"Successfully loaded AI model from: {path}")
+                logger.info(f"Using device: {self.device}")
+                break
+                
+            except Exception as e:
+                logger.warning(f"Failed to load model from {path}: {e}")
+                continue
+        
+        if not self.model_loaded:
+            self.fallback_reason = f"No valid model found in paths: {model_paths}"
+            logger.error(f"AI Model Loading Failed: {self.fallback_reason}")
+            logger.info("AI will use random strategy as fallback")
             self.model = None
 
     def get_observation(self, player: PlayerState, game_state: GameState) -> np.ndarray:
@@ -207,6 +280,11 @@ class AIPlayer:
 
     def choose_action(self, player: PlayerState, game_state: GameState, is_change_sort: bool = False) -> int:
         """Choose action using AI model"""
+        if is_change_sort:
+            logger.info(f"AI {player.name} received request to change sort after playing Jack or Joker penalty")
+        else:
+            logger.info(f"AI {player.name} received request to choose action on their turn")
+            
         if self.model is None:
             return self._random_action(player, game_state, is_change_sort)
         
@@ -233,12 +311,62 @@ class AIPlayer:
                 if jack_variants:
                     action = jack_variants[0]  # Choose first available Jack variant
             
-            logger.info(f"AI MODEL CHOICE: action={action}, is_change_sort={is_change_sort}")
+            if is_change_sort:
+                logger.info(f"AI {player.name} chose to change sort to: {['hearts', 'diamonds', 'spades', 'clubs'][action - 50]}")
+            else:
+                logger.info(f"AI {player.name} chose action: {action} ({'pass' if action == 54 else f'play card {action}'})")
             return int(action)
             
         except Exception as e:
             logger.error(f"AI inference error: {e}")
             return self._random_action(player, game_state, is_change_sort)
+    
+    def choose_action_with_drawn_card(self, player: PlayerState, game_state: GameState, drawn_card: int) -> int:
+        """Choose action considering a newly drawn card that could be played"""
+        if self.model is None:
+            return self._random_action_with_drawn_card(player, game_state, drawn_card)
+        
+        # Create temporary observation with drawn card added to compatible cards
+        obs = self.get_observation(player, game_state)
+        
+        # Temporarily add the drawn card to observation as if it's in hand
+        obs_card_num = drawn_card
+        if drawn_card >= 50 and drawn_card <= 53:
+            obs_card_num = 48  # Map Jack variants to generic Jack for AI
+        
+        if obs_card_num <= 49:
+            obs[obs_card_num] += 1  # Add to hand representation
+            if self._is_compatible(drawn_card, game_state.current_sort, game_state.current_true_number):
+                obs[obs_card_num + 50] += 1  # Add to compatible flags
+        
+        # Create action mask that includes the drawn card if compatible
+        mask = np.zeros(55, dtype=np.float32)
+        
+        # Add drawn card to mask if compatible
+        if self._is_compatible(drawn_card, game_state.current_sort, game_state.current_true_number):
+            mask[drawn_card if drawn_card <= 49 else 48] = 1
+            
+        mask[54] = 1  # Can always pass
+        
+        try:
+            # PyTorch inference
+            obs_tensor = torch.tensor(obs, dtype=torch.float32).unsqueeze(0).to(self.device)
+            with torch.no_grad():
+                logits = self.model(obs_tensor).squeeze(0).cpu().numpy()
+            
+            # Apply mask and get action
+            masked_logits = np.where(mask.astype(bool), logits, -1e9)
+            action = np.argmax(masked_logits)
+            
+            # Map generic Jack back to the drawn card if that's what was chosen
+            if action == 48 and drawn_card >= 50 and drawn_card <= 53:
+                return drawn_card
+            
+            return int(action)
+            
+        except Exception as e:
+            logger.error(f"AI inference error with drawn card: {e}")
+            return self._random_action_with_drawn_card(player, game_state, drawn_card)
 
     def _random_action(self, player: PlayerState, game_state: GameState, is_change_sort: bool) -> int:
         """Fallback random action selection"""
@@ -252,6 +380,26 @@ class AIPlayer:
                 compatible_cards.append(card_num)
         
         if compatible_cards:
+            return random.choice(compatible_cards)
+        else:
+            return 54  # Pass
+    
+    def _random_action_with_drawn_card(self, player: PlayerState, game_state: GameState, drawn_card: int) -> int:
+        """Fallback random action selection including drawn card option"""
+        # Find compatible cards in hand
+        compatible_cards = []
+        for card_num in player.hand:
+            if card_num <= 53 and self._is_compatible(card_num, game_state.current_sort, game_state.current_true_number):
+                compatible_cards.append(card_num)
+        
+        # Add drawn card if compatible
+        if self._is_compatible(drawn_card, game_state.current_sort, game_state.current_true_number):
+            compatible_cards.append(drawn_card)
+        
+        # 70% chance to play drawn card if it's compatible, otherwise random choice
+        if drawn_card in compatible_cards and random.random() < 0.7:
+            return drawn_card
+        elif compatible_cards:
             return random.choice(compatible_cards)
         else:
             return 54  # Pass
@@ -279,10 +427,20 @@ class GameRoom:
         self.ai_player = AIPlayer()
         self.started = False
         self.current_turn_timer: Optional[Timer] = None
-        self.turn_timeout_seconds = 10
+        self.turn_timeout_seconds = 60
+        self.timer_lock = Lock()  # Synchronize timer operations
         
-    def add_player(self, player_name: str, socket_id: str, is_ai: bool = False) -> bool:
-        """Add a player to the room"""
+    def add_player(self, player_name: str, socket_id: str, is_ai: bool = False) -> tuple[bool, str]:
+        """Add a player to the room. Returns (success, error_message)"""
+        
+        # Check for duplicate names (case-insensitive)
+        for existing_player in self.game_state.players:
+            if existing_player.name.lower() == player_name.lower():
+                return False, f"Player name '{player_name}' is already taken in this room"
+        
+        # Check room capacity (max 32 players for reasonable gameplay)
+        if len(self.game_state.players) >= 32:
+            return False, "Room is full (maximum 32 players)"
         
         player = PlayerState(
             id=str(uuid.uuid4()),
@@ -293,7 +451,7 @@ class GameRoom:
         )
         
         self.game_state.players.append(player)
-        return True
+        return True, ""
     
     def remove_player(self, socket_id: str) -> bool:
         """Mark a player as disconnected (don't actually remove them)"""
@@ -376,8 +534,8 @@ class GameRoom:
         for player in self.game_state.players:
             player.consecutive_timeouts = 0
         
-        # Start timer for the first player
-        self._start_turn_timer()
+        # Start game flow (handles both AI and human first players)
+        self._continue_game_flow()
     
     def play_card(self, player_id: str, card_num: Optional[int]) -> Dict[str, Any]:
         """Process a player's card play"""
@@ -411,17 +569,32 @@ class GameRoom:
         if card_num not in player.hand:
             return {"success": False, "error": "Card not in hand"}
         
+        # Validate card number
+        if not isinstance(card_num, int) or card_num < 0 or card_num > 53:
+            logger.error(f"Invalid card number {card_num} from player {player.name}")
+            return {"success": False, "error": "Invalid card"}
+        
         # Validate card compatibility
         card_data = get_web_card_data(card_num)
+        
+        # Check if card data is valid
+        if card_data["truenumber"] == -1 or card_data["sort"] == "unknown":
+            logger.error(f"Invalid card data for card {card_num} from player {player.name}")
+            return {"success": False, "error": "Invalid card"}
         logger.info(f"Checking compatibility: card {card_num} ({card_data['truenumber']} of {card_data['sort']}) vs table {self.game_state.current_true_number} of {self.game_state.current_sort}, penalty: {self.game_state.penalty_amount}")
         
         if not is_web_card_compatible(card_num, self.game_state.current_sort, self.game_state.current_true_number):
             if self.game_state.penalty_amount == 0:
                 logger.warning(f"Card {card_num} not compatible with {self.game_state.current_true_number} of {self.game_state.current_sort}")
                 return {"success": False, "error": "Card not compatible"}
-            elif card_data['truenumber'] != self.game_state.current_true_number:
+            else:
                 logger.info(f"Card {card_num} doesn't match penalty card, applying penalty")
                 return self._apply_penalty(player)
+        
+        # Additional penalty validation: during penalty, only matching numbers are allowed
+        if self.game_state.penalty_amount > 0 and card_data['truenumber'] != self.game_state.current_true_number:
+            logger.info(f"During penalty, card {card_num} (number {card_data['truenumber']}) doesn't match penalty card number {self.game_state.current_true_number}")
+            return self._apply_penalty(player)
         
         # Play the card
         return self._process_card_play(player, card_num, card_data)
@@ -438,22 +611,18 @@ class GameRoom:
                 if is_web_card_compatible(drawn_card, self.game_state.current_sort, self.game_state.current_true_number):
                     if player.is_ai:
                         # AI makes a strategic choice about the drawn card
-                        logger.info(f"AI drew compatible card {drawn_card}, making decision...")
+                        logger.info(f"AI {player.name} received request to decide whether to play drawn card {drawn_card}")
                         
-                        # Let AI decide whether to play the drawn card
-                        # We'll temporarily add the card to their observation and let them choose
-
-                        # TODO: only add the drawn card to the compatible cards in the observation and action mask temporarily
-
-                        ai_action = self.ai_player.choose_action(player, self.game_state)
+                        # Let AI decide whether to play the drawn card using special observation
+                        ai_action = self.ai_player.choose_action_with_drawn_card(player, self.game_state, drawn_card)
                         
                         # If AI chooses to play the specific drawn card, play it
                         if ai_action == drawn_card:
                             card_data = get_web_card_data(drawn_card)
-                            logger.info(f"AI chose to play drawn card {drawn_card}")
+                            logger.info(f"AI {player.name} decided to play the drawn card {drawn_card}")
                             return self._process_card_play(player, drawn_card, card_data)
                         else:
-                            logger.info(f"AI chose not to play drawn card {drawn_card}")
+                            logger.info(f"AI {player.name} decided not to play the drawn card {drawn_card}")
                             self._next_turn()
                             return {"success": True, "action": "pass"}
                     else:
@@ -524,11 +693,13 @@ class GameRoom:
                 self.game_state.game_over = True
                 self.game_state.winner = self.game_state.current_player_index
                 logger.info(f"Game ends - only {len(active_players)} active player(s) remaining")
+                return {"success": True, "action": "win"}
             
-            return {"success": True, "action": "win"}
-        
-        # Apply card effects
-        result = self._apply_card_effects(card_data, player)
+            # Don't return early - let the function continue to advance turns and skip observers
+            result = {"success": True, "action": "win"}
+        else:
+            # Apply card effects
+            result = self._apply_card_effects(card_data, player)
         
         if not result.get("skip_turn", False):
             old_player_index = self.game_state.current_player_index
@@ -600,8 +771,30 @@ class GameRoom:
                 card_num = self.game_state.grab_deck.pop(0)
                 player.hand.append(card_num)
                 return card_num
+            else:
+                # Game ends in a tie - no more cards available
+                logger.info("GAME TIE: No more cards available to draw, ending game in a tie")
+                self._end_game_in_tie()
+                return None
         
+        # No cards available anywhere - game ends in tie
+        logger.info("GAME TIE: No cards in grab deck and game deck too small, ending game in a tie")
+        self._end_game_in_tie()
         return None
+    
+    def _end_game_in_tie(self):
+        """End the game in a tie and notify all players"""
+        self.game_state.game_over = True
+        self.game_state.winner = None  # None indicates a tie
+        self._stop_turn_timer()  # Stop any active timers
+        
+        # Broadcast tie game to all players in the room
+        socketio.emit('game_tied', {
+            'message': 'Game ended in a tie - no more cards available!',
+            'game_state': self.get_public_state()
+        }, room=self.room_code)
+        
+        logger.info(f"Game in room {self.room_code} ended in a tie")
     
     def _next_turn(self):
         """Move to next player's turn, skipping observers"""
@@ -643,27 +836,53 @@ class GameRoom:
             logger.info(f"Skipped {skipped_count} observer turn(s), now at player {self.game_state.current_player_index}")
     
     def _start_turn_timer(self):
-        """Start a 30-second timer for the current player's turn"""
-        self._stop_turn_timer()  # Clear any existing timer
-        
-        current_player = self.game_state.players[self.game_state.current_player_index]
-        
-        # Only start timer for human players (not AI or observers)
-        if not current_player.is_ai and not current_player.is_observer and current_player.is_connected:
-            logger.info(f"Starting 30s timer for {current_player.name}")
-            self.current_turn_timer = Timer(self.turn_timeout_seconds, self._handle_turn_timeout)
-            self.current_turn_timer.start()
+        """Start a timer for the current player's turn"""
+        with self.timer_lock:
+            self._stop_turn_timer_unsafe()  # Clear any existing timer
+            
+            if (self.game_state.current_player_index >= len(self.game_state.players) or 
+                self.game_state.game_over):
+                return
+            
+            current_player = self.game_state.players[self.game_state.current_player_index]
+            
+            # Only start timer for human players (not AI or observers)
+            if not current_player.is_ai and not current_player.is_observer and current_player.is_connected:
+                logger.info(f"Starting {self.turn_timeout_seconds}s timer for {current_player.name}")
+                self.current_turn_timer = Timer(self.turn_timeout_seconds, self._handle_turn_timeout)
+                self.current_turn_timer.start()
     
     def _stop_turn_timer(self):
-        """Stop the current turn timer"""
+        """Stop the current turn timer (thread-safe)"""
+        with self.timer_lock:
+            self._stop_turn_timer_unsafe()
+    
+    def _stop_turn_timer_unsafe(self):
+        """Stop the current turn timer (NOT thread-safe - use only within timer_lock)"""
         if self.current_turn_timer:
             self.current_turn_timer.cancel()
             self.current_turn_timer = None
     
     def _handle_turn_timeout(self):
         """Handle when a player's turn times out"""
-        current_player = self.game_state.players[self.game_state.current_player_index]
-        logger.info(f"Player {current_player.name} timed out")
+        with self.timer_lock:
+            # Check if this timeout is still valid (game/player might have changed)
+            if (self.game_state.game_over or 
+                self.game_state.current_player_index >= len(self.game_state.players)):
+                logger.info("Turn timeout triggered but game is over or invalid player index")
+                return
+            
+            current_player = self.game_state.players[self.game_state.current_player_index]
+            
+            # Check if player is still the current player and not AI
+            if current_player.is_ai or current_player.is_observer:
+                logger.info(f"Turn timeout triggered for {current_player.name} but they are now AI/observer")
+                return
+            
+            logger.info(f"Player {current_player.name} timed out")
+            
+            # Clear the timer since we're handling the timeout
+            self.current_turn_timer = None
         
         # Increment consecutive timeouts
         current_player.consecutive_timeouts += 1
@@ -844,6 +1063,9 @@ class GameRoom:
                         socketio.emit('private_state', {
                             'hand': player.hand
                         }, room=player.socket_id)
+                
+                # If AI won and became observer, the while loop condition will naturally fail
+                # and we'll continue to the next iteration or exit the loop
             else:
                 logger.error("AI turn returned None - breaking loop to prevent hang")
                 break
@@ -963,6 +1185,29 @@ class GameRoom:
             "grab_deck_size": len(self.game_state.grab_deck)
         }
 
+def validate_player_name(name: str) -> tuple[bool, str]:
+    """Validate player name and return (is_valid, error_message)"""
+    if not name or not name.strip():
+        return False, "Player name cannot be empty"
+    
+    name = name.strip()
+    
+    if len(name) < 2:
+        return False, "Player name must be at least 2 characters long"
+    
+    if len(name) > 20:
+        return False, "Player name cannot be longer than 20 characters"
+    
+    # Allow letters, numbers, spaces, and common symbols
+    if not re.match(r'^[a-zA-Z0-9\s\-_.!@#$%^&*()]+$', name):
+        return False, "Player name contains invalid characters"
+    
+    # Prevent names that are too similar to AI naming pattern
+    if name.lower().startswith('ai ') or name.lower() == 'mechahhitler':
+        return False, "Player name conflicts with AI naming pattern"
+    
+    return True, ""
+
 def generate_room_code() -> str:
     """Generate a unique 6-character room code"""
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
@@ -982,6 +1227,13 @@ def handle_create_room(data):
     """Create a new game room"""
     player_name = data.get('player_name', 'Anonymous')
     
+    # Validate player name
+    is_valid, error_msg = validate_player_name(player_name)
+    if not is_valid:
+        emit('error', {'message': f'Invalid player name: {error_msg}'})
+        return
+    
+    player_name = player_name.strip()  # Clean up the name
     logger.info(f"Creating room for player '{player_name}', socket: {request.sid}")
     
     with rooms_lock:
@@ -995,7 +1247,10 @@ def handle_create_room(data):
         
         # Create room
         game_room = GameRoom(room_code)
-        game_room.add_player(player_name, request.sid)
+        success, error_msg = game_room.add_player(player_name, request.sid)
+        if not success:
+            emit('error', {'message': error_msg})
+            return
         game_rooms[room_code] = game_room
         
         logger.info(f"Room {room_code} created with {len(game_room.game_state.players)} players")
@@ -1017,6 +1272,13 @@ def handle_join_room(data):
     room_code = data.get('room_code', '').upper()
     player_name = data.get('player_name', 'Anonymous')
     
+    # Validate player name
+    is_valid, error_msg = validate_player_name(player_name)
+    if not is_valid:
+        emit('error', {'message': f'Invalid player name: {error_msg}'})
+        return
+    
+    player_name = player_name.strip()  # Clean up the name
     logger.info(f"Player '{player_name}' trying to join room '{room_code}', socket: {request.sid}")
     logger.info(f"Available rooms: {list(game_rooms.keys())}")
     
@@ -1061,7 +1323,10 @@ def handle_join_room(data):
             emit('error', {'message': 'Game already started'})
             return
         
-        game_room.add_player(player_name, request.sid)
+        success, error_msg = game_room.add_player(player_name, request.sid)
+        if not success:
+            emit('error', {'message': error_msg})
+            return
         
         join_room(room_code)
         
@@ -1104,7 +1369,10 @@ def handle_add_ai_player(data):
         np.random.shuffle(ai_names)
         ai_name = ai_names[len([p for p in game_room.game_state.players if p.is_ai]) % len(ai_names)]
         
-        game_room.add_player(ai_name, None, is_ai=True)
+        success, error_msg = game_room.add_player(ai_name, None, is_ai=True)
+        if not success:
+            emit('error', {'message': error_msg})
+            return
         
         socketio.emit('ai_player_added', {
             'ai_name': ai_name,
@@ -1184,7 +1452,7 @@ def handle_play_card(data):
         
         # Handle AI turns
         ai_turn_count = 0
-        max_ai_turns = 20  # Safety limit to prevent infinite loops
+        max_ai_turns = 100  # Safety limit to prevent infinite loops
         
         logger.info(f"AI LOOP START: game_over={game_room.game_state.game_over}, current_player={game_room.game_state.current_player_index}, is_ai={game_room.game_state.players[game_room.game_state.current_player_index].is_ai}, waiting_for_suit={game_room.game_state.waiting_for_suit_choice}")
         
@@ -1399,10 +1667,11 @@ def handle_player_timeout(data):
         logger.info(f"CLIENT TIMEOUT: Processing timeout for {player.name} on their turn")
         
         # Cancel any existing server-side timer to avoid race condition
-        if hasattr(game_room, 'turn_timer') and game_room.turn_timer:
-            logger.info(f"CLIENT TIMEOUT: Cancelling server timer to avoid race condition")
-            game_room.turn_timer.cancel()
-            game_room.turn_timer = None
+        with game_room.timer_lock:
+            if game_room.current_turn_timer:
+                logger.info(f"CLIENT TIMEOUT: Cancelling server timer to avoid race condition")
+                game_room.current_turn_timer.cancel()
+                game_room.current_turn_timer = None
         
         # Process the auto-pass
         game_room._auto_pass_player(player)
