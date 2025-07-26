@@ -10,7 +10,7 @@ let awaitingSortChoice = false;
 let lastCardWarnings = new Set(); // Track which players have been warned about having 1 card
 let turnTimer = null; // Current turn timer
 let timeLeft = 0; // Seconds left in current turn
-let lastDirectionChange = null; // Track when direction last changed to avoid duplicate animations
+let lastDirectionChangeProcessed = false; // Track if we've already processed the current direction change
 
 // DOM elements
 const lobbySection = document.getElementById('lobby-section');
