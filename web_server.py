@@ -1205,6 +1205,8 @@ def validate_player_name(name: str) -> tuple[bool, str]:
     # Prevent names that are too similar to AI naming pattern
     if name.lower().startswith('ai ') or name.lower() == 'mechahhitler':
         return False, "Player name conflicts with AI naming pattern"
+    if name.lower().startswith('You!'):
+        return False, "Player name conflicts with other players You Representaton"
     
     return True, ""
 

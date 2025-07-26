@@ -20,6 +20,7 @@ const startGameBtn = document.getElementById('start-game-btn');
 const leaveGameBtn = document.getElementById('leave-game');
 const playerHandElement = document.getElementById('player-hand');
 const otherPlayersElement = document.getElementById('other-players');
+const playerQueueElement = document.getElementById('player-queue');
 const topCardElement = document.getElementById('top-card');
 const currentTurnElement = document.getElementById('current-turn');
 const gameDirectionElement = document.getElementById('game-direction');
@@ -347,7 +348,7 @@ function showGameSection() {
 }
 
 function updateGameInterface() {
-    updateOtherPlayers();
+    updatePlayerQueue();
     updatePlayerHand();
     updateTopCard();
     updateCurrentTurn();
@@ -357,56 +358,137 @@ function updateGameInterface() {
     updateHandCount();
 }
 
-function updateOtherPlayers() {
-    otherPlayersElement.innerHTML = '';
+function updatePlayerQueue() {
+    console.log('🔄 Updating player queue');
+    
+    if (!playerQueueElement) return;
     
     const currentPlayer = gameState.players.find(p => p.id === playerId);
     if (!currentPlayer) return;
     
-    const otherPlayers = gameState.players.filter(p => p.id !== playerId);
+    // Get all active players (non-observers)
+    const activePlayers = gameState.players.filter(p => !p.is_observer);
+    const myIndex = activePlayers.findIndex(p => p.id === playerId);
     
-    otherPlayers.forEach(player => {
+    // Create queue array starting from current player
+    const queueOrder = [];
+    const playerCount = activePlayers.length;
+    
+    // Determine queue order based on game direction and current turn
+    for (let i = 0; i < playerCount; i++) {
+        let index;
+        if (gameState.direction === 1) {
+            // Clockwise: start from current player, go right
+            index = (myIndex + i) % playerCount;
+        } else {
+            // Counter-clockwise: start from current player, go left  
+            index = (myIndex - i + playerCount) % playerCount;
+        }
+        queueOrder.push(activePlayers[index]);
+    }
+    
+    // Clear existing queue
+    playerQueueElement.innerHTML = '';
+    
+    queueOrder.forEach((player, queueIndex) => {
         const playerIndex = gameState.players.indexOf(player);
         const isCurrentTurn = gameState.current_player_index === playerIndex;
+        const isMe = player.id === playerId;
         
-        // Calculate turn order relative to current player
-        const myIndex = gameState.players.indexOf(currentPlayer);
-        const turnOrder = getTurnOrder(myIndex, playerIndex, gameState.direction, gameState.players.length);
+        // Create queue player element
+        const queuePlayer = document.createElement('div');
+        let classes = ['queue-player'];
         
-        const playerElement = document.createElement('div');
-        playerElement.className = `other-player ${isCurrentTurn ? 'current-player' : ''} ${player.is_observer ? 'observer' : ''}`;
-        
-        const cardsHtml = player.is_observer ? '' : Array(player.hand_size).fill(0).map(() => 
-            '<div class="card-back-small">🂠</div>'
-        ).join('');
-        
-        // Add turn order arrow
-        const turnArrow = getTurnOrderArrow(turnOrder);
-        
-        let playerNameDisplay = `${turnArrow} ${player.name} ${player.is_ai ? '🤖' : ''}`;
-        if (player.is_observer) {
-            playerNameDisplay += ' 👁️';
+        if (isCurrentTurn) {
+            classes.push('spotlight');
         }
-        if (isCurrentTurn && !player.is_observer) {
-            playerNameDisplay += ' ⏰';
+        if (isMe) {
+            classes.push('you');
         }
         
-        const cardDisplay = player.is_observer ? '👁️ Observer' : `${player.hand_size} cards`;
+        queuePlayer.className = classes.join(' ');
+        queuePlayer.setAttribute('data-player-id', player.id);
         
-        playerElement.innerHTML = `
-            <div class="other-player-info">
-                <div class="other-player-name">
-                    ${playerNameDisplay}
-                </div>
-                <div class="other-player-cards">${cardDisplay}</div>
-            </div>
-            <div class="other-player-hand">
-                ${cardsHtml}
-            </div>
-        `;
+        // Player avatar (first letter of name or AI icon)
+        const avatar = document.createElement('div');
+        avatar.className = 'queue-player-avatar';
+        avatar.textContent = player.is_ai ? '🤖' : player.name.charAt(0).toUpperCase();
         
-        otherPlayersElement.appendChild(playerElement);
+        // Player name
+        const name = document.createElement('div');
+        name.className = 'queue-player-name';
+        name.textContent = isMe ? 'You!' : player.name;
+        
+        // Card count
+        const cards = document.createElement('div');
+        cards.className = 'queue-player-cards';
+        cards.textContent = `${player.hand_size} cards`;
+        
+        queuePlayer.appendChild(avatar);
+        queuePlayer.appendChild(name);
+        queuePlayer.appendChild(cards);
+        
+        playerQueueElement.appendChild(queuePlayer);
+        
+        // Add arrow between players (except after last player)
+        if (queueIndex < queueOrder.length - 1) {
+            const arrow = document.createElement('div');
+            arrow.className = `queue-arrow ${gameState.direction === -1 ? 'reverse' : ''}`;
+            arrow.textContent = '→';
+            playerQueueElement.appendChild(arrow);
+        }
     });
+    
+    // Scroll spotlight player into view
+    setTimeout(() => {
+        const spotlightPlayer = playerQueueElement.querySelector('.queue-player.spotlight');
+        if (spotlightPlayer) {
+            spotlightPlayer.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'nearest', 
+                inline: 'center' 
+            });
+        }
+    }, 100);
+}
+
+function animateSkippedPlayer(playerId) {
+    console.log(`⏭️ Animating skip for player ${playerId}`);
+    
+    const queuePlayer = playerQueueElement.querySelector(`[data-player-id="${playerId}"]`);
+    if (queuePlayer) {
+        queuePlayer.classList.add('skipped');
+        
+        // Remove animation class after animation completes
+        setTimeout(() => {
+            queuePlayer.classList.remove('skipped');
+        }, 600);
+    }
+}
+
+function animateDirectionReversal() {
+    console.log('🔄 Animating direction reversal');
+    
+    // Add reversal animation to all queue players
+    const queuePlayers = playerQueueElement.querySelectorAll('.queue-player');
+    queuePlayers.forEach(player => {
+        player.classList.add('reversing');
+    });
+    
+    // Update arrows direction
+    const arrows = playerQueueElement.querySelectorAll('.queue-arrow');
+    arrows.forEach(arrow => {
+        arrow.classList.toggle('reverse');
+    });
+    
+    // Remove animation class after animation completes
+    setTimeout(() => {
+        queuePlayers.forEach(player => {
+            player.classList.remove('reversing');
+        });
+        // Rebuild queue with new order
+        updatePlayerQueue();
+    }, 800);
 }
 
 function updatePlayerHand() {
@@ -690,6 +772,19 @@ function handleGameAction(action, details, actingPlayer = null) {
             if (details.card_effects) {
                 details.card_effects.forEach(effect => {
                     addLogEntry(getEffectMessage(effect));
+                    
+                    // Handle special animations
+                    if (effect === 'reverse') {
+                        animateDirectionReversal();
+                    } else if (effect === 'skip_player') {
+                        // Find the next player who would be skipped
+                        const currentIndex = gameState.players.findIndex(p => p.id === player.id);
+                        const nextIndex = (currentIndex + gameState.direction + gameState.players.length) % gameState.players.length;
+                        const skippedPlayer = gameState.players[nextIndex];
+                        if (skippedPlayer && !skippedPlayer.is_observer) {
+                            animateSkippedPlayer(skippedPlayer.id);
+                        }
+                    }
                 });
             }
             break;
