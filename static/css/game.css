@@ -126,65 +126,139 @@ body, html {
     gap: 20px;
 }
 
-/* Other Players Area */
-.other-players-area {
+/* Player Queue Area */
+.player-queue-area {
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     padding: 20px 0;
+    min-height: 120px;
 }
 
-.other-players {
+.player-queue {
     display: flex;
-    gap: 30px;
-    flex-wrap: wrap;
-    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    max-width: 90vw;
+    overflow-x: auto;
+    padding: 10px;
+    scroll-behavior: smooth;
 }
 
-.other-player {
+.queue-player {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 120px;
+    min-width: 80px;
+    padding: 8px;
+    border-radius: 12px;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    opacity: 0.6;
+    transform: scale(0.85);
 }
 
-.other-player-info {
-    text-align: center;
-    margin-bottom: 15px;
+.queue-player.spotlight {
+    opacity: 1;
+    transform: scale(1.1);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    z-index: 10;
 }
 
-.other-player-name {
-    font-weight: bold;
-    margin-bottom: 5px;
+.queue-player.you {
+    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+    box-shadow: 0 8px 25px rgba(46, 204, 113, 0.4);
 }
 
-.other-player-cards {
-    font-size: 0.9rem;
-    opacity: 0.8;
+.queue-player.passed {
+    opacity: 0.3;
+    transform: scale(0.75);
+    filter: grayscale(0.5);
 }
 
-.other-player-hand {
-    display: flex;
-    gap: -10px;
-    justify-content: center;
+.queue-player.skipped {
+    animation: skipBounce 0.6s ease-in-out;
+    opacity: 0.4;
 }
 
-.card-back-small {
-    width: 30px;
+.queue-player.reversing {
+    animation: reverseFlip 0.8s ease-in-out;
+}
+
+.queue-player-avatar {
+    width: 40px;
     height: 40px;
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-    border-radius: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    margin-left: -8px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7rem;
+    font-weight: bold;
     color: white;
+    margin-bottom: 5px;
+    font-size: 0.8rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
 }
 
-.card-back-small:first-child {
-    margin-left: 0;
+.queue-player.spotlight .queue-player-avatar {
+    border-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+.queue-player-name {
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-align: center;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    max-width: 70px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.queue-player-cards {
+    font-size: 0.6rem;
+    opacity: 0.8;
+    margin-top: 2px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.queue-arrow {
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.6);
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+.queue-arrow.wobble {
+    animation: arrowWobble 0.8s ease-in-out;
+}
+
+
+@keyframes skipBounce {
+    0%, 100% { transform: scale(0.85) translateY(0); }
+    25% { transform: scale(0.85) translateY(-10px); }
+    50% { transform: scale(0.85) translateY(-20px); }
+    75% { transform: scale(0.85) translateY(-10px); }
+}
+
+@keyframes reverseFlip {
+    0% { transform: scale(0.85) rotateY(0deg); }
+    50% { transform: scale(0.85) rotateY(180deg); }
+    100% { transform: scale(0.85) rotateY(360deg); }
+}
+
+@keyframes arrowWobble {
+    0%, 100% { transform: rotate(0deg); }
+    15% { transform: rotate(-15deg); }
+    30% { transform: rotate(15deg); }
+    45% { transform: rotate(-10deg); }
+    60% { transform: rotate(10deg); }
+    75% { transform: rotate(-5deg); }
+    85% { transform: rotate(5deg); }
 }
 
 /* Game Table */
@@ -623,5 +697,47 @@ body, html {
         padding: 15px 20px;
         margin: 0 10px;
         max-width: 80vw;
+    }
+    
+    /* Mobile Player Queue */
+    .player-queue-area {
+        padding: 10px 0;
+        min-height: 80px;
+    }
+    
+    .player-queue {
+        gap: 8px;
+        padding: 5px;
+        max-width: 95vw;
+    }
+    
+    .queue-player {
+        min-width: 60px;
+        padding: 6px;
+    }
+    
+    .queue-player.spotlight {
+        transform: scale(1.05);
+    }
+    
+    .queue-player-avatar {
+        width: 30px;
+        height: 30px;
+        font-size: 0.7rem;
+        margin-bottom: 3px;
+    }
+    
+    .queue-player-name {
+        font-size: 0.65rem;
+        max-width: 55px;
+    }
+    
+    .queue-player-cards {
+        font-size: 0.55rem;
+        margin-top: 1px;
+    }
+    
+    .queue-arrow {
+        font-size: 1.2rem;
     }
 }

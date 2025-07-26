@@ -162,7 +162,10 @@ class GameState:
     winner: Optional[int]
     turn_count: int
     sorts_played: List[int]  # Count for each suit
+    has_drawn_this_turn: bool = False  # Track if current player has drawn this turn
     waiting_for_suit_choice: bool = False  # True when waiting for human to choose suit
+    turn_order: List[str] = None  # Player IDs in turn order from current player
+    direction_just_changed: bool = False  # Flag for client to know direction just changed
 
 class AIPlayer:
     """AI Player using the trained PPO model"""
@@ -422,7 +425,10 @@ class GameRoom:
             winner=None,
             turn_count=0,
             sorts_played=[0, 0, 0, 0, 0],
-            waiting_for_suit_choice=False
+            has_drawn_this_turn=False,
+            waiting_for_suit_choice=False,
+            turn_order=[],
+            direction_just_changed=False
         )
         self.ai_player = AIPlayer()
         self.started = False
@@ -534,6 +540,9 @@ class GameRoom:
         for player in self.game_state.players:
             player.consecutive_timeouts = 0
         
+        # Initialize turn order
+        self._update_turn_order()
+        
         # Start game flow (handles both AI and human first players)
         self._continue_game_flow()
     
@@ -553,6 +562,9 @@ class GameRoom:
             return {"success": False, "error": "Player not found"}
         
         if player_idx != self.game_state.current_player_index:
+            player = self.game_state.players[player_idx] if player_idx is not None else None
+            player_name = player.name if player else "Unknown"
+            logger.warning(f"Player {player_name} tried to act on turn {self.game_state.current_player_index} (their index: {player_idx})")
             return {"success": False, "error": "Not your turn"}
         
         player = self.game_state.players[player_idx]
@@ -563,7 +575,10 @@ class GameRoom:
         
         # Handle pass
         if card_num is None:
-            return self._handle_pass(player)
+            result = self._handle_pass(player)
+            # Update turn order after pass
+            self._update_turn_order()
+            return result
         
         # Validate card is in hand
         if card_num not in player.hand:
@@ -589,23 +604,41 @@ class GameRoom:
                 return {"success": False, "error": "Card not compatible"}
             else:
                 logger.info(f"Card {card_num} doesn't match penalty card, applying penalty")
-                return self._apply_penalty(player)
+                result = self._apply_penalty(player)
+                # Update turn order after penalty
+                self._update_turn_order()
+                return result
         
         # Additional penalty validation: during penalty, only matching numbers are allowed
         if self.game_state.penalty_amount > 0 and card_data['truenumber'] != self.game_state.current_true_number:
             logger.info(f"During penalty, card {card_num} (number {card_data['truenumber']}) doesn't match penalty card number {self.game_state.current_true_number}")
-            return self._apply_penalty(player)
+            result = self._apply_penalty(player)
+            # Update turn order after penalty
+            self._update_turn_order()
+            return result
         
         # Play the card
-        return self._process_card_play(player, card_num, card_data)
+        result = self._process_card_play(player, card_num, card_data)
+        # Update turn order after any action
+        self._update_turn_order()
+        return result
     
     def _handle_pass(self, player: PlayerState) -> Dict[str, Any]:
         """Handle when player passes"""
         if self.game_state.penalty_amount > 0:
             return self._apply_penalty(player)
         else:
-            # Draw a card
+            # Check if player has already drawn this turn
+            if self.game_state.has_drawn_this_turn:
+                # Player already drew this turn, just end turn
+                self._next_turn()
+                self._skip_observer_turns()
+                return {"success": True, "action": "pass"}
+            
+            # Draw exactly one card (first and only draw this turn)
             drawn_card = self._draw_card(player)
+            self.game_state.has_drawn_this_turn = True
+            
             if drawn_card is not None:
                 # Check if drawn card can be played immediately
                 if is_web_card_compatible(drawn_card, self.game_state.current_sort, self.game_state.current_true_number):
@@ -613,22 +646,29 @@ class GameRoom:
                         # AI makes a strategic choice about the drawn card
                         logger.info(f"AI {player.name} received request to decide whether to play drawn card {drawn_card}")
                         
-                        # Let AI decide whether to play the drawn card using special observation
-                        ai_action = self.ai_player.choose_action_with_drawn_card(player, self.game_state, drawn_card)
-                        
-                        # If AI chooses to play the specific drawn card, play it
-                        if ai_action == drawn_card:
-                            card_data = get_web_card_data(drawn_card)
-                            logger.info(f"AI {player.name} decided to play the drawn card {drawn_card}")
-                            return self._process_card_play(player, drawn_card, card_data)
-                        else:
-                            logger.info(f"AI {player.name} decided not to play the drawn card {drawn_card}")
+                        try:
+                            # Let AI decide whether to play the drawn card using special observation
+                            ai_action = self.ai_player.choose_action_with_drawn_card(player, self.game_state, drawn_card)
+                            
+                            # If AI chooses to play the specific drawn card, play it
+                            if ai_action == drawn_card:
+                                card_data = get_web_card_data(drawn_card)
+                                logger.info(f"AI {player.name} decided to play the drawn card {drawn_card}")
+                                return self._process_card_play(player, drawn_card, card_data)
+                            else:
+                                logger.info(f"AI {player.name} decided not to play the drawn card {drawn_card}")
+                                self._next_turn()
+                                return {"success": True, "action": "pass"}
+                        except Exception as e:
+                            logger.error(f"AI decision error for {player.name}: {e}")
+                            # Default to not playing the drawn card
                             self._next_turn()
                             return {"success": True, "action": "pass"}
                     else:
                         # Human gets option to play the drawn card
                         return {"success": True, "action": "draw_and_play_option", "card": drawn_card}
             
+            # If no card was drawn or drawn card is not playable, end turn
             self._next_turn()
             # Auto-skip observer turns after pass
             self._skip_observer_turns()
@@ -732,6 +772,10 @@ class GameRoom:
         elif card_data["truenumber"] == 1:  # Reverse direction
             result["card_effects"].append("reverse")
             self.game_state.direction *= -1
+            # Set flag for client direction change animation (will be sent once and reset)
+            self.game_state.direction_just_changed = True
+            # Update turn order after direction change
+            self._update_turn_order()
         elif card_data["truenumber"] == 0:  # Joker - +5 penalty
             result["card_effects"].append("joker_penalty")
             self.game_state.penalty_amount += 5
@@ -811,6 +855,12 @@ class GameRoom:
             if not current_player.is_observer:
                 # Found an active player
                 self.game_state.turn_count += 1
+                # Reset draw flag for new turn
+                self.game_state.has_drawn_this_turn = False
+                # Reset direction change flag on next turn (not immediately after sending)
+                self.game_state.direction_just_changed = False
+                # Update turn order for clients
+                self._update_turn_order()
                 return
             
             attempts += 1
@@ -818,6 +868,52 @@ class GameRoom:
         # This shouldn't happen if game logic is correct, but safety check
         logger.error("Could not find active player for next turn!")
         self.game_state.current_player_index = original_index
+    
+    def _update_turn_order(self):
+        """Update turn_order with all active players starting from current player"""
+        try:
+            active_players = [p for p in self.game_state.players if not p.is_observer]
+            if not active_players:
+                self.game_state.turn_order = []
+                return
+            
+            # Validate current player index
+            if (self.game_state.current_player_index < 0 or 
+                self.game_state.current_player_index >= len(self.game_state.players)):
+                logger.error(f"Invalid current_player_index: {self.game_state.current_player_index}")
+                self.game_state.turn_order = [p.id for p in active_players]
+                return
+            
+            # Find current player in active players list
+            current_player = self.game_state.players[self.game_state.current_player_index]
+            current_index = -1
+            for i, player in enumerate(active_players):
+                if player.id == current_player.id:
+                    current_index = i
+                    break
+            
+            if current_index == -1:
+                # Current player is observer, shouldn't happen but safety check
+                logger.warning(f"Current player {current_player.name} not found in active players")
+                self.game_state.turn_order = [p.id for p in active_players]
+                return
+            
+            # Build turn order starting from current player
+            turn_order = []
+            player_count = len(active_players)
+            for i in range(player_count):
+                index = (current_index + (i * self.game_state.direction) + player_count) % player_count
+                turn_order.append(active_players[index].id)
+            
+            self.game_state.turn_order = turn_order
+        except Exception as e:
+            logger.error(f"Error updating turn order: {e}")
+            # Fallback: just use all active players in original order
+            try:
+                active_players = [p for p in self.game_state.players if not p.is_observer]
+                self.game_state.turn_order = [p.id for p in active_players]
+            except:
+                self.game_state.turn_order = []
     
     def _skip_observer_turns(self):
         """Automatically skip observer turns until we reach an active player"""
@@ -1181,6 +1277,8 @@ class GameRoom:
             "game_over": self.game_state.game_over,
             "winner": self.game_state.winner,
             "turn_count": self.game_state.turn_count,
+            "turn_order": self.game_state.turn_order,
+            "direction_changed": getattr(self.game_state, 'direction_just_changed', False),
             "started": self.started,
             "grab_deck_size": len(self.game_state.grab_deck)
         }
@@ -1416,24 +1514,35 @@ def handle_play_card(data):
     player_id = data.get('player_id')
     card_num = data.get('card_num')  # None for pass
     
+    logger.info(f"🎮 PLAY_CARD received: room={room_code}, player={player_id}, card={card_num}")
+    
+    # Process the human player's action first
     with rooms_lock:
         if room_code not in game_rooms:
+            logger.error(f"❌ Room not found: {room_code}")
             emit('error', {'message': 'Room not found'})
             return
         
         game_room = game_rooms[room_code]
+        logger.info(f"🎯 Calling play_card for player {player_id}")
         result = game_room.play_card(player_id, card_num)
+        logger.info(f"📋 play_card result: {result}")
         
         if not result['success']:
+            logger.info(f"❌ Emitting error: {result['error']}")
             emit('error', {'message': result['error']})
             return
         
         # Find the player who performed the action
         acting_player = None
-        for player in game_room.game_state.players:
-            if player.id == player_id:
-                acting_player = player
-                break
+        try:
+            for player in game_room.game_state.players:
+                if player.id == player_id:
+                    acting_player = player
+                    break
+        except Exception as e:
+            logger.error(f"Error finding acting player {player_id}: {e}")
+            acting_player = None
         
         # Broadcast game update
         public_state = game_room.get_public_state()
@@ -1451,19 +1560,21 @@ def handle_play_card(data):
                 socketio.emit('private_state', {
                     'hand': player.hand
                 }, room=player.socket_id)
-        
-        # Handle AI turns
-        ai_turn_count = 0
-        max_ai_turns = 100  # Safety limit to prevent infinite loops
-        
-        logger.info(f"AI LOOP START: game_over={game_room.game_state.game_over}, current_player={game_room.game_state.current_player_index}, is_ai={game_room.game_state.players[game_room.game_state.current_player_index].is_ai}, waiting_for_suit={game_room.game_state.waiting_for_suit_choice}")
-        
-        while (not game_room.game_state.game_over and 
-               game_room.game_state.current_player_index < len(game_room.game_state.players) and
-               game_room.game_state.players[game_room.game_state.current_player_index].is_ai and
-               not game_room.game_state.players[game_room.game_state.current_player_index].is_observer and
-               not game_room.game_state.waiting_for_suit_choice and
-               ai_turn_count < max_ai_turns):
+    
+    # Handle AI turns outside the lock to prevent deadlock with other player requests
+    ai_turn_count = 0
+    max_ai_turns = 100  # Safety limit to prevent infinite loops
+    
+    logger.info(f"🤖 AI LOOP START: game_over={game_room.game_state.game_over}, current_player={game_room.game_state.current_player_index}, is_ai={game_room.game_state.players[game_room.game_state.current_player_index].is_ai}, waiting_for_suit={game_room.game_state.waiting_for_suit_choice}")
+    
+    while (not game_room.game_state.game_over and 
+           game_room.game_state.current_player_index < len(game_room.game_state.players) and
+           game_room.game_state.players[game_room.game_state.current_player_index].is_ai and
+           not game_room.game_state.players[game_room.game_state.current_player_index].is_observer and
+           not game_room.game_state.waiting_for_suit_choice and
+           ai_turn_count < max_ai_turns):
+            
+            logger.info(f"🔄 AI LOOP iteration {ai_turn_count + 1}: processing AI turn")
             
             ai_turn_count += 1
             logger.info(f"AI turn {ai_turn_count}: Player {game_room.game_state.current_player_index}")
@@ -1485,6 +1596,7 @@ def handle_play_card(data):
                     'details': ai_result,
                     'acting_player': {'name': ai_player_before_turn.name, 'id': ai_player_before_turn.id}
                 }, room=room_code)
+                
             elif ai_result and not ai_result.get('success', False):
                 logger.error(f"AI turn failed: {ai_result.get('error', 'Unknown error')}")
                 # Break the loop to prevent infinite retries
@@ -1501,19 +1613,19 @@ def handle_play_card(data):
                 logger.error("AI turn returned None - breaking loop to prevent hang")
                 break
         
-        logger.info(f"AI LOOP END: game_over={game_room.game_state.game_over}, current_player={game_room.game_state.current_player_index}, is_ai={game_room.game_state.players[game_room.game_state.current_player_index].is_ai if game_room.game_state.current_player_index < len(game_room.game_state.players) else 'INDEX_OUT_OF_BOUNDS'}, waiting_for_suit={game_room.game_state.waiting_for_suit_choice}, ai_turns={ai_turn_count}")
-        
-        if ai_turn_count >= max_ai_turns:
-            logger.error(f"AI turn limit reached ({max_ai_turns}) - potential infinite loop prevented")
-        
-        # Start timer for human player if it's their turn and game is still active
-        if (not game_room.game_state.game_over and 
-            not game_room.game_state.waiting_for_suit_choice and
-            game_room.game_state.current_player_index < len(game_room.game_state.players)):
-            current_player = game_room.game_state.players[game_room.game_state.current_player_index]
-            if not current_player.is_ai and not current_player.is_observer:
-                logger.info(f"Starting timer for human player {current_player.name} after AI processing")
-                game_room._start_turn_timer()
+    logger.info(f"AI LOOP END: game_over={game_room.game_state.game_over}, current_player={game_room.game_state.current_player_index}, is_ai={game_room.game_state.players[game_room.game_state.current_player_index].is_ai if game_room.game_state.current_player_index < len(game_room.game_state.players) else 'INDEX_OUT_OF_BOUNDS'}, waiting_for_suit={game_room.game_state.waiting_for_suit_choice}, ai_turns={ai_turn_count}")
+    
+    if ai_turn_count >= max_ai_turns:
+        logger.error(f"AI turn limit reached ({max_ai_turns}) - potential infinite loop prevented")
+    
+    # Start timer for human player if it's their turn and game is still active
+    if (not game_room.game_state.game_over and 
+        not game_room.game_state.waiting_for_suit_choice and
+        game_room.game_state.current_player_index < len(game_room.game_state.players)):
+        current_player = game_room.game_state.players[game_room.game_state.current_player_index]
+        if not current_player.is_ai and not current_player.is_observer:
+            logger.info(f"Starting timer for human player {current_player.name} after AI processing")
+            game_room._start_turn_timer()
 
 @socketio.on('change_sort')
 def handle_change_sort(data):

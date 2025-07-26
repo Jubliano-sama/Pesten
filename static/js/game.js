@@ -10,6 +10,7 @@ let awaitingSortChoice = false;
 let lastCardWarnings = new Set(); // Track which players have been warned about having 1 card
 let turnTimer = null; // Current turn timer
 let timeLeft = 0; // Seconds left in current turn
+let lastDirectionChange = null; // Track when direction last changed to avoid duplicate animations
 
 // DOM elements
 const lobbySection = document.getElementById('lobby-section');
@@ -361,30 +362,47 @@ function updateGameInterface() {
 function updatePlayerQueue() {
     console.log('🔄 Updating player queue');
     
-    if (!playerQueueElement) return;
+    // Only trigger reversal animation once per direction change
+    const currentTurnCount = gameState.turn_count;
+    if (gameState.direction_changed && lastDirectionChange !== currentTurnCount) {
+        console.log('↩️ DIRECTION CHANGED - triggering reversal animation once');
+        lastDirectionChange = currentTurnCount;
+        
+        // Trigger arrow wobble animation
+        const arrows = playerQueueElement.querySelectorAll('.queue-arrow');
+        arrows.forEach(arrow => {
+            arrow.classList.remove('wobble');
+            void arrow.offsetWidth; // Force reflow
+            arrow.classList.add('wobble');
+        });
+    }
+    
+    console.log('📊 GameState turn_order:', gameState.turn_order);
+    
+    if (!playerQueueElement || !gameState.turn_order) return;
     
     const currentPlayer = gameState.players.find(p => p.id === playerId);
     if (!currentPlayer) return;
     
-    // Get all active players (non-observers)
-    const activePlayers = gameState.players.filter(p => !p.is_observer);
-    const myIndex = activePlayers.findIndex(p => p.id === playerId);
+    // Use server's turn_order directly - it's already calculated correctly
+    const serverTurnOrder = gameState.turn_order;
     
-    // Create queue array starting from current player
+    // Find my position in the server's turn order
+    const myIndexInTurnOrder = serverTurnOrder.findIndex(id => id === playerId);
+    
+    // Build queue with "You" at the start, others following server order
     const queueOrder = [];
-    const playerCount = activePlayers.length;
     
-    // Determine queue order based on game direction and current turn
-    for (let i = 0; i < playerCount; i++) {
-        let index;
-        if (gameState.direction === 1) {
-            // Clockwise: start from current player, go right
-            index = (myIndex + i) % playerCount;
-        } else {
-            // Counter-clockwise: start from current player, go left  
-            index = (myIndex - i + playerCount) % playerCount;
+    if (myIndexInTurnOrder !== -1) {
+        // Start with me, then add others in server turn order
+        for (let i = 0; i < serverTurnOrder.length; i++) {
+            const adjustedIndex = (myIndexInTurnOrder + i) % serverTurnOrder.length;
+            const playerId_at_index = serverTurnOrder[adjustedIndex];
+            const player = gameState.players.find(p => p.id === playerId_at_index);
+            if (player && !player.is_observer) {
+                queueOrder.push(player);
+            }
         }
-        queueOrder.push(activePlayers[index]);
     }
     
     // Clear existing queue
@@ -433,8 +451,8 @@ function updatePlayerQueue() {
         // Add arrow between players (except after last player)
         if (queueIndex < queueOrder.length - 1) {
             const arrow = document.createElement('div');
-            arrow.className = `queue-arrow ${gameState.direction === -1 ? 'reverse' : ''}`;
-            arrow.textContent = '→';
+            arrow.className = 'queue-arrow';
+            arrow.textContent = '→'; // Always point right
             playerQueueElement.appendChild(arrow);
         }
     });
@@ -450,7 +468,14 @@ function updatePlayerQueue() {
             });
         }
     }, 100);
+    
+    // Trigger reversal animation if server says direction changed
+    if (gameState.direction_changed) {
+        console.log('🔄 Server reports direction changed, triggering animation');
+        animateDirectionReversal();
+    }
 }
+
 
 function animateSkippedPlayer(playerId) {
     console.log(`⏭️ Animating skip for player ${playerId}`);
@@ -469,22 +494,25 @@ function animateSkippedPlayer(playerId) {
 function animateDirectionReversal() {
     console.log('🔄 Animating direction reversal');
     
-    // Add reversal animation to all queue players
-    const queuePlayers = playerQueueElement.querySelectorAll('.queue-player');
+    // Add reversal animation to all queue players (except "You")
+    const queuePlayers = playerQueueElement.querySelectorAll('.queue-player:not(.you)');
     queuePlayers.forEach(player => {
         player.classList.add('reversing');
     });
     
-    // Update arrows direction
+    // Add wobble animation to all arrows
     const arrows = playerQueueElement.querySelectorAll('.queue-arrow');
     arrows.forEach(arrow => {
-        arrow.classList.toggle('reverse');
+        arrow.classList.add('wobble');
     });
     
-    // Remove animation class after animation completes
+    // Remove animation classes and rebuild queue after animation completes
     setTimeout(() => {
         queuePlayers.forEach(player => {
             player.classList.remove('reversing');
+        });
+        arrows.forEach(arrow => {
+            arrow.classList.remove('wobble');
         });
         // Rebuild queue with new order
         updatePlayerQueue();
@@ -774,9 +802,7 @@ function handleGameAction(action, details, actingPlayer = null) {
                     addLogEntry(getEffectMessage(effect));
                     
                     // Handle special animations
-                    if (effect === 'reverse') {
-                        animateDirectionReversal();
-                    } else if (effect === 'skip_player') {
+                    if (effect === 'skip_player') {
                         // Find the next player who would be skipped
                         const currentIndex = gameState.players.findIndex(p => p.id === player.id);
                         const nextIndex = (currentIndex + gameState.direction + gameState.players.length) % gameState.players.length;
