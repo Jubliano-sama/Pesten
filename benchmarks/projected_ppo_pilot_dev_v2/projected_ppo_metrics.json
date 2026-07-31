@@ -1,0 +1,851 @@
+{
+  "algorithm": "exact_24_suit_projected_ppo_common_data_sweep",
+  "candidates": [
+    {
+      "accepted_epochs": 2,
+      "base_actor_sha256_after": "4dff127c9e3163dad9f89657ca49ab3258f53e7942d6da5f6216ebe062ef950e",
+      "base_actor_sha256_before": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+      "candidate_index": 0,
+      "checkpoint": {
+        "actor_state_sha256": "4dff127c9e3163dad9f89657ca49ab3258f53e7942d6da5f6216ebe062ef950e",
+        "path": "projected_ppo_kl0p2_lr1em6_ent0.pth",
+        "raw_base_requires_24_suit_projection": true,
+        "sha256": "eecd69c512e1fd1e7468f5a0fea3d9764d2a3aeb481db14b83925dd8cc945073"
+      },
+      "common_batch_sha256": "0ec265d0d0a2dca170de2625a11cc7658ac6a7d3240c4106a2df269fdd99181b",
+      "config": {
+        "entropy_coefficient": 0.0,
+        "kl_coefficient": 0.2,
+        "learning_rate": 1e-06,
+        "name": "kl0p2_lr1em6_ent0",
+        "target_kl": 0.0005
+      },
+      "final_exact_behavior_kl_old_to_new": 4.230466402077582e-06,
+      "initial_exact_behavior_kl_old_to_new": 0.0,
+      "max_initial_ratio_error": 0.0,
+      "peak_augmented_observations_per_minibatch": 1536,
+      "policy_updated": true,
+      "projected_actor_sha256_before": "aeabe8c1fd9e36857d08c68481ea95ce0d3ff07995e7a2c42fbfe25ab05726bc",
+      "projection_statistics": {
+        "aggregation": "logits",
+        "alpha": 1.0,
+        "augmented_observations": 339408,
+        "base_observations": 14142,
+        "forward_calls": 222,
+        "mean_base_batch_size": 63.7027027027027,
+        "player_orbit_average": false,
+        "player_orbit_mode": "none",
+        "underlying_actor_calls": 222
+      },
+      "target_kl_satisfied": true,
+      "update_epochs": [
+        {
+          "accepted": true,
+          "behavior_kl_old_to_new": 9.435580363643609e-07,
+          "clip_fraction": 0.0,
+          "clipped_surrogate": -0.0010621049567251593,
+          "critic_loss": 0.33538737248730016,
+          "entropy": 0.08526817875335345,
+          "epoch": 1,
+          "objective": -0.001062294008915086,
+          "post_epoch_full_exact_behavior_kl_old_to_new": 2.0589122868841514e-06,
+          "rolled_back": false,
+          "target_kl": 0.0005
+        },
+        {
+          "accepted": true,
+          "behavior_kl_old_to_new": 2.584844829421805e-06,
+          "clip_fraction": 0.0,
+          "clipped_surrogate": -0.00014688079622951714,
+          "critic_loss": 0.2969412316341658,
+          "entropy": 0.08502120997857403,
+          "epoch": 2,
+          "objective": -0.00014739762991666794,
+          "post_epoch_full_exact_behavior_kl_old_to_new": 4.230466402077582e-06,
+          "rolled_back": false,
+          "target_kl": 0.0005
+        }
+      ]
+    },
+    {
+      "accepted_epochs": 2,
+      "base_actor_sha256_after": "9115b7ee40b840c976b4229afd7d0241a1e6182a2696e117a44403d7f662e1a9",
+      "base_actor_sha256_before": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+      "candidate_index": 1,
+      "checkpoint": {
+        "actor_state_sha256": "9115b7ee40b840c976b4229afd7d0241a1e6182a2696e117a44403d7f662e1a9",
+        "path": "projected_ppo_kl0p2_lr3em6_ent0.pth",
+        "raw_base_requires_24_suit_projection": true,
+        "sha256": "d4b39fc3d3240ac106e43f5c86c41a57fc688d9814c530a3f9ec074128e6f768"
+      },
+      "common_batch_sha256": "0ec265d0d0a2dca170de2625a11cc7658ac6a7d3240c4106a2df269fdd99181b",
+      "config": {
+        "entropy_coefficient": 0.0,
+        "kl_coefficient": 0.2,
+        "learning_rate": 3e-06,
+        "name": "kl0p2_lr3em6_ent0",
+        "target_kl": 0.001
+      },
+      "final_exact_behavior_kl_old_to_new": 3.704323171405122e-05,
+      "initial_exact_behavior_kl_old_to_new": 0.0,
+      "max_initial_ratio_error": 0.0,
+      "peak_augmented_observations_per_minibatch": 1536,
+      "policy_updated": true,
+      "projected_actor_sha256_before": "aeabe8c1fd9e36857d08c68481ea95ce0d3ff07995e7a2c42fbfe25ab05726bc",
+      "projection_statistics": {
+        "aggregation": "logits",
+        "alpha": 1.0,
+        "augmented_observations": 339408,
+        "base_observations": 14142,
+        "forward_calls": 222,
+        "mean_base_batch_size": 63.7027027027027,
+        "player_orbit_average": false,
+        "player_orbit_mode": "none",
+        "underlying_actor_calls": 222
+      },
+      "target_kl_satisfied": true,
+      "update_epochs": [
+        {
+          "accepted": true,
+          "behavior_kl_old_to_new": 8.439043044960715e-06,
+          "clip_fraction": 0.0,
+          "clipped_surrogate": -0.00103388522827142,
+          "critic_loss": 0.3132549838439838,
+          "entropy": 0.0852618101682212,
+          "epoch": 1,
+          "objective": -0.0010355739426371213,
+          "post_epoch_full_exact_behavior_kl_old_to_new": 1.8133881894755177e-05,
+          "rolled_back": false,
+          "target_kl": 0.001
+        },
+        {
+          "accepted": true,
+          "behavior_kl_old_to_new": 2.2750534237668427e-05,
+          "clip_fraction": 0.0,
+          "clipped_surrogate": 0.00021034192193198847,
+          "critic_loss": 0.2545631596365491,
+          "entropy": 0.0849919750581722,
+          "epoch": 2,
+          "objective": 0.00020579198325002516,
+          "post_epoch_full_exact_behavior_kl_old_to_new": 3.704323171405122e-05,
+          "rolled_back": false,
+          "target_kl": 0.001
+        }
+      ]
+    },
+    {
+      "accepted_epochs": 2,
+      "base_actor_sha256_after": "7a1e2ab79dea6c6ff6ddb37e5c22c7cd8ff8f8381173842bd8ca71807b51d0a3",
+      "base_actor_sha256_before": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+      "candidate_index": 2,
+      "checkpoint": {
+        "actor_state_sha256": "7a1e2ab79dea6c6ff6ddb37e5c22c7cd8ff8f8381173842bd8ca71807b51d0a3",
+        "path": "projected_ppo_kl0p5_lr3em6_ent1em3.pth",
+        "raw_base_requires_24_suit_projection": true,
+        "sha256": "912f26018aa3473281d99aaea3e392c76f3385c4fb7b1e56e33bbe86423e480a"
+      },
+      "common_batch_sha256": "0ec265d0d0a2dca170de2625a11cc7658ac6a7d3240c4106a2df269fdd99181b",
+      "config": {
+        "entropy_coefficient": 0.001,
+        "kl_coefficient": 0.5,
+        "learning_rate": 3e-06,
+        "name": "kl0p5_lr3em6_ent1em3",
+        "target_kl": 0.001
+      },
+      "final_exact_behavior_kl_old_to_new": 3.530132744344883e-05,
+      "initial_exact_behavior_kl_old_to_new": 0.0,
+      "max_initial_ratio_error": 0.0,
+      "peak_augmented_observations_per_minibatch": 1536,
+      "policy_updated": true,
+      "projected_actor_sha256_before": "aeabe8c1fd9e36857d08c68481ea95ce0d3ff07995e7a2c42fbfe25ab05726bc",
+      "projection_statistics": {
+        "aggregation": "logits",
+        "alpha": 1.0,
+        "augmented_observations": 339408,
+        "base_observations": 14142,
+        "forward_calls": 222,
+        "mean_base_batch_size": 63.7027027027027,
+        "player_orbit_average": false,
+        "player_orbit_mode": "none",
+        "underlying_actor_calls": 222
+      },
+      "target_kl_satisfied": true,
+      "update_epochs": [
+        {
+          "accepted": true,
+          "behavior_kl_old_to_new": 8.33140647383313e-06,
+          "clip_fraction": 0.0,
+          "clipped_surrogate": -0.0010344346582486822,
+          "critic_loss": 0.3132549838439838,
+          "entropy": 0.0852619534408724,
+          "epoch": 1,
+          "objective": -0.0009533395814533169,
+          "post_epoch_full_exact_behavior_kl_old_to_new": 1.767382309481036e-05,
+          "rolled_back": false,
+          "target_kl": 0.001
+        },
+        {
+          "accepted": true,
+          "behavior_kl_old_to_new": 2.188306560227018e-05,
+          "clip_fraction": 0.0,
+          "clipped_surrogate": 0.00020291797212652259,
+          "critic_loss": 0.2545631596365491,
+          "entropy": 0.0849945061412212,
+          "epoch": 2,
+          "objective": 0.0002769713315206605,
+          "post_epoch_full_exact_behavior_kl_old_to_new": 3.530132744344883e-05,
+          "rolled_back": false,
+          "target_kl": 0.001
+        }
+      ]
+    }
+  ],
+  "champion": {
+    "actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+    "file_sha256": "aac589b3c7300895604e6c77755631ab4a31c8bf9810768448ab2f3ff5bbe186",
+    "path": "/home/tommie/Pesten/ppo_actor_100run3.pth"
+  },
+  "common_rollout": {
+    "episode_lengths": [
+      10,
+      6,
+      20,
+      15,
+      26,
+      36,
+      12,
+      11,
+      21,
+      17,
+      17,
+      12,
+      29,
+      22,
+      13,
+      11,
+      9,
+      10,
+      18,
+      11,
+      16,
+      15,
+      21,
+      19,
+      17,
+      28,
+      22,
+      20,
+      8,
+      4,
+      8,
+      12,
+      20,
+      24,
+      26,
+      22,
+      11,
+      6,
+      14,
+      11,
+      13,
+      14,
+      17,
+      24,
+      8,
+      11,
+      9,
+      11,
+      21,
+      19,
+      25,
+      25,
+      66,
+      70,
+      14,
+      13,
+      5,
+      7,
+      24,
+      15,
+      40,
+      29,
+      21,
+      28,
+      7,
+      8,
+      10,
+      13,
+      15,
+      12,
+      21,
+      16,
+      35,
+      43,
+      12,
+      13,
+      12,
+      14,
+      11,
+      11,
+      23,
+      19,
+      21,
+      12,
+      12,
+      13,
+      21,
+      25,
+      13,
+      11,
+      15,
+      16,
+      24,
+      20,
+      40,
+      34,
+      22,
+      26,
+      21,
+      18,
+      8,
+      5,
+      16,
+      16,
+      19,
+      18,
+      24,
+      29,
+      11,
+      9,
+      15,
+      18,
+      10,
+      12,
+      28,
+      27,
+      44,
+      35,
+      22,
+      29,
+      15,
+      15,
+      8,
+      8,
+      9,
+      8,
+      36,
+      25
+    ],
+    "max_initial_ratio_error": 0.0,
+    "payoff_audit": {
+      "full_pair_zero_sum_verified": true,
+      "implicit_zero_decision_seats": 0,
+      "populated_episodes": 128,
+      "terminal_payoffs_verified": true
+    },
+    "rollout": {
+      "actor_key_counts": {
+        "current": 128
+      },
+      "actor_key_layout_sha256": "f115ef3eb479e7927e0ec9bdfeccf1c663df188bcd9a7b81c7933ae2c7fe1f2e",
+      "completed_games": 64,
+      "deal_seed_count": 64,
+      "deal_seed_rng_replay_verified": true,
+      "deal_seeds": [
+        {
+          "deal_seed": 368909016
+        },
+        {
+          "deal_seed": 2458672383
+        },
+        {
+          "deal_seed": 945957979
+        },
+        {
+          "deal_seed": 2809813587
+        },
+        {
+          "deal_seed": 1618395839
+        },
+        {
+          "deal_seed": 3660512164
+        },
+        {
+          "deal_seed": 3842981927
+        },
+        {
+          "deal_seed": 2726146906
+        },
+        {
+          "deal_seed": 288992285
+        },
+        {
+          "deal_seed": 4100585584
+        },
+        {
+          "deal_seed": 219992955
+        },
+        {
+          "deal_seed": 1839224443
+        },
+        {
+          "deal_seed": 59717284
+        },
+        {
+          "deal_seed": 555831590
+        },
+        {
+          "deal_seed": 2094828093
+        },
+        {
+          "deal_seed": 3053420860
+        },
+        {
+          "deal_seed": 300514397
+        },
+        {
+          "deal_seed": 3464008643
+        },
+        {
+          "deal_seed": 528172286
+        },
+        {
+          "deal_seed": 1980143133
+        },
+        {
+          "deal_seed": 1342353572
+        },
+        {
+          "deal_seed": 3102588297
+        },
+        {
+          "deal_seed": 4240268241
+        },
+        {
+          "deal_seed": 2959568696
+        },
+        {
+          "deal_seed": 1561136165
+        },
+        {
+          "deal_seed": 2708442303
+        },
+        {
+          "deal_seed": 3592114484
+        },
+        {
+          "deal_seed": 3340715226
+        },
+        {
+          "deal_seed": 3899912417
+        },
+        {
+          "deal_seed": 1279297060
+        },
+        {
+          "deal_seed": 96560787
+        },
+        {
+          "deal_seed": 86371133
+        },
+        {
+          "deal_seed": 1971434314
+        },
+        {
+          "deal_seed": 4199653609
+        },
+        {
+          "deal_seed": 3384109249
+        },
+        {
+          "deal_seed": 2200996154
+        },
+        {
+          "deal_seed": 1680538691
+        },
+        {
+          "deal_seed": 492929155
+        },
+        {
+          "deal_seed": 2183745681
+        },
+        {
+          "deal_seed": 2747568706
+        },
+        {
+          "deal_seed": 2462711608
+        },
+        {
+          "deal_seed": 1521807384
+        },
+        {
+          "deal_seed": 3673516365
+        },
+        {
+          "deal_seed": 2528654372
+        },
+        {
+          "deal_seed": 234114629
+        },
+        {
+          "deal_seed": 3219909133
+        },
+        {
+          "deal_seed": 2086461241
+        },
+        {
+          "deal_seed": 2682220565
+        },
+        {
+          "deal_seed": 4070588196
+        },
+        {
+          "deal_seed": 3578815243
+        },
+        {
+          "deal_seed": 2975608361
+        },
+        {
+          "deal_seed": 542863292
+        },
+        {
+          "deal_seed": 3642198777
+        },
+        {
+          "deal_seed": 4027304741
+        },
+        {
+          "deal_seed": 3418582997
+        },
+        {
+          "deal_seed": 2306828292
+        },
+        {
+          "deal_seed": 814426026
+        },
+        {
+          "deal_seed": 57881613
+        },
+        {
+          "deal_seed": 2045094599
+        },
+        {
+          "deal_seed": 4025373897
+        },
+        {
+          "deal_seed": 3107597047
+        },
+        {
+          "deal_seed": 2239190271
+        },
+        {
+          "deal_seed": 521242228
+        },
+        {
+          "deal_seed": 3906699997
+        }
+      ],
+      "draws": 0,
+      "environment_turns": 2772,
+      "inference_calls": 178,
+      "past_policy_eligible_games": 64,
+      "past_policy_games": 0,
+      "past_policy_probability": 0.0,
+      "peak_buffer_bytes": 2089088,
+      "policy_decisions": 2357,
+      "torch_threads": 8,
+      "wins": 64
+    },
+    "sha256": "0ec265d0d0a2dca170de2625a11cc7658ac6a7d3240c4106a2df269fdd99181b"
+  },
+  "critic_warmup": {
+    "decisions": 2237,
+    "games": 64,
+    "loss_mean": 0.7484629494803292,
+    "payoff_audit": {
+      "full_pair_zero_sum_verified": true,
+      "implicit_zero_decision_seats": 0,
+      "populated_episodes": 128,
+      "terminal_payoffs_verified": true
+    },
+    "rollout": {
+      "actor_key_counts": {
+        "current": 128
+      },
+      "actor_key_layout_sha256": "f115ef3eb479e7927e0ec9bdfeccf1c663df188bcd9a7b81c7933ae2c7fe1f2e",
+      "completed_games": 64,
+      "deal_seed_count": 64,
+      "deal_seed_rng_replay_verified": true,
+      "deal_seeds": [
+        {
+          "deal_seed": 123191078
+        },
+        {
+          "deal_seed": 2532640389
+        },
+        {
+          "deal_seed": 1111125628
+        },
+        {
+          "deal_seed": 257052935
+        },
+        {
+          "deal_seed": 4275178298
+        },
+        {
+          "deal_seed": 3157673569
+        },
+        {
+          "deal_seed": 2822909275
+        },
+        {
+          "deal_seed": 1826974143
+        },
+        {
+          "deal_seed": 2042710105
+        },
+        {
+          "deal_seed": 2635862017
+        },
+        {
+          "deal_seed": 977638515
+        },
+        {
+          "deal_seed": 582262186
+        },
+        {
+          "deal_seed": 615175227
+        },
+        {
+          "deal_seed": 1474662783
+        },
+        {
+          "deal_seed": 1318892395
+        },
+        {
+          "deal_seed": 3756663192
+        },
+        {
+          "deal_seed": 829785205
+        },
+        {
+          "deal_seed": 2628349231
+        },
+        {
+          "deal_seed": 1514018971
+        },
+        {
+          "deal_seed": 1190163362
+        },
+        {
+          "deal_seed": 1220109738
+        },
+        {
+          "deal_seed": 1198329248
+        },
+        {
+          "deal_seed": 3390275780
+        },
+        {
+          "deal_seed": 2233189541
+        },
+        {
+          "deal_seed": 1147231755
+        },
+        {
+          "deal_seed": 701374913
+        },
+        {
+          "deal_seed": 1666992574
+        },
+        {
+          "deal_seed": 30122971
+        },
+        {
+          "deal_seed": 2408705413
+        },
+        {
+          "deal_seed": 1066302421
+        },
+        {
+          "deal_seed": 4207809307
+        },
+        {
+          "deal_seed": 4180687093
+        },
+        {
+          "deal_seed": 3548603812
+        },
+        {
+          "deal_seed": 3929679852
+        },
+        {
+          "deal_seed": 203513690
+        },
+        {
+          "deal_seed": 4172468558
+        },
+        {
+          "deal_seed": 1345682967
+        },
+        {
+          "deal_seed": 4000709162
+        },
+        {
+          "deal_seed": 3153050840
+        },
+        {
+          "deal_seed": 2983556210
+        },
+        {
+          "deal_seed": 138614386
+        },
+        {
+          "deal_seed": 4238897948
+        },
+        {
+          "deal_seed": 4201943373
+        },
+        {
+          "deal_seed": 3728092906
+        },
+        {
+          "deal_seed": 2111010659
+        },
+        {
+          "deal_seed": 230389110
+        },
+        {
+          "deal_seed": 433582898
+        },
+        {
+          "deal_seed": 3147837061
+        },
+        {
+          "deal_seed": 554367248
+        },
+        {
+          "deal_seed": 1069033414
+        },
+        {
+          "deal_seed": 3858237733
+        },
+        {
+          "deal_seed": 1076960143
+        },
+        {
+          "deal_seed": 2888084137
+        },
+        {
+          "deal_seed": 3123274510
+        },
+        {
+          "deal_seed": 3874623849
+        },
+        {
+          "deal_seed": 1494400271
+        },
+        {
+          "deal_seed": 924378181
+        },
+        {
+          "deal_seed": 1309425481
+        },
+        {
+          "deal_seed": 3462561919
+        },
+        {
+          "deal_seed": 2681083305
+        },
+        {
+          "deal_seed": 3433912812
+        },
+        {
+          "deal_seed": 410719689
+        },
+        {
+          "deal_seed": 3778444755
+        },
+        {
+          "deal_seed": 1223500615
+        }
+      ],
+      "draws": 0,
+      "environment_turns": 2602,
+      "inference_calls": 159,
+      "past_policy_eligible_games": 64,
+      "past_policy_games": 0,
+      "past_policy_probability": 0.0,
+      "peak_buffer_bytes": 2089088,
+      "policy_decisions": 2237,
+      "torch_threads": 8,
+      "wins": 64
+    }
+  },
+  "payoff": {
+    "standard_per_pass_shaping_removed": true,
+    "terminal_two_player_zero_sum_only": true
+  },
+  "privacy": {
+    "draw_pile_order": false,
+    "opponent_card_identities": false,
+    "own_hand_plus_public_state_only": true,
+    "players": 2,
+    "self_play": true
+  },
+  "projection": {
+    "aggregation": "arithmetic_mean_logits",
+    "alpha": 1.0,
+    "ordinary_suit_permutations": 24,
+    "player_orbit_mode": "none",
+    "production_legal_mask_preserved": true,
+    "rollout_actor_is_update_actor": true,
+    "saved_checkpoints_are_raw_base_weights": true,
+    "trainable_shared_base": true
+  },
+  "recipe": {
+    "base_chunk_size": 64,
+    "common_games": 64,
+    "critic_epochs": 1,
+    "critic_games": 64,
+    "diagnostic_chunk_size": 64,
+    "minibatch_size": 64,
+    "rollout_batch_size": 256,
+    "sweep": [
+      {
+        "entropy_coefficient": 0.0,
+        "kl_coefficient": 0.2,
+        "learning_rate": 1e-06,
+        "name": "kl0p2_lr1em6_ent0",
+        "target_kl": 0.0005
+      },
+      {
+        "entropy_coefficient": 0.0,
+        "kl_coefficient": 0.2,
+        "learning_rate": 3e-06,
+        "name": "kl0p2_lr3em6_ent0",
+        "target_kl": 0.001
+      },
+      {
+        "entropy_coefficient": 0.001,
+        "kl_coefficient": 0.5,
+        "learning_rate": 3e-06,
+        "name": "kl0p5_lr3em6_ent1em3",
+        "target_kl": 0.001
+      }
+    ],
+    "temperature": 0.8,
+    "torch_threads": 8,
+    "update_epochs": 2
+  },
+  "schema_version": 1,
+  "seed_audit": {
+    "development_only": true,
+    "development_seed_limit": 4294000000,
+    "per_deal_seeds_recorded": true,
+    "rng_replay_verified_per_rollout": true,
+    "root_seed": 84600001,
+    "sealed_outcomes_used": false
+  },
+  "wall_seconds": 47.91049943799953
+}
