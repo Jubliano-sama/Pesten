@@ -5,6 +5,10 @@ during PPO training.  Keep feature indices here so training and serving cannot
 silently assign different meanings to the same tensor positions.
 """
 
+import numpy as np
+import torch
+
+
 OBSERVATION_SIZE = 121
 
 HAND_START = 0
@@ -65,18 +69,102 @@ def populate_game_context(
             f"got {len(sorts_played)}"
         )
 
-    for offset in range(SORT_COUNT):
-        observation[SORTS_PLAYED_START + offset] = sorts_played[offset]
+    if isinstance(sorts_played, (np.ndarray, torch.Tensor)):
+        sorts = sorts_played[:SORT_COUNT]
+    else:
+        sorts = [
+            sorts_played[offset]
+            for offset in range(SORT_COUNT)
+        ]
+    if isinstance(observation, torch.Tensor):
+        sort_target = observation[
+            SORTS_PLAYED_START : SORTS_PLAYED_START + SORT_COUNT
+        ]
+        sort_values = torch.as_tensor(
+            sorts,
+            dtype=observation.dtype,
+            device=observation.device,
+        )
+        if sort_values.ndim == 1 and sort_target.ndim > 1:
+            sort_values = sort_values.reshape(
+                (SORT_COUNT,) + (1,) * (sort_target.ndim - 1)
+            )
+        sort_target[:] = sort_values
+        observation[
+            PLAYER_HAND_SIZES_START:PLAYER_HAND_SIZES_END
+        ].zero_()
+    elif isinstance(observation, np.ndarray):
+        sort_target = observation[
+            SORTS_PLAYED_START : SORTS_PLAYED_START + SORT_COUNT
+        ]
+        sort_values = np.asarray(sorts)
+        if sort_values.ndim == 1 and sort_target.ndim > 1:
+            sort_values = sort_values.reshape(
+                (SORT_COUNT,) + (1,) * (sort_target.ndim - 1)
+            )
+        sort_target[:] = sort_values
+        observation[
+            PLAYER_HAND_SIZES_START:PLAYER_HAND_SIZES_END
+        ] = 0
+    elif isinstance(observation, list):
+        observation[
+            SORTS_PLAYED_START : SORTS_PLAYED_START + SORT_COUNT
+        ] = list(sorts)
+        observation[
+            PLAYER_HAND_SIZES_START:PLAYER_HAND_SIZES_END
+        ] = [0] * PLAYER_HAND_SIZE_SLOTS
+    else:
+        for offset in range(SORT_COUNT):
+            observation[SORTS_PLAYED_START + offset] = sorts[offset]
+        for feature_index in range(
+            PLAYER_HAND_SIZES_START,
+            PLAYER_HAND_SIZES_END,
+        ):
+            observation[feature_index] = 0
 
     observation[MODE_INDEX] = 1 if is_change_sort else 0
 
-    # Clear every reserved slot in case a caller reuses an observation.
-    for feature_index in range(PLAYER_HAND_SIZES_START, PLAYER_HAND_SIZES_END):
-        observation[feature_index] = 0
-
     order = relative_player_indices(len(hand_sizes), player_index, direction)
-    for slot, ordered_player_index in enumerate(order[:PLAYER_HAND_SIZE_SLOTS]):
-        observation[PLAYER_HAND_SIZES_START + slot] = hand_sizes[ordered_player_index]
+    ordered_hand_sizes = [
+        hand_sizes[ordered_player_index]
+        for ordered_player_index in order[:PLAYER_HAND_SIZE_SLOTS]
+    ]
+    hand_size_end = PLAYER_HAND_SIZES_START + len(ordered_hand_sizes)
+    if isinstance(observation, torch.Tensor):
+        if ordered_hand_sizes:
+            hand_size_target = observation[
+                PLAYER_HAND_SIZES_START:hand_size_end
+            ]
+            hand_size_values = torch.as_tensor(
+                ordered_hand_sizes,
+                dtype=observation.dtype,
+                device=observation.device,
+            )
+            if hand_size_values.ndim == 1 and hand_size_target.ndim > 1:
+                hand_size_values = hand_size_values.reshape(
+                    (len(ordered_hand_sizes),)
+                    + (1,) * (hand_size_target.ndim - 1)
+                )
+            hand_size_target[:] = hand_size_values
+    elif isinstance(observation, np.ndarray):
+        if ordered_hand_sizes:
+            hand_size_target = observation[
+                PLAYER_HAND_SIZES_START:hand_size_end
+            ]
+            hand_size_values = np.asarray(ordered_hand_sizes)
+            if hand_size_values.ndim == 1 and hand_size_target.ndim > 1:
+                hand_size_values = hand_size_values.reshape(
+                    (len(ordered_hand_sizes),)
+                    + (1,) * (hand_size_target.ndim - 1)
+                )
+            hand_size_target[:] = hand_size_values
+    elif isinstance(observation, list):
+        observation[PLAYER_HAND_SIZES_START:hand_size_end] = (
+            ordered_hand_sizes
+        )
+    else:
+        for slot, size in enumerate(ordered_hand_sizes):
+            observation[PLAYER_HAND_SIZES_START + slot] = size
 
     observation[PLAYER_INDEX] = player_index
     observation[DIRECTION_INDEX] = direction

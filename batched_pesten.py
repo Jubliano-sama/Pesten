@@ -65,6 +65,23 @@ STANDARD_DECK = np.asarray(
     list(range(50)) + [49, 48, 48, 48],
     dtype=np.int8,
 )
+CARD_RANK_MASKS = (
+    CARD_RANK[np.newaxis, :]
+    == np.arange(14, dtype=np.int8)[:, np.newaxis]
+)
+CARD_COMPATIBILITY_MASKS = (
+    CARD_RANK_MASKS[np.newaxis, :, :]
+    | (CARD_RANK[np.newaxis, np.newaxis, :] == 0)
+    | (CARD_RANK[np.newaxis, np.newaxis, :] == 13)
+    | (
+        CARD_SORT[np.newaxis, np.newaxis, :]
+        == np.arange(5, dtype=np.int8)[:, np.newaxis, np.newaxis]
+    )
+)
+CARD_IS_PENALTY = np.isin(CARD_RANK, tuple(PENALTY_RANKS))
+CARD_RANK_MASKS.setflags(write=False)
+CARD_COMPATIBILITY_MASKS.setflags(write=False)
+CARD_IS_PENALTY.setflags(write=False)
 
 
 def _compatible(card_number: int, current_sort: int, current_rank: int) -> bool:
@@ -416,14 +433,14 @@ class BatchedPesten:
             if drawn >= 0:
                 playable[drawn] = True
         elif self.penalty_amount[game_index] > 0:
-            playable = CARD_RANK == self.current_rank[game_index]
+            playable = CARD_RANK_MASKS[
+                int(self.current_rank[game_index])
+            ]
         else:
-            playable = (
-                (CARD_RANK == self.current_rank[game_index])
-                | (CARD_RANK == 0)
-                | (CARD_RANK == 13)
-                | (CARD_SORT == self.current_sort[game_index])
-            )
+            playable = CARD_COMPATIBILITY_MASKS[
+                int(self.current_sort[game_index]),
+                int(self.current_rank[game_index]),
+            ]
         observation[COMPATIBLE_START:COMPATIBLE_END] = counts * playable
         observation[SORTS_PLAYED_START : SORTS_PLAYED_START + 5] = (
             self.sorts_played[game_index]
@@ -445,14 +462,14 @@ class BatchedPesten:
         player_index = int(self.current_player[game_index])
         counts = self.hand_counts[game_index, player_index]
         if self.penalty_amount[game_index] > 0:
-            playable = CARD_RANK == self.current_rank[game_index]
+            playable = CARD_RANK_MASKS[
+                int(self.current_rank[game_index])
+            ]
         else:
-            playable = (
-                (CARD_RANK == self.current_rank[game_index])
-                | (CARD_RANK == 0)
-                | (CARD_RANK == 13)
-                | (CARD_SORT == self.current_sort[game_index])
-            )
+            playable = CARD_COMPATIBILITY_MASKS[
+                int(self.current_sort[game_index]),
+                int(self.current_rank[game_index]),
+            ]
         return bool(np.any(counts & playable))
 
     def _ordered_hand(self, game_index: int, player_index: int) -> np.ndarray:
@@ -461,12 +478,12 @@ class BatchedPesten:
 
     def first_legal_action(self, game_index: int) -> int:
         player_index = int(self.current_player[game_index])
+        compatible = CARD_COMPATIBILITY_MASKS[
+            int(self.current_sort[game_index]),
+            int(self.current_rank[game_index]),
+        ]
         for number in self._ordered_hand(game_index, player_index):
-            if _compatible(
-                int(number),
-                int(self.current_sort[game_index]),
-                int(self.current_rank[game_index]),
-            ):
+            if compatible[int(number)]:
                 return int(number)
         return PASS_ACTION
 
@@ -477,12 +494,12 @@ class BatchedPesten:
         shuffled = hand[:size].copy()
         self.rngs[game_index].shuffle(shuffled)
         hand[:size] = shuffled
+        compatible = CARD_COMPATIBILITY_MASKS[
+            int(self.current_sort[game_index]),
+            int(self.current_rank[game_index]),
+        ]
         for number in shuffled:
-            if _compatible(
-                int(number),
-                int(self.current_sort[game_index]),
-                int(self.current_rank[game_index]),
-            ):
+            if compatible[int(number)]:
                 return int(number)
         return PASS_ACTION
 
@@ -513,7 +530,7 @@ class BatchedPesten:
         penalty = int(
             np.count_nonzero(
                 same_suit
-                & np.isin(CARD_RANK[hand], tuple(PENALTY_RANKS))
+                & CARD_IS_PENALTY[hand]
             )
         )
         return 0.43244878288347055 * total + penalty
@@ -521,25 +538,21 @@ class BatchedPesten:
     def smart_action(self, game_index: int) -> int:
         player_index = int(self.current_player[game_index])
         hand = self._ordered_hand(game_index, player_index)
-        compatible = np.asarray(
-            [
-                _compatible(
-                    int(number),
-                    int(self.current_sort[game_index]),
-                    int(self.current_rank[game_index]),
-                )
-                for number in hand
-            ],
-            dtype=np.bool_,
-        )
+        hand_ranks = CARD_RANK[hand]
+        hand_suits = CARD_SORT[hand]
+        current_sort = int(self.current_sort[game_index])
+        current_rank = int(self.current_rank[game_index])
+        compatible = CARD_COMPATIBILITY_MASKS[
+            current_sort, current_rank
+        ][hand]
         playable = hand[compatible]
         if len(playable) == 0:
             return PASS_ACTION
 
-        current_rank = int(self.current_rank[game_index])
+        playable_ranks = CARD_RANK[playable]
         candidates = playable
         if current_rank in PENALTY_RANKS and current_rank != 7:
-            matching = playable[CARD_RANK[playable] == current_rank]
+            matching = playable[playable_ranks == current_rank]
             if len(matching):
                 candidates = matching
 
@@ -550,40 +563,73 @@ class BatchedPesten:
             13: -3.0043124890687474,
             2: 0.04665718005466267,
         }
-        sevens = candidates[CARD_RANK[candidates] == 7]
-        if not (
+        penalty_branch = (
             current_rank in PENALTY_RANKS
             and current_rank != 7
-            and np.any(CARD_RANK[playable] == current_rank)
-        ):
+            and np.any(playable_ranks == current_rank)
+        )
+        sevens = candidates[CARD_RANK[candidates] == 7]
+        if not penalty_branch:
             candidates = np.concatenate(
                 (sevens, candidates[CARD_RANK[candidates] != 7])
             )
+
+        # Every candidate evaluation removes exactly one card.  Compute the
+        # sufficient statistics once instead of copying and deleting the hand
+        # for each candidate.
+        suit_counts = np.bincount(hand_suits, minlength=5)
+        two_player_game_reference = (
+            self.smart_agents_have_game_reference
+            and self.num_players == 2
+        )
+        rank_eight_count = (
+            int(np.count_nonzero(hand_ranks == 8))
+            if two_player_game_reference
+            else 0
+        )
+        remaining_length = len(hand) - 1
+
         seven_end_values: dict[int, float] = {}
         if len(sevens):
+            penalty_mask = CARD_IS_PENALTY[hand]
+            penalty_suit_counts = np.bincount(
+                hand_suits[penalty_mask], minlength=5
+            )
             for number in sevens:
-                remaining = hand.copy()
-                offset = int(np.flatnonzero(remaining == number)[0])
-                remaining = np.delete(remaining, offset)
-                seven_end_values[int(number)] = self._smart_end_value(
-                    int(number), remaining
+                number_int = int(number)
+                suit = int(CARD_SORT[number_int])
+                total = int(suit_counts[suit] - 1)
+                penalty = int(penalty_suit_counts[suit] - 1)
+                seven_end_values[number_int] = (
+                    0.43244878288347055 * total + penalty
                 )
             max_end = max(seven_end_values.values())
         else:
             max_end = 0.0
 
+        standard_suit_counts = suit_counts[:4]
+        maximum_suit_count = int(np.max(standard_suit_counts))
+        maximum_suit_ties = int(
+            np.count_nonzero(standard_suit_counts == maximum_suit_count)
+        )
+        if maximum_suit_ties == 1:
+            unique_maximum_suit = int(np.argmax(standard_suit_counts))
+            second_suit_count = max(
+                int(standard_suit_counts[(unique_maximum_suit + 1) % 4]),
+                int(standard_suit_counts[(unique_maximum_suit + 2) % 4]),
+                int(standard_suit_counts[(unique_maximum_suit + 3) % 4]),
+            )
+            decremented_unique_maximum = max(
+                maximum_suit_count - 1, second_suit_count
+            )
+        else:
+            unique_maximum_suit = -1
+            decremented_unique_maximum = maximum_suit_count
+
         best_number = int(candidates[0])
         best_score = -float("inf")
-        penalty_branch = (
-            current_rank in PENALTY_RANKS
-            and current_rank != 7
-            and np.any(CARD_RANK[playable] == current_rank)
-        )
         for number_value in candidates:
             number = int(number_value)
-            remaining = hand.copy()
-            offset = int(np.flatnonzero(remaining == number)[0])
-            remaining = np.delete(remaining, offset)
             rank = int(CARD_RANK[number])
             if rank == 7:
                 if penalty_branch:
@@ -597,7 +643,22 @@ class BatchedPesten:
                         * (max_end - seven_end_values[number])
                     )
             else:
-                score = self._smart_hand_value(remaining)
+                if (
+                    two_player_game_reference
+                    and rank_eight_count - int(rank == 8) > 0
+                ):
+                    stop_score = -1.9467897139799917
+                else:
+                    removed_suit = int(CARD_SORT[number])
+                    stop_score = float(
+                        decremented_unique_maximum
+                        if removed_suit == unique_maximum_suit
+                        else maximum_suit_count
+                    )
+                score = (
+                    stop_score
+                    - 1.0290830868190015 * remaining_length
+                )
                 score += penalty_bonuses.get(rank, 0.0)
             if score > best_score:
                 best_score = score
@@ -631,18 +692,11 @@ class BatchedPesten:
         """Match ``smartAgent.SmarterAgent`` with a live public Game reference."""
         player_index = int(self.current_player[game_index])
         hand = self._ordered_hand(game_index, player_index)
-        playable = np.asarray(
-            [
-                number
-                for number in hand
-                if _compatible(
-                    int(number),
-                    int(self.current_sort[game_index]),
-                    int(self.current_rank[game_index]),
-                )
-            ],
-            dtype=np.int8,
-        )
+        compatible = CARD_COMPATIBILITY_MASKS[
+            int(self.current_sort[game_index]),
+            int(self.current_rank[game_index]),
+        ]
+        playable = hand[compatible[hand]]
         if len(playable) == 0:
             return PASS_ACTION
 
@@ -703,16 +757,14 @@ class BatchedPesten:
         hand = self._ordered_hand(game_index, player_index)
         best_suit = 0
         best_score = -float("inf")
-        ranks = CARD_RANK[hand]
         suits = CARD_SORT[hand]
+        suit_counts = np.bincount(suits, minlength=5)
+        penalty_suit_counts = np.bincount(
+            suits[CARD_IS_PENALTY[hand]], minlength=5
+        )
         for suit in range(4):
-            same_suit = suits == suit
-            total = int(np.count_nonzero(same_suit))
-            penalty = int(
-                np.count_nonzero(
-                    same_suit & np.isin(ranks, tuple(PENALTY_RANKS))
-                )
-            )
+            total = int(suit_counts[suit])
+            penalty = int(penalty_suit_counts[suit])
             score = (
                 0.43244878288347055 * total
                 - (-1.8463831782446556) * penalty

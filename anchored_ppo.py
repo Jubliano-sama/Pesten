@@ -28,6 +28,7 @@ from torch.distributions import Categorical
 
 from ai_observation import HAND_END, HAND_START, OBSERVATION_SIZE
 from ppo2 import (
+    DEFAULT_TORCH_THREADS,
     PPO_Supervised,
     StudentNet,
     compute_gae,
@@ -442,6 +443,15 @@ def main() -> None:
     parser.add_argument("--games", type=int, default=2048)
     parser.add_argument("--update-epochs", type=int, default=2)
     parser.add_argument("--batch-size", type=int, default=4096)
+    parser.add_argument(
+        "--torch-threads",
+        type=int,
+        default=DEFAULT_TORCH_THREADS,
+        help=(
+            "PyTorch intra-op threads for rollout and updates "
+            f"(default: {DEFAULT_TORCH_THREADS})"
+        ),
+    )
     parser.add_argument("--temperature", type=float, default=0.8)
     parser.add_argument("--kl-coefficient", type=float, default=1.0)
     parser.add_argument("--target-kl", type=float, default=0.003)
@@ -498,6 +508,7 @@ def main() -> None:
             training_actor_device="cuda" if torch.cuda.is_available() else "cpu",
             compile_updates=False,
             past_policy_probability=args.past_policy_probability,
+            torch_threads=args.torch_threads,
         )
         for group in ppo.actor_optim.param_groups:
             group["lr"] = args.learning_rate
@@ -566,6 +577,7 @@ def main() -> None:
                 "games_per_iteration": args.games,
                 "update_epochs": args.update_epochs,
                 "batch_size": args.batch_size,
+                "torch_threads": args.torch_threads,
                 "temperature": args.temperature,
                 "kl_coefficient": args.kl_coefficient,
                 "target_kl": args.target_kl,

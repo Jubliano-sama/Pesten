@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import copy
 import contextlib
+import hashlib
 import io
 import json
 import os
@@ -57,6 +58,28 @@ def _seed_everything(seed: int) -> None:
     torch.manual_seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
+
+
+def _module_sha256(module: torch.nn.Module) -> str:
+    digest = hashlib.sha256()
+    for name, tensor in sorted(module.state_dict().items()):
+        value = tensor.detach().cpu().contiguous()
+        digest.update(name.encode("utf-8"))
+        digest.update(str(value.dtype).encode("ascii"))
+        digest.update(np.asarray(value.shape, dtype=np.int64).tobytes())
+        digest.update(value.numpy().tobytes())
+    return digest.hexdigest()
+
+
+def _rollout_sha256(batch) -> str:
+    digest = hashlib.sha256()
+    for tensor in batch[:4]:
+        value = tensor.detach().cpu().contiguous()
+        digest.update(str(value.dtype).encode("ascii"))
+        digest.update(np.asarray(value.shape, dtype=np.int64).tobytes())
+        digest.update(value.numpy().tobytes())
+    digest.update(np.asarray(batch[4], dtype=np.int64).tobytes())
+    return digest.hexdigest()
 
 
 def _training_update(ppo, batch, temperature: float) -> dict:
@@ -200,6 +223,7 @@ def _worker(args) -> dict:
         compile_updates=(
             args.compile_updates and torch.cuda.is_available()
         ),
+        torch_threads=args.threads,
     )
     generator = (
         ppo.generate_data
@@ -277,6 +301,7 @@ def _worker(args) -> dict:
         "thermal_state": args.thermal_state,
         "seed": args.seed,
         "episodes": args.episodes,
+        "rollout_sha256": _rollout_sha256(batch),
         "environment_turns": metrics["environment_turns"],
         "collected_policy_decisions": decisions,
         "episode_samples": len(batch[4]),
@@ -302,6 +327,9 @@ def _worker(args) -> dict:
         "actor_update_device": str(ppo.actor_device),
         "critic_update_device": str(ppo.device),
         "compiled_updates": ppo.compile_updates,
+        "torch_threads": ppo.torch_threads,
+        "actor_state_sha256": _module_sha256(ppo.actor),
+        "critic_state_sha256": _module_sha256(ppo.critic),
         "rollout_buffer_peak_mib": (
             metrics["peak_buffer_bytes"] / (1024 * 1024)
         ),

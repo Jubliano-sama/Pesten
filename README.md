@@ -105,6 +105,16 @@ orbit averaging. The draw-retry adapter permits exactly the newly drawn card
 or pass on the immediate retry. If the checkpoint is absent or its digest does
 not match, startup fails explicitly instead of selecting another model.
 
+To verify the tracked champion, one-way claim ledger, raw sealed records,
+summary, and report without running any games:
+
+```bash
+python verify_autoresearch_release.py
+```
+
+Add `--verify-bootstrap-cis` to replay the recorded confidence intervals with
+bounded memory. The verifier imports no game engine or benchmark evaluator.
+
 ### 2. Train the RL Agent
 
 The `ppo2.py` script trains the neural network agent using Reinforcement Learning. It will periodically save model checkpoints (`ppo_actor_*.pth`, `ppo_critic_*.pth`).
@@ -120,6 +130,8 @@ python ppo2.py --iterations 200 --episodes 1000 --agent_sets "smart,rl;random,rl
 *   `--iterations`: Number of training iterations.
 *   `--episodes`: Number of game episodes to generate for data collection in each iteration.
 *   `--agent_sets`: Semicolon-separated lists of opponents for training games. `rl` refers to the agent being trained, and `self` refers to another instance of the same agent.
+*   `--torch-threads`: PyTorch CPU thread count. The profiled default is 8;
+    override it when the host has a materially different CPU topology.
 
 ### 3. Distill a Trained Model
 

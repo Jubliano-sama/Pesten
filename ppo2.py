@@ -6,6 +6,7 @@ from torch.distributions import Categorical
 import hashlib
 import os
 import random
+from numbers import Integral
 from contextlib import nullcontext
 from tqdm import tqdm
 import logging
@@ -38,6 +39,7 @@ from batched_pesten import (
 from seed_integrity import DEVELOPMENT_SEED_LIMIT
 
 DEFAULT_ROLLOUT_TEMPERATURE = 0.8
+DEFAULT_TORCH_THREADS = 8
 
 
 def non_rl_policy_kind(agent_type):
@@ -355,7 +357,18 @@ class PPO_Supervised:
                  rollout_batch_size=256,
                  training_actor_device="auto",
                  compile_updates=None,
-                 past_policy_probability=0.2):
+                 past_policy_probability=0.2,
+                 torch_threads=DEFAULT_TORCH_THREADS):
+        if (
+            isinstance(torch_threads, bool)
+            or not isinstance(torch_threads, Integral)
+            or torch_threads < 1
+        ):
+            raise ValueError("torch_threads must be a positive integer")
+        # Small dense actor/critic updates and shrinking rollout batches
+        # oversubscribe badly at the common 16-thread host default.
+        self.torch_threads = int(torch_threads)
+        torch.set_num_threads(self.torch_threads)
         self._init_hyperparameters()
         if (
             not np.isfinite(past_policy_probability)
@@ -879,6 +892,7 @@ class PPO_Supervised:
 
         aggregate_metrics.update(
             {
+                "torch_threads": self.torch_threads,
                 "past_policy_probability": self.past_policy_probability,
                 "past_policy_eligible_games": past_policy_eligible_games,
                 "past_policy_games": past_policy_games,
@@ -1145,6 +1159,17 @@ def main():
         help="number of independent games advanced in each vectorized batch",
     )
     parser.add_argument(
+        "--torch_threads",
+        "--torch-threads",
+        dest="torch_threads",
+        type=int,
+        default=DEFAULT_TORCH_THREADS,
+        help=(
+            "PyTorch intra-op threads for rollout and PPO updates "
+            f"(default: {DEFAULT_TORCH_THREADS})"
+        ),
+    )
+    parser.add_argument(
         "--training_actor_device",
         choices=("auto", "cpu", "cuda"),
         default="auto",
@@ -1198,7 +1223,8 @@ def main():
                          rollout_batch_size=args.rollout_batch_size,
                          training_actor_device=args.training_actor_device,
                          compile_updates=args.compile_updates,
-                         past_policy_probability=args.past_policy_probability)
+                         past_policy_probability=args.past_policy_probability,
+                         torch_threads=args.torch_threads)
     ppo.save_freq = args.save_freq
     ppo.learn(num_iterations=args.iterations, episodes_per_iter=args.episodes, temperature=args.temperature,
               eval_freq=args.eval_freq, eval_episodes=args.eval_episodes, agent_sets=agent_sets)

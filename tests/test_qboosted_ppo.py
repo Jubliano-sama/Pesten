@@ -15,6 +15,7 @@ from qboosted_ppo import (
     validate_development_seed,
     validate_public_observations,
 )
+from ppo2 import DEFAULT_TORCH_THREADS
 
 
 def test_qboost_estimator_matches_hand_computed_expected_sarsa_trace():
@@ -277,6 +278,7 @@ def test_zero_qcritic_warmup_is_a_backward_compatible_noop():
     parser = build_argument_parser()
     defaults = parser.parse_args(["--output-dir", "pilot"])
     assert defaults.q_warmup_iterations == 0
+    assert defaults.torch_threads == DEFAULT_TORCH_THREADS
     configured = parser.parse_args(
         [
             "--output-dir",
@@ -287,6 +289,8 @@ def test_zero_qcritic_warmup_is_a_backward_compatible_noop():
             "64",
             "--q-warmup-epochs",
             "5",
+            "--torch-threads",
+            "3",
         ]
     )
     assert (
@@ -294,6 +298,7 @@ def test_zero_qcritic_warmup_is_a_backward_compatible_noop():
         configured.q_warmup_games,
         configured.q_warmup_epochs,
     ) == (3, 64, 5)
+    assert configured.torch_threads == 3
 
 
 class MutatingTinyPPO(TinyPPO):

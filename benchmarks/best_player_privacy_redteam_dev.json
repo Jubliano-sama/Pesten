@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "scope": "development-only canonical best-player privacy red team",
+  "development_seed": 89707031,
+  "all_seeds_below_92m": true,
+  "checkpoint_sha256": "aac589b3c7300895604e6c77755631ab4a31c8bf9810768448ab2f3ff5bbe186",
+  "production_changes": false,
+  "coverage": {
+    "player_counts": [2, 3, 4, 5, 6, 7],
+    "every_absolute_best_player_seat": true,
+    "phases": [
+      "ordinary",
+      "penalty",
+      "suit_change",
+      "draw_retry"
+    ],
+    "paired_hidden_worlds_per_case": 2,
+    "paired_cases": 108,
+    "policy_decisions": 216
+  },
+  "tripwires": {
+    "opponent_hand_identity_access_raises": true,
+    "only_public_opponent_hand_count_allowed": true,
+    "draw_pile_identity_or_order_access_raises": true,
+    "discard_pile_identity_or_order_access_raises": true,
+    "game_state_field_reads_are_allowlisted": true
+  },
+  "results": {
+    "hidden_object_accesses": 0,
+    "paired_hidden_world_action_mismatches": 0,
+    "illegal_actions": 0,
+    "status": "pass"
+  }
+}

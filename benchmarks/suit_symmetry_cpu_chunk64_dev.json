@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "scope": "common-development performance evidence",
+  "checkpoint_sha256": "aac589b3c7300895604e6c77755631ab4a31c8bf9810768448ab2f3ff5bbe186",
+  "device": "cpu",
+  "torch_threads": 1,
+  "production_default_changed": false,
+  "reference_base_chunk_size": 512,
+  "opt_in_base_chunk_size": 64,
+  "inference_profile": {
+    "rounds": 3,
+    "rows": [
+      {
+        "batch_size": 1,
+        "logits_bit_exact": true,
+        "actions_exact": true,
+        "reference_milliseconds": 1.4229694499954348,
+        "opt_in_milliseconds": 1.450218469981337,
+        "speedup": 0.9812104034323513,
+        "largest_actor_activation_bytes": {
+          "reference": 208224,
+          "opt_in": 208224
+        }
+      },
+      {
+        "batch_size": 64,
+        "logits_bit_exact": true,
+        "actions_exact": true,
+        "reference_milliseconds": 66.88867074990412,
+        "opt_in_milliseconds": 67.43926837498293,
+        "speedup": 0.9918356524567065,
+        "largest_actor_activation_bytes": {
+          "reference": 13326336,
+          "opt_in": 13326336
+        }
+      },
+      {
+        "batch_size": 512,
+        "logits_bit_exact": true,
+        "actions_exact": true,
+        "reference_milliseconds": 677.9692334985157,
+        "opt_in_milliseconds": 452.52556200102845,
+        "speedup": 1.4981899155057563,
+        "largest_actor_activation_bytes": {
+          "reference": 106610688,
+          "opt_in": 13326336
+        }
+      }
+    ]
+  },
+  "fresh_development_game_parity": {
+    "base_seed": 87607031,
+    "all_deal_seeds_below_92m": true,
+    "pairs_per_matchup": 100,
+    "games": 1400,
+    "direct_outcomes_exact": true,
+    "pool_outcomes_exact": true,
+    "turn_counts_exact": true,
+    "reference": {
+      "elapsed_seconds": 26.20712138300223,
+      "games_per_second": 53.42059433158618
+    },
+    "opt_in": {
+      "elapsed_seconds": 18.70733655799995,
+      "games_per_second": 74.836949432083,
+      "speedup": 1.4009007269287137
+    }
+  },
+  "rejected_approaches": {
+    "flattened_gathers": "bit-exact but neutral or inconsistent",
+    "specialized_student_eval": "bit-exact but only marginal at small batches and inconsistent at batch 512",
+    "torchscript": "not bit-exact and not faster",
+    "torch_compile": "not bit-exact, 9.35 second cold start, modest warm gain"
+  }
+}

@@ -195,9 +195,10 @@ def scan_recorded_seed_interval(
 ) -> list[RecordedSeedUse]:
     """Return every recorded game/development seed inside ``[start, end)``.
 
-    Output artifacts with ``sealed`` in their filename are skipped by default:
-    once a final evaluation is intentionally run, its seeds belong in the
-    reserved interval.  Development artifacts must never appear in the result.
+    Output artifacts with ``sealed`` in their filename and explicit
+    ``sealed_evaluation`` sections in combined release summaries are skipped by
+    default: once a final evaluation is intentionally run, its seeds belong in
+    the reserved interval. Development siblings are still scanned.
     """
     if not 0 <= start < end <= 2**32:
         raise ValueError("seed interval must be a non-empty uint32 range")
@@ -206,6 +207,20 @@ def scan_recorded_seed_interval(
         if allow_sealed_results and "sealed" in path.name.lower():
             continue
         for document in _iter_json_documents(path):
+            if (
+                allow_sealed_results
+                and isinstance(document, dict)
+                and isinstance(document.get("sealed_evaluation"), dict)
+            ):
+                # Release summaries may combine development evidence with an
+                # intentional sealed-result section. Keep scanning every
+                # sibling while excluding only that explicitly labelled
+                # one-way result.
+                document = {
+                    key: value
+                    for key, value in document.items()
+                    if key != "sealed_evaluation"
+                }
             for key_path, seed in _iter_seed_values(document):
                 if start <= seed < end:
                     uses.append(

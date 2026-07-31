@@ -52,6 +52,41 @@ def test_scanner_finds_retired_interval_contamination(tmp_path):
     ]
 
 
+def test_scanner_omits_only_explicit_sealed_summary_section(tmp_path):
+    root = tmp_path / "benchmarks"
+    root.mkdir()
+    summary = root / "autoresearch_summary.json"
+    summary.write_text(
+        json.dumps(
+            {
+                "sealed_evaluation": {
+                    "base_seed": SEALED_SEED_START,
+                    "deal_seed": SEALED_SEED_START + 1,
+                },
+                "development_evidence": {
+                    "deal_seed": SEALED_SEED_START + 2,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    allowed = scan_recorded_seed_interval((root,))
+    assert [(use.key_path, use.seed) for use in allowed] == [
+        ("development_evidence.deal_seed", SEALED_SEED_START + 2)
+    ]
+
+    included = scan_recorded_seed_interval(
+        (root,),
+        allow_sealed_results=False,
+    )
+    assert [(use.key_path, use.seed) for use in included] == [
+        ("sealed_evaluation.base_seed", SEALED_SEED_START),
+        ("sealed_evaluation.deal_seed", SEALED_SEED_START + 1),
+        ("development_evidence.deal_seed", SEALED_SEED_START + 2),
+    ]
+
+
 def test_development_hash_generators_cannot_enter_active_namespace():
     seeds = {
         derive_deal_seed(20_260_731, namespace, pair_index)

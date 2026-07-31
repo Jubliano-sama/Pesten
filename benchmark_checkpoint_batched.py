@@ -107,14 +107,24 @@ def build_game_specs(
     unknown = sorted(set(pool_names) - set(FIXED_POOL))
     if unknown:
         raise ValueError(f"unknown pool policies: {', '.join(unknown)}")
+    if len(set(pool_names)) != len(pool_names):
+        raise ValueError("pool policies must be unique")
+    required_deals = pairs * (1 + len(pool_names))
+    if required_deals > UNSEALED_SEED_LIMIT:
+        raise ValueError(
+            "requested distinct deals exceed the unsealed seed namespace"
+        )
 
     specs: list[BatchGameSpec] = []
     seen_distinct_deals: set[int] = set()
 
     def deal_seed(namespace: str, pair_index: int) -> int:
         seed = derive_unsealed_seed(base_seed, namespace, pair_index)
-        if seed in seen_distinct_deals:
-            raise RuntimeError("derived evaluation seed collision")
+        # Preserve every historical non-colliding seed. At large development
+        # sweeps, resolve the inevitable birthday collisions deterministically
+        # instead of aborting the benchmark.
+        while seed in seen_distinct_deals:
+            seed = (seed + 1) % UNSEALED_SEED_LIMIT
         seen_distinct_deals.add(seed)
         return seed
 
@@ -394,20 +404,73 @@ def assemble_benchmark_payload(
 ) -> dict:
     if len(specs) != len(outcomes):
         raise ValueError("spec and outcome counts differ")
-    indexed = list(zip(specs, outcomes))
+    if pairs < 1:
+        raise ValueError("pairs must be positive")
+    if len(set(pool_names)) != len(pool_names):
+        raise ValueError("pool policies must be unique")
+    direct_index: dict[
+        int,
+        list[tuple[BatchGameSpec, BatchGameOutcome]],
+    ] = {}
+    pool_index: dict[
+        tuple[str | None, int, str],
+        list[tuple[BatchGameSpec, BatchGameOutcome]],
+    ] = {}
+    for spec, outcome in zip(specs, outcomes):
+        if not 0 <= spec.pair_index < pairs:
+            raise ValueError("spec pair_index is outside requested pairs")
+        if spec.section == "direct":
+            if spec.opponent is not None or spec.evaluated_key != "candidate":
+                raise ValueError("malformed direct benchmark spec")
+            direct_index.setdefault(spec.pair_index, []).append((spec, outcome))
+        elif spec.section == "pool":
+            if (
+                spec.opponent not in pool_names
+                or spec.evaluated_key not in ("candidate", "parent")
+            ):
+                raise ValueError("malformed pool benchmark spec")
+            pool_index.setdefault(
+                (spec.opponent, spec.pair_index, spec.evaluated_key),
+                [],
+            ).append((spec, outcome))
+        else:
+            raise ValueError(f"unknown benchmark spec section: {spec.section}")
+
+    def validated_pair(
+        selected: Sequence[tuple[BatchGameSpec, BatchGameOutcome]],
+        *,
+        label: str,
+    ) -> tuple[int, list[BatchGameOutcome]]:
+        if len(selected) != 2:
+            raise ValueError(f"{label} must contain exactly two games")
+        selected_specs = [spec for spec, _ in selected]
+        seats = [spec.evaluated_seat for spec in selected_specs]
+        if seats != [0, 1]:
+            raise ValueError(
+                f"{label} must contain rotated seats 0 and 1 in order"
+            )
+        deal_seeds = {spec.deal_seed for spec in selected_specs}
+        if len(deal_seeds) != 1:
+            raise ValueError(f"{label} games must share one deal seed")
+        for spec, outcome in selected:
+            if outcome.evaluated_seat != spec.evaluated_seat:
+                raise ValueError(
+                    f"{label} outcome evaluated seat differs from its spec"
+                )
+        return deal_seeds.pop(), [outcome for _, outcome in selected]
 
     direct_pairs = []
     for pair_index in range(pairs):
-        selected = [
-            (spec, outcome)
-            for spec, outcome in indexed
-            if spec.section == "direct" and spec.pair_index == pair_index
-        ]
+        selected = direct_index.get(pair_index, [])
+        deal_seed, pair_outcomes = validated_pair(
+            selected,
+            label=f"direct pair {pair_index}",
+        )
         direct_pairs.append(
             _seat_pair_record(
                 pair_index,
-                selected[0][0].deal_seed,
-                [outcome for _, outcome in selected],
+                deal_seed,
+                pair_outcomes,
             )
         )
     direct_advantages = [
@@ -419,33 +482,37 @@ def assemble_benchmark_payload(
     for opponent_name in pool_names:
         records = []
         for pair_index in range(pairs):
-            selected = [
-                (spec, outcome)
-                for spec, outcome in indexed
-                if spec.section == "pool"
-                and spec.opponent == opponent_name
-                and spec.pair_index == pair_index
-            ]
-            candidate_selected = [
-                (spec, outcome)
-                for spec, outcome in selected
-                if spec.evaluated_key == "candidate"
-            ]
-            parent_selected = [
-                (spec, outcome)
-                for spec, outcome in selected
-                if spec.evaluated_key == "parent"
-            ]
-            deal_seed = selected[0][0].deal_seed
+            candidate_selected = pool_index.get(
+                (opponent_name, pair_index, "candidate"),
+                [],
+            )
+            parent_selected = pool_index.get(
+                (opponent_name, pair_index, "parent"),
+                [],
+            )
+            candidate_seed, candidate_outcomes = validated_pair(
+                candidate_selected,
+                label=f"pool {opponent_name} candidate pair {pair_index}",
+            )
+            parent_seed, parent_outcomes = validated_pair(
+                parent_selected,
+                label=f"pool {opponent_name} parent pair {pair_index}",
+            )
+            if candidate_seed != parent_seed:
+                raise ValueError(
+                    f"pool {opponent_name} pair {pair_index} candidate and "
+                    "parent must share one deal seed"
+                )
+            deal_seed = candidate_seed
             candidate_pair = _seat_pair_record(
                 pair_index,
                 deal_seed,
-                [outcome for _, outcome in candidate_selected],
+                candidate_outcomes,
             )
             parent_pair = _seat_pair_record(
                 pair_index,
                 deal_seed,
-                [outcome for _, outcome in parent_selected],
+                parent_outcomes,
             )
             delta = candidate_pair["score"] - parent_pair["score"]
             combined_deltas.append(delta)

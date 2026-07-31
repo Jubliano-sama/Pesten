@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "recorded_on": "2026-07-31",
+  "sealed_outcomes_used": false,
+  "benchmark_payload_assembly": {
+    "decision": "accept one-pass indexing",
+    "workload": {
+      "synthetic_matched_pairs_per_matchup": 5000,
+      "game_records": 70000,
+      "pool_opponents": [
+        "random",
+        "smart",
+        "smarter"
+      ],
+      "bootstrap_samples": 1
+    },
+    "historical_seconds": 36.891452,
+    "optimized_seconds": 0.214057,
+    "speedup": 172.34,
+    "payload_exact": true,
+    "complexity": {
+      "historical": "O(pairs * game_records)",
+      "optimized": "O(game_records + pairs)"
+    }
+  },
+  "bootstrap_resampling": {
+    "decision": "accept bounded complete-row chunks",
+    "maximum_index_elements_per_chunk": 2000000,
+    "maximum_index_bytes_per_chunk": 16000000,
+    "bound_scope": "audited statistic vectors contain at most 15000 values; one complete bootstrap row is the irreducible minimum",
+    "historical_rng_stream_exact": true,
+    "confidence_interval_exact": true
+  },
+  "development_seed_layout": {
+    "decision": "accept deterministic linear probing on hash collisions",
+    "workload": {
+      "base_seed": 17731,
+      "matched_deals": 20000,
+      "game_records": 70000,
+      "raw_hash_collisions": 3
+    },
+    "result": {
+      "unique_deal_seeds": 20000,
+      "all_below_unsealed_limit": true,
+      "historical_non_colliding_seeds_unchanged": true
+    },
+    "fail_closed_guards": [
+      "duplicate pool names",
+      "requested deals exceeding seed namespace capacity",
+      "mismatched paired deal seeds",
+      "duplicate, out-of-order, or mismatched evaluated seats"
+    ]
+  }
+}

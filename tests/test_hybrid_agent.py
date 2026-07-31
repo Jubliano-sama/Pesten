@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 import torch
@@ -232,6 +233,39 @@ class HybridAgentTests(unittest.TestCase):
             (0.25, 0.25),
         )
 
+    def test_chunked_bootstrap_is_bit_exact_with_historical_one_shot_rng(self):
+        values = np.asarray(
+            [float(index % 7) for index in range(100)],
+            dtype=np.float64,
+        )
+        samples = 101
+        seed = 71
+        generator = np.random.default_rng(seed)
+        indices = generator.integers(
+            0,
+            len(values),
+            size=(samples, len(values)),
+        )
+        tail = (1.0 - 0.95) / 2.0
+        expected = tuple(
+            float(value)
+            for value in np.quantile(
+                values[indices].mean(axis=1),
+                (tail, 1.0 - tail),
+            )
+        )
+
+        with patch(
+            "benchmark_hybrid.BOOTSTRAP_MAX_INDEX_ELEMENTS",
+            len(values),
+        ):
+            actual = bootstrap_mean_ci(
+                values,
+                samples=samples,
+                seed=seed,
+            )
+
+        self.assertEqual(actual, expected)
 
 if __name__ == "__main__":
     unittest.main()

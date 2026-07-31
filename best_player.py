@@ -24,6 +24,8 @@ from hybrid_agent import load_frozen_ppo_actor
 CHAMPION_SHA256 = (
     "aac589b3c7300895604e6c77755631ab4a31c8bf9810768448ab2f3ff5bbe186"
 )
+# Explicit CPU throughput option; the sealed production default remains 512.
+OPT_IN_CPU_BASE_CHUNK_SIZE = 64
 DEFAULT_CHAMPION_PATH = Path(__file__).resolve().with_name(
     "ppo_actor_100run3.pth"
 )

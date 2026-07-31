@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "scope": "development-only non-sealed best-player game profile",
+  "development_base_seed": 89607031,
+  "all_seeds_below_92m": true,
+  "checkpoint_sha256": "aac589b3c7300895604e6c77755631ab4a31c8bf9810768448ab2f3ff5bbe186",
+  "production_projection_unchanged": {
+    "alpha": 1.0,
+    "aggregation": "logits",
+    "ordinary_suit_permutations": 24,
+    "player_orbit_average": false,
+    "base_chunk_size": 512
+  },
+  "profile": {
+    "canonical_30_games_cprofile_seconds": 2.609,
+    "canonical_share": {
+      "frozen_model_and_projection": 0.8428,
+      "complete_observation_construction": 0.0824,
+      "populate_game_context": 0.0468,
+      "action_mask_construction": 0.0257
+    },
+    "batched_300_games_cprofile_seconds": 11.320,
+    "batched_share": {
+      "frozen_model_and_projection": 0.9683,
+      "observation_construction": 0.0096,
+      "action_application": 0.0124
+    }
+  },
+  "accepted_optimization": {
+    "location": "ai_observation.populate_game_context",
+    "change": "type-aware slice writes replace repeated scalar writes",
+    "complexity": "O(players + fixed feature count) before and after",
+    "torch_microbenchmark": {
+      "scalar_microseconds": 57.21639130006224,
+      "optimized_microseconds": 21.19464240004163,
+      "speedup": 2.6995686089023074
+    },
+    "numpy_microbenchmark": {
+      "scalar_microseconds": 2.857329899961769,
+      "optimized_microseconds": 2.4257588998807478,
+      "speedup": 1.177911745516934
+    },
+    "canonical_100_game_median": {
+      "rounds": 3,
+      "scalar_reference_seconds": 6.390456343000551,
+      "optimized_seconds": 6.007913179000752,
+      "speedup": 1.06367321773838,
+      "winner_turn_pairs_exact": true
+    }
+  },
+  "batched_reference": {
+    "games": 300,
+    "turns": 12217,
+    "policy_decisions": 10566,
+    "inference_calls": 181,
+    "elapsed_seconds": 11.534525418002886,
+    "games_per_second": 26.00887241808538,
+    "winner_turn_pairs_sha256": "f6786b5be0284d55ac7cd1b26a0b05fae29f112d4aa8fd9e58573b615f1420ad",
+    "note": "batched observation construction is separate and unchanged"
+  }
+}

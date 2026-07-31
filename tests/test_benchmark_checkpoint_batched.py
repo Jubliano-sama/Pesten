@@ -1,5 +1,7 @@
+import dataclasses
 import random
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 import torch
@@ -13,6 +15,7 @@ from batched_pesten import (
     POLICY_RANDOM,
 )
 from benchmark_checkpoint_batched import (
+    BatchGameOutcome,
     FIXED_POOL,
     UNSEALED_SEED_LIMIT,
     _exact_non_neural_action,
@@ -43,6 +46,23 @@ class HighestCardActor(nn.Module):
         ).expand(len(observations), -1).clone()
         logits[:, -1] = -100.0  # Prefer a card over voluntary pass.
         return logits
+
+
+class SinglePassSequence:
+    """Sequence-like input that exposes accidental repeated full scans."""
+
+    def __init__(self, values):
+        self.values = values
+        self.iterations = 0
+
+    def __len__(self):
+        return len(self.values)
+
+    def __iter__(self):
+        self.iterations += 1
+        if self.iterations > 1:
+            raise AssertionError("input was scanned more than once")
+        return iter(self.values)
 
 
 def policies_and_factories():
@@ -124,6 +144,51 @@ class BatchedCheckpointBenchmarkTests(unittest.TestCase):
         self.assertTrue(
             all(0 <= spec.deal_seed < UNSEALED_SEED_LIMIT for spec in specs)
         )
+
+    def test_large_development_layout_resolves_seed_collisions(self):
+        specs = build_game_specs(
+            pairs=5_000,
+            base_seed=17_731,
+            pool_names=("random", "smart", "smarter"),
+        )
+        distinct_matchup_seeds = {
+            (
+                spec.section,
+                spec.opponent,
+                spec.pair_index,
+                spec.deal_seed,
+            )
+            for spec in specs
+        }
+        unique_deal_seeds = {
+            spec.deal_seed for spec in specs
+        }
+
+        self.assertEqual(len(specs), 70_000)
+        self.assertEqual(len(distinct_matchup_seeds), 20_000)
+        self.assertEqual(len(unique_deal_seeds), 20_000)
+
+    def test_development_layout_rejects_duplicate_pools_and_seed_exhaustion(self):
+        with self.assertRaisesRegex(ValueError, "pool policies must be unique"):
+            build_game_specs(
+                pairs=1,
+                base_seed=17_731,
+                pool_names=("random", "random"),
+            )
+
+        with patch(
+            "benchmark_checkpoint_batched.UNSEALED_SEED_LIMIT",
+            3,
+        ):
+            with self.assertRaisesRegex(
+                ValueError,
+                "exceed the unsealed seed namespace",
+            ):
+                build_game_specs(
+                    pairs=2,
+                    base_seed=1,
+                    pool_names=("random",),
+                )
 
     def test_random_suit_choice_uses_canonical_python_rng_stream(self):
         seed = 88_123
@@ -223,6 +288,124 @@ class BatchedCheckpointBenchmarkTests(unittest.TestCase):
             set(FIXED_POOL),
             {"random", "smart", "smarter"},
         )
+
+    def test_payload_indexes_specs_in_one_pass(self):
+        pairs = 3
+        pool_names = ("random", "smart", "smarter")
+        specs = build_game_specs(
+            pairs=pairs,
+            base_seed=4_210_778,
+            pool_names=pool_names,
+        )
+        outcomes = [
+            BatchGameOutcome(
+                evaluated_seat=spec.evaluated_seat,
+                winner=spec.evaluated_seat,
+                result="win",
+                score=1.0,
+                turns=10,
+            )
+            for spec in specs
+        ]
+        single_pass_specs = SinglePassSequence(specs)
+
+        payload = assemble_benchmark_payload(
+            single_pass_specs,
+            outcomes,
+            pairs=pairs,
+            base_seed=4_210_778,
+            pool_names=pool_names,
+            bootstrap_samples=10,
+        )
+
+        self.assertEqual(single_pass_specs.iterations, 1)
+        self.assertEqual(len(payload["direct"]["per_pair"]), pairs)
+
+    def test_payload_rejects_malformed_pair_identity(self):
+        pairs = 1
+        pool_names = ("random",)
+        specs = build_game_specs(
+            pairs=pairs,
+            base_seed=4_210_779,
+            pool_names=pool_names,
+        )
+        outcomes = [
+            BatchGameOutcome(
+                evaluated_seat=spec.evaluated_seat,
+                winner=spec.evaluated_seat,
+                result="win",
+                score=1.0,
+                turns=10,
+            )
+            for spec in specs
+        ]
+
+        mismatched_seed_specs = list(specs)
+        for index, spec in enumerate(mismatched_seed_specs):
+            if spec.section == "pool" and spec.evaluated_key == "parent":
+                mismatched_seed_specs[index] = dataclasses.replace(
+                    spec,
+                    deal_seed=spec.deal_seed + 1,
+                )
+        with self.assertRaisesRegex(
+            ValueError,
+            "candidate and parent must share one deal seed",
+        ):
+            assemble_benchmark_payload(
+                mismatched_seed_specs,
+                outcomes,
+                pairs=pairs,
+                base_seed=4_210_779,
+                pool_names=pool_names,
+                bootstrap_samples=10,
+            )
+
+        duplicate_seat_specs = list(specs)
+        duplicate_seat_specs[1] = dataclasses.replace(
+            duplicate_seat_specs[1],
+            evaluated_seat=0,
+        )
+        with self.assertRaisesRegex(ValueError, "rotated seats 0 and 1"):
+            assemble_benchmark_payload(
+                duplicate_seat_specs,
+                outcomes,
+                pairs=pairs,
+                base_seed=4_210_779,
+                pool_names=pool_names,
+                bootstrap_samples=10,
+            )
+
+        reversed_specs = list(specs)
+        reversed_outcomes = list(outcomes)
+        reversed_specs[:2] = reversed(reversed_specs[:2])
+        reversed_outcomes[:2] = reversed(reversed_outcomes[:2])
+        with self.assertRaisesRegex(ValueError, "seats 0 and 1 in order"):
+            assemble_benchmark_payload(
+                reversed_specs,
+                reversed_outcomes,
+                pairs=pairs,
+                base_seed=4_210_779,
+                pool_names=pool_names,
+                bootstrap_samples=10,
+            )
+
+        mismatched_outcomes = list(outcomes)
+        mismatched_outcomes[1] = dataclasses.replace(
+            mismatched_outcomes[1],
+            evaluated_seat=0,
+        )
+        with self.assertRaisesRegex(
+            ValueError,
+            "outcome evaluated seat differs",
+        ):
+            assemble_benchmark_payload(
+                specs,
+                mismatched_outcomes,
+                pairs=pairs,
+                base_seed=4_210_779,
+                pool_names=pool_names,
+                bootstrap_samples=10,
+            )
 
 
 if __name__ == "__main__":

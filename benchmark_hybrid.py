@@ -30,6 +30,7 @@ import smartAgent
 
 
 DEFAULT_FIXED_POOL = ("random", "smart", "smarter")
+BOOTSTRAP_MAX_INDEX_ELEMENTS = 2_000_000
 
 
 @dataclass(frozen=True)
@@ -149,12 +150,24 @@ def bootstrap_mean_ci(
     if not 0.0 < confidence < 1.0:
         raise ValueError("confidence must be between zero and one")
     generator = np.random.default_rng(seed)
-    indices = generator.integers(
-        0,
-        len(values),
-        size=(samples, len(values)),
+    # Generate the same row-major random stream as the historical one-shot
+    # allocation, but keep peak temporary storage bounded for large sealed
+    # evaluations.  Splitting only on complete bootstrap rows preserves each
+    # resample and the exact RNG sequence.
+    rows_per_chunk = max(
+        1,
+        BOOTSTRAP_MAX_INDEX_ELEMENTS // len(values),
     )
-    means = values[indices].mean(axis=1)
+    mean_chunks = []
+    for start in range(0, samples, rows_per_chunk):
+        chunk_rows = min(rows_per_chunk, samples - start)
+        indices = generator.integers(
+            0,
+            len(values),
+            size=(chunk_rows, len(values)),
+        )
+        mean_chunks.append(values[indices].mean(axis=1))
+    means = np.concatenate(mean_chunks)
     tail = (1.0 - confidence) / 2.0
     low, high = np.quantile(means, (tail, 1.0 - tail))
     return float(low), float(high)

@@ -1,0 +1,65 @@
+{
+  "after": {
+    "median_seconds": 0.4945749159978732,
+    "seconds": [
+      0.4946596119989408,
+      0.48611296200033394,
+      0.6331622629986668,
+      0.5166892359993653,
+      0.4667058580016601,
+      0.49449021999680554,
+      0.47557305000009364,
+      0.46041290600260254,
+      0.5634792870005185,
+      0.5309059110004455
+    ]
+  },
+  "before": {
+    "median_seconds": 0.6196001164989866,
+    "seconds": [
+      0.6628834170005575,
+      0.6248926280022715,
+      0.6185475640013465,
+      0.6548908139993728,
+      0.6294097499994677,
+      0.6189433789986651,
+      0.6120746389970009,
+      0.611000677003176,
+      0.6193680940014019,
+      0.6198321389965713
+    ]
+  },
+  "benchmark": "vectorized_rollout_immutable_card_tables",
+  "parity": {
+    "episode_lengths_exact": true,
+    "samples": 5282,
+    "scalar_fields_exact": [
+      "environment_turns",
+      "completed_games",
+      "policy_decisions",
+      "inference_calls",
+      "peak_buffer_bytes",
+      "wins",
+      "draws"
+    ],
+    "tensor_fields_bit_exact": [
+      "observations",
+      "actions",
+      "log_probabilities",
+      "rewards"
+    ]
+  },
+  "schema_version": 1,
+  "seed_audit": {
+    "development_only": true,
+    "sealed_outcomes_used": false
+  },
+  "speedup": 1.2527932502376466,
+  "workload": {
+    "games": 256,
+    "max_turns": 300,
+    "repeats": 10,
+    "seed_start": 84340001,
+    "torch_threads": 8
+  }
+}

@@ -9,6 +9,7 @@ from best_player import (
     CHAMPION_SHA256,
     DEFAULT_CHAMPION_PATH,
     INFORMATION_BOUNDARY,
+    OPT_IN_CPU_BASE_CHUNK_SIZE,
     BestPlayerConfig,
     load_batched_actor,
     load_best_player,
@@ -75,6 +76,8 @@ def test_defaults_pin_exact_current_champion_and_suit_only_projection():
     assert config.alpha == 1.0
     assert config.aggregation == "logits"
     assert not config.player_orbit_average
+    assert config.base_chunk_size == 512
+    assert OPT_IN_CPU_BASE_CHUNK_SIZE == 64
     assert verify_champion(config.model_path) == CHAMPION_SHA256
 
 

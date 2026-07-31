@@ -6,6 +6,7 @@ from ai_observation import (
     ACTION_COUNT,
     COMPATIBLE_START,
     DIRECTION_INDEX,
+    MODE_INDEX,
     OBSERVATION_SIZE,
     PASS_ACTION,
     PLAYER_HAND_SIZES_START,
@@ -18,7 +19,11 @@ from batched_pesten import (
     PHASE_DRAW_RETRY,
     POLICY_RL,
 )
-from batched_suit_symmetry import BatchedSuitAveragedActor
+from batched_suit_symmetry import (
+    SUIT_PERMUTATIONS,
+    BatchedSuitAveragedActor,
+    _permutation_indices,
+)
 from benchmark_checkpoint_batched import (
     build_game_specs,
     run_batched_specs,
@@ -69,6 +74,52 @@ class CountingReverseActor(StableSuitBiasedActor):
         return -super().forward(observations)
 
 
+class AdversarialTieActor(torch.nn.Module):
+    """Pointwise actor with deliberate ties and extreme finite logits."""
+
+    def forward(self, observations):
+        logits = observations[:, :ACTION_COUNT].clone()
+        shared = observations[:, 0] - observations[:, 49]
+        logits[:, 0] = shared
+        logits[:, 12] = shared
+        logits[:, 48] = 1.0e20
+        logits[:, 49] = 1.0e20
+        logits[:, 50:54] = -1.0e20
+        logits[:, PASS_ACTION] = 0.0
+        return logits
+
+
+def frozen_commit_suit_only_logits(actor, observations):
+    """The suit-only tensor program frozen in commit 7de18e0."""
+    observation_indices, action_indices = _permutation_indices()
+    observation_indices = observation_indices.to(observations.device)
+    action_indices = action_indices.to(observations.device)
+    transformed = torch.gather(
+        observations.unsqueeze(1).expand(
+            -1, len(SUIT_PERMUTATIONS), -1
+        ),
+        dim=2,
+        index=observation_indices.unsqueeze(0).expand(
+            len(observations), -1, -1
+        ),
+    )
+    transformed_logits = actor(
+        transformed.reshape(-1, OBSERVATION_SIZE)
+    ).reshape(
+        len(observations),
+        len(SUIT_PERMUTATIONS),
+        ACTION_COUNT,
+    )
+    mapped_back = torch.gather(
+        transformed_logits,
+        dim=-1,
+        index=action_indices.unsqueeze(0).expand(
+            len(observations), -1, -1
+        ),
+    )
+    return mapped_back.mean(dim=1)
+
+
 def fixture_observations(count=7):
     generator = torch.Generator().manual_seed(19)
     observations = torch.randn(
@@ -81,6 +132,37 @@ def fixture_observations(count=7):
     ).float()
     observations[:, 105] = 0
     return observations
+
+
+def test_cpu_chunking_is_bit_exact_against_frozen_commit_on_ties():
+    actor = AdversarialTieActor()
+    values = torch.linspace(
+        -1.0e10,
+        1.0e10,
+        steps=129 * OBSERVATION_SIZE,
+    )
+    observations = values.reshape(129, OBSERVATION_SIZE)
+    observations[:, COMPATIBLE_START:COMPATIBLE_START + 50] = (
+        observations[:, COMPATIBLE_START:COMPATIBLE_START + 50] > 0
+    )
+    observations[::2, MODE_INDEX] = 0
+    observations[1::2, MODE_INDEX] = 1
+    wrapper = BatchedSuitAveragedActor(
+        actor,
+        alpha=1.0,
+        aggregation="logits",
+        base_chunk_size=64,
+    )
+
+    with torch.inference_mode():
+        expected = frozen_commit_suit_only_logits(actor, observations)
+        actual = wrapper(observations)
+
+    assert torch.equal(actual, expected)
+    masks = build_action_masks(observations)
+    expected_actions = expected.masked_fill(~masks, -torch.inf).argmax(-1)
+    actual_actions = actual.masked_fill(~masks, -torch.inf).argmax(-1)
+    assert torch.equal(actual_actions, expected_actions)
 
 
 def test_alpha_zero_is_bit_exact_legacy_and_skips_augmentation():

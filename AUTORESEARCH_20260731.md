@@ -57,6 +57,9 @@ Rejected after matched-deal evaluation:
 - naive PPO continuation and aggressive anchored PPO;
 - tactical shielding and public-belief/Bayesian search;
 - causal transformer, GRU/LSTM, tiny decoder, and SmolLM2 imitation adapters;
+- a persistent `gpt-5.6-luna` player with cross-game context: it remained
+  information-safe and legal, but lost 7-13 to the unprojected incumbent in
+  its exploratory 20-game match;
 - population distillation and a 10,000-game causal imitation run;
 - confidence gates, temporal ensembles, and checkpoint interpolation;
 - naive public-history auxiliary prediction;
@@ -125,6 +128,39 @@ player-label orbit did not improve either result.
 - The full player-label+suit orbit reached 226 games/s on CUDA in one
   2,800-game run, but was rejected for strength and portability reasons.
 
+### Post-selection exact-semantics optimization
+
+After the player and one-way result were frozen, only changes proven to retain
+the same observations, actions, outcomes, and (for training paths) downstream
+parameter updates were accepted:
+
+- capping PyTorch CPU execution at the profiled eight-thread default reduced a
+  representative 512-game PPO iteration from 43.43 seconds at 16 threads to
+  17.55 seconds; a fresh post-lookup sweep across 4/6/8/10/12 threads again
+  selected 8 (13.31 seconds median). The setting remains configurable and is
+  recorded in recipes;
+- immutable card/rank/compatibility lookup tables and one-pass Smart scoring
+  reduced a 256-game rollout from 0.620 to 0.495 seconds (`1.253x`), with
+  bit-exact rollout tensors and downstream SGD state;
+- type-aware public-context slice writes reduced canonical 100-game execution
+  from 6.390 to 6.008 seconds (`1.064x`) with exact observations, logits,
+  actions, winners, and turn counts;
+- the opt-in CPU suit-inference chunk size 64 is neutral for batch 1, but
+  reduces the largest estimated actor activation at batch 512 from 106.6 MB to
+  13.3 MB and improved a 1,400-game development benchmark `1.40x`. The frozen
+  production default remains 512;
+- one-pass benchmark result indexing reduced synthetic assembly of the exact
+  70,000-game result shape from 36.89 to 0.214 seconds (`172x`) while producing
+  the same nested payload, and bootstrap resampling now preserves the exact
+  historical RNG stream in bounded chunks;
+- a 5,000-pair development layout now resolves its three hash collisions
+  deterministically, preserving every non-colliding historical seed and
+  yielding 20,000 distinct deals instead of aborting.
+
+CPU compilation and gradient microbatching were rejected despite warm speed or
+memory gains because they changed fixed-seed model state. Full production
+compilation remains appropriate only on the already-supported CUDA path.
+
 ## Research basis
 
 - Group averaging is the exact invariance projection used by the selected
@@ -140,6 +176,12 @@ player-label orbit did not improve either result.
 - The information-safe Q-boost experiment was inspired by
   <https://arxiv.org/abs/2605.19235>, but deliberately did not use that paper's
   centralized privileged critic.
+- A July 2026 Gin Rummy study independently found that larger attention,
+  recurrent, and live-LLM agents did not break its information ceiling, while
+  trust-region updates, curricula, warm starts, and checkpoint selection were
+  useful. That result supports testing all of those lanes here without
+  assuming that capacity alone would win:
+  <https://arxiv.org/abs/2607.06854>.
 
 ## Final selection
 
@@ -171,6 +213,11 @@ result SHA-256 is
 the atomic claim-ledger SHA-256 is
 `21d6f27508e29b97adc8708d7d76f2a2a5dadf6b67469ed34dde7073b3cb03eb`.
 
-Final verification: 314 tests passed, 4 skipped, all 1,152 subtests passed;
-compilation, diff checks, exact checkpoint verification, canonical/batched
-parity, information-boundary tests, and sealed-protocol guards passed.
+Final verification after the semantics-preserving performance pass: 357 tests
+passed, 4 skipped, and all 1,152 equivalence subtests passed. Active privacy
+tripwires covered 216 decisions across 2–7 players, every absolute seat, and
+ordinary, penalty, suit-change, and draw-retry phases: opponent-card and pile
+access remained zero, every action was legal, and paired hidden worlds chose
+identical actions. Compilation, diff checks, exact checkpoint verification,
+canonical/batched parity, the recorded-artifact-only release verifier, and
+sealed-protocol guards passed.
