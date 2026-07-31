@@ -10,6 +10,8 @@ if not str(getattr(pufferlib, "__version__", "")).startswith("4"):
 from temporal_reward_league import (
     pfsp_weights,
     save_reward_checkpoint,
+    snapshot,
+    synchronize_cpu_shadow,
     train_reward_population,
 )
 from temporal_puffer_v4 import NativePufferTemporalPolicy
@@ -58,6 +60,30 @@ def test_reward_checkpoint_proves_random_parentless_lineage(tmp_path):
     assert not lineage["prohibited_training_sources_used"]
 
 
+def test_cpu_shadow_synchronizes_exactly_without_moving_update_policy():
+    torch.manual_seed(63)
+    update_policy = NativePufferTemporalPolicy(hidden_size=16)
+    shadow = snapshot(update_policy)
+    with torch.no_grad():
+        next(update_policy.parameters()).add_(1.0)
+
+    synchronize_cpu_shadow(update_policy, shadow)
+
+    assert next(update_policy.parameters()).device.type == "cpu"
+    assert next(shadow.parameters()).device.type == "cpu"
+    assert not shadow.training
+    for update_tensor, shadow_tensor in zip(
+        update_policy.state_dict().values(),
+        shadow.state_dict().values(),
+    ):
+        torch.testing.assert_close(
+            shadow_tensor,
+            update_tensor,
+            rtol=0,
+            atol=0,
+        )
+
+
 def test_tiny_accepted_training_never_loads_actor_and_has_no_ppo_contribution(
     tmp_path, monkeypatch
 ):
@@ -99,4 +125,11 @@ def test_tiny_accepted_training_never_loads_actor_and_has_no_ppo_contribution(
     assert result["best_checkpoint"]["development_evaluation"][
         "contains_ppo_benchmark"
     ] is False
+    assert result["runtime"]["update_device"] == "cpu"
+    assert result["runtime"]["rollout_device"] == "cpu"
+    assert result["runtime"]["evaluation_device"] == "cpu"
+    assert epoch["execution_devices"]["update"] == "cpu"
+    assert epoch["execution_devices"]["rollout"] == "cpu"
+    assert epoch["execution_devices"]["evaluation"] == "cpu"
+    assert epoch["execution_devices"]["cpu_shadow_sync_seconds"] >= 0
     assert Path(result["accepted_manifest"]["path"]).is_file()

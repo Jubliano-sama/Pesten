@@ -1,0 +1,157 @@
+# Pesten player autoresearch — 2026-07-31
+
+## Scope and selection rule
+
+The player may use its own hand, the public game state, public action history,
+and public hand sizes. It may not read opponent card identities or draw-pile
+order. Training critics follow the same boundary.
+
+The originally proposed sealed interval `[92_000_000, 93_000_000)` is retired:
+the legacy unrestricted hash derivation placed development deal `92_286_746`
+inside it, recorded in six aggressive-anchored screens. The active sealed
+namespace is now `[4_294_000_000, 4_294_900_000)`. The repository-wide
+`seed_integrity.py` scan of every currently recorded JSON/JSONL seed field
+found zero active-namespace uses; updated random and hash-derived development
+generators are bounded below `4_294_000_000`. The active namespace remains
+reserved for one final evaluation after candidate and SHA-256 are frozen.
+All sealed entrypoints share the fixed atomic claim ledger
+`benchmarks/.sealed_evaluation_claim.json`. The ledger binds evaluator,
+candidate SHA-256, configuration, seed block, and output before model loading
+or play; its creation burns the holdout even if evaluation later crashes.
+
+A replacement must improve the matched, seat-rotated fixed-opponent pool
+without a material head-to-head regression against
+`ppo_actor_100run3.pth`. Screens choose candidates; only fresh deal ranges are
+used for confirmation. The final evaluation is protected by both the seed
+namespace and the atomic claim ledger, so changing the output path cannot
+reopen the holdout.
+
+## Incumbent
+
+- Path: `ppo_actor_100run3.pth`
+- SHA-256: `aac589b3c7300895604e6c77755631ab4a31c8bf9810768448ab2f3ff5bbe186`
+- Architecture: 121-feature feed-forward PPO policy, 55 actions
+
+## Correctness repairs
+
+- The batched draw-retry phase and corrected deployment wrapper expose only the
+  newly drawn card and PASS. This preserves executable game semantics but is an
+  intentional correction to the raw legacy actor observation, which exposed
+  every compatible held card before the canonical game accepted only the newly
+  drawn card.
+- Canonical and batched engines reject fabricated, out-of-range, unowned, and
+  incompatible card actions before mutating public state.
+- Batched rollout supports the exact `SmarterAgent` policy.
+- Temporal-to-PPO observation conversion now matches production semantics in
+  ordinary, penalty, draw-retry, and Jack suit-choice states.
+- Anchored PPO checks the pre-update importance ratio and fails before mutation
+  when rollout/update behavior policies disagree.
+- PPO GAE is episode-safe, rollout temperature is consistent, historical
+  actors are frozen/cached, and frozen-champion assignment is configurable and
+  audited.
+
+## Broad development results
+
+Rejected after matched-deal evaluation:
+
+- naive PPO continuation and aggressive anchored PPO;
+- tactical shielding and public-belief/Bayesian search;
+- causal transformer, GRU/LSTM, tiny decoder, and SmolLM2 imitation adapters;
+- population distillation and a 10,000-game causal imitation run;
+- confidence gates, temporal ensembles, and checkpoint interpolation;
+- naive public-history auxiliary prediction;
+- full player-label rotation/reflection averaging: its fresh 500-pair
+  confirmation was neutral (`-0.0017`, CI `[-0.0207, +0.0177]`);
+- the legacy draw-retry correction as a standalone strength wrapper (it
+  remains a required executable-semantics correction);
+- a corrected residual GRU: the first 1,000-pair direct screen was `+0.009`,
+  but two fresh confirmations reduced the aggregate to `+0.0023`, CI
+  `[-0.0039, +0.0086]`;
+- information-safe Q-boosted PPO, potential shaping, champion-heavy PPO, and
+  current-policy self-play. Current-policy iteration 3 briefly reached
+  `+0.0093` pool delta on one common screen, but iteration 10 returned to
+  `+0.0013`, and wrapping iteration 3 in the suit projection was outcome-level
+  indistinguishable from wrapping the incumbent on the same fresh deals;
+- compressed symmetry distillation. It was up to 21.9x faster than exact
+  24-view inference at batch 128, but regressed head-to-head and had pool delta
+  `-0.011` in its gameplay pilot;
+- selective projection and lower-cost player-label subgroups. They are valid
+  and technically useful, but did not clearly beat unconditional suit-only
+  averaging on fresh deals;
+- majority-vote and mean-Borda orbit aggregation. Borda passed its small
+  screen, then regressed by `0.0111` pool score versus mean logits on its
+  disjoint confirmation.
+
+### Selected development candidate
+
+The selected player is the exact frozen incumbent plus full group averaging
+over all 24 relabelings of the four ordinary suits. Each transformed policy
+output is mapped back to the original card/suit actions and the logits are
+averaged before the normal legal-action mask and greedy action selection.
+Special cards and all non-suit public/own-hand features remain fixed.
+
+Across the three durable, disjoint confirmation ranges totaling 1,200 direct
+paired deals and 3,600 paired opponent comparisons:
+
+- direct advantage over the unprojected incumbent: `+0.05083`, bootstrap 95%
+  CI `[+0.01333, +0.08750]`;
+- combined pool delta: `+0.01556`, CI `[+0.00278, +0.02833]`;
+- random delta: `+0.03083`, CI `[+0.00875, +0.05292]`;
+- smart delta: `+0.00667`, CI `[-0.01625, +0.03000]`;
+- smarter delta: `+0.00917`, CI `[-0.01167, +0.03000]`.
+
+The largest individual 500-pair range was positive (`+0.02767`, CI
+`[+0.00833, +0.04767]`); a second 500-pair range was neutral. Their combination
+with the independent 200-pair confirmation remains positive, so selection does not rest
+on one favorable seed block.
+
+In seat-rotated multiplayer development screens against otherwise unprojected
+champions, suit-only scored `0.3183` in three-player games (equal-policy null
+`0.3333`, CI `[0.2833, 0.3533]`) and `0.2325` in four-player games (null
+`0.25`, CI `[0.2088, 0.2563]`). These do not demonstrate a multiplayer gain,
+but also do not establish a material regression. The more expensive
+player-label orbit did not improve either result.
+
+## Throughput
+
+- Vectorized `BatchedPesten` rollout and evaluation replaced sequential
+  per-agent inference for feed-forward PPO.
+- Recurrent rollout uses one scoped CPU inference thread, measured at roughly
+  10–20× faster than the oversubscribed path while preserving exact outcomes.
+- A 14,000-game feed-forward matched benchmark completes at roughly
+  176–204 games/s on the current host.
+- Full suit averaging evaluates all 24 transforms as one tensor batch instead
+  of making 24 game-agent calls; the wrapper also chunks base observations.
+- The full player-label+suit orbit reached 226 games/s on CUDA in one
+  2,800-game run, but was rejected for strength and portability reasons.
+
+## Research basis
+
+- Group averaging is the exact invariance projection used by the selected
+  player; prior theory shows group-averaged predictors can reduce variance:
+  <https://www.jmlr.org/papers/v21/20-163.html>.
+- Partial augmentation can approximate full-group benefits but cannot enforce
+  exact invariance in general, consistent with the subgroup results:
+  <https://proceedings.mlr.press/v336/tahmasebi26a.html>.
+- Large recent imperfect-information studies support generic policy gradients
+  as strong baselines and explain why the corrected-PPO lanes were tested:
+  <https://arxiv.org/abs/2502.08938> and
+  <https://arxiv.org/abs/2605.28863>.
+- The information-safe Q-boost experiment was inspired by
+  <https://arxiv.org/abs/2605.19235>, but deliberately did not use that paper's
+  centralized privileged critic.
+
+## Final selection
+
+Frozen before sealed evaluation:
+
+- checkpoint: `ppo_actor_100run3.pth`;
+- checkpoint SHA-256:
+  `aac589b3c7300895604e6c77755631ab4a31c8bf9810768448ab2f3ff5bbe186`;
+- projection: 24 ordinary-suit permutations, mean logits, alpha `1.0`;
+- no player-label orbit and no adaptive selector;
+- greedy masked action selection with exact draw-retry semantics;
+- production entrypoint: `best_player.py`;
+- interactive entrypoint: `python interactive_game.py --agents human,best`.
+
+One sealed holdout and final full-regression verification remain pending.

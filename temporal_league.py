@@ -33,7 +33,7 @@ from benchmark_agents import (
 from hardcodedAgent import HardcodedStrategyAgent
 from ppo2 import StudentNet, build_action_masks
 from randomAgent import AgentRandom
-from smartAgent import Agent as SmartAgent
+from smartAgent import Agent as SmartAgent, SmarterAgent
 from temporal_puffer_agent import (
     TemporalPestenAgent,
     TrajectoryStep,
@@ -53,6 +53,14 @@ LEAGUE_MIXTURE = (
     ("ppo_champion", 2),
     ("bayesian_tree", 1),
     ("smart_rule", 1),
+)
+LEAGUE_OPPONENT_TYPES = (
+    "current_selfplay",
+    "historical_temporal",
+    "ppo_champion",
+    "bayesian_tree",
+    "smart_rule",
+    "smarter_rule",
 )
 
 
@@ -522,10 +530,38 @@ def _snapshot(policy: NativePufferTemporalPolicy):
     return snapshot
 
 
-def league_schedule() -> tuple[str, ...]:
+def validate_league_mixture(
+    mixture: Sequence[tuple[str, int]],
+) -> tuple[tuple[str, int], ...]:
+    """Validate a deterministic public-policy league weight specification."""
+    normalized = tuple(mixture)
+    names = [name for name, _ in normalized]
+    if len(names) != len(set(names)):
+        raise ValueError("league mixture contains a duplicate opponent type")
+    unknown = sorted(set(names) - set(LEAGUE_OPPONENT_TYPES))
+    if unknown:
+        raise ValueError(
+            f"unknown league opponent types: {', '.join(unknown)}"
+        )
+    if any(
+        isinstance(weight, bool)
+        or not isinstance(weight, int)
+        or weight < 0
+        for _, weight in normalized
+    ):
+        raise ValueError("league weights must be non-negative integers")
+    if not any(weight for _, weight in normalized):
+        raise ValueError("league mixture must have at least one positive weight")
+    return normalized
+
+
+def league_schedule(
+    mixture: Sequence[tuple[str, int]] = LEAGUE_MIXTURE,
+) -> tuple[str, ...]:
+    normalized = validate_league_mixture(mixture)
     return tuple(
         name
-        for name, count in LEAGUE_MIXTURE
+        for name, count in normalized
         for _ in range(count)
     )
 
@@ -538,8 +574,9 @@ def collect_league_batch(
     games: int,
     seed: int,
     schedule_offset: int = 0,
+    mixture: Sequence[tuple[str, int]] = LEAGUE_MIXTURE,
 ) -> tuple[list[tuple[Sequence[TrajectoryStep], bool]], dict]:
-    schedule = league_schedule()
+    schedule = league_schedule(mixture)
     episodes = []
     contributions = Counter()
     game_counts = Counter()
@@ -568,8 +605,14 @@ def collect_league_batch(
                 opponent = champion_factory
             elif opponent_type == "bayesian_tree":
                 opponent = tree_factory
-            else:
+            elif opponent_type == "smart_rule":
                 opponent = SmartAgent
+            elif opponent_type == "smarter_rule":
+                opponent = SmarterAgent
+            else:  # Defensive guard if schedule validation changes.
+                raise RuntimeError(
+                    f"unsupported league opponent: {opponent_type}"
+                )
             current_seat = index % 2
             factories = (
                 [current_zero, opponent]

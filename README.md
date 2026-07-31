@@ -86,7 +86,24 @@ python interactive_game.py --agents human,smart,random
 ```
 
 The `--agents` flag takes a comma-separated list of agent types: `human`,
-`random`, `smart`, `hardcoded` (or `tree`), `supervised`, `student`.
+`random`, `smart`, `hardcoded` (or `tree`), `supervised`, and `best`. Names
+are validated exactly; an unknown name is an error and is never replaced by a
+random player.
+
+To play against the selected production player:
+
+```bash
+python interactive_game.py --agents human,best
+```
+
+`best` loads `ppo_actor_100run3.pth` through `best_player.py`, verifies its
+SHA-256 is
+`aac589b3c7300895604e6c77755631ab4a31c8bf9810768448ab2f3ff5bbe186`,
+freezes it in greedy evaluation mode, and applies the production projection:
+all 24 ordinary suit relabelings averaged in logit space, with no player-label
+orbit averaging. The draw-retry adapter permits exactly the newly drawn card
+or pass on the immediate retry. If the checkpoint is absent or its digest does
+not match, startup fails explicitly instead of selecting another model.
 
 ### 2. Train the RL Agent
 

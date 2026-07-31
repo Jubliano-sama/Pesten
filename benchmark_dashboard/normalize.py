@@ -32,6 +32,10 @@ class MetricReconciliationError(BenchmarkInputError):
     """Raised when source totals and derived metrics materially disagree."""
 
 
+class UnsupportedBenchmarkShapeError(BenchmarkInputError):
+    """Raised only when valid JSON is outside every dashboard input schema."""
+
+
 @dataclass(frozen=True)
 class NormalizationResult:
     runs: list[dict[str, Any]]
@@ -987,7 +991,6 @@ def normalize_file(path: Path, root: Path) -> tuple[list[dict[str, Any]], dict[s
         ) from exc
     if not isinstance(payload, dict):
         raise BenchmarkInputError(f"{path}: top-level JSON value must be an object")
-    source = _source_record(path, root, payload)
     if (
         payload.get("schema_version") == SCHEMA_VERSION
         and "run_id" in payload
@@ -1008,9 +1011,12 @@ def normalize_file(path: Path, root: Path) -> tuple[list[dict[str, Any]], dict[s
     elif "final" in payload and "baseline" in payload:
         runs, warnings = _normalize_training(payload, path, root)
     else:
-        raise BenchmarkInputError(
-            f"{path}: unsupported benchmark shape; expected schema-v1, tournament, or training-performance JSON"
+        raise UnsupportedBenchmarkShapeError(
+            f"{path}: unsupported raw benchmark shape; expected schema-v1, "
+            "tournament, puffer-smoke, vectorized-training, or "
+            "training-performance JSON"
         )
+    source = _source_record(path, root, payload)
     for index, run in enumerate(runs):
         validate_normalized_run(run, f"{path}:normalized[{index}]")
     return runs, source, warnings
@@ -1022,7 +1028,14 @@ def load_and_normalize(paths: Iterable[Path], root: Path) -> NormalizationResult
     warnings: list[str] = []
     seen_ids: set[str] = set()
     for path in sorted(Path(item) for item in paths):
-        file_runs, source, file_warnings = normalize_file(path, root)
+        try:
+            file_runs, source, file_warnings = normalize_file(path, root)
+        except UnsupportedBenchmarkShapeError:
+            warnings.append(
+                f"{_relative_source(path, root)}: skipped unsupported "
+                "autoresearch raw benchmark shape"
+            )
+            continue
         for run in file_runs:
             if run["run_id"] in seen_ids:
                 raise BenchmarkInputError(f"duplicate normalized run_id: {run['run_id']}")

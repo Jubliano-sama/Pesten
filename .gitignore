@@ -5,6 +5,7 @@ venv/
 .venv/
 .playwright-cli/
 /resources
+/experiments/models/
 *.log
 /MNIST/
 pyproject.toml
@@ -12,3 +13,9 @@ uv.lock
 repomix-output.txt
 .python-version
 *.pth
+*.pt
+/experiments/
+# Autoresearch keeps full per-deal evidence locally; the committed compact
+# summary and report deliberately omit these often multi-megabyte raw files.
+/benchmarks/*_20260731.json
+/benchmarks/**/*_20260731.json

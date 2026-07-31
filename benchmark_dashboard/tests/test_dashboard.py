@@ -10,6 +10,7 @@ from benchmark_dashboard.artifact import build_artifact
 from benchmark_dashboard.normalize import (
     BenchmarkInputError,
     MetricReconciliationError,
+    UnsupportedBenchmarkShapeError,
     load_and_normalize,
     normalize_file,
 )
@@ -68,6 +69,55 @@ class NormalizationTests(unittest.TestCase):
             path.write_text('{"result": ', encoding="utf-8")
             with self.assertRaisesRegex(BenchmarkInputError, "malformed JSON"):
                 normalize_file(path, Path(temp))
+
+    def test_bulk_load_skips_only_unsupported_raw_autoresearch_shapes(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            supported = root / TOURNAMENT_FIXTURE.name
+            supported.write_bytes(TOURNAMENT_FIXTURE.read_bytes())
+            raw = root / "anchored_screen_20260731.json"
+            raw.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "benchmark": "anchored_common_development",
+                        "base_seed": 71_000_001,
+                        "combined_pool_delta": {"mean": 0.01},
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(
+                UnsupportedBenchmarkShapeError,
+                "unsupported raw benchmark shape",
+            ):
+                normalize_file(raw, root)
+
+            result = load_and_normalize([raw, supported], root)
+            self.assertEqual(len(result.runs), 1)
+            self.assertEqual(
+                [source["path"] for source in result.source_files],
+                [supported.name],
+            )
+            self.assertTrue(
+                any(
+                    raw.name in warning
+                    and "skipped unsupported autoresearch raw" in warning
+                    for warning in result.warnings
+                )
+            )
+
+    def test_bulk_load_never_hides_malformed_discovered_json(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            supported = root / TOURNAMENT_FIXTURE.name
+            supported.write_bytes(TOURNAMENT_FIXTURE.read_bytes())
+            malformed = root / "raw_but_broken_20260731.json"
+            malformed.write_text('{"combined_pool_delta": ', encoding="utf-8")
+
+            with self.assertRaisesRegex(BenchmarkInputError, "malformed JSON"):
+                load_and_normalize([supported, malformed], root)
 
     def test_tournament_count_mismatch_is_rejected(self) -> None:
         payload = json.loads(TOURNAMENT_FIXTURE.read_text(encoding="utf-8"))
@@ -143,7 +193,10 @@ class ArtifactTests(unittest.TestCase):
             datasets["headline"][0]["challenge_status"],
             "No eligible declared matchup",
         )
-        self.assertEqual(len(datasets["matchups"]), 4)
+        # Five supported tournament files are present. Raw autoresearch screens
+        # are intentionally reported as skips rather than coerced into this
+        # dataset.
+        self.assertEqual(len(datasets["matchups"]), 5)
         self.assertEqual(len(datasets["crossplay"]), 6)
         self.assertEqual(len(datasets["ratings"]), 4)
         self.assertEqual(len(datasets["seed_variance"]), 6)
@@ -152,6 +205,12 @@ class ArtifactTests(unittest.TestCase):
             any(row["status"] == "No data" for row in datasets["coverage"])
         )
         self.assertNotIn("accessIssues", artifact["snapshot"])
+        self.assertTrue(
+            any(
+                "skipped unsupported autoresearch raw" in warning
+                for warning in result.warnings
+            )
+        )
 
 
 if __name__ == "__main__":

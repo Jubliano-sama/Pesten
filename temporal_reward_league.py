@@ -107,6 +107,19 @@ def snapshot(policy: NativePufferTemporalPolicy):
     return frozen
 
 
+def synchronize_cpu_shadow(
+    source: NativePufferTemporalPolicy,
+    shadow: NativePufferTemporalPolicy,
+) -> None:
+    """Copy update weights to the inference-only CPU policy in place."""
+    source_state = {
+        name: tensor.detach().cpu()
+        for name, tensor in source.state_dict().items()
+    }
+    shadow.load_state_dict(source_state)
+    shadow.eval()
+
+
 def paired_bootstrap_interval(
     pair_scores: Sequence[float],
     *,
@@ -390,7 +403,12 @@ def train_reward_population(
     ).to(device)
     initial_state_sha256 = _state_hash(policy)
     optimizer = torch.optim.Adam(policy.parameters(), lr=learning_rate)
-    historical = [snapshot(policy)]
+    initial_snapshot = snapshot(policy)
+    # Keep environment rollout and scalar evaluation off CUDA.  Deep-copying
+    # the already-created initial snapshot preserves the historical sequence
+    # of global RNG consumption (constructing a second model would not).
+    rollout_policy = copy.deepcopy(initial_snapshot)
+    historical = [initial_snapshot]
     history_manifests = [
         {
             "history_index": 0,
@@ -419,6 +437,11 @@ def train_reward_population(
         "target_kl": target_kl,
         "entropy_coefficient": entropy_coefficient,
         "value_coefficient": value_coefficient,
+        "execution_devices": {
+            "update": str(next(policy.parameters()).device),
+            "rollout": str(next(rollout_policy.parameters()).device),
+            "evaluation": str(next(rollout_policy.parameters()).device),
+        },
         "pfsp": {
             "weight": (
                 "(max(0.05, 1 - current_win_rate))^2"
@@ -439,7 +462,7 @@ def train_reward_population(
     for epoch in range(epochs):
         pfsp_history_manifest = copy.deepcopy(history_manifests)
         pfsp_scores, difficulty_weights = evaluate_history_for_pfsp(
-            policy,
+            rollout_policy,
             historical,
             pairs=pfsp_pairs,
             seed=seed + 1_000_000 + epoch * 100_000,
@@ -453,7 +476,7 @@ def train_reward_population(
         stats = BatchRolloutStats()
         epoch_started = time.perf_counter()
         episodes, contribution = collect_league_batch_batched(
-            policy,
+            rollout_policy,
             None,
             prioritized,
             games=games_per_epoch,
@@ -484,6 +507,11 @@ def train_reward_population(
         )
         total_decisions += epoch_decisions
         frozen = snapshot(policy)
+        sync_started = time.perf_counter()
+        # ``frozen`` already contains the exact post-update CPU state, avoiding
+        # a second device-to-host transfer solely for shadow synchronization.
+        synchronize_cpu_shadow(frozen, rollout_policy)
+        cpu_shadow_sync_seconds = time.perf_counter() - sync_started
         historical.append(frozen)
         history_manifests.append(
             {
@@ -507,7 +535,7 @@ def train_reward_population(
         )
         checkpoints.append(checkpoint)
         evaluation = evaluate_non_ppo_pool(
-            policy,
+            rollout_policy,
             historical[:-1],
             pairs=development_pairs,
             seed=seed + 4_000_000,
@@ -522,6 +550,12 @@ def train_reward_population(
             "batch_rollout_stats": {
                 name: getattr(stats, name)
                 for name in stats.__dataclass_fields__
+            },
+            "execution_devices": {
+                "update": str(next(policy.parameters()).device),
+                "rollout": str(next(rollout_policy.parameters()).device),
+                "evaluation": str(next(rollout_policy.parameters()).device),
+                "cpu_shadow_sync_seconds": cpu_shadow_sync_seconds,
             },
             "pfsp": {
                 "history_win_rates": pfsp_scores,
@@ -593,6 +627,13 @@ def train_reward_population(
             "pufferlib": str(pufferlib.__version__),
             "pufferlib_revision": PUFFERLIB_REVISION,
             "device": device,
+            "update_device": str(next(policy.parameters()).device),
+            "rollout_device": str(
+                next(rollout_policy.parameters()).device
+            ),
+            "evaluation_device": str(
+                next(rollout_policy.parameters()).device
+            ),
         },
         "lineage": manifest["random_initialization"],
         "recipe": recipe,

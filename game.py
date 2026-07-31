@@ -135,6 +135,7 @@ class Game:
         """
         played_card = player.playCard(self.current_sort, self.current_true_number)
         if played_card is not None:
+            self._require_owned_card(player, played_card)
             if played_card.truenumber != self.current_true_number:
                 self._apply_penalty(player)
                 if self.current_true_number == 0 and not self.game_over:
@@ -162,19 +163,26 @@ class Game:
         Process a played card: update counters, validate the play, update game state,
         and apply special effects.
         """
+        if played_card is None:
+            self.cards_played += 1
+            if self.cards_played > 500:
+                self.game_over = True
+                logging.info("Game ended due to too many cards played.")
+                return
+            self._handle_no_card_play(player, is_last_card)
+            return
+
+        self._require_owned_card(player, played_card)
         self.cards_played += 1
         if self.cards_played > 500:
             self.game_over = True
             logging.info("Game ended due to too many cards played.")
             return
 
-        if played_card is None:
-            self._handle_no_card_play(player, is_last_card)
-            return
-
         if not played_card.compatible(self.current_sort, self.current_true_number):
-            logging.warning("Played card is not compatible with the current state.")
-            return
+            raise ValueError(
+                "played card is not compatible with the current state"
+            )
 
         if is_last_card and self._is_penalty_card(played_card):
             self._handle_last_card_penalty(player)
@@ -182,6 +190,17 @@ class Game:
 
         self._update_state_with_card(played_card, player)
         self._apply_card_effects(played_card, player)
+
+    @staticmethod
+    def _require_owned_card(player, played_card: card.Card) -> None:
+        """Reject fabricated actions before any public game state is mutated."""
+        if not isinstance(played_card, card.Card):
+            raise TypeError("played action must be a Card or None")
+        if not any(
+            held_card.number == played_card.number
+            for held_card in player.mydeck.cards
+        ):
+            raise ValueError("player cannot play a card that is not in hand")
 
     def _apply_penalty(self, player) -> None:
         """

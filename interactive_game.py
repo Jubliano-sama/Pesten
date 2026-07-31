@@ -1,15 +1,10 @@
 #!/usr/bin/env python
-"""
-interactive_game.py
-
-an interactive wrapper to play the card game against any mix of agents.
-you (human) get to make your moves while the others (random, smart, supervised)
-do their thing. displays moves, your hand, and blocks invalid moves.
-"""
+"""Play Pesten interactively against an explicit list of agents."""
 
 import argparse
 import sys
 
+from best_player import load_canonical_game_factory
 import game
 import card
 import hardcodedAgent
@@ -108,20 +103,18 @@ class InteractiveGame(game.Game):
             print(f">> player {player_idx} passed")
 
 
-def main():
-    parser = argparse.ArgumentParser(description="play interactively against various agents")
-    parser.add_argument(
-        "--agents",
-        type=str,
-        default="human,random,smart,supervised",
-        help=(
-            "comma-separated list of agents "
-            "(human, random, smart, hardcoded, supervised)"
-        ),
-    )
-    args = parser.parse_args()
+def parse_agent_names(value):
+    """Parse a non-empty comma-separated agent list without guessing names."""
+    names = [name.strip().lower() for name in value.split(",")]
+    if not names or any(not name for name in names):
+        raise ValueError(
+            "--agents must be a comma-separated list of non-empty names"
+        )
+    return names
 
-    # mapping agent names to classes, using the wrapper for supervised
+
+def resolve_agent_classes(agent_names):
+    """Resolve CLI names, loading the verified champion only when requested."""
     mapping = {
         "human": HumanAgent,
         "random": randomAgent.AgentRandom,
@@ -130,15 +123,49 @@ def main():
         "tree": hardcodedAgent.HardcodedStrategyAgent,
         "supervised": SupervisedAgentWrapper,
     }
+    unknown = sorted(set(agent_names) - (set(mapping) | {"best"}))
+    if unknown:
+        valid = ", ".join((*mapping, "best"))
+        raise ValueError(
+            f"unknown agent name(s): {', '.join(unknown)}; valid names: "
+            f"{valid}"
+        )
 
-    agent_names = [a.strip().lower() for a in args.agents.split(",")]
-    agents = []
-    for name in agent_names:
-        agent_cls = mapping.get(name, randomAgent.AgentRandom)
-        agents.append(agent_cls)
+    if "best" in agent_names:
+        try:
+            mapping["best"] = load_canonical_game_factory()
+        except Exception as error:
+            raise RuntimeError(
+                "failed to load verified 'best' agent: "
+                f"{type(error).__name__}: {error}"
+            ) from error
+    return [mapping[name] for name in agent_names]
+
+
+def main():
+    parser = argparse.ArgumentParser(description="play interactively against various agents")
+    parser.add_argument(
+        "--agents",
+        type=str,
+        default="human,random,smart,supervised",
+        help=(
+            "comma-separated list of agents "
+            "(human, random, smart, hardcoded/tree, supervised, best)"
+        ),
+    )
+    args = parser.parse_args()
+
+    try:
+        agent_names = parse_agent_names(args.agents)
+    except ValueError as error:
+        parser.error(str(error))
     if "human" not in agent_names:
         print("yo, no human agent specified. adding one for you as player 0.")
-        agents[0] = HumanAgent
+        agent_names[0] = "human"
+    try:
+        agents = resolve_agent_classes(agent_names)
+    except (ValueError, RuntimeError) as error:
+        parser.error(str(error))
 
     # create interactive game instance and reset state
     g = InteractiveGame(agents)

@@ -39,6 +39,7 @@ POLICY_RL = 0
 POLICY_SMART = 1
 POLICY_RANDOM = 2
 POLICY_FIRST_LEGAL = 3  # Deterministic canonical differential-test policy.
+POLICY_SMARTER = 4
 
 PHASE_CARD = 0
 PHASE_DRAW_RETRY = 1
@@ -406,7 +407,15 @@ class BatchedPesten:
         observation = np.zeros(OBSERVATION_SIZE, dtype=np.float32)
         counts = self.hand_counts[game_index, player_index]
         observation[:HAND_END] = counts
-        if self.penalty_amount[game_index] > 0:
+        if self.phase[game_index] == PHASE_DRAW_RETRY:
+            # Legacy Game permits only the card that was just drawn to be
+            # played during the immediate retry.  Other compatible cards
+            # already in hand are not executable in this phase.
+            playable = np.zeros(len(CARD_RANK), dtype=np.bool_)
+            drawn = int(self.drawn_card[game_index])
+            if drawn >= 0:
+                playable[drawn] = True
+        elif self.penalty_amount[game_index] > 0:
             playable = CARD_RANK == self.current_rank[game_index]
         else:
             playable = (
@@ -431,6 +440,8 @@ class BatchedPesten:
         return observation
 
     def rl_has_card_decision(self, game_index: int) -> bool:
+        if self.phase[game_index] == PHASE_DRAW_RETRY:
+            return int(self.drawn_card[game_index]) >= 0
         player_index = int(self.current_player[game_index])
         counts = self.hand_counts[game_index, player_index]
         if self.penalty_amount[game_index] > 0:
@@ -593,11 +604,99 @@ class BatchedPesten:
                 best_number = number
         return best_number
 
+    @staticmethod
+    def _smarter_hand_value(hand: np.ndarray) -> float:
+        """Exact array equivalent of ``SmarterAgent.hand_value``."""
+        if len(hand) == 0:
+            return 0.0
+        standard_suits = CARD_SORT[hand]
+        suit_counts = np.bincount(standard_suits, minlength=5)[:4]
+        # Python ``max(dict, key=dict.get)`` and NumPy argmax both resolve a
+        # tie to the first standard suit.
+        max_suit = int(np.argmax(suit_counts))
+        ranks = CARD_RANK[hand]
+        special_bonus = {
+            7: 2.0,
+            8: 1.5,
+            1: 1.0,
+            0: 1.5,
+            13: 1.0,
+            2: 1.0,
+        }
+        value = 0.5 * int(np.count_nonzero(standard_suits == max_suit))
+        value += sum(special_bonus.get(int(rank), 0.0) for rank in ranks)
+        return value - len(hand)
+
+    def smarter_action(self, game_index: int) -> int:
+        """Match ``smartAgent.SmarterAgent`` with a live public Game reference."""
+        player_index = int(self.current_player[game_index])
+        hand = self._ordered_hand(game_index, player_index)
+        playable = np.asarray(
+            [
+                number
+                for number in hand
+                if _compatible(
+                    int(number),
+                    int(self.current_sort[game_index]),
+                    int(self.current_rank[game_index]),
+                )
+            ],
+            dtype=np.int8,
+        )
+        if len(playable) == 0:
+            return PASS_ACTION
+
+        best_number = int(playable[0])
+        best_score = -float("inf")
+        direction = int(self.direction[game_index])
+        next_player = (player_index + direction) % self.num_players
+        next_count = int(self.hand_sizes[game_index, next_player])
+        public_sorts = self.sorts_played[game_index]
+        for number_value in playable:
+            number = int(number_value)
+            # Canonical ``Card.__eq__`` makes the list comprehension remove
+            # every duplicate of the candidate number, not just one instance.
+            remaining = hand[hand != number]
+            score = self._smarter_hand_value(remaining)
+            rank = int(CARD_RANK[number])
+            if rank == 7:
+                score += 2.0
+            elif rank == 8:
+                score += 5.0 / (next_count + 1)
+            elif rank == 1:
+                score += 0.5
+            elif rank == 0:
+                score += 1.0
+            elif rank == 2:
+                score += 0.4
+            elif rank == 13:
+                best_suit = int(np.argmax(public_sorts[:4]))
+                # Preserve the canonical left-associative expression:
+                # ``base_score + suit_change_bonus + depletion * weight``.
+                # Grouping the final two terms can change a last-bit tie and
+                # therefore select a different first-max candidate.
+                score = (
+                    score
+                    + 1.0
+                    + public_sorts[best_suit] * 0.1
+                )
+            else:
+                score = (
+                    score
+                    + public_sorts[int(CARD_SORT[number])] * 0.1
+                )
+            if score > best_score:
+                best_score = score
+                best_number = number
+        return best_number
+
     def choose_suit(self, game_index: int, policy_kind: int) -> int:
         if policy_kind == POLICY_FIRST_LEGAL:
             return 0
         if policy_kind == POLICY_RANDOM:
             return int(self.rngs[game_index].randint(0, 4))
+        if policy_kind == POLICY_SMARTER:
+            return int(np.argmax(self.sorts_played[game_index, :4]))
         if policy_kind != POLICY_SMART:
             raise ValueError("RL suit choices must come from the actor")
         player_index = int(self.current_player[game_index])
@@ -640,6 +739,14 @@ class BatchedPesten:
             return
         if phase == PHASE_DRAW_RETRY:
             drawn = int(self.drawn_card[game_index])
+            player_index = int(self.current_player[game_index])
+            if (
+                self.policy_kinds[game_index, player_index] == POLICY_RL
+                and action not in (drawn, PASS_ACTION)
+            ):
+                raise ValueError(
+                    "draw-retry action must be the drawn card or pass"
+                )
             if action == drawn:
                 self._process_played_card(
                     game_index,
@@ -649,6 +756,15 @@ class BatchedPesten:
             else:
                 self._finish_turn(game_index)
             return
+
+        if action != PASS_ACTION:
+            if not 0 <= action < len(CARD_RANK):
+                raise ValueError(f"invalid card action {action}")
+            player_index = int(self.current_player[game_index])
+            if self.hand_counts[game_index, player_index, action] <= 0:
+                raise ValueError(
+                    "player cannot play a card that is not in hand"
+                )
 
         if self.penalty_amount[game_index] > 0:
             if (
@@ -716,6 +832,11 @@ class BatchedPesten:
             else:
                 self._finish_turn(game_index)
             return
+        if not 0 <= action < len(CARD_RANK):
+            raise ValueError(f"invalid card action {action}")
+        player_index = int(self.current_player[game_index])
+        if self.hand_counts[game_index, player_index, action] <= 0:
+            raise ValueError("player cannot play a card that is not in hand")
         if not _compatible(
             action,
             int(self.current_sort[game_index]),
@@ -732,7 +853,6 @@ class BatchedPesten:
             self._finish_turn(game_index)
             return
 
-        player_index = int(self.current_player[game_index])
         if self.hand_counts[game_index, player_index, action] > 1:
             self.event_counts["duplicate_play"] += 1
         self._append_discard(game_index, action)
@@ -798,6 +918,8 @@ class BatchedPesten:
             return self.random_action(game_index)
         if kind == POLICY_SMART:
             return self.smart_action(game_index)
+        if kind == POLICY_SMARTER:
+            return self.smarter_action(game_index)
         raise ValueError("an RL action requires batched actor inference")
 
     def run_non_neural(self) -> None:

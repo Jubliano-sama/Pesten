@@ -3,7 +3,9 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.distributions import Categorical
+import hashlib
 import os
+import random
 from contextlib import nullcontext
 from tqdm import tqdm
 import logging
@@ -30,10 +32,24 @@ from batched_pesten import (
     POLICY_RANDOM,
     POLICY_RL,
     POLICY_SMART,
+    POLICY_SMARTER,
     collect_batched_rollout,
 )
+from seed_integrity import DEVELOPMENT_SEED_LIMIT
 
 DEFAULT_ROLLOUT_TEMPERATURE = 0.8
+
+
+def non_rl_policy_kind(agent_type):
+    """Map a parsed non-neural opponent name to its batched policy."""
+    normalized = str(agent_type).lower()
+    if normalized == "smart":
+        return POLICY_SMART
+    if normalized == "smarter":
+        return POLICY_SMARTER
+    if normalized == "random":
+        return POLICY_RANDOM
+    raise ValueError(f"unknown non-RL agent type: {agent_type}")
 
 
 def autocast_for(device):
@@ -338,8 +354,15 @@ class PPO_Supervised:
                  rollout_device="auto",
                  rollout_batch_size=256,
                  training_actor_device="auto",
-                 compile_updates=None):
+                 compile_updates=None,
+                 past_policy_probability=0.2):
         self._init_hyperparameters()
+        if (
+            not np.isfinite(past_policy_probability)
+            or not 0.0 <= past_policy_probability <= 1.0
+        ):
+            raise ValueError("past_policy_probability must be in [0, 1]")
+        self.past_policy_probability = float(past_policy_probability)
         self.max_saves = max_saves
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         if rollout_device == "auto":
@@ -494,8 +517,28 @@ class PPO_Supervised:
                 )
             )
             actor.eval()
+            for parameter in actor.parameters():
+                parameter.requires_grad_(False)
             self._checkpoint_actor_cache[checkpoint] = actor
         return actor
+
+    def _select_past_checkpoint(self, agent_types, available_checkpoints):
+        """Select one fixed opponent for an eligible game, if configured."""
+        eligible = (
+            bool(available_checkpoints)
+            and sum(
+                agent_type in ("rl", "self")
+                for agent_type in agent_types
+            ) > 1
+        )
+        if not eligible or self.past_policy_probability == 0.0:
+            return None, eligible
+        if (
+            self.past_policy_probability < 1.0
+            and np.random.random() >= self.past_policy_probability
+        ):
+            return None, eligible
+        return np.random.choice(available_checkpoints), eligible
 
     def get_action_mask(self, obs):
         return build_action_masks(obs)
@@ -519,10 +562,15 @@ class PPO_Supervised:
         global_wins = 0
         environment_turns = 0
         completed_games = 0
+        past_policy_eligible_games = 0
+        past_policy_games = 0
+        actor_key_counts = {}
+        actor_key_layout = hashlib.sha256()
         num_sets = len(agent_sets)
         available_checkpoints = self._available_actor_checkpoints()
         for i, agent_set in enumerate(agent_sets):
-            if not any(typ.lower() in ['rl', 'self'] for typ in agent_set):
+            normalized = [typ.lower() for typ in agent_set]
+            if not any(typ in ['rl', 'self'] for typ in normalized):
                 raise ValueError("each agent set must include at least one rl agent")
             if i < num_sets - 1:
                 episodes_for_set = num_episodes // num_sets
@@ -535,36 +583,29 @@ class PPO_Supervised:
                 g = game.Game([])
                 agents = []
                 rl_agents = []
-                past_version_used = False  # ensure at most one past version per game
-                pastProbability = np.random.random() < 0.2
-                for typ in agent_set:
-                    if typ.lower() in ['rl', 'self']:
+                agent_actor_keys = {}
+                chosen_ckpt, past_eligible = self._select_past_checkpoint(
+                    normalized, available_checkpoints
+                )
+                past_policy_eligible_games += int(past_eligible)
+                past_version_used = False
+                for typ in normalized:
+                    if typ in ['rl', 'self']:
                         if (
                             not past_version_used
-                            and pastProbability
-                            and available_checkpoints
+                            and chosen_ckpt is not None
                         ):
-                            chosen_ckpt = np.random.choice(available_checkpoints)
-                            past_actor = StudentNet(
-                                input_dim=OBSERVATION_SIZE,
-                                output_dim=ACTION_COUNT,
-                            ).to(self.rollout_device)
-                            past_actor.load_state_dict(
-                                torch.load(
-                                    f"./ppo_actor_{chosen_ckpt}.pth",
-                                    map_location=self.rollout_device,
-                                )
-                            )
-                            past_actor.eval()
                             a = RL_SupervisedAgent(
                                 g,
-                                past_actor,
+                                self._checkpoint_actor(chosen_ckpt),
                                 self.rollout_device,
                                 temperature=temperature,
                             )
                             a.collect_data = False  # do not collect data from past version
                             a.eval_mode = True
                             past_version_used = True
+                            past_policy_games += 1
+                            actor_key = f"checkpoint:{chosen_ckpt}"
                         else:
                             a = RL_SupervisedAgent(
                                 g,
@@ -574,19 +615,34 @@ class PPO_Supervised:
                             )
                             a.collect_data = True
                             a.eval_mode = False
+                            actor_key = "current"
                         a.reset_episode()
                         agents.append(a)
+                        agent_actor_keys[id(a)] = actor_key
+                        actor_key_counts[actor_key] = (
+                            actor_key_counts.get(actor_key, 0) + 1
+                        )
                         if a.collect_data:
                             rl_agents.append(a)
-                    elif typ.lower() == 'smart':
+                    elif typ == 'smart':
                         import smartAgent
                         agents.append(smartAgent.Agent())
-                    elif typ.lower() == 'random':
+                    elif typ == 'smarter':
+                        import smartAgent
+                        agents.append(smartAgent.SmarterAgent(g))
+                    elif typ == 'random':
                         import randomAgent
                         agents.append(randomAgent.AgentRandom())
                     else:
                         print(f"unknown agent type: {typ}")
                 shuffle(agents)
+                actor_key_layout.update(
+                    "|".join(
+                        agent_actor_keys.get(id(agent), "")
+                        for agent in agents
+                    ).encode("utf-8")
+                )
+                actor_key_layout.update(b"\n")
                 g.players = agents
                 g.num_players = len(agents)
                 for a in rl_agents:
@@ -624,6 +680,11 @@ class PPO_Supervised:
             "peak_buffer_bytes": 0,
             "wins": global_wins,
             "draws": completed_games - global_wins,
+            "past_policy_probability": self.past_policy_probability,
+            "past_policy_eligible_games": past_policy_eligible_games,
+            "past_policy_games": past_policy_games,
+            "actor_key_counts": actor_key_counts,
+            "actor_key_layout_sha256": actor_key_layout.hexdigest(),
         }
         batch_obs = torch.stack(batch_obs).to(
             device=self.actor_device,
@@ -668,6 +729,10 @@ class PPO_Supervised:
         all_log_probabilities = []
         all_rewards = []
         all_episode_lengths = []
+        past_policy_eligible_games = 0
+        past_policy_games = 0
+        actor_key_counts = {}
+        actor_key_layout = hashlib.sha256()
         aggregate_metrics = {
             "environment_turns": 0,
             "completed_games": 0,
@@ -694,7 +759,9 @@ class PPO_Supervised:
             normalized = [agent_type.lower() for agent_type in agent_set]
             if not any(agent_type in ("rl", "self") for agent_type in normalized):
                 raise ValueError("each agent set must include at least one rl agent")
-            unknown = set(normalized) - {"rl", "self", "smart", "random"}
+            unknown = set(normalized) - {
+                "rl", "self", "smart", "smarter", "random"
+            }
             if unknown:
                 raise ValueError(
                     "unknown agent type(s): " + ", ".join(sorted(unknown))
@@ -723,46 +790,60 @@ class PPO_Supervised:
 
                 for game_index in range(batch_games):
                     entries = []
-                    use_past = (
-                        bool(available_checkpoints)
-                        and sum(
-                            agent_type in ("rl", "self")
-                            for agent_type in normalized
-                        ) > 1
-                        and np.random.random() < 0.2
+                    chosen_checkpoint, past_eligible = (
+                        self._select_past_checkpoint(
+                            normalized, available_checkpoints
+                        )
                     )
+                    past_policy_eligible_games += int(past_eligible)
                     past_version_used = False
                     for agent_type in normalized:
                         if agent_type in ("rl", "self"):
-                            if use_past and not past_version_used:
-                                checkpoint = np.random.choice(
-                                    available_checkpoints
+                            if (
+                                chosen_checkpoint is not None
+                                and not past_version_used
+                            ):
+                                checkpoint_key = (
+                                    f"checkpoint:{chosen_checkpoint}"
                                 )
-                                checkpoint_key = f"checkpoint:{checkpoint}"
                                 entries.append((POLICY_RL, checkpoint_key))
                                 if checkpoint_key not in actor_policies:
                                     actor_policies[checkpoint_key] = ActorPolicy(
-                                        actor=self._checkpoint_actor(checkpoint),
+                                        actor=self._checkpoint_actor(
+                                            chosen_checkpoint
+                                        ),
                                         device=self.rollout_device,
                                         temperature=1e-5,
                                         collect_data=False,
                                         greedy=True,
                                     )
                                 past_version_used = True
+                                past_policy_games += 1
                             else:
                                 entries.append((POLICY_RL, current_key))
-                        elif agent_type == "smart":
-                            entries.append((POLICY_SMART, None))
                         else:
-                            entries.append((POLICY_RANDOM, None))
+                            entries.append(
+                                (non_rl_policy_kind(agent_type), None)
+                            )
                     shuffle(entries)
                     for player_index, (kind, key) in enumerate(entries):
                         policy_kinds[game_index, player_index] = kind
                         actor_keys[game_index, player_index] = key
+                        if key is not None:
+                            actor_key_counts[key] = (
+                                actor_key_counts.get(key, 0) + 1
+                            )
+                    actor_key_layout.update(
+                        "|".join(
+                            "" if key is None else str(key)
+                            for _, key in entries
+                        ).encode("utf-8")
+                    )
+                    actor_key_layout.update(b"\n")
 
                 seeds = np.random.randint(
                     0,
-                    np.iinfo(np.uint32).max,
+                    DEVELOPMENT_SEED_LIMIT,
                     size=batch_games,
                     dtype=np.uint32,
                 )
@@ -796,6 +877,15 @@ class PPO_Supervised:
                         aggregate_metrics[metric] += value
                 remaining -= batch_games
 
+        aggregate_metrics.update(
+            {
+                "past_policy_probability": self.past_policy_probability,
+                "past_policy_eligible_games": past_policy_eligible_games,
+                "past_policy_games": past_policy_games,
+                "actor_key_counts": actor_key_counts,
+                "actor_key_layout_sha256": actor_key_layout.hexdigest(),
+            }
+        )
         self.last_rollout_metrics = aggregate_metrics
         print(
             "[data generation] complete: "
@@ -850,6 +940,9 @@ class PPO_Supervised:
                     elif typ.lower() == 'smart':
                         import smartAgent
                         agents.append(smartAgent.Agent())
+                    elif typ.lower() == 'smarter':
+                        import smartAgent
+                        agents.append(smartAgent.SmarterAgent(g))
                     elif typ.lower() == 'random':
                         import randomAgent
                         agents.append(randomAgent.AgentRandom())
@@ -1024,6 +1117,12 @@ def main():
     parser.add_argument("--iterations", type=int, default=1000, help="number of training iterations")
     parser.add_argument("--episodes", type=int, default=1000, help="episodes per iteration")
     parser.add_argument(
+        "--seed",
+        type=int,
+        default=20260731,
+        help="seed for Python, NumPy, PyTorch, and CUDA RNGs",
+    )
+    parser.add_argument(
         "--temperature",
         type=float,
         default=DEFAULT_ROLLOUT_TEMPERATURE,
@@ -1057,9 +1156,27 @@ def main():
         default=None,
         help="compile CUDA actor/critic updates (default: enabled on CUDA)",
     )
+    parser.add_argument(
+        "--past-policy-probability",
+        "--past_policy_probability",
+        dest="past_policy_probability",
+        type=float,
+        default=0.2,
+        help=(
+            "per-game probability of replacing one of two or more RL seats "
+            "with a fixed saved-checkpoint opponent"
+        ),
+    )
     parser.add_argument("--agent_sets", type=str, default="smart,rl",
-                        help="semicolon-separated sets of comma-separated agent types (each set must include at least one rl agent), e.g. \"smart,rl;random,rl\"")
+                        help="semicolon-separated sets of comma-separated agent types (smart, smarter, random, rl/self; each set must include at least one rl agent), e.g. \"smarter,rl;random,rl\"")
     args = parser.parse_args()
+
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(args.seed)
+        torch.set_float32_matmul_precision("high")
 
     agent_sets = parse_agent_sets(args.agent_sets)
     # validate each set includes at least one rl agent
@@ -1080,7 +1197,8 @@ def main():
                          rollout_device=args.rollout_device,
                          rollout_batch_size=args.rollout_batch_size,
                          training_actor_device=args.training_actor_device,
-                         compile_updates=args.compile_updates)
+                         compile_updates=args.compile_updates,
+                         past_policy_probability=args.past_policy_probability)
     ppo.save_freq = args.save_freq
     ppo.learn(num_iterations=args.iterations, episodes_per_iter=args.episodes, temperature=args.temperature,
               eval_freq=args.eval_freq, eval_episodes=args.eval_episodes, agent_sets=agent_sets)
