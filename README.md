@@ -136,6 +136,37 @@ python ppo2.py --iterations 200 --episodes 1000 --agent_sets "smart,rl;random,rl
 *   `--torch-threads`: PyTorch CPU thread count. The profiled default is 8;
     override it when the host has a materially different CPU topology.
 
+#### Iterative-reference two-player self-play
+
+`nashpg_ppo.py` is a development-only, shared-symmetric specialization of
+NashPG. It removes legacy pass shaping, audits terminal two-player payoffs,
+uses `KL(current || reference)`, freezes the reference for each inner block,
+and refreshes it only between outer rounds.
+
+```bash
+python nashpg_ppo.py \
+  --output-dir experiments/nashpg-alpha02 \
+  --alphas 0.2 \
+  --outer-rounds 8 \
+  --inner-iterations 5 \
+  --games 256 \
+  --update-epochs 3 \
+  --learning-rate 3e-5
+```
+
+Use `benchmark_nashpg_crossplay.py` to evaluate every finalized outer
+checkpoint on fresh, explicit development seeds. It compares all neural pairs
+in both seats and uses common deals against random, Smart, and Smarter:
+
+```bash
+python benchmark_nashpg_crossplay.py \
+  --nashpg-manifest experiments/nashpg-alpha02/nashpg_pilot_metrics.json \
+  --stage screen \
+  --pairs 100 \
+  --base-seed 89000000 \
+  --output benchmarks/nashpg-alpha02-screen.json
+```
+
 ### 3. Distill a Trained Model
 
 After training an RL agent (e.g., `ppo_actor.pth`), you can use distillation to initialize a new, larger student model.

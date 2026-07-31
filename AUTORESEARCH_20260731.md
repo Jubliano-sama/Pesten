@@ -83,7 +83,34 @@ Rejected after matched-deal evaluation:
   averaging on fresh deals;
 - majority-vote and mean-Borda orbit aggregation. Borda passed its small
   screen, then regressed by `0.0111` pool score versus mean logits on its
-  disjoint confirmation.
+  disjoint confirmation;
+- a shared-symmetric two-player specialization of NashPG with the paper's
+  current-to-reference KL direction and frozen-reference/outer-refresh
+  schedule. A broad `alpha={0.05,0.2,0.5}` screen trained nine checkpoints.
+  All fixed-pool screen intervals crossed zero and cross-play means stayed
+  between `0.4972` and `0.5017`. The apparent `alpha=0.05`, outer-round-3
+  leader then regressed on a fresh 200-pair confirmation: combined pool delta
+  `-0.00917`, CI `[-0.01500,-0.00417]`, while its direct edge remained
+  unresolved. A deeper `alpha=0.2` run recorded all 10,496 unique training
+  deals and increased reference KL to roughly `1e-3`; its outer-round-4 screen
+  looked promising, but a fresh 300-pair confirmation returned direct
+  candidate advantage `-0.00333`, CI `[-0.04333,+0.03667]`, and pool delta
+  `+0.00500`, CI `[-0.00611,+0.01611]`. It therefore also failed the
+  predeclared two-gate rule;
+- true TRPO with legal-mask `KL(old||new)` Fisher-vector products,
+  conjugate-gradient natural-gradient steps, and rollback-safe line search.
+  A common-data target-KL sweep over `{0.001,0.005,0.01}` produced no robust
+  screen winner. The least aggressive candidate then lost its fresh 300-pair
+  confirmation directly by `-0.02667`, CI `[-0.05000,-0.00667]`, with pool
+  delta `-0.00333`, CI `[-0.01000,+0.00333]`;
+- Data-Augmented Game Starts (DAGS) feasibility. Full simulator-private state
+  capture/restore and the required root-versus-dataset observation flag were
+  implemented and continuation/privacy-tested, but not connected to training.
+  In the durable 256-game champion self-play audit, trajectories were already
+  short (mean `42.35` turns, median `33`, p90 `84`, zero truncations). A safe DAGS pilot
+  would require migrating every dense layer and collector from 121 to 122
+  features and mixing root starts to avoid a biased equilibrium; its expected
+  gain is lower than the iterative-reference lane on this environment.
 
 ### Selected development candidate
 
@@ -157,6 +184,10 @@ parameter updates were accepted:
   70,000-game result shape from 36.89 to 0.214 seconds (`172x`) while producing
   the same nested payload, and bootstrap resampling now preserves the exact
   historical RNG stream in bounded chunks;
+- the generalized neural cross-play harness evaluated the nine-checkpoint
+  NashPG screen plus incumbent over 15,000 matched, seat-rotated games in
+  17.54 seconds (`855` games/s), including every neural pairing and common-deal
+  random/Smart/Smarter comparisons;
 - a 5,000-pair development layout now resolves its three hash collisions
   deterministically, preserving every non-colliding historical seed and
   yielding 20,000 distinct deals instead of aborting.
@@ -186,6 +217,17 @@ compilation remains appropriate only on the already-supported CUDA path.
   useful. That result supports testing all of those lanes here without
   assuming that capacity alone would win:
   <https://arxiv.org/abs/2607.06854>.
+- The iterative-reference experiment implements the practical objective and
+  reference schedule in NashPG, as a shared-policy specialization rather than
+  claiming literal separate-player parameterization:
+  <https://arxiv.org/abs/2510.18183v2>.
+- The independent trust-region lane implements the constrained natural-gradient
+  update and backtracking acceptance procedure from TRPO:
+  <https://arxiv.org/abs/1502.05477v5>.
+- DAGS motivated the audited intermediate-state scaffold, while its own bias
+  counterexample and task-flag mitigation are why it was not wired into the
+  frozen 121-feature player without a separate controlled study:
+  <https://arxiv.org/abs/2605.14379>.
 
 ## Final selection
 
@@ -217,7 +259,7 @@ result SHA-256 is
 the atomic claim-ledger SHA-256 is
 `21d6f27508e29b97adc8708d7d76f2a2a5dadf6b67469ed34dde7073b3cb03eb`.
 
-Final verification after the semantics-preserving performance pass: 357 tests
+Final verification after the additional NashPG, DAGS, and TRPO lanes: 388 tests
 passed, 4 skipped, and all 1,152 equivalence subtests passed. Active privacy
 tripwires covered 216 decisions across 2–7 players, every absolute seat, and
 ordinary, penalty, suit-change, and draw-retry phases: opponent-card and pile

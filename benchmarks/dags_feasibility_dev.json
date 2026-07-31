@@ -1,0 +1,72 @@
+{
+  "benchmark": "dags_feasibility_champion_horizon",
+  "champion": {
+    "path": "/home/tommie/Pesten/ppo_actor_100run3.pth",
+    "sha256": "aac589b3c7300895604e6c77755631ab4a31c8bf9810768448ab2f3ff5bbe186"
+  },
+  "deterministic_measurements": {
+    "completed_games": 256,
+    "draws": 0,
+    "environment_turns": 10841,
+    "finite_log_probabilities": true,
+    "games": 256,
+    "implicit_zero_decision_seats": 0,
+    "inference_calls": 213,
+    "maximum_turns_observed": 202,
+    "mean_policy_decisions_per_game": 36.30859375,
+    "mean_turns_per_game": 42.34765625,
+    "median_turns_per_game": 33.0,
+    "observation_shape": [
+      9295,
+      121
+    ],
+    "p90_turns_per_game": 84.0,
+    "policy_decisions": 9295,
+    "policy_episodes": 512,
+    "truncated_games": 0,
+    "wins": 256
+  },
+  "interpretation": {
+    "dags_expected_value": "low_for_current_champion",
+    "reason": "Champion games already have short decision horizons relative to the long control bottlenecks where DAGS was most helpful.",
+    "timing_is_machine_state_dependent": true
+  },
+  "paper": {
+    "name": "Data-Augmented Game Starts",
+    "url": "https://arxiv.org/abs/2605.14379v1"
+  },
+  "recorded_at": "2026-07-31T10:28:32.927552+00:00",
+  "reproduction_command": "./venv/bin/python benchmark_dags_feasibility.py --champion ppo_actor_100run3.pth --output benchmarks/dags_feasibility_dev.json --games 256 --deal-seed-start 84510000 --policy-seed 84510999 --temperature 0.8 --max-turns 500 --torch-threads 8",
+  "schema_version": 1,
+  "seed_audit": {
+    "deal_seed_recipe": "contiguous uint32 range [84510000, 84510255]",
+    "deal_seed_start": 84510000,
+    "deal_seed_stop_inclusive": 84510255,
+    "development_only": true,
+    "development_seed_limit": 4294000000,
+    "policy_sampling_seed": 84510999,
+    "sealed_outcomes_used": false
+  },
+  "throughput": {
+    "environment_turns_per_second": 16780.386197995915,
+    "games_per_second": 396.25300864191075,
+    "mean_policy_inference_batch_size": 43.63849765258216,
+    "policy_decisions_per_second": 14387.389512994376,
+    "rollout_wall_seconds": 0.6460518769999908
+  },
+  "workload": {
+    "agent_sets": [
+      [
+        "champion",
+        "champion"
+      ]
+    ],
+    "games": 256,
+    "maximum_turns_per_game": 500,
+    "players": 2,
+    "policy": "StudentNet shared symmetrically by both seats",
+    "rollout_device": "cpu",
+    "temperature": 0.8,
+    "torch_threads": 8
+  }
+}
