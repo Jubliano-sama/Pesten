@@ -1,0 +1,4844 @@
+{
+  "created_at_utc": "2026-07-31T10:49:58.763410+00:00",
+  "development_only": true,
+  "fixed_raw_incumbent": {
+    "actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+    "frozen": true,
+    "path": "/home/tommie/Pesten/ppo_actor_100run3.pth",
+    "projected": false,
+    "sha256": "aac589b3c7300895604e6c77755631ab4a31c8bf9810768448ab2f3ff5bbe186"
+  },
+  "interpretation": {
+    "claim": "diagnostic lower bound from responses found by finite PPO",
+    "not_claimed": "exact best response, exploitability certificate, or exact exploitability or production promotion",
+    "overfitting_warning": "the response may overfit the frozen raw incumbent; it must pass raw direct and fixed-pool gates, then fresh exact projected-vs-projected production gates"
+  },
+  "method": "finite learned PPO approximate best response",
+  "observation_contract": {
+    "candidate_only_collection": true,
+    "draw_pile_order_visible": false,
+    "opponent_private_state_visible": false,
+    "size": 121
+  },
+  "protocol": {
+    "batch_size": 2048,
+    "deal_pairs_per_iteration": 64,
+    "device": "cpu",
+    "epochs": 2,
+    "games_per_iteration": 128,
+    "iterations": 4,
+    "learning_rate": 3e-05,
+    "maximum_turns": 500,
+    "ppo_clip": 0.1,
+    "temperature": 1.0,
+    "torch_threads": 8
+  },
+  "references": {
+    "policy_space_response_oracles": "https://arxiv.org/abs/1711.00832",
+    "ppo": "https://arxiv.org/abs/1707.06347"
+  },
+  "reward": {
+    "collector_pass_penalty_removed": true,
+    "discount": 1.0,
+    "terminal_zero_sum_win_draw_loss_only": true
+  },
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "seed_audit": {
+    "all_seeds_below_92m": true,
+    "both_seats_per_deal": true,
+    "common_across_variants": true,
+    "deal_seeds": [
+      {
+        "deal_seed": 90500002
+      },
+      {
+        "deal_seed": 90500003
+      },
+      {
+        "deal_seed": 90500004
+      },
+      {
+        "deal_seed": 90500005
+      },
+      {
+        "deal_seed": 90500006
+      },
+      {
+        "deal_seed": 90500007
+      },
+      {
+        "deal_seed": 90500008
+      },
+      {
+        "deal_seed": 90500009
+      },
+      {
+        "deal_seed": 90500010
+      },
+      {
+        "deal_seed": 90500011
+      },
+      {
+        "deal_seed": 90500012
+      },
+      {
+        "deal_seed": 90500013
+      },
+      {
+        "deal_seed": 90500014
+      },
+      {
+        "deal_seed": 90500015
+      },
+      {
+        "deal_seed": 90500016
+      },
+      {
+        "deal_seed": 90500017
+      },
+      {
+        "deal_seed": 90500018
+      },
+      {
+        "deal_seed": 90500019
+      },
+      {
+        "deal_seed": 90500020
+      },
+      {
+        "deal_seed": 90500021
+      },
+      {
+        "deal_seed": 90500022
+      },
+      {
+        "deal_seed": 90500023
+      },
+      {
+        "deal_seed": 90500024
+      },
+      {
+        "deal_seed": 90500025
+      },
+      {
+        "deal_seed": 90500026
+      },
+      {
+        "deal_seed": 90500027
+      },
+      {
+        "deal_seed": 90500028
+      },
+      {
+        "deal_seed": 90500029
+      },
+      {
+        "deal_seed": 90500030
+      },
+      {
+        "deal_seed": 90500031
+      },
+      {
+        "deal_seed": 90500032
+      },
+      {
+        "deal_seed": 90500033
+      },
+      {
+        "deal_seed": 90500034
+      },
+      {
+        "deal_seed": 90500035
+      },
+      {
+        "deal_seed": 90500036
+      },
+      {
+        "deal_seed": 90500037
+      },
+      {
+        "deal_seed": 90500038
+      },
+      {
+        "deal_seed": 90500039
+      },
+      {
+        "deal_seed": 90500040
+      },
+      {
+        "deal_seed": 90500041
+      },
+      {
+        "deal_seed": 90500042
+      },
+      {
+        "deal_seed": 90500043
+      },
+      {
+        "deal_seed": 90500044
+      },
+      {
+        "deal_seed": 90500045
+      },
+      {
+        "deal_seed": 90500046
+      },
+      {
+        "deal_seed": 90500047
+      },
+      {
+        "deal_seed": 90500048
+      },
+      {
+        "deal_seed": 90500049
+      },
+      {
+        "deal_seed": 90500050
+      },
+      {
+        "deal_seed": 90500051
+      },
+      {
+        "deal_seed": 90500052
+      },
+      {
+        "deal_seed": 90500053
+      },
+      {
+        "deal_seed": 90500054
+      },
+      {
+        "deal_seed": 90500055
+      },
+      {
+        "deal_seed": 90500056
+      },
+      {
+        "deal_seed": 90500057
+      },
+      {
+        "deal_seed": 90500058
+      },
+      {
+        "deal_seed": 90500059
+      },
+      {
+        "deal_seed": 90500060
+      },
+      {
+        "deal_seed": 90500061
+      },
+      {
+        "deal_seed": 90500062
+      },
+      {
+        "deal_seed": 90500063
+      },
+      {
+        "deal_seed": 90500064
+      },
+      {
+        "deal_seed": 90500065
+      },
+      {
+        "deal_seed": 90500066
+      },
+      {
+        "deal_seed": 90500067
+      },
+      {
+        "deal_seed": 90500068
+      },
+      {
+        "deal_seed": 90500069
+      },
+      {
+        "deal_seed": 90500070
+      },
+      {
+        "deal_seed": 90500071
+      },
+      {
+        "deal_seed": 90500072
+      },
+      {
+        "deal_seed": 90500073
+      },
+      {
+        "deal_seed": 90500074
+      },
+      {
+        "deal_seed": 90500075
+      },
+      {
+        "deal_seed": 90500076
+      },
+      {
+        "deal_seed": 90500077
+      },
+      {
+        "deal_seed": 90500078
+      },
+      {
+        "deal_seed": 90500079
+      },
+      {
+        "deal_seed": 90500080
+      },
+      {
+        "deal_seed": 90500081
+      },
+      {
+        "deal_seed": 90500082
+      },
+      {
+        "deal_seed": 90500083
+      },
+      {
+        "deal_seed": 90500084
+      },
+      {
+        "deal_seed": 90500085
+      },
+      {
+        "deal_seed": 90500086
+      },
+      {
+        "deal_seed": 90500087
+      },
+      {
+        "deal_seed": 90500088
+      },
+      {
+        "deal_seed": 90500089
+      },
+      {
+        "deal_seed": 90500090
+      },
+      {
+        "deal_seed": 90500091
+      },
+      {
+        "deal_seed": 90500092
+      },
+      {
+        "deal_seed": 90500093
+      },
+      {
+        "deal_seed": 90500094
+      },
+      {
+        "deal_seed": 90500095
+      },
+      {
+        "deal_seed": 90500096
+      },
+      {
+        "deal_seed": 90500097
+      },
+      {
+        "deal_seed": 90500098
+      },
+      {
+        "deal_seed": 90500099
+      },
+      {
+        "deal_seed": 90500100
+      },
+      {
+        "deal_seed": 90500101
+      },
+      {
+        "deal_seed": 90500102
+      },
+      {
+        "deal_seed": 90500103
+      },
+      {
+        "deal_seed": 90500104
+      },
+      {
+        "deal_seed": 90500105
+      },
+      {
+        "deal_seed": 90500106
+      },
+      {
+        "deal_seed": 90500107
+      },
+      {
+        "deal_seed": 90500108
+      },
+      {
+        "deal_seed": 90500109
+      },
+      {
+        "deal_seed": 90500110
+      },
+      {
+        "deal_seed": 90500111
+      },
+      {
+        "deal_seed": 90500112
+      },
+      {
+        "deal_seed": 90500113
+      },
+      {
+        "deal_seed": 90500114
+      },
+      {
+        "deal_seed": 90500115
+      },
+      {
+        "deal_seed": 90500116
+      },
+      {
+        "deal_seed": 90500117
+      },
+      {
+        "deal_seed": 90500118
+      },
+      {
+        "deal_seed": 90500119
+      },
+      {
+        "deal_seed": 90500120
+      },
+      {
+        "deal_seed": 90500121
+      },
+      {
+        "deal_seed": 90500122
+      },
+      {
+        "deal_seed": 90500123
+      },
+      {
+        "deal_seed": 90500124
+      },
+      {
+        "deal_seed": 90500125
+      },
+      {
+        "deal_seed": 90500126
+      },
+      {
+        "deal_seed": 90500127
+      },
+      {
+        "deal_seed": 90500128
+      },
+      {
+        "deal_seed": 90500129
+      },
+      {
+        "deal_seed": 90500130
+      },
+      {
+        "deal_seed": 90500131
+      },
+      {
+        "deal_seed": 90500132
+      },
+      {
+        "deal_seed": 90500133
+      },
+      {
+        "deal_seed": 90500134
+      },
+      {
+        "deal_seed": 90500135
+      },
+      {
+        "deal_seed": 90500136
+      },
+      {
+        "deal_seed": 90500137
+      },
+      {
+        "deal_seed": 90500138
+      },
+      {
+        "deal_seed": 90500139
+      },
+      {
+        "deal_seed": 90500140
+      },
+      {
+        "deal_seed": 90500141
+      },
+      {
+        "deal_seed": 90500142
+      },
+      {
+        "deal_seed": 90500143
+      },
+      {
+        "deal_seed": 90500144
+      },
+      {
+        "deal_seed": 90500145
+      },
+      {
+        "deal_seed": 90500146
+      },
+      {
+        "deal_seed": 90500147
+      },
+      {
+        "deal_seed": 90500148
+      },
+      {
+        "deal_seed": 90500149
+      },
+      {
+        "deal_seed": 90500150
+      },
+      {
+        "deal_seed": 90500151
+      },
+      {
+        "deal_seed": 90500152
+      },
+      {
+        "deal_seed": 90500153
+      },
+      {
+        "deal_seed": 90500154
+      },
+      {
+        "deal_seed": 90500155
+      },
+      {
+        "deal_seed": 90500156
+      },
+      {
+        "deal_seed": 90500157
+      },
+      {
+        "deal_seed": 90500158
+      },
+      {
+        "deal_seed": 90500159
+      },
+      {
+        "deal_seed": 90500160
+      },
+      {
+        "deal_seed": 90500161
+      },
+      {
+        "deal_seed": 90500162
+      },
+      {
+        "deal_seed": 90500163
+      },
+      {
+        "deal_seed": 90500164
+      },
+      {
+        "deal_seed": 90500165
+      },
+      {
+        "deal_seed": 90500166
+      },
+      {
+        "deal_seed": 90500167
+      },
+      {
+        "deal_seed": 90500168
+      },
+      {
+        "deal_seed": 90500169
+      },
+      {
+        "deal_seed": 90500170
+      },
+      {
+        "deal_seed": 90500171
+      },
+      {
+        "deal_seed": 90500172
+      },
+      {
+        "deal_seed": 90500173
+      },
+      {
+        "deal_seed": 90500174
+      },
+      {
+        "deal_seed": 90500175
+      },
+      {
+        "deal_seed": 90500176
+      },
+      {
+        "deal_seed": 90500177
+      },
+      {
+        "deal_seed": 90500178
+      },
+      {
+        "deal_seed": 90500179
+      },
+      {
+        "deal_seed": 90500180
+      },
+      {
+        "deal_seed": 90500181
+      },
+      {
+        "deal_seed": 90500182
+      },
+      {
+        "deal_seed": 90500183
+      },
+      {
+        "deal_seed": 90500184
+      },
+      {
+        "deal_seed": 90500185
+      },
+      {
+        "deal_seed": 90500186
+      },
+      {
+        "deal_seed": 90500187
+      },
+      {
+        "deal_seed": 90500188
+      },
+      {
+        "deal_seed": 90500189
+      },
+      {
+        "deal_seed": 90500190
+      },
+      {
+        "deal_seed": 90500191
+      },
+      {
+        "deal_seed": 90500192
+      },
+      {
+        "deal_seed": 90500193
+      },
+      {
+        "deal_seed": 90500194
+      },
+      {
+        "deal_seed": 90500195
+      },
+      {
+        "deal_seed": 90500196
+      },
+      {
+        "deal_seed": 90500197
+      },
+      {
+        "deal_seed": 90500198
+      },
+      {
+        "deal_seed": 90500199
+      },
+      {
+        "deal_seed": 90500200
+      },
+      {
+        "deal_seed": 90500201
+      },
+      {
+        "deal_seed": 90500202
+      },
+      {
+        "deal_seed": 90500203
+      },
+      {
+        "deal_seed": 90500204
+      },
+      {
+        "deal_seed": 90500205
+      },
+      {
+        "deal_seed": 90500206
+      },
+      {
+        "deal_seed": 90500207
+      },
+      {
+        "deal_seed": 90500208
+      },
+      {
+        "deal_seed": 90500209
+      },
+      {
+        "deal_seed": 90500210
+      },
+      {
+        "deal_seed": 90500211
+      },
+      {
+        "deal_seed": 90500212
+      },
+      {
+        "deal_seed": 90500213
+      },
+      {
+        "deal_seed": 90500214
+      },
+      {
+        "deal_seed": 90500215
+      },
+      {
+        "deal_seed": 90500216
+      },
+      {
+        "deal_seed": 90500217
+      },
+      {
+        "deal_seed": 90500218
+      },
+      {
+        "deal_seed": 90500219
+      },
+      {
+        "deal_seed": 90500220
+      },
+      {
+        "deal_seed": 90500221
+      },
+      {
+        "deal_seed": 90500222
+      },
+      {
+        "deal_seed": 90500223
+      },
+      {
+        "deal_seed": 90500224
+      },
+      {
+        "deal_seed": 90500225
+      },
+      {
+        "deal_seed": 90500226
+      },
+      {
+        "deal_seed": 90500227
+      },
+      {
+        "deal_seed": 90500228
+      },
+      {
+        "deal_seed": 90500229
+      },
+      {
+        "deal_seed": 90500230
+      },
+      {
+        "deal_seed": 90500231
+      },
+      {
+        "deal_seed": 90500232
+      },
+      {
+        "deal_seed": 90500233
+      },
+      {
+        "deal_seed": 90500234
+      },
+      {
+        "deal_seed": 90500235
+      },
+      {
+        "deal_seed": 90500236
+      },
+      {
+        "deal_seed": 90500237
+      },
+      {
+        "deal_seed": 90500238
+      },
+      {
+        "deal_seed": 90500239
+      },
+      {
+        "deal_seed": 90500240
+      },
+      {
+        "deal_seed": 90500241
+      },
+      {
+        "deal_seed": 90500242
+      },
+      {
+        "deal_seed": 90500243
+      },
+      {
+        "deal_seed": 90500244
+      },
+      {
+        "deal_seed": 90500245
+      },
+      {
+        "deal_seed": 90500246
+      },
+      {
+        "deal_seed": 90500247
+      },
+      {
+        "deal_seed": 90500248
+      },
+      {
+        "deal_seed": 90500249
+      },
+      {
+        "deal_seed": 90500250
+      },
+      {
+        "deal_seed": 90500251
+      },
+      {
+        "deal_seed": 90500252
+      },
+      {
+        "deal_seed": 90500253
+      },
+      {
+        "deal_seed": 90500254
+      },
+      {
+        "deal_seed": 90500255
+      },
+      {
+        "deal_seed": 90500256
+      },
+      {
+        "deal_seed": 90500257
+      }
+    ],
+    "maximum_seed": 90500265,
+    "minimum_seed": 90500001,
+    "policy_sampling_seeds": [
+      90500258,
+      90500259,
+      90500260,
+      90500261
+    ],
+    "recorded_seed_roots": [
+      "/home/tommie/Pesten/benchmarks",
+      "/home/tommie/Pesten/experiments"
+    ],
+    "recorded_seed_values_seen": 14202,
+    "requested_start": 90500001,
+    "shuffle_seeds": [
+      90500262,
+      90500263,
+      90500264,
+      90500265
+    ],
+    "skipped_recorded_seeds": [],
+    "training_seed": 90500001
+  },
+  "status": "final",
+  "sweeps": [
+    {
+      "checkpoint": {
+        "actor_state_sha256": "365573f8ccd971429c1f4d1ac09c45e0fb50dcdba8766cd279de4dc33915caca",
+        "path": "best_response_plain.pth",
+        "sha256": "c4bd76bca0ee144019759b6b57a38cca7d0fdd23fe89e7544b84e436bc9bc79d"
+      },
+      "initial_actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+      "iterations": [
+        {
+          "deal_seeds": [
+            {
+              "deal_seed": 90500002
+            },
+            {
+              "deal_seed": 90500003
+            },
+            {
+              "deal_seed": 90500004
+            },
+            {
+              "deal_seed": 90500005
+            },
+            {
+              "deal_seed": 90500006
+            },
+            {
+              "deal_seed": 90500007
+            },
+            {
+              "deal_seed": 90500008
+            },
+            {
+              "deal_seed": 90500009
+            },
+            {
+              "deal_seed": 90500010
+            },
+            {
+              "deal_seed": 90500011
+            },
+            {
+              "deal_seed": 90500012
+            },
+            {
+              "deal_seed": 90500013
+            },
+            {
+              "deal_seed": 90500014
+            },
+            {
+              "deal_seed": 90500015
+            },
+            {
+              "deal_seed": 90500016
+            },
+            {
+              "deal_seed": 90500017
+            },
+            {
+              "deal_seed": 90500018
+            },
+            {
+              "deal_seed": 90500019
+            },
+            {
+              "deal_seed": 90500020
+            },
+            {
+              "deal_seed": 90500021
+            },
+            {
+              "deal_seed": 90500022
+            },
+            {
+              "deal_seed": 90500023
+            },
+            {
+              "deal_seed": 90500024
+            },
+            {
+              "deal_seed": 90500025
+            },
+            {
+              "deal_seed": 90500026
+            },
+            {
+              "deal_seed": 90500027
+            },
+            {
+              "deal_seed": 90500028
+            },
+            {
+              "deal_seed": 90500029
+            },
+            {
+              "deal_seed": 90500030
+            },
+            {
+              "deal_seed": 90500031
+            },
+            {
+              "deal_seed": 90500032
+            },
+            {
+              "deal_seed": 90500033
+            },
+            {
+              "deal_seed": 90500034
+            },
+            {
+              "deal_seed": 90500035
+            },
+            {
+              "deal_seed": 90500036
+            },
+            {
+              "deal_seed": 90500037
+            },
+            {
+              "deal_seed": 90500038
+            },
+            {
+              "deal_seed": 90500039
+            },
+            {
+              "deal_seed": 90500040
+            },
+            {
+              "deal_seed": 90500041
+            },
+            {
+              "deal_seed": 90500042
+            },
+            {
+              "deal_seed": 90500043
+            },
+            {
+              "deal_seed": 90500044
+            },
+            {
+              "deal_seed": 90500045
+            },
+            {
+              "deal_seed": 90500046
+            },
+            {
+              "deal_seed": 90500047
+            },
+            {
+              "deal_seed": 90500048
+            },
+            {
+              "deal_seed": 90500049
+            },
+            {
+              "deal_seed": 90500050
+            },
+            {
+              "deal_seed": 90500051
+            },
+            {
+              "deal_seed": 90500052
+            },
+            {
+              "deal_seed": 90500053
+            },
+            {
+              "deal_seed": 90500054
+            },
+            {
+              "deal_seed": 90500055
+            },
+            {
+              "deal_seed": 90500056
+            },
+            {
+              "deal_seed": 90500057
+            },
+            {
+              "deal_seed": 90500058
+            },
+            {
+              "deal_seed": 90500059
+            },
+            {
+              "deal_seed": 90500060
+            },
+            {
+              "deal_seed": 90500061
+            },
+            {
+              "deal_seed": 90500062
+            },
+            {
+              "deal_seed": 90500063
+            },
+            {
+              "deal_seed": 90500064
+            },
+            {
+              "deal_seed": 90500065
+            }
+          ],
+          "iteration": 1,
+          "payoff_audit": {
+            "candidate_draws": 0,
+            "candidate_losses": 69,
+            "candidate_matched_pair_score": 0.4609375,
+            "candidate_mean_payoff": -0.078125,
+            "candidate_seat_0_games": 64,
+            "candidate_seat_1_games": 64,
+            "candidate_wins": 59,
+            "environment_zero_sum_verified": true,
+            "games": 128,
+            "implicit_zero_decision_candidate_games": 0,
+            "matched_deal_pairs": 64,
+            "populated_candidate_episodes": 128,
+            "terminal_payoffs_verified": true
+          },
+          "policy_sampling_seed": 90500258,
+          "rollout": {
+            "completed_games": 128,
+            "environment_turns": 5911,
+            "inference_calls": 320,
+            "policy_decisions": 2470
+          },
+          "seat_rotation": "each deal candidate seat0 then candidate seat1",
+          "shuffle_seed": 90500262,
+          "update": {
+            "candidate_actor_state_sha256_after": "564bd6f325a7a3e2697ab665b41396e52db17143626d0fe397a4ad82a349da9b",
+            "epochs": [
+              {
+                "epoch": 1,
+                "maximum_preclip_gradient_norm": 0.16003745794296265,
+                "mean_candidate_champion_kl": 0.654483288526535,
+                "mean_clipped_surrogate": -0.0561587680131197,
+                "mean_entropy": 0.05169554427266121,
+                "mean_objective": -0.0561587680131197
+              },
+              {
+                "epoch": 2,
+                "maximum_preclip_gradient_norm": 0.16416636109352112,
+                "mean_candidate_champion_kl": 0.628388375043869,
+                "mean_clipped_surrogate": -0.0700584165751934,
+                "mean_entropy": 0.054058756679296494,
+                "mean_objective": -0.0700584165751934
+              }
+            ],
+            "frozen_champion_actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+            "maximum_initial_ratio_error": 2.86102294921875e-06,
+            "unchanged_policy_ratio_guard_passed": true
+          },
+          "wall_seconds": 0.618287875000533
+        },
+        {
+          "deal_seeds": [
+            {
+              "deal_seed": 90500066
+            },
+            {
+              "deal_seed": 90500067
+            },
+            {
+              "deal_seed": 90500068
+            },
+            {
+              "deal_seed": 90500069
+            },
+            {
+              "deal_seed": 90500070
+            },
+            {
+              "deal_seed": 90500071
+            },
+            {
+              "deal_seed": 90500072
+            },
+            {
+              "deal_seed": 90500073
+            },
+            {
+              "deal_seed": 90500074
+            },
+            {
+              "deal_seed": 90500075
+            },
+            {
+              "deal_seed": 90500076
+            },
+            {
+              "deal_seed": 90500077
+            },
+            {
+              "deal_seed": 90500078
+            },
+            {
+              "deal_seed": 90500079
+            },
+            {
+              "deal_seed": 90500080
+            },
+            {
+              "deal_seed": 90500081
+            },
+            {
+              "deal_seed": 90500082
+            },
+            {
+              "deal_seed": 90500083
+            },
+            {
+              "deal_seed": 90500084
+            },
+            {
+              "deal_seed": 90500085
+            },
+            {
+              "deal_seed": 90500086
+            },
+            {
+              "deal_seed": 90500087
+            },
+            {
+              "deal_seed": 90500088
+            },
+            {
+              "deal_seed": 90500089
+            },
+            {
+              "deal_seed": 90500090
+            },
+            {
+              "deal_seed": 90500091
+            },
+            {
+              "deal_seed": 90500092
+            },
+            {
+              "deal_seed": 90500093
+            },
+            {
+              "deal_seed": 90500094
+            },
+            {
+              "deal_seed": 90500095
+            },
+            {
+              "deal_seed": 90500096
+            },
+            {
+              "deal_seed": 90500097
+            },
+            {
+              "deal_seed": 90500098
+            },
+            {
+              "deal_seed": 90500099
+            },
+            {
+              "deal_seed": 90500100
+            },
+            {
+              "deal_seed": 90500101
+            },
+            {
+              "deal_seed": 90500102
+            },
+            {
+              "deal_seed": 90500103
+            },
+            {
+              "deal_seed": 90500104
+            },
+            {
+              "deal_seed": 90500105
+            },
+            {
+              "deal_seed": 90500106
+            },
+            {
+              "deal_seed": 90500107
+            },
+            {
+              "deal_seed": 90500108
+            },
+            {
+              "deal_seed": 90500109
+            },
+            {
+              "deal_seed": 90500110
+            },
+            {
+              "deal_seed": 90500111
+            },
+            {
+              "deal_seed": 90500112
+            },
+            {
+              "deal_seed": 90500113
+            },
+            {
+              "deal_seed": 90500114
+            },
+            {
+              "deal_seed": 90500115
+            },
+            {
+              "deal_seed": 90500116
+            },
+            {
+              "deal_seed": 90500117
+            },
+            {
+              "deal_seed": 90500118
+            },
+            {
+              "deal_seed": 90500119
+            },
+            {
+              "deal_seed": 90500120
+            },
+            {
+              "deal_seed": 90500121
+            },
+            {
+              "deal_seed": 90500122
+            },
+            {
+              "deal_seed": 90500123
+            },
+            {
+              "deal_seed": 90500124
+            },
+            {
+              "deal_seed": 90500125
+            },
+            {
+              "deal_seed": 90500126
+            },
+            {
+              "deal_seed": 90500127
+            },
+            {
+              "deal_seed": 90500128
+            },
+            {
+              "deal_seed": 90500129
+            }
+          ],
+          "iteration": 2,
+          "payoff_audit": {
+            "candidate_draws": 0,
+            "candidate_losses": 57,
+            "candidate_matched_pair_score": 0.5546875,
+            "candidate_mean_payoff": 0.109375,
+            "candidate_seat_0_games": 64,
+            "candidate_seat_1_games": 64,
+            "candidate_wins": 71,
+            "environment_zero_sum_verified": true,
+            "games": 128,
+            "implicit_zero_decision_candidate_games": 0,
+            "matched_deal_pairs": 64,
+            "populated_candidate_episodes": 128,
+            "terminal_payoffs_verified": true
+          },
+          "policy_sampling_seed": 90500259,
+          "rollout": {
+            "completed_games": 128,
+            "environment_turns": 5661,
+            "inference_calls": 282,
+            "policy_decisions": 2426
+          },
+          "seat_rotation": "each deal candidate seat0 then candidate seat1",
+          "shuffle_seed": 90500263,
+          "update": {
+            "candidate_actor_state_sha256_after": "03a26373c7cc9cb4ba19c725abc0cbb97f0da616601212df969790f59a2ff548",
+            "epochs": [
+              {
+                "epoch": 1,
+                "maximum_preclip_gradient_norm": 0.3281481862068176,
+                "mean_candidate_champion_kl": 0.6868285238742828,
+                "mean_clipped_surrogate": -0.09944059327244759,
+                "mean_entropy": 0.054808683693408966,
+                "mean_objective": -0.09944059327244759
+              },
+              {
+                "epoch": 2,
+                "maximum_preclip_gradient_norm": 0.6878431439399719,
+                "mean_candidate_champion_kl": 0.6374876797199249,
+                "mean_clipped_surrogate": -0.11467964574694633,
+                "mean_entropy": 0.052754830569028854,
+                "mean_objective": -0.11467964574694633
+              }
+            ],
+            "frozen_champion_actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+            "maximum_initial_ratio_error": 3.4570693969726562e-06,
+            "unchanged_policy_ratio_guard_passed": true
+          },
+          "wall_seconds": 0.568719899001735
+        },
+        {
+          "deal_seeds": [
+            {
+              "deal_seed": 90500130
+            },
+            {
+              "deal_seed": 90500131
+            },
+            {
+              "deal_seed": 90500132
+            },
+            {
+              "deal_seed": 90500133
+            },
+            {
+              "deal_seed": 90500134
+            },
+            {
+              "deal_seed": 90500135
+            },
+            {
+              "deal_seed": 90500136
+            },
+            {
+              "deal_seed": 90500137
+            },
+            {
+              "deal_seed": 90500138
+            },
+            {
+              "deal_seed": 90500139
+            },
+            {
+              "deal_seed": 90500140
+            },
+            {
+              "deal_seed": 90500141
+            },
+            {
+              "deal_seed": 90500142
+            },
+            {
+              "deal_seed": 90500143
+            },
+            {
+              "deal_seed": 90500144
+            },
+            {
+              "deal_seed": 90500145
+            },
+            {
+              "deal_seed": 90500146
+            },
+            {
+              "deal_seed": 90500147
+            },
+            {
+              "deal_seed": 90500148
+            },
+            {
+              "deal_seed": 90500149
+            },
+            {
+              "deal_seed": 90500150
+            },
+            {
+              "deal_seed": 90500151
+            },
+            {
+              "deal_seed": 90500152
+            },
+            {
+              "deal_seed": 90500153
+            },
+            {
+              "deal_seed": 90500154
+            },
+            {
+              "deal_seed": 90500155
+            },
+            {
+              "deal_seed": 90500156
+            },
+            {
+              "deal_seed": 90500157
+            },
+            {
+              "deal_seed": 90500158
+            },
+            {
+              "deal_seed": 90500159
+            },
+            {
+              "deal_seed": 90500160
+            },
+            {
+              "deal_seed": 90500161
+            },
+            {
+              "deal_seed": 90500162
+            },
+            {
+              "deal_seed": 90500163
+            },
+            {
+              "deal_seed": 90500164
+            },
+            {
+              "deal_seed": 90500165
+            },
+            {
+              "deal_seed": 90500166
+            },
+            {
+              "deal_seed": 90500167
+            },
+            {
+              "deal_seed": 90500168
+            },
+            {
+              "deal_seed": 90500169
+            },
+            {
+              "deal_seed": 90500170
+            },
+            {
+              "deal_seed": 90500171
+            },
+            {
+              "deal_seed": 90500172
+            },
+            {
+              "deal_seed": 90500173
+            },
+            {
+              "deal_seed": 90500174
+            },
+            {
+              "deal_seed": 90500175
+            },
+            {
+              "deal_seed": 90500176
+            },
+            {
+              "deal_seed": 90500177
+            },
+            {
+              "deal_seed": 90500178
+            },
+            {
+              "deal_seed": 90500179
+            },
+            {
+              "deal_seed": 90500180
+            },
+            {
+              "deal_seed": 90500181
+            },
+            {
+              "deal_seed": 90500182
+            },
+            {
+              "deal_seed": 90500183
+            },
+            {
+              "deal_seed": 90500184
+            },
+            {
+              "deal_seed": 90500185
+            },
+            {
+              "deal_seed": 90500186
+            },
+            {
+              "deal_seed": 90500187
+            },
+            {
+              "deal_seed": 90500188
+            },
+            {
+              "deal_seed": 90500189
+            },
+            {
+              "deal_seed": 90500190
+            },
+            {
+              "deal_seed": 90500191
+            },
+            {
+              "deal_seed": 90500192
+            },
+            {
+              "deal_seed": 90500193
+            }
+          ],
+          "iteration": 3,
+          "payoff_audit": {
+            "candidate_draws": 0,
+            "candidate_losses": 70,
+            "candidate_matched_pair_score": 0.453125,
+            "candidate_mean_payoff": -0.09375,
+            "candidate_seat_0_games": 64,
+            "candidate_seat_1_games": 64,
+            "candidate_wins": 58,
+            "environment_zero_sum_verified": true,
+            "games": 128,
+            "implicit_zero_decision_candidate_games": 0,
+            "matched_deal_pairs": 64,
+            "populated_candidate_episodes": 128,
+            "terminal_payoffs_verified": true
+          },
+          "policy_sampling_seed": 90500260,
+          "rollout": {
+            "completed_games": 128,
+            "environment_turns": 6192,
+            "inference_calls": 318,
+            "policy_decisions": 2619
+          },
+          "seat_rotation": "each deal candidate seat0 then candidate seat1",
+          "shuffle_seed": 90500264,
+          "update": {
+            "candidate_actor_state_sha256_after": "21614bcab317381fb3437a494de74f077430c3c24c369b267893bc6a08f77d0d",
+            "epochs": [
+              {
+                "epoch": 1,
+                "maximum_preclip_gradient_norm": 0.16438037157058716,
+                "mean_candidate_champion_kl": 0.6011387705802917,
+                "mean_clipped_surrogate": -0.0608450248837471,
+                "mean_entropy": 0.049544040113687515,
+                "mean_objective": -0.0608450248837471
+              },
+              {
+                "epoch": 2,
+                "maximum_preclip_gradient_norm": 0.13313335180282593,
+                "mean_candidate_champion_kl": 0.6983587145805359,
+                "mean_clipped_surrogate": -0.07907698303461075,
+                "mean_entropy": 0.051810773089528084,
+                "mean_objective": -0.07907698303461075
+              }
+            ],
+            "frozen_champion_actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+            "maximum_initial_ratio_error": 3.0994415283203125e-06,
+            "unchanged_policy_ratio_guard_passed": true
+          },
+          "wall_seconds": 0.6181305430000066
+        },
+        {
+          "deal_seeds": [
+            {
+              "deal_seed": 90500194
+            },
+            {
+              "deal_seed": 90500195
+            },
+            {
+              "deal_seed": 90500196
+            },
+            {
+              "deal_seed": 90500197
+            },
+            {
+              "deal_seed": 90500198
+            },
+            {
+              "deal_seed": 90500199
+            },
+            {
+              "deal_seed": 90500200
+            },
+            {
+              "deal_seed": 90500201
+            },
+            {
+              "deal_seed": 90500202
+            },
+            {
+              "deal_seed": 90500203
+            },
+            {
+              "deal_seed": 90500204
+            },
+            {
+              "deal_seed": 90500205
+            },
+            {
+              "deal_seed": 90500206
+            },
+            {
+              "deal_seed": 90500207
+            },
+            {
+              "deal_seed": 90500208
+            },
+            {
+              "deal_seed": 90500209
+            },
+            {
+              "deal_seed": 90500210
+            },
+            {
+              "deal_seed": 90500211
+            },
+            {
+              "deal_seed": 90500212
+            },
+            {
+              "deal_seed": 90500213
+            },
+            {
+              "deal_seed": 90500214
+            },
+            {
+              "deal_seed": 90500215
+            },
+            {
+              "deal_seed": 90500216
+            },
+            {
+              "deal_seed": 90500217
+            },
+            {
+              "deal_seed": 90500218
+            },
+            {
+              "deal_seed": 90500219
+            },
+            {
+              "deal_seed": 90500220
+            },
+            {
+              "deal_seed": 90500221
+            },
+            {
+              "deal_seed": 90500222
+            },
+            {
+              "deal_seed": 90500223
+            },
+            {
+              "deal_seed": 90500224
+            },
+            {
+              "deal_seed": 90500225
+            },
+            {
+              "deal_seed": 90500226
+            },
+            {
+              "deal_seed": 90500227
+            },
+            {
+              "deal_seed": 90500228
+            },
+            {
+              "deal_seed": 90500229
+            },
+            {
+              "deal_seed": 90500230
+            },
+            {
+              "deal_seed": 90500231
+            },
+            {
+              "deal_seed": 90500232
+            },
+            {
+              "deal_seed": 90500233
+            },
+            {
+              "deal_seed": 90500234
+            },
+            {
+              "deal_seed": 90500235
+            },
+            {
+              "deal_seed": 90500236
+            },
+            {
+              "deal_seed": 90500237
+            },
+            {
+              "deal_seed": 90500238
+            },
+            {
+              "deal_seed": 90500239
+            },
+            {
+              "deal_seed": 90500240
+            },
+            {
+              "deal_seed": 90500241
+            },
+            {
+              "deal_seed": 90500242
+            },
+            {
+              "deal_seed": 90500243
+            },
+            {
+              "deal_seed": 90500244
+            },
+            {
+              "deal_seed": 90500245
+            },
+            {
+              "deal_seed": 90500246
+            },
+            {
+              "deal_seed": 90500247
+            },
+            {
+              "deal_seed": 90500248
+            },
+            {
+              "deal_seed": 90500249
+            },
+            {
+              "deal_seed": 90500250
+            },
+            {
+              "deal_seed": 90500251
+            },
+            {
+              "deal_seed": 90500252
+            },
+            {
+              "deal_seed": 90500253
+            },
+            {
+              "deal_seed": 90500254
+            },
+            {
+              "deal_seed": 90500255
+            },
+            {
+              "deal_seed": 90500256
+            },
+            {
+              "deal_seed": 90500257
+            }
+          ],
+          "iteration": 4,
+          "payoff_audit": {
+            "candidate_draws": 0,
+            "candidate_losses": 67,
+            "candidate_matched_pair_score": 0.4765625,
+            "candidate_mean_payoff": -0.046875,
+            "candidate_seat_0_games": 64,
+            "candidate_seat_1_games": 64,
+            "candidate_wins": 61,
+            "environment_zero_sum_verified": true,
+            "games": 128,
+            "implicit_zero_decision_candidate_games": 0,
+            "matched_deal_pairs": 64,
+            "populated_candidate_episodes": 128,
+            "terminal_payoffs_verified": true
+          },
+          "policy_sampling_seed": 90500261,
+          "rollout": {
+            "completed_games": 128,
+            "environment_turns": 5438,
+            "inference_calls": 346,
+            "policy_decisions": 2297
+          },
+          "seat_rotation": "each deal candidate seat0 then candidate seat1",
+          "shuffle_seed": 90500265,
+          "update": {
+            "candidate_actor_state_sha256_after": "365573f8ccd971429c1f4d1ac09c45e0fb50dcdba8766cd279de4dc33915caca",
+            "epochs": [
+              {
+                "epoch": 1,
+                "maximum_preclip_gradient_norm": 0.2344876378774643,
+                "mean_candidate_champion_kl": 0.6023682653903961,
+                "mean_clipped_surrogate": -0.04139183461666107,
+                "mean_entropy": 0.05162784643471241,
+                "mean_objective": -0.04139183461666107
+              },
+              {
+                "epoch": 2,
+                "maximum_preclip_gradient_norm": 0.2817099988460541,
+                "mean_candidate_champion_kl": 0.5965834558010101,
+                "mean_clipped_surrogate": -0.026339801552239805,
+                "mean_entropy": 0.05424000695347786,
+                "mean_objective": -0.026339801552239805
+              }
+            ],
+            "frozen_champion_actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+            "maximum_initial_ratio_error": 1.9073486328125e-06,
+            "unchanged_policy_ratio_guard_passed": true
+          },
+          "wall_seconds": 0.5938915309998265
+        }
+      ],
+      "variant": {
+        "champion_kl_coefficient": 0.0,
+        "entropy_coefficient": 0.0,
+        "name": "plain"
+      }
+    },
+    {
+      "checkpoint": {
+        "actor_state_sha256": "c4b38aaa84d50d026dc29852049d2b373a7bfca95e660e877228d01354a3d254",
+        "path": "best_response_entropy_0p01.pth",
+        "sha256": "6b063a8571ae97a1cea61b7987ca324928c5b99171d74a97224d203f1ce44c7a"
+      },
+      "initial_actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+      "iterations": [
+        {
+          "deal_seeds": [
+            {
+              "deal_seed": 90500002
+            },
+            {
+              "deal_seed": 90500003
+            },
+            {
+              "deal_seed": 90500004
+            },
+            {
+              "deal_seed": 90500005
+            },
+            {
+              "deal_seed": 90500006
+            },
+            {
+              "deal_seed": 90500007
+            },
+            {
+              "deal_seed": 90500008
+            },
+            {
+              "deal_seed": 90500009
+            },
+            {
+              "deal_seed": 90500010
+            },
+            {
+              "deal_seed": 90500011
+            },
+            {
+              "deal_seed": 90500012
+            },
+            {
+              "deal_seed": 90500013
+            },
+            {
+              "deal_seed": 90500014
+            },
+            {
+              "deal_seed": 90500015
+            },
+            {
+              "deal_seed": 90500016
+            },
+            {
+              "deal_seed": 90500017
+            },
+            {
+              "deal_seed": 90500018
+            },
+            {
+              "deal_seed": 90500019
+            },
+            {
+              "deal_seed": 90500020
+            },
+            {
+              "deal_seed": 90500021
+            },
+            {
+              "deal_seed": 90500022
+            },
+            {
+              "deal_seed": 90500023
+            },
+            {
+              "deal_seed": 90500024
+            },
+            {
+              "deal_seed": 90500025
+            },
+            {
+              "deal_seed": 90500026
+            },
+            {
+              "deal_seed": 90500027
+            },
+            {
+              "deal_seed": 90500028
+            },
+            {
+              "deal_seed": 90500029
+            },
+            {
+              "deal_seed": 90500030
+            },
+            {
+              "deal_seed": 90500031
+            },
+            {
+              "deal_seed": 90500032
+            },
+            {
+              "deal_seed": 90500033
+            },
+            {
+              "deal_seed": 90500034
+            },
+            {
+              "deal_seed": 90500035
+            },
+            {
+              "deal_seed": 90500036
+            },
+            {
+              "deal_seed": 90500037
+            },
+            {
+              "deal_seed": 90500038
+            },
+            {
+              "deal_seed": 90500039
+            },
+            {
+              "deal_seed": 90500040
+            },
+            {
+              "deal_seed": 90500041
+            },
+            {
+              "deal_seed": 90500042
+            },
+            {
+              "deal_seed": 90500043
+            },
+            {
+              "deal_seed": 90500044
+            },
+            {
+              "deal_seed": 90500045
+            },
+            {
+              "deal_seed": 90500046
+            },
+            {
+              "deal_seed": 90500047
+            },
+            {
+              "deal_seed": 90500048
+            },
+            {
+              "deal_seed": 90500049
+            },
+            {
+              "deal_seed": 90500050
+            },
+            {
+              "deal_seed": 90500051
+            },
+            {
+              "deal_seed": 90500052
+            },
+            {
+              "deal_seed": 90500053
+            },
+            {
+              "deal_seed": 90500054
+            },
+            {
+              "deal_seed": 90500055
+            },
+            {
+              "deal_seed": 90500056
+            },
+            {
+              "deal_seed": 90500057
+            },
+            {
+              "deal_seed": 90500058
+            },
+            {
+              "deal_seed": 90500059
+            },
+            {
+              "deal_seed": 90500060
+            },
+            {
+              "deal_seed": 90500061
+            },
+            {
+              "deal_seed": 90500062
+            },
+            {
+              "deal_seed": 90500063
+            },
+            {
+              "deal_seed": 90500064
+            },
+            {
+              "deal_seed": 90500065
+            }
+          ],
+          "iteration": 1,
+          "payoff_audit": {
+            "candidate_draws": 0,
+            "candidate_losses": 69,
+            "candidate_matched_pair_score": 0.4609375,
+            "candidate_mean_payoff": -0.078125,
+            "candidate_seat_0_games": 64,
+            "candidate_seat_1_games": 64,
+            "candidate_wins": 59,
+            "environment_zero_sum_verified": true,
+            "games": 128,
+            "implicit_zero_decision_candidate_games": 0,
+            "matched_deal_pairs": 64,
+            "populated_candidate_episodes": 128,
+            "terminal_payoffs_verified": true
+          },
+          "policy_sampling_seed": 90500258,
+          "rollout": {
+            "completed_games": 128,
+            "environment_turns": 5911,
+            "inference_calls": 320,
+            "policy_decisions": 2470
+          },
+          "seat_rotation": "each deal candidate seat0 then candidate seat1",
+          "shuffle_seed": 90500262,
+          "update": {
+            "candidate_actor_state_sha256_after": "7ccedb75a7d571bf47ccadfb235095581e4e2a1251cff8abd1600f9508ac944b",
+            "epochs": [
+              {
+                "epoch": 1,
+                "maximum_preclip_gradient_norm": 0.16007691621780396,
+                "mean_candidate_champion_kl": 0.6544900834560394,
+                "mean_clipped_surrogate": -0.05615825019776821,
+                "mean_entropy": 0.051697758957743645,
+                "mean_objective": -0.05564127117395401
+              },
+              {
+                "epoch": 2,
+                "maximum_preclip_gradient_norm": 0.16449789702892303,
+                "mean_candidate_champion_kl": 0.6283501088619232,
+                "mean_clipped_surrogate": -0.07006049528717995,
+                "mean_entropy": 0.05409822799265385,
+                "mean_objective": -0.0695195123553276
+              }
+            ],
+            "frozen_champion_actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+            "maximum_initial_ratio_error": 2.86102294921875e-06,
+            "unchanged_policy_ratio_guard_passed": true
+          },
+          "wall_seconds": 0.7699623779990361
+        },
+        {
+          "deal_seeds": [
+            {
+              "deal_seed": 90500066
+            },
+            {
+              "deal_seed": 90500067
+            },
+            {
+              "deal_seed": 90500068
+            },
+            {
+              "deal_seed": 90500069
+            },
+            {
+              "deal_seed": 90500070
+            },
+            {
+              "deal_seed": 90500071
+            },
+            {
+              "deal_seed": 90500072
+            },
+            {
+              "deal_seed": 90500073
+            },
+            {
+              "deal_seed": 90500074
+            },
+            {
+              "deal_seed": 90500075
+            },
+            {
+              "deal_seed": 90500076
+            },
+            {
+              "deal_seed": 90500077
+            },
+            {
+              "deal_seed": 90500078
+            },
+            {
+              "deal_seed": 90500079
+            },
+            {
+              "deal_seed": 90500080
+            },
+            {
+              "deal_seed": 90500081
+            },
+            {
+              "deal_seed": 90500082
+            },
+            {
+              "deal_seed": 90500083
+            },
+            {
+              "deal_seed": 90500084
+            },
+            {
+              "deal_seed": 90500085
+            },
+            {
+              "deal_seed": 90500086
+            },
+            {
+              "deal_seed": 90500087
+            },
+            {
+              "deal_seed": 90500088
+            },
+            {
+              "deal_seed": 90500089
+            },
+            {
+              "deal_seed": 90500090
+            },
+            {
+              "deal_seed": 90500091
+            },
+            {
+              "deal_seed": 90500092
+            },
+            {
+              "deal_seed": 90500093
+            },
+            {
+              "deal_seed": 90500094
+            },
+            {
+              "deal_seed": 90500095
+            },
+            {
+              "deal_seed": 90500096
+            },
+            {
+              "deal_seed": 90500097
+            },
+            {
+              "deal_seed": 90500098
+            },
+            {
+              "deal_seed": 90500099
+            },
+            {
+              "deal_seed": 90500100
+            },
+            {
+              "deal_seed": 90500101
+            },
+            {
+              "deal_seed": 90500102
+            },
+            {
+              "deal_seed": 90500103
+            },
+            {
+              "deal_seed": 90500104
+            },
+            {
+              "deal_seed": 90500105
+            },
+            {
+              "deal_seed": 90500106
+            },
+            {
+              "deal_seed": 90500107
+            },
+            {
+              "deal_seed": 90500108
+            },
+            {
+              "deal_seed": 90500109
+            },
+            {
+              "deal_seed": 90500110
+            },
+            {
+              "deal_seed": 90500111
+            },
+            {
+              "deal_seed": 90500112
+            },
+            {
+              "deal_seed": 90500113
+            },
+            {
+              "deal_seed": 90500114
+            },
+            {
+              "deal_seed": 90500115
+            },
+            {
+              "deal_seed": 90500116
+            },
+            {
+              "deal_seed": 90500117
+            },
+            {
+              "deal_seed": 90500118
+            },
+            {
+              "deal_seed": 90500119
+            },
+            {
+              "deal_seed": 90500120
+            },
+            {
+              "deal_seed": 90500121
+            },
+            {
+              "deal_seed": 90500122
+            },
+            {
+              "deal_seed": 90500123
+            },
+            {
+              "deal_seed": 90500124
+            },
+            {
+              "deal_seed": 90500125
+            },
+            {
+              "deal_seed": 90500126
+            },
+            {
+              "deal_seed": 90500127
+            },
+            {
+              "deal_seed": 90500128
+            },
+            {
+              "deal_seed": 90500129
+            }
+          ],
+          "iteration": 2,
+          "payoff_audit": {
+            "candidate_draws": 0,
+            "candidate_losses": 57,
+            "candidate_matched_pair_score": 0.5546875,
+            "candidate_mean_payoff": 0.109375,
+            "candidate_seat_0_games": 64,
+            "candidate_seat_1_games": 64,
+            "candidate_wins": 71,
+            "environment_zero_sum_verified": true,
+            "games": 128,
+            "implicit_zero_decision_candidate_games": 0,
+            "matched_deal_pairs": 64,
+            "populated_candidate_episodes": 128,
+            "terminal_payoffs_verified": true
+          },
+          "policy_sampling_seed": 90500259,
+          "rollout": {
+            "completed_games": 128,
+            "environment_turns": 5661,
+            "inference_calls": 282,
+            "policy_decisions": 2426
+          },
+          "seat_rotation": "each deal candidate seat0 then candidate seat1",
+          "shuffle_seed": 90500263,
+          "update": {
+            "candidate_actor_state_sha256_after": "0794339c4dcdef0dabc18286aa8a9c8746c0696ccfa2d9c83489d6fbf0868ebd",
+            "epochs": [
+              {
+                "epoch": 1,
+                "maximum_preclip_gradient_norm": 0.328521728515625,
+                "mean_candidate_champion_kl": 0.6867326498031616,
+                "mean_clipped_surrogate": -0.0994831807911396,
+                "mean_entropy": 0.05480598285794258,
+                "mean_objective": -0.09893511980772018
+              },
+              {
+                "epoch": 2,
+                "maximum_preclip_gradient_norm": 0.6875377297401428,
+                "mean_candidate_champion_kl": 0.6374446153640747,
+                "mean_clipped_surrogate": -0.11470622196793556,
+                "mean_entropy": 0.052765486761927605,
+                "mean_objective": -0.11417856812477112
+              }
+            ],
+            "frozen_champion_actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+            "maximum_initial_ratio_error": 2.5033950805664062e-06,
+            "unchanged_policy_ratio_guard_passed": true
+          },
+          "wall_seconds": 0.6898933570009831
+        },
+        {
+          "deal_seeds": [
+            {
+              "deal_seed": 90500130
+            },
+            {
+              "deal_seed": 90500131
+            },
+            {
+              "deal_seed": 90500132
+            },
+            {
+              "deal_seed": 90500133
+            },
+            {
+              "deal_seed": 90500134
+            },
+            {
+              "deal_seed": 90500135
+            },
+            {
+              "deal_seed": 90500136
+            },
+            {
+              "deal_seed": 90500137
+            },
+            {
+              "deal_seed": 90500138
+            },
+            {
+              "deal_seed": 90500139
+            },
+            {
+              "deal_seed": 90500140
+            },
+            {
+              "deal_seed": 90500141
+            },
+            {
+              "deal_seed": 90500142
+            },
+            {
+              "deal_seed": 90500143
+            },
+            {
+              "deal_seed": 90500144
+            },
+            {
+              "deal_seed": 90500145
+            },
+            {
+              "deal_seed": 90500146
+            },
+            {
+              "deal_seed": 90500147
+            },
+            {
+              "deal_seed": 90500148
+            },
+            {
+              "deal_seed": 90500149
+            },
+            {
+              "deal_seed": 90500150
+            },
+            {
+              "deal_seed": 90500151
+            },
+            {
+              "deal_seed": 90500152
+            },
+            {
+              "deal_seed": 90500153
+            },
+            {
+              "deal_seed": 90500154
+            },
+            {
+              "deal_seed": 90500155
+            },
+            {
+              "deal_seed": 90500156
+            },
+            {
+              "deal_seed": 90500157
+            },
+            {
+              "deal_seed": 90500158
+            },
+            {
+              "deal_seed": 90500159
+            },
+            {
+              "deal_seed": 90500160
+            },
+            {
+              "deal_seed": 90500161
+            },
+            {
+              "deal_seed": 90500162
+            },
+            {
+              "deal_seed": 90500163
+            },
+            {
+              "deal_seed": 90500164
+            },
+            {
+              "deal_seed": 90500165
+            },
+            {
+              "deal_seed": 90500166
+            },
+            {
+              "deal_seed": 90500167
+            },
+            {
+              "deal_seed": 90500168
+            },
+            {
+              "deal_seed": 90500169
+            },
+            {
+              "deal_seed": 90500170
+            },
+            {
+              "deal_seed": 90500171
+            },
+            {
+              "deal_seed": 90500172
+            },
+            {
+              "deal_seed": 90500173
+            },
+            {
+              "deal_seed": 90500174
+            },
+            {
+              "deal_seed": 90500175
+            },
+            {
+              "deal_seed": 90500176
+            },
+            {
+              "deal_seed": 90500177
+            },
+            {
+              "deal_seed": 90500178
+            },
+            {
+              "deal_seed": 90500179
+            },
+            {
+              "deal_seed": 90500180
+            },
+            {
+              "deal_seed": 90500181
+            },
+            {
+              "deal_seed": 90500182
+            },
+            {
+              "deal_seed": 90500183
+            },
+            {
+              "deal_seed": 90500184
+            },
+            {
+              "deal_seed": 90500185
+            },
+            {
+              "deal_seed": 90500186
+            },
+            {
+              "deal_seed": 90500187
+            },
+            {
+              "deal_seed": 90500188
+            },
+            {
+              "deal_seed": 90500189
+            },
+            {
+              "deal_seed": 90500190
+            },
+            {
+              "deal_seed": 90500191
+            },
+            {
+              "deal_seed": 90500192
+            },
+            {
+              "deal_seed": 90500193
+            }
+          ],
+          "iteration": 3,
+          "payoff_audit": {
+            "candidate_draws": 0,
+            "candidate_losses": 70,
+            "candidate_matched_pair_score": 0.453125,
+            "candidate_mean_payoff": -0.09375,
+            "candidate_seat_0_games": 64,
+            "candidate_seat_1_games": 64,
+            "candidate_wins": 58,
+            "environment_zero_sum_verified": true,
+            "games": 128,
+            "implicit_zero_decision_candidate_games": 0,
+            "matched_deal_pairs": 64,
+            "populated_candidate_episodes": 128,
+            "terminal_payoffs_verified": true
+          },
+          "policy_sampling_seed": 90500260,
+          "rollout": {
+            "completed_games": 128,
+            "environment_turns": 6192,
+            "inference_calls": 318,
+            "policy_decisions": 2619
+          },
+          "seat_rotation": "each deal candidate seat0 then candidate seat1",
+          "shuffle_seed": 90500264,
+          "update": {
+            "candidate_actor_state_sha256_after": "77652bb09b51509da1f195a98f3b758e64da73d79d97e0f57cd503d622ee419e",
+            "epochs": [
+              {
+                "epoch": 1,
+                "maximum_preclip_gradient_norm": 0.16504621505737305,
+                "mean_candidate_champion_kl": 0.6009746491909027,
+                "mean_clipped_surrogate": -0.06084113195538521,
+                "mean_entropy": 0.049556611105799675,
+                "mean_objective": -0.060345565900206566
+              },
+              {
+                "epoch": 2,
+                "maximum_preclip_gradient_norm": 0.13366727530956268,
+                "mean_candidate_champion_kl": 0.6982462406158447,
+                "mean_clipped_surrogate": -0.07906602881848812,
+                "mean_entropy": 0.051814742386341095,
+                "mean_objective": -0.0785478800535202
+              }
+            ],
+            "frozen_champion_actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+            "maximum_initial_ratio_error": 1.9073486328125e-06,
+            "unchanged_policy_ratio_guard_passed": true
+          },
+          "wall_seconds": 0.6254783990007127
+        },
+        {
+          "deal_seeds": [
+            {
+              "deal_seed": 90500194
+            },
+            {
+              "deal_seed": 90500195
+            },
+            {
+              "deal_seed": 90500196
+            },
+            {
+              "deal_seed": 90500197
+            },
+            {
+              "deal_seed": 90500198
+            },
+            {
+              "deal_seed": 90500199
+            },
+            {
+              "deal_seed": 90500200
+            },
+            {
+              "deal_seed": 90500201
+            },
+            {
+              "deal_seed": 90500202
+            },
+            {
+              "deal_seed": 90500203
+            },
+            {
+              "deal_seed": 90500204
+            },
+            {
+              "deal_seed": 90500205
+            },
+            {
+              "deal_seed": 90500206
+            },
+            {
+              "deal_seed": 90500207
+            },
+            {
+              "deal_seed": 90500208
+            },
+            {
+              "deal_seed": 90500209
+            },
+            {
+              "deal_seed": 90500210
+            },
+            {
+              "deal_seed": 90500211
+            },
+            {
+              "deal_seed": 90500212
+            },
+            {
+              "deal_seed": 90500213
+            },
+            {
+              "deal_seed": 90500214
+            },
+            {
+              "deal_seed": 90500215
+            },
+            {
+              "deal_seed": 90500216
+            },
+            {
+              "deal_seed": 90500217
+            },
+            {
+              "deal_seed": 90500218
+            },
+            {
+              "deal_seed": 90500219
+            },
+            {
+              "deal_seed": 90500220
+            },
+            {
+              "deal_seed": 90500221
+            },
+            {
+              "deal_seed": 90500222
+            },
+            {
+              "deal_seed": 90500223
+            },
+            {
+              "deal_seed": 90500224
+            },
+            {
+              "deal_seed": 90500225
+            },
+            {
+              "deal_seed": 90500226
+            },
+            {
+              "deal_seed": 90500227
+            },
+            {
+              "deal_seed": 90500228
+            },
+            {
+              "deal_seed": 90500229
+            },
+            {
+              "deal_seed": 90500230
+            },
+            {
+              "deal_seed": 90500231
+            },
+            {
+              "deal_seed": 90500232
+            },
+            {
+              "deal_seed": 90500233
+            },
+            {
+              "deal_seed": 90500234
+            },
+            {
+              "deal_seed": 90500235
+            },
+            {
+              "deal_seed": 90500236
+            },
+            {
+              "deal_seed": 90500237
+            },
+            {
+              "deal_seed": 90500238
+            },
+            {
+              "deal_seed": 90500239
+            },
+            {
+              "deal_seed": 90500240
+            },
+            {
+              "deal_seed": 90500241
+            },
+            {
+              "deal_seed": 90500242
+            },
+            {
+              "deal_seed": 90500243
+            },
+            {
+              "deal_seed": 90500244
+            },
+            {
+              "deal_seed": 90500245
+            },
+            {
+              "deal_seed": 90500246
+            },
+            {
+              "deal_seed": 90500247
+            },
+            {
+              "deal_seed": 90500248
+            },
+            {
+              "deal_seed": 90500249
+            },
+            {
+              "deal_seed": 90500250
+            },
+            {
+              "deal_seed": 90500251
+            },
+            {
+              "deal_seed": 90500252
+            },
+            {
+              "deal_seed": 90500253
+            },
+            {
+              "deal_seed": 90500254
+            },
+            {
+              "deal_seed": 90500255
+            },
+            {
+              "deal_seed": 90500256
+            },
+            {
+              "deal_seed": 90500257
+            }
+          ],
+          "iteration": 4,
+          "payoff_audit": {
+            "candidate_draws": 0,
+            "candidate_losses": 67,
+            "candidate_matched_pair_score": 0.4765625,
+            "candidate_mean_payoff": -0.046875,
+            "candidate_seat_0_games": 64,
+            "candidate_seat_1_games": 64,
+            "candidate_wins": 61,
+            "environment_zero_sum_verified": true,
+            "games": 128,
+            "implicit_zero_decision_candidate_games": 0,
+            "matched_deal_pairs": 64,
+            "populated_candidate_episodes": 128,
+            "terminal_payoffs_verified": true
+          },
+          "policy_sampling_seed": 90500261,
+          "rollout": {
+            "completed_games": 128,
+            "environment_turns": 5438,
+            "inference_calls": 346,
+            "policy_decisions": 2297
+          },
+          "seat_rotation": "each deal candidate seat0 then candidate seat1",
+          "shuffle_seed": 90500265,
+          "update": {
+            "candidate_actor_state_sha256_after": "c4b38aaa84d50d026dc29852049d2b373a7bfca95e660e877228d01354a3d254",
+            "epochs": [
+              {
+                "epoch": 1,
+                "maximum_preclip_gradient_norm": 0.2334882766008377,
+                "mean_candidate_champion_kl": 0.602293461561203,
+                "mean_clipped_surrogate": -0.0413680300116539,
+                "mean_entropy": 0.051626164466142654,
+                "mean_objective": -0.04085176810622215
+              },
+              {
+                "epoch": 2,
+                "maximum_preclip_gradient_norm": 0.2821585536003113,
+                "mean_candidate_champion_kl": 0.596476137638092,
+                "mean_clipped_surrogate": -0.02633184805745259,
+                "mean_entropy": 0.05424988269805908,
+                "mean_objective": -0.02578934980556369
+              }
+            ],
+            "frozen_champion_actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+            "maximum_initial_ratio_error": 3.2186508178710938e-06,
+            "unchanged_policy_ratio_guard_passed": true
+          },
+          "wall_seconds": 0.6828275859988935
+        }
+      ],
+      "variant": {
+        "champion_kl_coefficient": 0.0,
+        "entropy_coefficient": 0.01,
+        "name": "entropy_0p01"
+      }
+    },
+    {
+      "checkpoint": {
+        "actor_state_sha256": "a2884d3414a0fe3a8ca14b18ca76e1a8ffc76dccc56d52a61a0543fe00b0ed48",
+        "path": "best_response_anchor_0p02.pth",
+        "sha256": "8dd45d79ab6e5546d543ed720ce629608bf4260ad593a275c1fc973b231f8dbb"
+      },
+      "initial_actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+      "iterations": [
+        {
+          "deal_seeds": [
+            {
+              "deal_seed": 90500002
+            },
+            {
+              "deal_seed": 90500003
+            },
+            {
+              "deal_seed": 90500004
+            },
+            {
+              "deal_seed": 90500005
+            },
+            {
+              "deal_seed": 90500006
+            },
+            {
+              "deal_seed": 90500007
+            },
+            {
+              "deal_seed": 90500008
+            },
+            {
+              "deal_seed": 90500009
+            },
+            {
+              "deal_seed": 90500010
+            },
+            {
+              "deal_seed": 90500011
+            },
+            {
+              "deal_seed": 90500012
+            },
+            {
+              "deal_seed": 90500013
+            },
+            {
+              "deal_seed": 90500014
+            },
+            {
+              "deal_seed": 90500015
+            },
+            {
+              "deal_seed": 90500016
+            },
+            {
+              "deal_seed": 90500017
+            },
+            {
+              "deal_seed": 90500018
+            },
+            {
+              "deal_seed": 90500019
+            },
+            {
+              "deal_seed": 90500020
+            },
+            {
+              "deal_seed": 90500021
+            },
+            {
+              "deal_seed": 90500022
+            },
+            {
+              "deal_seed": 90500023
+            },
+            {
+              "deal_seed": 90500024
+            },
+            {
+              "deal_seed": 90500025
+            },
+            {
+              "deal_seed": 90500026
+            },
+            {
+              "deal_seed": 90500027
+            },
+            {
+              "deal_seed": 90500028
+            },
+            {
+              "deal_seed": 90500029
+            },
+            {
+              "deal_seed": 90500030
+            },
+            {
+              "deal_seed": 90500031
+            },
+            {
+              "deal_seed": 90500032
+            },
+            {
+              "deal_seed": 90500033
+            },
+            {
+              "deal_seed": 90500034
+            },
+            {
+              "deal_seed": 90500035
+            },
+            {
+              "deal_seed": 90500036
+            },
+            {
+              "deal_seed": 90500037
+            },
+            {
+              "deal_seed": 90500038
+            },
+            {
+              "deal_seed": 90500039
+            },
+            {
+              "deal_seed": 90500040
+            },
+            {
+              "deal_seed": 90500041
+            },
+            {
+              "deal_seed": 90500042
+            },
+            {
+              "deal_seed": 90500043
+            },
+            {
+              "deal_seed": 90500044
+            },
+            {
+              "deal_seed": 90500045
+            },
+            {
+              "deal_seed": 90500046
+            },
+            {
+              "deal_seed": 90500047
+            },
+            {
+              "deal_seed": 90500048
+            },
+            {
+              "deal_seed": 90500049
+            },
+            {
+              "deal_seed": 90500050
+            },
+            {
+              "deal_seed": 90500051
+            },
+            {
+              "deal_seed": 90500052
+            },
+            {
+              "deal_seed": 90500053
+            },
+            {
+              "deal_seed": 90500054
+            },
+            {
+              "deal_seed": 90500055
+            },
+            {
+              "deal_seed": 90500056
+            },
+            {
+              "deal_seed": 90500057
+            },
+            {
+              "deal_seed": 90500058
+            },
+            {
+              "deal_seed": 90500059
+            },
+            {
+              "deal_seed": 90500060
+            },
+            {
+              "deal_seed": 90500061
+            },
+            {
+              "deal_seed": 90500062
+            },
+            {
+              "deal_seed": 90500063
+            },
+            {
+              "deal_seed": 90500064
+            },
+            {
+              "deal_seed": 90500065
+            }
+          ],
+          "iteration": 1,
+          "payoff_audit": {
+            "candidate_draws": 0,
+            "candidate_losses": 69,
+            "candidate_matched_pair_score": 0.4609375,
+            "candidate_mean_payoff": -0.078125,
+            "candidate_seat_0_games": 64,
+            "candidate_seat_1_games": 64,
+            "candidate_wins": 59,
+            "environment_zero_sum_verified": true,
+            "games": 128,
+            "implicit_zero_decision_candidate_games": 0,
+            "matched_deal_pairs": 64,
+            "populated_candidate_episodes": 128,
+            "terminal_payoffs_verified": true
+          },
+          "policy_sampling_seed": 90500258,
+          "rollout": {
+            "completed_games": 128,
+            "environment_turns": 5911,
+            "inference_calls": 320,
+            "policy_decisions": 2470
+          },
+          "seat_rotation": "each deal candidate seat0 then candidate seat1",
+          "shuffle_seed": 90500262,
+          "update": {
+            "candidate_actor_state_sha256_after": "a2188c7f0ce34980781c9176b4faacfce25b27be9ab60c1e88026769f3859ae1",
+            "epochs": [
+              {
+                "epoch": 1,
+                "maximum_preclip_gradient_norm": 0.16902072727680206,
+                "mean_candidate_champion_kl": 0.6542422771453857,
+                "mean_clipped_surrogate": -0.0561626423150301,
+                "mean_entropy": 0.05170763283967972,
+                "mean_objective": -0.06924748793244362
+              },
+              {
+                "epoch": 2,
+                "maximum_preclip_gradient_norm": 0.1794862449169159,
+                "mean_candidate_champion_kl": 0.6266035437583923,
+                "mean_clipped_surrogate": -0.07005153968930244,
+                "mean_entropy": 0.05407271347939968,
+                "mean_objective": -0.08258360996842384
+              }
+            ],
+            "frozen_champion_actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+            "maximum_initial_ratio_error": 2.86102294921875e-06,
+            "unchanged_policy_ratio_guard_passed": true
+          },
+          "wall_seconds": 0.5886365909973392
+        },
+        {
+          "deal_seeds": [
+            {
+              "deal_seed": 90500066
+            },
+            {
+              "deal_seed": 90500067
+            },
+            {
+              "deal_seed": 90500068
+            },
+            {
+              "deal_seed": 90500069
+            },
+            {
+              "deal_seed": 90500070
+            },
+            {
+              "deal_seed": 90500071
+            },
+            {
+              "deal_seed": 90500072
+            },
+            {
+              "deal_seed": 90500073
+            },
+            {
+              "deal_seed": 90500074
+            },
+            {
+              "deal_seed": 90500075
+            },
+            {
+              "deal_seed": 90500076
+            },
+            {
+              "deal_seed": 90500077
+            },
+            {
+              "deal_seed": 90500078
+            },
+            {
+              "deal_seed": 90500079
+            },
+            {
+              "deal_seed": 90500080
+            },
+            {
+              "deal_seed": 90500081
+            },
+            {
+              "deal_seed": 90500082
+            },
+            {
+              "deal_seed": 90500083
+            },
+            {
+              "deal_seed": 90500084
+            },
+            {
+              "deal_seed": 90500085
+            },
+            {
+              "deal_seed": 90500086
+            },
+            {
+              "deal_seed": 90500087
+            },
+            {
+              "deal_seed": 90500088
+            },
+            {
+              "deal_seed": 90500089
+            },
+            {
+              "deal_seed": 90500090
+            },
+            {
+              "deal_seed": 90500091
+            },
+            {
+              "deal_seed": 90500092
+            },
+            {
+              "deal_seed": 90500093
+            },
+            {
+              "deal_seed": 90500094
+            },
+            {
+              "deal_seed": 90500095
+            },
+            {
+              "deal_seed": 90500096
+            },
+            {
+              "deal_seed": 90500097
+            },
+            {
+              "deal_seed": 90500098
+            },
+            {
+              "deal_seed": 90500099
+            },
+            {
+              "deal_seed": 90500100
+            },
+            {
+              "deal_seed": 90500101
+            },
+            {
+              "deal_seed": 90500102
+            },
+            {
+              "deal_seed": 90500103
+            },
+            {
+              "deal_seed": 90500104
+            },
+            {
+              "deal_seed": 90500105
+            },
+            {
+              "deal_seed": 90500106
+            },
+            {
+              "deal_seed": 90500107
+            },
+            {
+              "deal_seed": 90500108
+            },
+            {
+              "deal_seed": 90500109
+            },
+            {
+              "deal_seed": 90500110
+            },
+            {
+              "deal_seed": 90500111
+            },
+            {
+              "deal_seed": 90500112
+            },
+            {
+              "deal_seed": 90500113
+            },
+            {
+              "deal_seed": 90500114
+            },
+            {
+              "deal_seed": 90500115
+            },
+            {
+              "deal_seed": 90500116
+            },
+            {
+              "deal_seed": 90500117
+            },
+            {
+              "deal_seed": 90500118
+            },
+            {
+              "deal_seed": 90500119
+            },
+            {
+              "deal_seed": 90500120
+            },
+            {
+              "deal_seed": 90500121
+            },
+            {
+              "deal_seed": 90500122
+            },
+            {
+              "deal_seed": 90500123
+            },
+            {
+              "deal_seed": 90500124
+            },
+            {
+              "deal_seed": 90500125
+            },
+            {
+              "deal_seed": 90500126
+            },
+            {
+              "deal_seed": 90500127
+            },
+            {
+              "deal_seed": 90500128
+            },
+            {
+              "deal_seed": 90500129
+            }
+          ],
+          "iteration": 2,
+          "payoff_audit": {
+            "candidate_draws": 0,
+            "candidate_losses": 57,
+            "candidate_matched_pair_score": 0.5546875,
+            "candidate_mean_payoff": 0.109375,
+            "candidate_seat_0_games": 64,
+            "candidate_seat_1_games": 64,
+            "candidate_wins": 71,
+            "environment_zero_sum_verified": true,
+            "games": 128,
+            "implicit_zero_decision_candidate_games": 0,
+            "matched_deal_pairs": 64,
+            "populated_candidate_episodes": 128,
+            "terminal_payoffs_verified": true
+          },
+          "policy_sampling_seed": 90500259,
+          "rollout": {
+            "completed_games": 128,
+            "environment_turns": 5661,
+            "inference_calls": 282,
+            "policy_decisions": 2426
+          },
+          "seat_rotation": "each deal candidate seat0 then candidate seat1",
+          "shuffle_seed": 90500263,
+          "update": {
+            "candidate_actor_state_sha256_after": "701ad794c502254e5bc473a87ca888605ba22a5f7c95c9fa81bb67f3426ea4b4",
+            "epochs": [
+              {
+                "epoch": 1,
+                "maximum_preclip_gradient_norm": 0.33246922492980957,
+                "mean_candidate_champion_kl": 0.6857577562332153,
+                "mean_clipped_surrogate": -0.09942222759127617,
+                "mean_entropy": 0.05477188155055046,
+                "mean_objective": -0.1131373830139637
+              },
+              {
+                "epoch": 2,
+                "maximum_preclip_gradient_norm": 0.6929791569709778,
+                "mean_candidate_champion_kl": 0.6362714469432831,
+                "mean_clipped_surrogate": -0.11504578962922096,
+                "mean_entropy": 0.052704159170389175,
+                "mean_objective": -0.12777122110128403
+              }
+            ],
+            "frozen_champion_actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+            "maximum_initial_ratio_error": 3.039836883544922e-06,
+            "unchanged_policy_ratio_guard_passed": true
+          },
+          "wall_seconds": 0.6031186190011795
+        },
+        {
+          "deal_seeds": [
+            {
+              "deal_seed": 90500130
+            },
+            {
+              "deal_seed": 90500131
+            },
+            {
+              "deal_seed": 90500132
+            },
+            {
+              "deal_seed": 90500133
+            },
+            {
+              "deal_seed": 90500134
+            },
+            {
+              "deal_seed": 90500135
+            },
+            {
+              "deal_seed": 90500136
+            },
+            {
+              "deal_seed": 90500137
+            },
+            {
+              "deal_seed": 90500138
+            },
+            {
+              "deal_seed": 90500139
+            },
+            {
+              "deal_seed": 90500140
+            },
+            {
+              "deal_seed": 90500141
+            },
+            {
+              "deal_seed": 90500142
+            },
+            {
+              "deal_seed": 90500143
+            },
+            {
+              "deal_seed": 90500144
+            },
+            {
+              "deal_seed": 90500145
+            },
+            {
+              "deal_seed": 90500146
+            },
+            {
+              "deal_seed": 90500147
+            },
+            {
+              "deal_seed": 90500148
+            },
+            {
+              "deal_seed": 90500149
+            },
+            {
+              "deal_seed": 90500150
+            },
+            {
+              "deal_seed": 90500151
+            },
+            {
+              "deal_seed": 90500152
+            },
+            {
+              "deal_seed": 90500153
+            },
+            {
+              "deal_seed": 90500154
+            },
+            {
+              "deal_seed": 90500155
+            },
+            {
+              "deal_seed": 90500156
+            },
+            {
+              "deal_seed": 90500157
+            },
+            {
+              "deal_seed": 90500158
+            },
+            {
+              "deal_seed": 90500159
+            },
+            {
+              "deal_seed": 90500160
+            },
+            {
+              "deal_seed": 90500161
+            },
+            {
+              "deal_seed": 90500162
+            },
+            {
+              "deal_seed": 90500163
+            },
+            {
+              "deal_seed": 90500164
+            },
+            {
+              "deal_seed": 90500165
+            },
+            {
+              "deal_seed": 90500166
+            },
+            {
+              "deal_seed": 90500167
+            },
+            {
+              "deal_seed": 90500168
+            },
+            {
+              "deal_seed": 90500169
+            },
+            {
+              "deal_seed": 90500170
+            },
+            {
+              "deal_seed": 90500171
+            },
+            {
+              "deal_seed": 90500172
+            },
+            {
+              "deal_seed": 90500173
+            },
+            {
+              "deal_seed": 90500174
+            },
+            {
+              "deal_seed": 90500175
+            },
+            {
+              "deal_seed": 90500176
+            },
+            {
+              "deal_seed": 90500177
+            },
+            {
+              "deal_seed": 90500178
+            },
+            {
+              "deal_seed": 90500179
+            },
+            {
+              "deal_seed": 90500180
+            },
+            {
+              "deal_seed": 90500181
+            },
+            {
+              "deal_seed": 90500182
+            },
+            {
+              "deal_seed": 90500183
+            },
+            {
+              "deal_seed": 90500184
+            },
+            {
+              "deal_seed": 90500185
+            },
+            {
+              "deal_seed": 90500186
+            },
+            {
+              "deal_seed": 90500187
+            },
+            {
+              "deal_seed": 90500188
+            },
+            {
+              "deal_seed": 90500189
+            },
+            {
+              "deal_seed": 90500190
+            },
+            {
+              "deal_seed": 90500191
+            },
+            {
+              "deal_seed": 90500192
+            },
+            {
+              "deal_seed": 90500193
+            }
+          ],
+          "iteration": 3,
+          "payoff_audit": {
+            "candidate_draws": 0,
+            "candidate_losses": 62,
+            "candidate_matched_pair_score": 0.515625,
+            "candidate_mean_payoff": 0.03125,
+            "candidate_seat_0_games": 64,
+            "candidate_seat_1_games": 64,
+            "candidate_wins": 66,
+            "environment_zero_sum_verified": true,
+            "games": 128,
+            "implicit_zero_decision_candidate_games": 0,
+            "matched_deal_pairs": 64,
+            "populated_candidate_episodes": 128,
+            "terminal_payoffs_verified": true
+          },
+          "policy_sampling_seed": 90500260,
+          "rollout": {
+            "completed_games": 128,
+            "environment_turns": 5800,
+            "inference_calls": 309,
+            "policy_decisions": 2483
+          },
+          "seat_rotation": "each deal candidate seat0 then candidate seat1",
+          "shuffle_seed": 90500264,
+          "update": {
+            "candidate_actor_state_sha256_after": "97d2d7f8aae9d4cac255da0c4bb37d4aae594bd6fbccbaa86d9cfe23c0dde4ed",
+            "epochs": [
+              {
+                "epoch": 1,
+                "maximum_preclip_gradient_norm": 0.1759517937898636,
+                "mean_candidate_champion_kl": 0.7066256403923035,
+                "mean_clipped_surrogate": -0.04406272992491722,
+                "mean_entropy": 0.0491764098405838,
+                "mean_objective": -0.058195242658257484
+              },
+              {
+                "epoch": 2,
+                "maximum_preclip_gradient_norm": 0.17379122972488403,
+                "mean_candidate_champion_kl": 0.6943287551403046,
+                "mean_clipped_surrogate": -0.05207972787320614,
+                "mean_entropy": 0.052470097318291664,
+                "mean_objective": -0.06596630066633224
+              }
+            ],
+            "frozen_champion_actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+            "maximum_initial_ratio_error": 4.76837158203125e-06,
+            "unchanged_policy_ratio_guard_passed": true
+          },
+          "wall_seconds": 0.6055770870007109
+        },
+        {
+          "deal_seeds": [
+            {
+              "deal_seed": 90500194
+            },
+            {
+              "deal_seed": 90500195
+            },
+            {
+              "deal_seed": 90500196
+            },
+            {
+              "deal_seed": 90500197
+            },
+            {
+              "deal_seed": 90500198
+            },
+            {
+              "deal_seed": 90500199
+            },
+            {
+              "deal_seed": 90500200
+            },
+            {
+              "deal_seed": 90500201
+            },
+            {
+              "deal_seed": 90500202
+            },
+            {
+              "deal_seed": 90500203
+            },
+            {
+              "deal_seed": 90500204
+            },
+            {
+              "deal_seed": 90500205
+            },
+            {
+              "deal_seed": 90500206
+            },
+            {
+              "deal_seed": 90500207
+            },
+            {
+              "deal_seed": 90500208
+            },
+            {
+              "deal_seed": 90500209
+            },
+            {
+              "deal_seed": 90500210
+            },
+            {
+              "deal_seed": 90500211
+            },
+            {
+              "deal_seed": 90500212
+            },
+            {
+              "deal_seed": 90500213
+            },
+            {
+              "deal_seed": 90500214
+            },
+            {
+              "deal_seed": 90500215
+            },
+            {
+              "deal_seed": 90500216
+            },
+            {
+              "deal_seed": 90500217
+            },
+            {
+              "deal_seed": 90500218
+            },
+            {
+              "deal_seed": 90500219
+            },
+            {
+              "deal_seed": 90500220
+            },
+            {
+              "deal_seed": 90500221
+            },
+            {
+              "deal_seed": 90500222
+            },
+            {
+              "deal_seed": 90500223
+            },
+            {
+              "deal_seed": 90500224
+            },
+            {
+              "deal_seed": 90500225
+            },
+            {
+              "deal_seed": 90500226
+            },
+            {
+              "deal_seed": 90500227
+            },
+            {
+              "deal_seed": 90500228
+            },
+            {
+              "deal_seed": 90500229
+            },
+            {
+              "deal_seed": 90500230
+            },
+            {
+              "deal_seed": 90500231
+            },
+            {
+              "deal_seed": 90500232
+            },
+            {
+              "deal_seed": 90500233
+            },
+            {
+              "deal_seed": 90500234
+            },
+            {
+              "deal_seed": 90500235
+            },
+            {
+              "deal_seed": 90500236
+            },
+            {
+              "deal_seed": 90500237
+            },
+            {
+              "deal_seed": 90500238
+            },
+            {
+              "deal_seed": 90500239
+            },
+            {
+              "deal_seed": 90500240
+            },
+            {
+              "deal_seed": 90500241
+            },
+            {
+              "deal_seed": 90500242
+            },
+            {
+              "deal_seed": 90500243
+            },
+            {
+              "deal_seed": 90500244
+            },
+            {
+              "deal_seed": 90500245
+            },
+            {
+              "deal_seed": 90500246
+            },
+            {
+              "deal_seed": 90500247
+            },
+            {
+              "deal_seed": 90500248
+            },
+            {
+              "deal_seed": 90500249
+            },
+            {
+              "deal_seed": 90500250
+            },
+            {
+              "deal_seed": 90500251
+            },
+            {
+              "deal_seed": 90500252
+            },
+            {
+              "deal_seed": 90500253
+            },
+            {
+              "deal_seed": 90500254
+            },
+            {
+              "deal_seed": 90500255
+            },
+            {
+              "deal_seed": 90500256
+            },
+            {
+              "deal_seed": 90500257
+            }
+          ],
+          "iteration": 4,
+          "payoff_audit": {
+            "candidate_draws": 0,
+            "candidate_losses": 57,
+            "candidate_matched_pair_score": 0.5546875,
+            "candidate_mean_payoff": 0.109375,
+            "candidate_seat_0_games": 64,
+            "candidate_seat_1_games": 64,
+            "candidate_wins": 71,
+            "environment_zero_sum_verified": true,
+            "games": 128,
+            "implicit_zero_decision_candidate_games": 0,
+            "matched_deal_pairs": 64,
+            "populated_candidate_episodes": 128,
+            "terminal_payoffs_verified": true
+          },
+          "policy_sampling_seed": 90500261,
+          "rollout": {
+            "completed_games": 128,
+            "environment_turns": 5315,
+            "inference_calls": 357,
+            "policy_decisions": 2272
+          },
+          "seat_rotation": "each deal candidate seat0 then candidate seat1",
+          "shuffle_seed": 90500265,
+          "update": {
+            "candidate_actor_state_sha256_after": "a2884d3414a0fe3a8ca14b18ca76e1a8ffc76dccc56d52a61a0543fe00b0ed48",
+            "epochs": [
+              {
+                "epoch": 1,
+                "maximum_preclip_gradient_norm": 1.083289384841919,
+                "mean_candidate_champion_kl": 0.6289739012718201,
+                "mean_clipped_surrogate": -0.07129861414432526,
+                "mean_entropy": 0.05031222850084305,
+                "mean_objective": -0.08387809060513973
+              },
+              {
+                "epoch": 2,
+                "maximum_preclip_gradient_norm": 0.36851054430007935,
+                "mean_candidate_champion_kl": 0.7596264779567719,
+                "mean_clipped_surrogate": -0.07740422338247299,
+                "mean_entropy": 0.06109541840851307,
+                "mean_objective": -0.0925967525690794
+              }
+            ],
+            "frozen_champion_actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+            "maximum_initial_ratio_error": 2.6226043701171875e-06,
+            "unchanged_policy_ratio_guard_passed": true
+          },
+          "wall_seconds": 0.597504253997613
+        }
+      ],
+      "variant": {
+        "champion_kl_coefficient": 0.02,
+        "entropy_coefficient": 0.0,
+        "name": "anchor_0p02"
+      }
+    },
+    {
+      "checkpoint": {
+        "actor_state_sha256": "704ea50049d82da530c20406ca158b3eaa8ac3d365f177327a01db39b9f3e28a",
+        "path": "best_response_anchor_0p02_entropy_0p01.pth",
+        "sha256": "be7718259ff0af04cf4075940a21bc1c87540d3c7d3db8641f1aae1e3f8c832d"
+      },
+      "initial_actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+      "iterations": [
+        {
+          "deal_seeds": [
+            {
+              "deal_seed": 90500002
+            },
+            {
+              "deal_seed": 90500003
+            },
+            {
+              "deal_seed": 90500004
+            },
+            {
+              "deal_seed": 90500005
+            },
+            {
+              "deal_seed": 90500006
+            },
+            {
+              "deal_seed": 90500007
+            },
+            {
+              "deal_seed": 90500008
+            },
+            {
+              "deal_seed": 90500009
+            },
+            {
+              "deal_seed": 90500010
+            },
+            {
+              "deal_seed": 90500011
+            },
+            {
+              "deal_seed": 90500012
+            },
+            {
+              "deal_seed": 90500013
+            },
+            {
+              "deal_seed": 90500014
+            },
+            {
+              "deal_seed": 90500015
+            },
+            {
+              "deal_seed": 90500016
+            },
+            {
+              "deal_seed": 90500017
+            },
+            {
+              "deal_seed": 90500018
+            },
+            {
+              "deal_seed": 90500019
+            },
+            {
+              "deal_seed": 90500020
+            },
+            {
+              "deal_seed": 90500021
+            },
+            {
+              "deal_seed": 90500022
+            },
+            {
+              "deal_seed": 90500023
+            },
+            {
+              "deal_seed": 90500024
+            },
+            {
+              "deal_seed": 90500025
+            },
+            {
+              "deal_seed": 90500026
+            },
+            {
+              "deal_seed": 90500027
+            },
+            {
+              "deal_seed": 90500028
+            },
+            {
+              "deal_seed": 90500029
+            },
+            {
+              "deal_seed": 90500030
+            },
+            {
+              "deal_seed": 90500031
+            },
+            {
+              "deal_seed": 90500032
+            },
+            {
+              "deal_seed": 90500033
+            },
+            {
+              "deal_seed": 90500034
+            },
+            {
+              "deal_seed": 90500035
+            },
+            {
+              "deal_seed": 90500036
+            },
+            {
+              "deal_seed": 90500037
+            },
+            {
+              "deal_seed": 90500038
+            },
+            {
+              "deal_seed": 90500039
+            },
+            {
+              "deal_seed": 90500040
+            },
+            {
+              "deal_seed": 90500041
+            },
+            {
+              "deal_seed": 90500042
+            },
+            {
+              "deal_seed": 90500043
+            },
+            {
+              "deal_seed": 90500044
+            },
+            {
+              "deal_seed": 90500045
+            },
+            {
+              "deal_seed": 90500046
+            },
+            {
+              "deal_seed": 90500047
+            },
+            {
+              "deal_seed": 90500048
+            },
+            {
+              "deal_seed": 90500049
+            },
+            {
+              "deal_seed": 90500050
+            },
+            {
+              "deal_seed": 90500051
+            },
+            {
+              "deal_seed": 90500052
+            },
+            {
+              "deal_seed": 90500053
+            },
+            {
+              "deal_seed": 90500054
+            },
+            {
+              "deal_seed": 90500055
+            },
+            {
+              "deal_seed": 90500056
+            },
+            {
+              "deal_seed": 90500057
+            },
+            {
+              "deal_seed": 90500058
+            },
+            {
+              "deal_seed": 90500059
+            },
+            {
+              "deal_seed": 90500060
+            },
+            {
+              "deal_seed": 90500061
+            },
+            {
+              "deal_seed": 90500062
+            },
+            {
+              "deal_seed": 90500063
+            },
+            {
+              "deal_seed": 90500064
+            },
+            {
+              "deal_seed": 90500065
+            }
+          ],
+          "iteration": 1,
+          "payoff_audit": {
+            "candidate_draws": 0,
+            "candidate_losses": 69,
+            "candidate_matched_pair_score": 0.4609375,
+            "candidate_mean_payoff": -0.078125,
+            "candidate_seat_0_games": 64,
+            "candidate_seat_1_games": 64,
+            "candidate_wins": 59,
+            "environment_zero_sum_verified": true,
+            "games": 128,
+            "implicit_zero_decision_candidate_games": 0,
+            "matched_deal_pairs": 64,
+            "populated_candidate_episodes": 128,
+            "terminal_payoffs_verified": true
+          },
+          "policy_sampling_seed": 90500258,
+          "rollout": {
+            "completed_games": 128,
+            "environment_turns": 5911,
+            "inference_calls": 320,
+            "policy_decisions": 2470
+          },
+          "seat_rotation": "each deal candidate seat0 then candidate seat1",
+          "shuffle_seed": 90500262,
+          "update": {
+            "candidate_actor_state_sha256_after": "df5cf67be4ca08b7a4cbbe8f9616e9bdd8b137e05e760b6349f0b9239208a67c",
+            "epochs": [
+              {
+                "epoch": 1,
+                "maximum_preclip_gradient_norm": 0.16914992034435272,
+                "mean_candidate_champion_kl": 0.6542463898658752,
+                "mean_clipped_surrogate": -0.0561623927205801,
+                "mean_entropy": 0.05170822888612747,
+                "mean_objective": -0.06873023696243763
+              },
+              {
+                "epoch": 2,
+                "maximum_preclip_gradient_norm": 0.17980578541755676,
+                "mean_candidate_champion_kl": 0.62659952044487,
+                "mean_clipped_surrogate": -0.07005219534039497,
+                "mean_entropy": 0.0540910679847002,
+                "mean_objective": -0.08204327151179314
+              }
+            ],
+            "frozen_champion_actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+            "maximum_initial_ratio_error": 2.86102294921875e-06,
+            "unchanged_policy_ratio_guard_passed": true
+          },
+          "wall_seconds": 0.6070543949972489
+        },
+        {
+          "deal_seeds": [
+            {
+              "deal_seed": 90500066
+            },
+            {
+              "deal_seed": 90500067
+            },
+            {
+              "deal_seed": 90500068
+            },
+            {
+              "deal_seed": 90500069
+            },
+            {
+              "deal_seed": 90500070
+            },
+            {
+              "deal_seed": 90500071
+            },
+            {
+              "deal_seed": 90500072
+            },
+            {
+              "deal_seed": 90500073
+            },
+            {
+              "deal_seed": 90500074
+            },
+            {
+              "deal_seed": 90500075
+            },
+            {
+              "deal_seed": 90500076
+            },
+            {
+              "deal_seed": 90500077
+            },
+            {
+              "deal_seed": 90500078
+            },
+            {
+              "deal_seed": 90500079
+            },
+            {
+              "deal_seed": 90500080
+            },
+            {
+              "deal_seed": 90500081
+            },
+            {
+              "deal_seed": 90500082
+            },
+            {
+              "deal_seed": 90500083
+            },
+            {
+              "deal_seed": 90500084
+            },
+            {
+              "deal_seed": 90500085
+            },
+            {
+              "deal_seed": 90500086
+            },
+            {
+              "deal_seed": 90500087
+            },
+            {
+              "deal_seed": 90500088
+            },
+            {
+              "deal_seed": 90500089
+            },
+            {
+              "deal_seed": 90500090
+            },
+            {
+              "deal_seed": 90500091
+            },
+            {
+              "deal_seed": 90500092
+            },
+            {
+              "deal_seed": 90500093
+            },
+            {
+              "deal_seed": 90500094
+            },
+            {
+              "deal_seed": 90500095
+            },
+            {
+              "deal_seed": 90500096
+            },
+            {
+              "deal_seed": 90500097
+            },
+            {
+              "deal_seed": 90500098
+            },
+            {
+              "deal_seed": 90500099
+            },
+            {
+              "deal_seed": 90500100
+            },
+            {
+              "deal_seed": 90500101
+            },
+            {
+              "deal_seed": 90500102
+            },
+            {
+              "deal_seed": 90500103
+            },
+            {
+              "deal_seed": 90500104
+            },
+            {
+              "deal_seed": 90500105
+            },
+            {
+              "deal_seed": 90500106
+            },
+            {
+              "deal_seed": 90500107
+            },
+            {
+              "deal_seed": 90500108
+            },
+            {
+              "deal_seed": 90500109
+            },
+            {
+              "deal_seed": 90500110
+            },
+            {
+              "deal_seed": 90500111
+            },
+            {
+              "deal_seed": 90500112
+            },
+            {
+              "deal_seed": 90500113
+            },
+            {
+              "deal_seed": 90500114
+            },
+            {
+              "deal_seed": 90500115
+            },
+            {
+              "deal_seed": 90500116
+            },
+            {
+              "deal_seed": 90500117
+            },
+            {
+              "deal_seed": 90500118
+            },
+            {
+              "deal_seed": 90500119
+            },
+            {
+              "deal_seed": 90500120
+            },
+            {
+              "deal_seed": 90500121
+            },
+            {
+              "deal_seed": 90500122
+            },
+            {
+              "deal_seed": 90500123
+            },
+            {
+              "deal_seed": 90500124
+            },
+            {
+              "deal_seed": 90500125
+            },
+            {
+              "deal_seed": 90500126
+            },
+            {
+              "deal_seed": 90500127
+            },
+            {
+              "deal_seed": 90500128
+            },
+            {
+              "deal_seed": 90500129
+            }
+          ],
+          "iteration": 2,
+          "payoff_audit": {
+            "candidate_draws": 0,
+            "candidate_losses": 57,
+            "candidate_matched_pair_score": 0.5546875,
+            "candidate_mean_payoff": 0.109375,
+            "candidate_seat_0_games": 64,
+            "candidate_seat_1_games": 64,
+            "candidate_wins": 71,
+            "environment_zero_sum_verified": true,
+            "games": 128,
+            "implicit_zero_decision_candidate_games": 0,
+            "matched_deal_pairs": 64,
+            "populated_candidate_episodes": 128,
+            "terminal_payoffs_verified": true
+          },
+          "policy_sampling_seed": 90500259,
+          "rollout": {
+            "completed_games": 128,
+            "environment_turns": 5661,
+            "inference_calls": 282,
+            "policy_decisions": 2426
+          },
+          "seat_rotation": "each deal candidate seat0 then candidate seat1",
+          "shuffle_seed": 90500263,
+          "update": {
+            "candidate_actor_state_sha256_after": "5e3a149d583ba801d49ce05883ea95298faa6f310131d0c1c549491d3562804d",
+            "epochs": [
+              {
+                "epoch": 1,
+                "maximum_preclip_gradient_norm": 0.33275794982910156,
+                "mean_candidate_champion_kl": 0.6857580840587616,
+                "mean_clipped_surrogate": -0.09942184016108513,
+                "mean_entropy": 0.05477479100227356,
+                "mean_objective": -0.11258925125002861
+              },
+              {
+                "epoch": 2,
+                "maximum_preclip_gradient_norm": 0.6927136778831482,
+                "mean_candidate_champion_kl": 0.636275440454483,
+                "mean_clipped_surrogate": -0.11503749713301659,
+                "mean_entropy": 0.052712325006723404,
+                "mean_objective": -0.12723588570952415
+              }
+            ],
+            "frozen_champion_actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+            "maximum_initial_ratio_error": 4.887580871582031e-06,
+            "unchanged_policy_ratio_guard_passed": true
+          },
+          "wall_seconds": 0.5917623169989383
+        },
+        {
+          "deal_seeds": [
+            {
+              "deal_seed": 90500130
+            },
+            {
+              "deal_seed": 90500131
+            },
+            {
+              "deal_seed": 90500132
+            },
+            {
+              "deal_seed": 90500133
+            },
+            {
+              "deal_seed": 90500134
+            },
+            {
+              "deal_seed": 90500135
+            },
+            {
+              "deal_seed": 90500136
+            },
+            {
+              "deal_seed": 90500137
+            },
+            {
+              "deal_seed": 90500138
+            },
+            {
+              "deal_seed": 90500139
+            },
+            {
+              "deal_seed": 90500140
+            },
+            {
+              "deal_seed": 90500141
+            },
+            {
+              "deal_seed": 90500142
+            },
+            {
+              "deal_seed": 90500143
+            },
+            {
+              "deal_seed": 90500144
+            },
+            {
+              "deal_seed": 90500145
+            },
+            {
+              "deal_seed": 90500146
+            },
+            {
+              "deal_seed": 90500147
+            },
+            {
+              "deal_seed": 90500148
+            },
+            {
+              "deal_seed": 90500149
+            },
+            {
+              "deal_seed": 90500150
+            },
+            {
+              "deal_seed": 90500151
+            },
+            {
+              "deal_seed": 90500152
+            },
+            {
+              "deal_seed": 90500153
+            },
+            {
+              "deal_seed": 90500154
+            },
+            {
+              "deal_seed": 90500155
+            },
+            {
+              "deal_seed": 90500156
+            },
+            {
+              "deal_seed": 90500157
+            },
+            {
+              "deal_seed": 90500158
+            },
+            {
+              "deal_seed": 90500159
+            },
+            {
+              "deal_seed": 90500160
+            },
+            {
+              "deal_seed": 90500161
+            },
+            {
+              "deal_seed": 90500162
+            },
+            {
+              "deal_seed": 90500163
+            },
+            {
+              "deal_seed": 90500164
+            },
+            {
+              "deal_seed": 90500165
+            },
+            {
+              "deal_seed": 90500166
+            },
+            {
+              "deal_seed": 90500167
+            },
+            {
+              "deal_seed": 90500168
+            },
+            {
+              "deal_seed": 90500169
+            },
+            {
+              "deal_seed": 90500170
+            },
+            {
+              "deal_seed": 90500171
+            },
+            {
+              "deal_seed": 90500172
+            },
+            {
+              "deal_seed": 90500173
+            },
+            {
+              "deal_seed": 90500174
+            },
+            {
+              "deal_seed": 90500175
+            },
+            {
+              "deal_seed": 90500176
+            },
+            {
+              "deal_seed": 90500177
+            },
+            {
+              "deal_seed": 90500178
+            },
+            {
+              "deal_seed": 90500179
+            },
+            {
+              "deal_seed": 90500180
+            },
+            {
+              "deal_seed": 90500181
+            },
+            {
+              "deal_seed": 90500182
+            },
+            {
+              "deal_seed": 90500183
+            },
+            {
+              "deal_seed": 90500184
+            },
+            {
+              "deal_seed": 90500185
+            },
+            {
+              "deal_seed": 90500186
+            },
+            {
+              "deal_seed": 90500187
+            },
+            {
+              "deal_seed": 90500188
+            },
+            {
+              "deal_seed": 90500189
+            },
+            {
+              "deal_seed": 90500190
+            },
+            {
+              "deal_seed": 90500191
+            },
+            {
+              "deal_seed": 90500192
+            },
+            {
+              "deal_seed": 90500193
+            }
+          ],
+          "iteration": 3,
+          "payoff_audit": {
+            "candidate_draws": 0,
+            "candidate_losses": 62,
+            "candidate_matched_pair_score": 0.515625,
+            "candidate_mean_payoff": 0.03125,
+            "candidate_seat_0_games": 64,
+            "candidate_seat_1_games": 64,
+            "candidate_wins": 66,
+            "environment_zero_sum_verified": true,
+            "games": 128,
+            "implicit_zero_decision_candidate_games": 0,
+            "matched_deal_pairs": 64,
+            "populated_candidate_episodes": 128,
+            "terminal_payoffs_verified": true
+          },
+          "policy_sampling_seed": 90500260,
+          "rollout": {
+            "completed_games": 128,
+            "environment_turns": 5800,
+            "inference_calls": 309,
+            "policy_decisions": 2483
+          },
+          "seat_rotation": "each deal candidate seat0 then candidate seat1",
+          "shuffle_seed": 90500264,
+          "update": {
+            "candidate_actor_state_sha256_after": "7e7a7ceefcee6dcd616492478a58ffc1f76182d4496e374bf528e1a3f1eec8ea",
+            "epochs": [
+              {
+                "epoch": 1,
+                "maximum_preclip_gradient_norm": 0.1769322007894516,
+                "mean_candidate_champion_kl": 0.7066228687763214,
+                "mean_clipped_surrogate": -0.044062238186597824,
+                "mean_entropy": 0.04917783662676811,
+                "mean_objective": -0.057702913880348206
+              },
+              {
+                "epoch": 2,
+                "maximum_preclip_gradient_norm": 0.17473143339157104,
+                "mean_candidate_champion_kl": 0.6942866146564484,
+                "mean_clipped_surrogate": -0.05210285633802414,
+                "mean_entropy": 0.05247795768082142,
+                "mean_objective": -0.06546380743384361
+              }
+            ],
+            "frozen_champion_actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+            "maximum_initial_ratio_error": 2.384185791015625e-06,
+            "unchanged_policy_ratio_guard_passed": true
+          },
+          "wall_seconds": 0.6411363610022818
+        },
+        {
+          "deal_seeds": [
+            {
+              "deal_seed": 90500194
+            },
+            {
+              "deal_seed": 90500195
+            },
+            {
+              "deal_seed": 90500196
+            },
+            {
+              "deal_seed": 90500197
+            },
+            {
+              "deal_seed": 90500198
+            },
+            {
+              "deal_seed": 90500199
+            },
+            {
+              "deal_seed": 90500200
+            },
+            {
+              "deal_seed": 90500201
+            },
+            {
+              "deal_seed": 90500202
+            },
+            {
+              "deal_seed": 90500203
+            },
+            {
+              "deal_seed": 90500204
+            },
+            {
+              "deal_seed": 90500205
+            },
+            {
+              "deal_seed": 90500206
+            },
+            {
+              "deal_seed": 90500207
+            },
+            {
+              "deal_seed": 90500208
+            },
+            {
+              "deal_seed": 90500209
+            },
+            {
+              "deal_seed": 90500210
+            },
+            {
+              "deal_seed": 90500211
+            },
+            {
+              "deal_seed": 90500212
+            },
+            {
+              "deal_seed": 90500213
+            },
+            {
+              "deal_seed": 90500214
+            },
+            {
+              "deal_seed": 90500215
+            },
+            {
+              "deal_seed": 90500216
+            },
+            {
+              "deal_seed": 90500217
+            },
+            {
+              "deal_seed": 90500218
+            },
+            {
+              "deal_seed": 90500219
+            },
+            {
+              "deal_seed": 90500220
+            },
+            {
+              "deal_seed": 90500221
+            },
+            {
+              "deal_seed": 90500222
+            },
+            {
+              "deal_seed": 90500223
+            },
+            {
+              "deal_seed": 90500224
+            },
+            {
+              "deal_seed": 90500225
+            },
+            {
+              "deal_seed": 90500226
+            },
+            {
+              "deal_seed": 90500227
+            },
+            {
+              "deal_seed": 90500228
+            },
+            {
+              "deal_seed": 90500229
+            },
+            {
+              "deal_seed": 90500230
+            },
+            {
+              "deal_seed": 90500231
+            },
+            {
+              "deal_seed": 90500232
+            },
+            {
+              "deal_seed": 90500233
+            },
+            {
+              "deal_seed": 90500234
+            },
+            {
+              "deal_seed": 90500235
+            },
+            {
+              "deal_seed": 90500236
+            },
+            {
+              "deal_seed": 90500237
+            },
+            {
+              "deal_seed": 90500238
+            },
+            {
+              "deal_seed": 90500239
+            },
+            {
+              "deal_seed": 90500240
+            },
+            {
+              "deal_seed": 90500241
+            },
+            {
+              "deal_seed": 90500242
+            },
+            {
+              "deal_seed": 90500243
+            },
+            {
+              "deal_seed": 90500244
+            },
+            {
+              "deal_seed": 90500245
+            },
+            {
+              "deal_seed": 90500246
+            },
+            {
+              "deal_seed": 90500247
+            },
+            {
+              "deal_seed": 90500248
+            },
+            {
+              "deal_seed": 90500249
+            },
+            {
+              "deal_seed": 90500250
+            },
+            {
+              "deal_seed": 90500251
+            },
+            {
+              "deal_seed": 90500252
+            },
+            {
+              "deal_seed": 90500253
+            },
+            {
+              "deal_seed": 90500254
+            },
+            {
+              "deal_seed": 90500255
+            },
+            {
+              "deal_seed": 90500256
+            },
+            {
+              "deal_seed": 90500257
+            }
+          ],
+          "iteration": 4,
+          "payoff_audit": {
+            "candidate_draws": 0,
+            "candidate_losses": 57,
+            "candidate_matched_pair_score": 0.5546875,
+            "candidate_mean_payoff": 0.109375,
+            "candidate_seat_0_games": 64,
+            "candidate_seat_1_games": 64,
+            "candidate_wins": 71,
+            "environment_zero_sum_verified": true,
+            "games": 128,
+            "implicit_zero_decision_candidate_games": 0,
+            "matched_deal_pairs": 64,
+            "populated_candidate_episodes": 128,
+            "terminal_payoffs_verified": true
+          },
+          "policy_sampling_seed": 90500261,
+          "rollout": {
+            "completed_games": 128,
+            "environment_turns": 5315,
+            "inference_calls": 357,
+            "policy_decisions": 2272
+          },
+          "seat_rotation": "each deal candidate seat0 then candidate seat1",
+          "shuffle_seed": 90500265,
+          "update": {
+            "candidate_actor_state_sha256_after": "704ea50049d82da530c20406ca158b3eaa8ac3d365f177327a01db39b9f3e28a",
+            "epochs": [
+              {
+                "epoch": 1,
+                "maximum_preclip_gradient_norm": 1.0825905799865723,
+                "mean_candidate_champion_kl": 0.628960371017456,
+                "mean_clipped_surrogate": -0.07129536010324955,
+                "mean_entropy": 0.05031014233827591,
+                "mean_objective": -0.08337146788835526
+              },
+              {
+                "epoch": 2,
+                "maximum_preclip_gradient_norm": 0.36930084228515625,
+                "mean_candidate_champion_kl": 0.7596146762371063,
+                "mean_clipped_surrogate": -0.07741012424230576,
+                "mean_entropy": 0.06109991297125816,
+                "mean_objective": -0.09199142083525658
+              }
+            ],
+            "frozen_champion_actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+            "maximum_initial_ratio_error": 2.7418136596679688e-06,
+            "unchanged_policy_ratio_guard_passed": true
+          },
+          "wall_seconds": 0.6517592649979633
+        }
+      ],
+      "variant": {
+        "champion_kl_coefficient": 0.02,
+        "entropy_coefficient": 0.01,
+        "name": "anchor_0p02_entropy_0p01"
+      }
+    }
+  ],
+  "wall_seconds": 10.697005665002507
+}
