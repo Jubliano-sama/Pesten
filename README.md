@@ -104,6 +104,9 @@ all 24 ordinary suit relabelings averaged in logit space, with no player-label
 orbit averaging. The draw-retry adapter permits exactly the newly drawn card
 or pass on the immediate retry. If the checkpoint is absent or its digest does
 not match, startup fails explicitly instead of selecting another model.
+On CPU, the frozen base network is traced once at load time; an eager opt-out
+is available through `BestPlayerConfig(trace_cpu_actor=False)`. The tracked
+trace audit requires bit-identical projected logits and actions.
 
 To verify the tracked champion, one-way claim ledger, raw sealed records,
 summary, and report without running any games:

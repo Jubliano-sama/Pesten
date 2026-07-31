@@ -77,6 +77,7 @@ def test_defaults_pin_exact_current_champion_and_suit_only_projection():
     assert config.aggregation == "logits"
     assert not config.player_orbit_average
     assert config.base_chunk_size == 512
+    assert config.trace_cpu_actor
     assert OPT_IN_CPU_BASE_CHUNK_SIZE == 64
     assert verify_champion(config.model_path) == CHAMPION_SHA256
 
@@ -219,9 +220,48 @@ def test_projection_configuration_and_information_boundary_are_recorded():
     assert projection["aggregation"] == "probabilities"
     assert projection["player_orbit_average"]
     assert projection["base_chunk_size"] == 32
+    assert projection["base_actor_execution"] == "torchscript_trace"
     assert loaded.metadata["information_boundary"] == INFORMATION_BOUNDARY
     assert not INFORMATION_BOUNDARY["opponent_card_identities"]
     assert not INFORMATION_BOUNDARY["draw_pile_inspection"]
+
+
+def test_cpu_trace_is_bit_exact_for_projected_logits_and_actions():
+    eager = load_best_player(
+        BestPlayerConfig(device="cpu", trace_cpu_actor=False)
+    )
+    traced = load_best_player(
+        BestPlayerConfig(device="cpu", trace_cpu_actor=True)
+    )
+    generator = torch.Generator().manual_seed(91_733_041)
+    for batch_size in (1, 7, 64):
+        observations = torch.randn(
+            batch_size,
+            121,
+            generator=generator,
+        )
+        observations[:, 50:100] = (
+            observations[:, 50:100] > 0
+        )
+        observations[::2, 120] = 0
+        observations[1::2, 120] = 1
+        with torch.inference_mode():
+            expected = eager.actor(observations)
+            actual = traced.actor(observations)
+        masks = build_action_masks(observations)
+
+        assert torch.equal(actual, expected)
+        assert torch.equal(
+            actual.masked_fill(~masks, -torch.inf).argmax(-1),
+            expected.masked_fill(~masks, -torch.inf).argmax(-1),
+        )
+    assert (
+        eager.metadata["projection"]["base_actor_execution"] == "eager"
+    )
+    assert (
+        traced.metadata["projection"]["base_actor_execution"]
+        == "torchscript_trace"
+    )
 
 
 def test_convenience_loaders_return_factory_and_batched_actor(monkeypatch):

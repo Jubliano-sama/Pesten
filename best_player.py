@@ -12,9 +12,11 @@ from dataclasses import asdict, dataclass
 import hashlib
 from pathlib import Path
 from typing import Callable
+import warnings
 
 import torch
 
+from ai_observation import OBSERVATION_SIZE
 from batched_pesten import ActorPolicy
 from batched_suit_symmetry import BatchedSuitAveragedActor
 from corrected_ppo_agent import make_corrected_ppo_agent_factory
@@ -62,6 +64,7 @@ class BestPlayerConfig:
     aggregation: str = "logits"
     player_orbit_average: bool = False
     base_chunk_size: int = 512
+    trace_cpu_actor: bool = True
 
     def __post_init__(self):
         object.__setattr__(self, "model_path", Path(self.model_path).resolve())
@@ -126,6 +129,27 @@ def load_best_player(
         config.model_path,
         config.device,
     )
+    base_actor_execution = "eager"
+    if config.trace_cpu_actor and device.type == "cpu":
+        # Every suit-projected call reaches the base actor with a dynamic
+        # batch dimension and at least 24 rows.  Tracing only this frozen,
+        # inference-only module removes Python dispatch without changing any
+        # tensor operation or checkpoint value.  Do not freeze the graph:
+        # constant folding can change floating-point association.
+        trace_example = torch.zeros(
+            (24, OBSERVATION_SIZE),
+            dtype=torch.float32,
+            device=device,
+        )
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", torch.jit.TracerWarning)
+            warnings.simplefilter("ignore", DeprecationWarning)
+            base_actor = torch.jit.trace(
+                base_actor,
+                trace_example,
+                check_trace=False,
+            ).eval()
+        base_actor_execution = "torchscript_trace"
     actor = BatchedSuitAveragedActor(
         base_actor,
         alpha=config.alpha,
@@ -148,6 +172,7 @@ def load_best_player(
             "player_orbit_average": config.player_orbit_average,
             "ordinary_suit_permutations": 24,
             "base_chunk_size": config.base_chunk_size,
+            "base_actor_execution": base_actor_execution,
             "draw_retry": "just-drawn card plus PASS",
         },
         "information_boundary": dict(INFORMATION_BOUNDARY),

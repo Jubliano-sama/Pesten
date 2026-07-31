@@ -145,6 +145,10 @@ parameter updates were accepted:
 - type-aware public-context slice writes reduced canonical 100-game execution
   from 6.390 to 6.008 seconds (`1.064x`) with exact observations, logits,
   actions, winners, and turn counts;
+- tracing only the frozen CPU base actor at load time reduced representative
+  single-decision 24-view projection from 0.776 to 0.506 milliseconds
+  (`1.535x`), with bit-identical projected logits and masked actions; eager
+  execution remains an explicit configuration opt-out;
 - the opt-in CPU suit-inference chunk size 64 is neutral for batch 1, but
   reduces the largest estimated actor activation at batch 512 from 106.6 MB to
   13.3 MB and improved a 1,400-game development benchmark `1.40x`. The frozen

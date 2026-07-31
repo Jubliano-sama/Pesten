@@ -1,0 +1,39 @@
+{
+  "aggregation": "24-way ordinary-suit mean logits",
+  "base_actor_execution": {
+    "optimized": "torchscript_trace",
+    "reference": "eager"
+  },
+  "checkpoint_sha256": "aac589b3c7300895604e6c77755631ab4a31c8bf9810768448ab2f3ff5bbe186",
+  "kind": "best_player_cpu_trace_performance_audit",
+  "rows": [
+    {
+      "actions_exact": true,
+      "batch_size": 1,
+      "eager_milliseconds": 0.7761999921882534,
+      "logits_bit_exact": true,
+      "repetitions_per_round": 256,
+      "speedup": 1.535320894827128,
+      "traced_milliseconds": 0.5055620585920906
+    },
+    {
+      "actions_exact": true,
+      "batch_size": 7,
+      "eager_milliseconds": 1.6069166665854733,
+      "logits_bit_exact": true,
+      "repetitions_per_round": 36,
+      "speedup": 1.03398413375183,
+      "traced_milliseconds": 1.5541018610747415
+    },
+    {
+      "actions_exact": true,
+      "batch_size": 64,
+      "eager_milliseconds": 14.052655000341474,
+      "logits_bit_exact": true,
+      "repetitions_per_round": 4,
+      "speedup": 1.0230256492023764,
+      "traced_milliseconds": 13.736366249759158
+    }
+  ],
+  "torch_threads": 8
+}
