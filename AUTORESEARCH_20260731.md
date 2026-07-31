@@ -154,4 +154,23 @@ Frozen before sealed evaluation:
 - production entrypoint: `best_player.py`;
 - interactive entrypoint: `python interactive_game.py --agents human,best`.
 
-One sealed holdout and final full-regression verification remain pending.
+The one-way sealed holdout used 5,000 paired deals per matchup: 5,000 direct
+pairs plus 5,000 pairs against each of random, smart, and smarter, for 70,000
+games total. It independently confirmed the candidate:
+
+- direct candidate score: `0.5203`, CI `[0.5113, 0.5294]`;
+- direct advantage: `+0.0406`, CI `[+0.0226, +0.0586]`;
+- combined pool delta: `+0.01678`, CI `[+0.01050, +0.02300]`;
+- random delta: `+0.02270`, CI `[+0.01160, +0.03400]`;
+- smart delta: `+0.02170`, CI `[+0.01020, +0.03300]`;
+- smarter delta: `+0.00595`, CI `[-0.00420, +0.01635]`.
+
+The 70,000 games completed in 723.8 seconds at 96.7 games/s. The raw sealed
+result SHA-256 is
+`3b1b634baa39f14d2d32fe081f124bb9a11175b96614fa578a8d7684ef06f688`;
+the atomic claim-ledger SHA-256 is
+`21d6f27508e29b97adc8708d7d76f2a2a5dadf6b67469ed34dde7073b3cb03eb`.
+
+Final verification: 314 tests passed, 4 skipped, all 1,152 subtests passed;
+compilation, diff checks, exact checkpoint verification, canonical/batched
+parity, information-boundary tests, and sealed-protocol guards passed.

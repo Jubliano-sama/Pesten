@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "date": "2026-07-31",
+  "candidate_freeze_commit": "7de18e0",
+  "selected_player": {
+    "entrypoint": "best_player.py",
+    "checkpoint": "ppo_actor_100run3.pth",
+    "checkpoint_sha256": "aac589b3c7300895604e6c77755631ab4a31c8bf9810768448ab2f3ff5bbe186",
+    "projection": {
+      "ordinary_suit_permutations": 24,
+      "aggregation": "logits",
+      "alpha": 1.0,
+      "player_orbit_average": false,
+      "greedy": true
+    },
+    "information_boundary": {
+      "own_hand_and_public_state_only": true,
+      "opponent_card_identities": false,
+      "draw_pile_order": false
+    }
+  },
+  "durable_development_confirmation": {
+    "direct_pairs": 1200,
+    "pool_pair_comparisons": 3600,
+    "direct_advantage": {
+      "mean": 0.050833333333333335,
+      "bootstrap_ci95": [
+        0.013333333333333334,
+        0.0875
+      ]
+    },
+    "combined_pool_delta": {
+      "mean": 0.015555555555555555,
+      "bootstrap_ci95": [
+        0.002777777777777778,
+        0.028333333333333332
+      ]
+    }
+  },
+  "sealed_evaluation": {
+    "one_way": true,
+    "pairs_per_matchup": 5000,
+    "total_games": 70000,
+    "base_seed": 4294000000,
+    "direct_candidate_score": {
+      "mean": 0.5203,
+      "bootstrap_ci95": [
+        0.5113,
+        0.5294
+      ]
+    },
+    "direct_advantage": {
+      "mean": 0.0406,
+      "bootstrap_ci95": [
+        0.0226,
+        0.0586
+      ]
+    },
+    "combined_pool_delta": {
+      "mean": 0.016783333333333334,
+      "bootstrap_ci95": [
+        0.0105,
+        0.023
+      ]
+    },
+    "opponent_deltas": {
+      "random": {
+        "mean": 0.0227,
+        "bootstrap_ci95": [
+          0.0116,
+          0.034
+        ]
+      },
+      "smart": {
+        "mean": 0.0217,
+        "bootstrap_ci95": [
+          0.0102,
+          0.03300249999999978
+        ]
+      },
+      "smarter": {
+        "mean": 0.00595,
+        "bootstrap_ci95": [
+          -0.0042,
+          0.01635
+        ]
+      }
+    },
+    "throughput": {
+      "elapsed_seconds": 723.8016476039993,
+      "games_per_second": 96.71157869247882
+    },
+    "raw_result": "benchmarks/sealed_suit_symmetry_final_20260731.json",
+    "raw_result_sha256": "3b1b634baa39f14d2d32fe081f124bb9a11175b96614fa578a8d7684ef06f688",
+    "claim_ledger": "benchmarks/.sealed_evaluation_claim.json",
+    "claim_ledger_sha256": "21d6f27508e29b97adc8708d7d76f2a2a5dadf6b67469ed34dde7073b3cb03eb"
+  },
+  "verification": {
+    "pytest": "314 passed, 4 skipped, 1152 subtests passed",
+    "compileall": "passed",
+    "git_diff_check": "passed",
+    "active_seed_namespace_contamination_before_sealed_run": 0
+  }
+}

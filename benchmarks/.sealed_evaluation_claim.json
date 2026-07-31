@@ -1,0 +1,32 @@
+{
+  "base_seed": 4294000000,
+  "candidate": {
+    "path": "/home/tommie/Pesten/ppo_actor_100run3.pth",
+    "sha256": "aac589b3c7300895604e6c77755631ab4a31c8bf9810768448ab2f3ff5bbe186"
+  },
+  "claimed_at_utc": "2026-07-31T09:04:35.381124+00:00",
+  "configuration": {
+    "aggregation": "logits",
+    "alpha": 1.0,
+    "base_chunk_size": 512,
+    "bootstrap_samples": 20000,
+    "device": "cpu",
+    "max_turns": 1000,
+    "player_orbit_average": false,
+    "pool": [
+      "random",
+      "smart",
+      "smarter"
+    ]
+  },
+  "evaluator": "suit_symmetry_projection",
+  "ledger_path": "/home/tommie/Pesten/benchmarks/.sealed_evaluation_claim.json",
+  "output_path": "/home/tommie/Pesten/benchmarks/sealed_suit_symmetry_final_20260731.json",
+  "pairs": 5000,
+  "schema_version": 1,
+  "seed_interval": {
+    "end_exclusive": 4294900000,
+    "start_inclusive": 4294000000
+  },
+  "status": "holdout_burned_before_evaluation"
+}
