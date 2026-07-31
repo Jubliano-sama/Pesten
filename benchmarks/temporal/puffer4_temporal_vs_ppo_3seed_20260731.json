@@ -1,0 +1,1155 @@
+{
+  "aggregate": {
+    "all_seed_gates_passed": false,
+    "mean_ppo_score": 0.37166666666666665,
+    "min_seed_lower_ci95": 0.265,
+    "ppo_scores": [
+      0.325,
+      0.375,
+      0.415
+    ],
+    "superiority_claim_allowed": false,
+    "training_seeds": 3
+  },
+  "budget_comparability": {
+    "candidate_step_budget_recorded": true,
+    "candidate_wall_budget_recorded": true,
+    "ppo_champion_training_steps_available": false,
+    "ppo_champion_training_wall_seconds_available": false,
+    "reason": "the deployed actor checkpoint contains weights only and no recoverable training step or wall-clock provenance",
+    "step_matched_vs_champion": false,
+    "wall_clock_matched_vs_champion": false
+  },
+  "runs": [
+    {
+      "schema_version": 1,
+      "champion": {
+        "action_count": 55,
+        "architecture": "ppo2.StudentNet(DenseSkipNet 8x256)",
+        "critic_checkpoint_available": false,
+        "observation_size": 121,
+        "path": "ppo_actor_100run3.pth",
+        "sha256": "aac589b3c7300895604e6c77755631ab4a31c8bf9810768448ab2f3ff5bbe186"
+      },
+      "evaluation": {
+        "paired_deal_seeds_and_rotated_seats": true,
+        "pool": {
+          "bayesian_tree": {
+            "average_turns": 42.48,
+            "candidate": "temporal_seed_731",
+            "draws": 0,
+            "elapsed_seconds": 6.418753024001489,
+            "games": 100,
+            "gate_passed": false,
+            "losses": 56,
+            "opponent": "bayesian_tree",
+            "paired_bootstrap_ci95": [
+              0.35,
+              0.53
+            ],
+            "pairs": 50,
+            "score": 0.44,
+            "seed": 2100731,
+            "wins": 44,
+            "wins_as_seat_0": 22,
+            "wins_as_seat_1": 22
+          },
+          "ppo_champion": {
+            "average_turns": 43.75,
+            "candidate": "temporal_seed_731",
+            "draws": 0,
+            "elapsed_seconds": 5.374409298994578,
+            "games": 200,
+            "gate_passed": false,
+            "losses": 135,
+            "opponent": "ppo_champion",
+            "paired_bootstrap_ci95": [
+              0.265,
+              0.385
+            ],
+            "pairs": 100,
+            "score": 0.325,
+            "seed": 2000731,
+            "wins": 65,
+            "wins_as_seat_0": 28,
+            "wins_as_seat_1": 37
+          },
+          "random": {
+            "average_turns": 46.42,
+            "candidate": "temporal_seed_731",
+            "draws": 0,
+            "elapsed_seconds": 1.5782131279993337,
+            "games": 100,
+            "gate_passed": false,
+            "losses": 43,
+            "opponent": "random",
+            "paired_bootstrap_ci95": [
+              0.46,
+              0.68
+            ],
+            "pairs": 50,
+            "score": 0.57,
+            "seed": 2300731,
+            "wins": 57,
+            "wins_as_seat_0": 28,
+            "wins_as_seat_1": 29
+          },
+          "smart_rule": {
+            "average_turns": 40.74,
+            "candidate": "temporal_seed_731",
+            "draws": 0,
+            "elapsed_seconds": 1.4590199969970854,
+            "games": 100,
+            "gate_passed": false,
+            "losses": 59,
+            "opponent": "smart_rule",
+            "paired_bootstrap_ci95": [
+              0.32,
+              0.5
+            ],
+            "pairs": 50,
+            "score": 0.41,
+            "seed": 2200731,
+            "wins": 41,
+            "wins_as_seat_0": 22,
+            "wins_as_seat_1": 19
+          }
+        },
+        "two_player_only": true
+      },
+      "heldout_champion_action_target": {
+        "after_imitation": {
+          "accuracy": 0.8330522765598651,
+          "cross_entropy": 0.34920454025268555,
+          "samples": 593
+        },
+        "final": {
+          "accuracy": 0.836424957841484,
+          "cross_entropy": 0.3403729498386383,
+          "samples": 593
+        },
+        "initial": {
+          "accuracy": 0.40640809443507586,
+          "cross_entropy": 0.8485766649246216,
+          "samples": 593
+        },
+        "target": "deployed frozen PPO masked-argmax action on held-out safe trajectories; this is actor agreement, not PPO loss"
+      },
+      "seed": 731,
+      "stability": {
+        "finite_imitation": true,
+        "finite_league": true
+      },
+      "training": {
+        "decisions_per_second": 164.77206478996968,
+        "imitation_curve": [
+          {
+            "accuracy": 0.5172642762284196,
+            "cross_entropy": 0.8330656407551857,
+            "epoch": 0,
+            "samples": 1506
+          },
+          {
+            "accuracy": 0.7702523240371846,
+            "cross_entropy": 0.6252058680035708,
+            "epoch": 1,
+            "samples": 1506
+          },
+          {
+            "accuracy": 0.7868525896414342,
+            "cross_entropy": 0.5199135083788363,
+            "epoch": 2,
+            "samples": 1506
+          },
+          {
+            "accuracy": 0.8134130146082338,
+            "cross_entropy": 0.4453910865771974,
+            "epoch": 3,
+            "samples": 1506
+          },
+          {
+            "accuracy": 0.8313413014608234,
+            "cross_entropy": 0.3955842607703441,
+            "epoch": 4,
+            "samples": 1506
+          }
+        ],
+        "imitation_epochs": 5,
+        "imitation_games": 60,
+        "league_curve": [
+          {
+            "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed731_league1.pt",
+            "cumulative_decisions": 3035,
+            "cumulative_wall_seconds": 12.944165402004728,
+            "epoch": 1,
+            "losses": {
+              "approx_kl": 0.0,
+              "clip_fraction": 0.0,
+              "entropy": 0.3552361726760864,
+              "explained_variance": -0.08291518688201904,
+              "loss": 0.20434868335723877,
+              "old_approx_kl": 0.0,
+              "policy_loss": 0.004905333276838064,
+              "samples": 1529,
+              "value_loss": 0.40599143505096436
+            },
+            "quick_ppo_gate": {
+              "average_turns": 43.92,
+              "candidate": "temporal_seed_731",
+              "draws": 0,
+              "elapsed_seconds": 1.4224443129933206,
+              "games": 50,
+              "gate_passed": false,
+              "losses": 31,
+              "opponent": "ppo_champion",
+              "paired_bootstrap_ci95": [
+                0.26,
+                0.5
+              ],
+              "pairs": 25,
+              "score": 0.38,
+              "seed": 900731,
+              "wins": 19,
+              "wins_as_seat_0": 9,
+              "wins_as_seat_1": 10
+            },
+            "validation": {
+              "accuracy": 0.8330522765598651,
+              "cross_entropy": 0.34658342599868774,
+              "samples": 593
+            },
+            "wall_seconds": 5.368302396003855
+          },
+          {
+            "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed731_league2.pt",
+            "cumulative_decisions": 4187,
+            "cumulative_wall_seconds": 17.171196315000998,
+            "epoch": 2,
+            "losses": {
+              "approx_kl": 0.0,
+              "clip_fraction": 0.0,
+              "entropy": 0.37483641505241394,
+              "explained_variance": -0.17208731174468994,
+              "loss": 0.33291301131248474,
+              "old_approx_kl": 0.0,
+              "policy_loss": 0.07684271782636642,
+              "samples": 1152,
+              "value_loss": 0.5196372866630554
+            },
+            "quick_ppo_gate": {
+              "average_turns": 43.06,
+              "candidate": "temporal_seed_731",
+              "draws": 0,
+              "elapsed_seconds": 1.3151121529954253,
+              "games": 50,
+              "gate_passed": false,
+              "losses": 22,
+              "opponent": "ppo_champion",
+              "paired_bootstrap_ci95": [
+                0.44,
+                0.68
+              ],
+              "pairs": 25,
+              "score": 0.56,
+              "seed": 901731,
+              "wins": 28,
+              "wins_as_seat_0": 17,
+              "wins_as_seat_1": 11
+            },
+            "validation": {
+              "accuracy": 0.8330522765598651,
+              "cross_entropy": 0.34423917531967163,
+              "samples": 593
+            },
+            "wall_seconds": 4.227009993002866
+          },
+          {
+            "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed731_league3.pt",
+            "cumulative_decisions": 5461,
+            "cumulative_wall_seconds": 21.495782551995944,
+            "epoch": 3,
+            "losses": {
+              "approx_kl": 0.0,
+              "clip_fraction": 0.0,
+              "entropy": 0.36712440848350525,
+              "explained_variance": -0.18672776222229004,
+              "loss": 0.30115053057670593,
+              "old_approx_kl": 0.0,
+              "policy_loss": 0.05435961112380028,
+              "samples": 1274,
+              "value_loss": 0.5009243488311768
+            },
+            "quick_ppo_gate": {
+              "average_turns": 35.54,
+              "candidate": "temporal_seed_731",
+              "draws": 0,
+              "elapsed_seconds": 1.1470654419972561,
+              "games": 50,
+              "gate_passed": false,
+              "losses": 27,
+              "opponent": "ppo_champion",
+              "paired_bootstrap_ci95": [
+                0.36,
+                0.56
+              ],
+              "pairs": 25,
+              "score": 0.46,
+              "seed": 902731,
+              "wins": 23,
+              "wins_as_seat_0": 13,
+              "wins_as_seat_1": 10
+            },
+            "validation": {
+              "accuracy": 0.8347386172006745,
+              "cross_entropy": 0.34221258759498596,
+              "samples": 593
+            },
+            "wall_seconds": 4.324564417009242
+          },
+          {
+            "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed731_league4.pt",
+            "cumulative_decisions": 6828,
+            "cumulative_wall_seconds": 26.360007909999695,
+            "epoch": 4,
+            "losses": {
+              "approx_kl": 0.0,
+              "clip_fraction": 0.0,
+              "entropy": 0.3376750946044922,
+              "explained_variance": -0.09801828861236572,
+              "loss": 0.23991675674915314,
+              "old_approx_kl": 0.0,
+              "policy_loss": 0.02681138552725315,
+              "samples": 1367,
+              "value_loss": 0.4329642355442047
+            },
+            "quick_ppo_gate": {
+              "average_turns": 43.82,
+              "candidate": "temporal_seed_731",
+              "draws": 0,
+              "elapsed_seconds": 1.361038136004936,
+              "games": 50,
+              "gate_passed": false,
+              "losses": 26,
+              "opponent": "ppo_champion",
+              "paired_bootstrap_ci95": [
+                0.36,
+                0.6
+              ],
+              "pairs": 25,
+              "score": 0.48,
+              "seed": 903731,
+              "wins": 24,
+              "wins_as_seat_0": 12,
+              "wins_as_seat_1": 12
+            },
+            "validation": {
+              "accuracy": 0.836424957841484,
+              "cross_entropy": 0.3403729498386383,
+              "samples": 593
+            },
+            "wall_seconds": 4.864204237994272
+          }
+        ],
+        "league_epochs": 4,
+        "league_games_per_epoch": 30,
+        "league_mixture": [
+          {
+            "opponent": "current_selfplay",
+            "parts": 4
+          },
+          {
+            "opponent": "historical_temporal",
+            "parts": 2
+          },
+          {
+            "opponent": "ppo_champion",
+            "parts": 2
+          },
+          {
+            "opponent": "bayesian_tree",
+            "parts": 1
+          },
+          {
+            "opponent": "smart_rule",
+            "parts": 1
+          }
+        ],
+        "opponent_data_contribution": {
+          "decisions": {
+            "bayesian_tree": 432,
+            "current_selfplay": 3174,
+            "historical_temporal": 814,
+            "ppo_champion": 543,
+            "smart_rule": 359
+          },
+          "games": {
+            "bayesian_tree": 12,
+            "current_selfplay": 48,
+            "historical_temporal": 24,
+            "ppo_champion": 24,
+            "smart_rule": 12
+          }
+        },
+        "time_to_provisional_gate": null,
+        "total_environment_decisions": 6828,
+        "wall_seconds": 41.43906316100038
+      }
+    },
+    {
+      "schema_version": 1,
+      "champion": {
+        "action_count": 55,
+        "architecture": "ppo2.StudentNet(DenseSkipNet 8x256)",
+        "critic_checkpoint_available": false,
+        "observation_size": 121,
+        "path": "ppo_actor_100run3.pth",
+        "sha256": "aac589b3c7300895604e6c77755631ab4a31c8bf9810768448ab2f3ff5bbe186"
+      },
+      "evaluation": {
+        "paired_deal_seeds_and_rotated_seats": true,
+        "pool": {
+          "bayesian_tree": {
+            "average_turns": 56.55,
+            "candidate": "temporal_seed_1731",
+            "draws": 0,
+            "elapsed_seconds": 8.591383860999485,
+            "games": 100,
+            "gate_passed": false,
+            "losses": 46,
+            "opponent": "bayesian_tree",
+            "paired_bootstrap_ci95": [
+              0.44,
+              0.64
+            ],
+            "pairs": 50,
+            "score": 0.54,
+            "seed": 2101731,
+            "wins": 54,
+            "wins_as_seat_0": 31,
+            "wins_as_seat_1": 23
+          },
+          "ppo_champion": {
+            "average_turns": 45.015,
+            "candidate": "temporal_seed_1731",
+            "draws": 0,
+            "elapsed_seconds": 5.955582730995957,
+            "games": 200,
+            "gate_passed": false,
+            "losses": 125,
+            "opponent": "ppo_champion",
+            "paired_bootstrap_ci95": [
+              0.315,
+              0.435
+            ],
+            "pairs": 100,
+            "score": 0.375,
+            "seed": 2001731,
+            "wins": 75,
+            "wins_as_seat_0": 45,
+            "wins_as_seat_1": 30
+          },
+          "random": {
+            "average_turns": 51.85,
+            "candidate": "temporal_seed_1731",
+            "draws": 0,
+            "elapsed_seconds": 1.9114757839997765,
+            "games": 100,
+            "gate_passed": false,
+            "losses": 41,
+            "opponent": "random",
+            "paired_bootstrap_ci95": [
+              0.5,
+              0.68
+            ],
+            "pairs": 50,
+            "score": 0.59,
+            "seed": 2301731,
+            "wins": 59,
+            "wins_as_seat_0": 32,
+            "wins_as_seat_1": 27
+          },
+          "smart_rule": {
+            "average_turns": 46.92,
+            "candidate": "temporal_seed_1731",
+            "draws": 0,
+            "elapsed_seconds": 1.7453425259882351,
+            "games": 100,
+            "gate_passed": false,
+            "losses": 53,
+            "opponent": "smart_rule",
+            "paired_bootstrap_ci95": [
+              0.38,
+              0.57
+            ],
+            "pairs": 50,
+            "score": 0.47,
+            "seed": 2201731,
+            "wins": 47,
+            "wins_as_seat_0": 22,
+            "wins_as_seat_1": 25
+          }
+        },
+        "two_player_only": true
+      },
+      "heldout_champion_action_target": {
+        "after_imitation": {
+          "accuracy": 0.8686679174484052,
+          "cross_entropy": 0.32744100689888,
+          "samples": 533
+        },
+        "final": {
+          "accuracy": 0.8705440900562852,
+          "cross_entropy": 0.31704357266426086,
+          "samples": 533
+        },
+        "initial": {
+          "accuracy": 0.5215759849906192,
+          "cross_entropy": 0.7945116758346558,
+          "samples": 533
+        },
+        "target": "deployed frozen PPO masked-argmax action on held-out safe trajectories; this is actor agreement, not PPO loss"
+      },
+      "seed": 1731,
+      "stability": {
+        "finite_imitation": true,
+        "finite_league": true
+      },
+      "training": {
+        "decisions_per_second": 144.7072596460727,
+        "imitation_curve": [
+          {
+            "accuracy": 0.6567489114658926,
+            "cross_entropy": 0.7315887759435592,
+            "epoch": 0,
+            "samples": 1378
+          },
+          {
+            "accuracy": 0.7851959361393324,
+            "cross_entropy": 0.5482210920528157,
+            "epoch": 1,
+            "samples": 1378
+          },
+          {
+            "accuracy": 0.8134978229317852,
+            "cross_entropy": 0.4564099953418173,
+            "epoch": 2,
+            "samples": 1378
+          },
+          {
+            "accuracy": 0.8439767779390421,
+            "cross_entropy": 0.3940636785715296,
+            "epoch": 3,
+            "samples": 1378
+          },
+          {
+            "accuracy": 0.8606676342525399,
+            "cross_entropy": 0.3501576226737218,
+            "epoch": 4,
+            "samples": 1378
+          }
+        ],
+        "imitation_epochs": 5,
+        "imitation_games": 60,
+        "league_curve": [
+          {
+            "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed1731_league1.pt",
+            "cumulative_decisions": 2616,
+            "cumulative_wall_seconds": 11.64272724201146,
+            "epoch": 1,
+            "losses": {
+              "approx_kl": 0.0,
+              "clip_fraction": 0.0,
+              "entropy": 0.3560837507247925,
+              "explained_variance": -0.1563493013381958,
+              "loss": -0.13853749632835388,
+              "old_approx_kl": 0.0,
+              "policy_loss": -0.5161663889884949,
+              "samples": 1238,
+              "value_loss": 0.7623794674873352
+            },
+            "quick_ppo_gate": {
+              "average_turns": 57.94,
+              "candidate": "temporal_seed_1731",
+              "draws": 0,
+              "elapsed_seconds": 1.7382384119991912,
+              "games": 50,
+              "gate_passed": false,
+              "losses": 30,
+              "opponent": "ppo_champion",
+              "paired_bootstrap_ci95": [
+                0.32,
+                0.48
+              ],
+              "pairs": 25,
+              "score": 0.4,
+              "seed": 901731,
+              "wins": 20,
+              "wins_as_seat_0": 13,
+              "wins_as_seat_1": 7
+            },
+            "validation": {
+              "accuracy": 0.8686679174484052,
+              "cross_entropy": 0.3243879973888397,
+              "samples": 533
+            },
+            "wall_seconds": 4.7893737709964626
+          },
+          {
+            "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed1731_league2.pt",
+            "cumulative_decisions": 3622,
+            "cumulative_wall_seconds": 15.664746047012159,
+            "epoch": 2,
+            "losses": {
+              "approx_kl": 0.0,
+              "clip_fraction": 0.0,
+              "entropy": 0.36502519249916077,
+              "explained_variance": -0.3517848253250122,
+              "loss": -0.07240545749664307,
+              "old_approx_kl": 0.0,
+              "policy_loss": -0.5266415476799011,
+              "samples": 1006,
+              "value_loss": 0.9157726764678955
+            },
+            "quick_ppo_gate": {
+              "average_turns": 41.82,
+              "candidate": "temporal_seed_1731",
+              "draws": 0,
+              "elapsed_seconds": 1.3219171230011852,
+              "games": 50,
+              "gate_passed": false,
+              "losses": 29,
+              "opponent": "ppo_champion",
+              "paired_bootstrap_ci95": [
+                0.28,
+                0.56
+              ],
+              "pairs": 25,
+              "score": 0.42,
+              "seed": 902731,
+              "wins": 21,
+              "wins_as_seat_0": 10,
+              "wins_as_seat_1": 11
+            },
+            "validation": {
+              "accuracy": 0.8686679174484052,
+              "cross_entropy": 0.32165855169296265,
+              "samples": 533
+            },
+            "wall_seconds": 4.021997474003001
+          },
+          {
+            "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed1731_league3.pt",
+            "cumulative_decisions": 4897,
+            "cumulative_wall_seconds": 20.562456841013045,
+            "epoch": 3,
+            "losses": {
+              "approx_kl": 0.0,
+              "clip_fraction": 0.0,
+              "entropy": 0.3327198028564453,
+              "explained_variance": -0.5441288948059082,
+              "loss": -0.006589240860193968,
+              "old_approx_kl": 0.0,
+              "policy_loss": -0.37787261605262756,
+              "samples": 1275,
+              "value_loss": 0.74922114610672
+            },
+            "quick_ppo_gate": {
+              "average_turns": 49.5,
+              "candidate": "temporal_seed_1731",
+              "draws": 0,
+              "elapsed_seconds": 1.6779428879963234,
+              "games": 50,
+              "gate_passed": false,
+              "losses": 30,
+              "opponent": "ppo_champion",
+              "paired_bootstrap_ci95": [
+                0.28,
+                0.5
+              ],
+              "pairs": 25,
+              "score": 0.4,
+              "seed": 903731,
+              "wins": 20,
+              "wins_as_seat_0": 10,
+              "wins_as_seat_1": 10
+            },
+            "validation": {
+              "accuracy": 0.8705440900562852,
+              "cross_entropy": 0.31922364234924316,
+              "samples": 533
+            },
+            "wall_seconds": 4.897688783006743
+          },
+          {
+            "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed1731_league4.pt",
+            "cumulative_decisions": 6466,
+            "cumulative_wall_seconds": 26.241054462007014,
+            "epoch": 4,
+            "losses": {
+              "approx_kl": 0.0,
+              "clip_fraction": 0.0,
+              "entropy": 0.3279121220111847,
+              "explained_variance": -0.2857789993286133,
+              "loss": -0.0201894361525774,
+              "old_approx_kl": 0.0,
+              "policy_loss": -0.2950703501701355,
+              "samples": 1569,
+              "value_loss": 0.556320071220398
+            },
+            "quick_ppo_gate": {
+              "average_turns": 48.74,
+              "candidate": "temporal_seed_1731",
+              "draws": 0,
+              "elapsed_seconds": 1.7030563659936888,
+              "games": 50,
+              "gate_passed": false,
+              "losses": 33,
+              "opponent": "ppo_champion",
+              "paired_bootstrap_ci95": [
+                0.2,
+                0.48
+              ],
+              "pairs": 25,
+              "score": 0.34,
+              "seed": 904731,
+              "wins": 17,
+              "wins_as_seat_0": 7,
+              "wins_as_seat_1": 10
+            },
+            "validation": {
+              "accuracy": 0.8705440900562852,
+              "cross_entropy": 0.31704357266426086,
+              "samples": 533
+            },
+            "wall_seconds": 5.6785751110001
+          }
+        ],
+        "league_epochs": 4,
+        "league_games_per_epoch": 30,
+        "league_mixture": [
+          {
+            "opponent": "current_selfplay",
+            "parts": 4
+          },
+          {
+            "opponent": "historical_temporal",
+            "parts": 2
+          },
+          {
+            "opponent": "ppo_champion",
+            "parts": 2
+          },
+          {
+            "opponent": "bayesian_tree",
+            "parts": 1
+          },
+          {
+            "opponent": "smart_rule",
+            "parts": 1
+          }
+        ],
+        "opponent_data_contribution": {
+          "decisions": {
+            "bayesian_tree": 304,
+            "current_selfplay": 3056,
+            "historical_temporal": 600,
+            "ppo_champion": 792,
+            "smart_rule": 336
+          },
+          "games": {
+            "bayesian_tree": 12,
+            "current_selfplay": 48,
+            "historical_temporal": 24,
+            "ppo_champion": 24,
+            "smart_rule": 12
+          }
+        },
+        "time_to_provisional_gate": null,
+        "total_environment_decisions": 6466,
+        "wall_seconds": 44.68331454700092
+      }
+    },
+    {
+      "schema_version": 1,
+      "champion": {
+        "action_count": 55,
+        "architecture": "ppo2.StudentNet(DenseSkipNet 8x256)",
+        "critic_checkpoint_available": false,
+        "observation_size": 121,
+        "path": "ppo_actor_100run3.pth",
+        "sha256": "aac589b3c7300895604e6c77755631ab4a31c8bf9810768448ab2f3ff5bbe186"
+      },
+      "evaluation": {
+        "paired_deal_seeds_and_rotated_seats": true,
+        "pool": {
+          "bayesian_tree": {
+            "average_turns": 48.5,
+            "candidate": "temporal_seed_2731",
+            "draws": 0,
+            "elapsed_seconds": 7.058059215007233,
+            "games": 100,
+            "gate_passed": false,
+            "losses": 54,
+            "opponent": "bayesian_tree",
+            "paired_bootstrap_ci95": [
+              0.37,
+              0.56
+            ],
+            "pairs": 50,
+            "score": 0.46,
+            "seed": 2102731,
+            "wins": 46,
+            "wins_as_seat_0": 24,
+            "wins_as_seat_1": 22
+          },
+          "ppo_champion": {
+            "average_turns": 42.59,
+            "candidate": "temporal_seed_2731",
+            "draws": 0,
+            "elapsed_seconds": 6.05300189400441,
+            "games": 200,
+            "gate_passed": false,
+            "losses": 117,
+            "opponent": "ppo_champion",
+            "paired_bootstrap_ci95": [
+              0.35,
+              0.48
+            ],
+            "pairs": 100,
+            "score": 0.415,
+            "seed": 2002731,
+            "wins": 83,
+            "wins_as_seat_0": 40,
+            "wins_as_seat_1": 43
+          },
+          "random": {
+            "average_turns": 52.5,
+            "candidate": "temporal_seed_2731",
+            "draws": 0,
+            "elapsed_seconds": 1.9365104510070523,
+            "games": 100,
+            "gate_passed": true,
+            "losses": 35,
+            "opponent": "random",
+            "paired_bootstrap_ci95": [
+              0.56,
+              0.74
+            ],
+            "pairs": 50,
+            "score": 0.65,
+            "seed": 2302731,
+            "wins": 65,
+            "wins_as_seat_0": 34,
+            "wins_as_seat_1": 31
+          },
+          "smart_rule": {
+            "average_turns": 42.94,
+            "candidate": "temporal_seed_2731",
+            "draws": 0,
+            "elapsed_seconds": 1.5535044449934503,
+            "games": 100,
+            "gate_passed": false,
+            "losses": 64,
+            "opponent": "smart_rule",
+            "paired_bootstrap_ci95": [
+              0.27,
+              0.45
+            ],
+            "pairs": 50,
+            "score": 0.36,
+            "seed": 2202731,
+            "wins": 36,
+            "wins_as_seat_0": 23,
+            "wins_as_seat_1": 13
+          }
+        },
+        "two_player_only": true
+      },
+      "heldout_champion_action_target": {
+        "after_imitation": {
+          "accuracy": 0.8563829787234043,
+          "cross_entropy": 0.3253578841686249,
+          "samples": 564
+        },
+        "final": {
+          "accuracy": 0.8617021276595744,
+          "cross_entropy": 0.3185407519340515,
+          "samples": 564
+        },
+        "initial": {
+          "accuracy": 0.6560283687943262,
+          "cross_entropy": 0.7130765318870544,
+          "samples": 564
+        },
+        "target": "deployed frozen PPO masked-argmax action on held-out safe trajectories; this is actor agreement, not PPO loss"
+      },
+      "seed": 2731,
+      "stability": {
+        "finite_imitation": true,
+        "finite_league": true
+      },
+      "training": {
+        "decisions_per_second": 145.678217687421,
+        "imitation_curve": [
+          {
+            "accuracy": 0.7537361923326835,
+            "cross_entropy": 0.6194093468477386,
+            "epoch": 0,
+            "samples": 1539
+          },
+          {
+            "accuracy": 0.8174139051332033,
+            "cross_entropy": 0.4798442414653735,
+            "epoch": 1,
+            "samples": 1539
+          },
+          {
+            "accuracy": 0.8427550357374919,
+            "cross_entropy": 0.4025030133900554,
+            "epoch": 2,
+            "samples": 1539
+          },
+          {
+            "accuracy": 0.8589993502274204,
+            "cross_entropy": 0.34994092967517343,
+            "epoch": 3,
+            "samples": 1539
+          },
+          {
+            "accuracy": 0.8778427550357375,
+            "cross_entropy": 0.31196363295982865,
+            "epoch": 4,
+            "samples": 1539
+          }
+        ],
+        "imitation_epochs": 5,
+        "imitation_games": 60,
+        "league_curve": [
+          {
+            "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed2731_league1.pt",
+            "cumulative_decisions": 2930,
+            "cumulative_wall_seconds": 13.276265954991686,
+            "epoch": 1,
+            "losses": {
+              "approx_kl": 0.0,
+              "clip_fraction": 0.0,
+              "entropy": 0.3634856939315796,
+              "explained_variance": -0.4860595464706421,
+              "loss": -0.00588749535381794,
+              "old_approx_kl": 0.0,
+              "policy_loss": -0.31883496046066284,
+              "samples": 1391,
+              "value_loss": 0.633164644241333
+            },
+            "quick_ppo_gate": {
+              "average_turns": 39.08,
+              "candidate": "temporal_seed_2731",
+              "draws": 0,
+              "elapsed_seconds": 1.32656463800231,
+              "games": 50,
+              "gate_passed": false,
+              "losses": 31,
+              "opponent": "ppo_champion",
+              "paired_bootstrap_ci95": [
+                0.26,
+                0.5
+              ],
+              "pairs": 25,
+              "score": 0.38,
+              "seed": 902731,
+              "wins": 19,
+              "wins_as_seat_0": 10,
+              "wins_as_seat_1": 9
+            },
+            "validation": {
+              "accuracy": 0.8599290780141844,
+              "cross_entropy": 0.3235146999359131,
+              "samples": 564
+            },
+            "wall_seconds": 5.055506083008368
+          },
+          {
+            "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed2731_league2.pt",
+            "cumulative_decisions": 4262,
+            "cumulative_wall_seconds": 18.232262928999262,
+            "epoch": 2,
+            "losses": {
+              "approx_kl": 0.0,
+              "clip_fraction": 0.0,
+              "entropy": 0.3444129526615143,
+              "explained_variance": -0.36029481887817383,
+              "loss": 0.034638650715351105,
+              "old_approx_kl": 0.0,
+              "policy_loss": -0.2691774368286133,
+              "samples": 1332,
+              "value_loss": 0.6145204305648804
+            },
+            "quick_ppo_gate": {
+              "average_turns": 40.98,
+              "candidate": "temporal_seed_2731",
+              "draws": 0,
+              "elapsed_seconds": 1.360433738998836,
+              "games": 50,
+              "gate_passed": false,
+              "losses": 27,
+              "opponent": "ppo_champion",
+              "paired_bootstrap_ci95": [
+                0.36,
+                0.56
+              ],
+              "pairs": 25,
+              "score": 0.46,
+              "seed": 903731,
+              "wins": 23,
+              "wins_as_seat_0": 10,
+              "wins_as_seat_1": 13
+            },
+            "validation": {
+              "accuracy": 0.8634751773049646,
+              "cross_entropy": 0.32176461815834045,
+              "samples": 564
+            },
+            "wall_seconds": 4.955973844000255
+          },
+          {
+            "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed2731_league3.pt",
+            "cumulative_decisions": 5384,
+            "cumulative_wall_seconds": 22.623739407994435,
+            "epoch": 3,
+            "losses": {
+              "approx_kl": 0.0,
+              "clip_fraction": 0.0,
+              "entropy": 0.3739664852619171,
+              "explained_variance": -0.10751378536224365,
+              "loss": 0.04257473722100258,
+              "old_approx_kl": 0.0,
+              "policy_loss": -0.23456798493862152,
+              "samples": 1122,
+              "value_loss": 0.5617647767066956
+            },
+            "quick_ppo_gate": {
+              "average_turns": 37.44,
+              "candidate": "temporal_seed_2731",
+              "draws": 0,
+              "elapsed_seconds": 1.2934455950016854,
+              "games": 50,
+              "gate_passed": false,
+              "losses": 33,
+              "opponent": "ppo_champion",
+              "paired_bootstrap_ci95": [
+                0.2,
+                0.48
+              ],
+              "pairs": 25,
+              "score": 0.34,
+              "seed": 904731,
+              "wins": 17,
+              "wins_as_seat_0": 9,
+              "wins_as_seat_1": 8
+            },
+            "validation": {
+              "accuracy": 0.8634751773049646,
+              "cross_entropy": 0.3201012909412384,
+              "samples": 564
+            },
+            "wall_seconds": 4.391454028998851
+          },
+          {
+            "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed2731_league4.pt",
+            "cumulative_decisions": 6373,
+            "cumulative_wall_seconds": 26.90077500299958,
+            "epoch": 4,
+            "losses": {
+              "approx_kl": 0.0,
+              "clip_fraction": 0.0,
+              "entropy": 0.3988734483718872,
+              "explained_variance": -0.10423922538757324,
+              "loss": 0.1352260857820511,
+              "old_approx_kl": 0.0,
+              "policy_loss": -0.1368952989578247,
+              "samples": 989,
+              "value_loss": 0.5522202253341675
+            },
+            "quick_ppo_gate": {
+              "average_turns": 47.44,
+              "candidate": "temporal_seed_2731",
+              "draws": 0,
+              "elapsed_seconds": 1.5645498459925875,
+              "games": 50,
+              "gate_passed": false,
+              "losses": 30,
+              "opponent": "ppo_champion",
+              "paired_bootstrap_ci95": [
+                0.28,
+                0.52
+              ],
+              "pairs": 25,
+              "score": 0.4,
+              "seed": 905731,
+              "wins": 20,
+              "wins_as_seat_0": 10,
+              "wins_as_seat_1": 10
+            },
+            "validation": {
+              "accuracy": 0.8617021276595744,
+              "cross_entropy": 0.3185407519340515,
+              "samples": 564
+            },
+            "wall_seconds": 4.2770126839895966
+          }
+        ],
+        "league_epochs": 4,
+        "league_games_per_epoch": 30,
+        "league_mixture": [
+          {
+            "opponent": "current_selfplay",
+            "parts": 4
+          },
+          {
+            "opponent": "historical_temporal",
+            "parts": 2
+          },
+          {
+            "opponent": "ppo_champion",
+            "parts": 2
+          },
+          {
+            "opponent": "bayesian_tree",
+            "parts": 1
+          },
+          {
+            "opponent": "smart_rule",
+            "parts": 1
+          }
+        ],
+        "opponent_data_contribution": {
+          "decisions": {
+            "bayesian_tree": 347,
+            "current_selfplay": 2891,
+            "historical_temporal": 669,
+            "ppo_champion": 645,
+            "smart_rule": 282
+          },
+          "games": {
+            "bayesian_tree": 12,
+            "current_selfplay": 48,
+            "historical_temporal": 24,
+            "ppo_champion": 24,
+            "smart_rule": 12
+          }
+        },
+        "time_to_provisional_gate": null,
+        "total_environment_decisions": 6373,
+        "wall_seconds": 43.74710304099426
+      }
+    }
+  ],
+  "runtime": {
+    "device": "cpu",
+    "pufferlib": "4.0",
+    "pufferlib_revision": "c5d3c637446047a6efbcaa74c039c5295d201ab0",
+    "python": "3.12.12",
+    "torch": "2.13.0+cu130"
+  },
+  "schema_version": 1
+}

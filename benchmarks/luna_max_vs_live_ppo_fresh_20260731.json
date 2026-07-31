@@ -1,0 +1,214 @@
+{
+  "status": "complete",
+  "agent": "gpt-5.6-luna",
+  "reasoning_effort": "max",
+  "persistent_context": true,
+  "opponent": "live_ppo_greedy",
+  "opponent_metadata": {
+    "checkpoint": "ppo_actor_100run3.pth",
+    "sha256": "aac589b3c7300895604e6c77755631ab4a31c8bf9810768448ab2f3ff5bbe186"
+  },
+  "games": 20,
+  "seed": 20261201,
+  "elapsed_seconds": 1633.749660528003,
+  "score": {
+    "luna_wins": 7,
+    "opponent": "live_ppo_greedy",
+    "opponent_wins": 13,
+    "draws": 0,
+    "luna_win_rate": 0.35,
+    "luna_win_rate_ci95": [
+      0.1811918241010821,
+      0.5671457233147638
+    ],
+    "luna_wins_as_seat_0": 3,
+    "luna_wins_as_seat_1": 4
+  },
+  "learning_curve": {
+    "first_half_win_rate": 0.3,
+    "second_half_win_rate": 0.4
+  },
+  "audit_file": "benchmarks/luna_max_vs_live_ppo_fresh_20260731.audit.jsonl",
+  "per_game": [
+    {
+      "game": 1,
+      "seed": 20261201,
+      "luna_seat": 0,
+      "winner": "opponent",
+      "turns": 25,
+      "luna_decisions": 10,
+      "invalid_responses": 0
+    },
+    {
+      "game": 2,
+      "seed": 20261202,
+      "luna_seat": 1,
+      "winner": "opponent",
+      "turns": 30,
+      "luna_decisions": 13,
+      "invalid_responses": 0
+    },
+    {
+      "game": 3,
+      "seed": 20261203,
+      "luna_seat": 0,
+      "winner": "opponent",
+      "turns": 69,
+      "luna_decisions": 21,
+      "invalid_responses": 0
+    },
+    {
+      "game": 4,
+      "seed": 20261204,
+      "luna_seat": 1,
+      "winner": "opponent",
+      "turns": 14,
+      "luna_decisions": 6,
+      "invalid_responses": 0
+    },
+    {
+      "game": 5,
+      "seed": 20261205,
+      "luna_seat": 0,
+      "winner": "luna",
+      "turns": 27,
+      "luna_decisions": 15,
+      "invalid_responses": 0
+    },
+    {
+      "game": 6,
+      "seed": 20261206,
+      "luna_seat": 1,
+      "winner": "luna",
+      "turns": 14,
+      "luna_decisions": 9,
+      "invalid_responses": 0
+    },
+    {
+      "game": 7,
+      "seed": 20261207,
+      "luna_seat": 0,
+      "winner": "luna",
+      "turns": 23,
+      "luna_decisions": 13,
+      "invalid_responses": 0
+    },
+    {
+      "game": 8,
+      "seed": 20261208,
+      "luna_seat": 1,
+      "winner": "opponent",
+      "turns": 44,
+      "luna_decisions": 19,
+      "invalid_responses": 0
+    },
+    {
+      "game": 9,
+      "seed": 20261209,
+      "luna_seat": 0,
+      "winner": "opponent",
+      "turns": 22,
+      "luna_decisions": 8,
+      "invalid_responses": 0
+    },
+    {
+      "game": 10,
+      "seed": 20261210,
+      "luna_seat": 1,
+      "winner": "opponent",
+      "turns": 31,
+      "luna_decisions": 11,
+      "invalid_responses": 0
+    },
+    {
+      "game": 11,
+      "seed": 20261211,
+      "luna_seat": 0,
+      "winner": "opponent",
+      "turns": 21,
+      "luna_decisions": 7,
+      "invalid_responses": 0
+    },
+    {
+      "game": 12,
+      "seed": 20261212,
+      "luna_seat": 1,
+      "winner": "luna",
+      "turns": 27,
+      "luna_decisions": 14,
+      "invalid_responses": 0
+    },
+    {
+      "game": 13,
+      "seed": 20261213,
+      "luna_seat": 0,
+      "winner": "luna",
+      "turns": 30,
+      "luna_decisions": 16,
+      "invalid_responses": 0
+    },
+    {
+      "game": 14,
+      "seed": 20261214,
+      "luna_seat": 1,
+      "winner": "opponent",
+      "turns": 34,
+      "luna_decisions": 16,
+      "invalid_responses": 0
+    },
+    {
+      "game": 15,
+      "seed": 20261215,
+      "luna_seat": 0,
+      "winner": "opponent",
+      "turns": 34,
+      "luna_decisions": 14,
+      "invalid_responses": 0
+    },
+    {
+      "game": 16,
+      "seed": 20261216,
+      "luna_seat": 1,
+      "winner": "luna",
+      "turns": 39,
+      "luna_decisions": 18,
+      "invalid_responses": 0
+    },
+    {
+      "game": 17,
+      "seed": 20261217,
+      "luna_seat": 0,
+      "winner": "opponent",
+      "turns": 68,
+      "luna_decisions": 29,
+      "invalid_responses": 0
+    },
+    {
+      "game": 18,
+      "seed": 20261218,
+      "luna_seat": 1,
+      "winner": "luna",
+      "turns": 70,
+      "luna_decisions": 28,
+      "invalid_responses": 0
+    },
+    {
+      "game": 19,
+      "seed": 20261219,
+      "luna_seat": 0,
+      "winner": "opponent",
+      "turns": 68,
+      "luna_decisions": 32,
+      "invalid_responses": 0
+    },
+    {
+      "game": 20,
+      "seed": 20261220,
+      "luna_seat": 1,
+      "winner": "opponent",
+      "turns": 17,
+      "luna_decisions": 6,
+      "invalid_responses": 0
+    }
+  ]
+}

@@ -45,6 +45,7 @@ class Game:
 
         self.game_over: bool = False
         self.winner: Optional[int] = None
+        self.public_history: List[dict] = []
 
         # Decks used in the game
         self.grab_deck: Optional[deck.Deck] = None
@@ -57,17 +58,24 @@ class Game:
         self.current_player_index = 0
         self.turn_count = 0
         self.direction = 1
+        self.cards_played = 0
         self.penalty_amount = 0
         self.current_sort = None
         self.current_true_number = None
         self.game_over = False
         self.winner = None
+        self.public_history = []
         self.sorts_played = np.zeros(5, dtype=int)
 
         if len(self.players) < 2:
             logging.critical("Cannot start game with less than two players")
             self.game_over = True
             return
+
+        # A reset starts a new game, so previously dealt cards must not carry
+        # into the next deal.
+        for player in self.players:
+            player.mydeck.cards.clear()
 
         # Create and shuffle the grab deck
         self.grab_deck = deck.standardDeck()
@@ -130,13 +138,17 @@ class Game:
             if played_card.truenumber != self.current_true_number:
                 self._apply_penalty(player)
                 if self.current_true_number == 0 and not self.game_over:
-                    self.change_sort(player.changeSort())
+                    new_sort = player.changeSort()
+                    self.change_sort(new_sort)
+                    self._record_suit_choice(player, new_sort)
             else:
                 self._process_played_card(played_card, player, is_last_card)
         else:
             self._apply_penalty(player)
             if self.current_true_number == 0 and not self.game_over:
-                self.change_sort(player.changeSort())
+                new_sort = player.changeSort()
+                self.change_sort(new_sort)
+                self._record_suit_choice(player, new_sort)
 
     def _handle_normal_turn(self, player, is_last_card: bool) -> None:
         """
@@ -214,6 +226,19 @@ class Game:
         self.current_sort = new_sort
         logging.debug(f"Sort changed to: {self.current_sort}")
 
+    def _record_suit_choice(self, player, new_sort: str) -> None:
+        """Record the publicly announced suit without exposing hidden cards."""
+        try:
+            player_index = self.players.index(player)
+        except ValueError:
+            return
+        self.public_history.append({
+            "turn": self.turn_count,
+            "player": player_index,
+            "action": "choose_sort",
+            "sort": new_sort,
+        })
+
     def _handle_no_card_play(self, player, is_last_card: bool) -> None:
         """
         If no card was played, force the player to grab a card and, if it's playable,
@@ -257,6 +282,18 @@ class Game:
         self.sorts_played[sort_index] += 1
         self.current_true_number = played_card.truenumber
         player.remove(played_card)
+        try:
+            player_index = self.players.index(player)
+        except ValueError:
+            player_index = -1
+        self.public_history.append({
+            "turn": self.turn_count,
+            "player": player_index,
+            "action": "play",
+            "card": played_card.number,
+            "sort": played_card.sort,
+            "rank": played_card.truenumber,
+        })
 
     def _apply_card_effects(self, played_card: card.Card, player) -> None:
         """
@@ -273,7 +310,9 @@ class Game:
         elif played_card.truenumber == 0:
             self.penalty_amount += 5
         elif played_card.truenumber == 13:
-            self.change_sort(player.changeSort())
+            new_sort = player.changeSort()
+            self.change_sort(new_sort)
+            self._record_suit_choice(player, new_sort)
         elif played_card.truenumber == 2:
             self.penalty_amount += 2
 

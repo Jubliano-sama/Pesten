@@ -1,0 +1,8 @@
+FROM jubliano/pesten-server:v4
+
+COPY ai_observation.py supervisedAgent.py web_server.py /app/
+
+RUN python -m py_compile \
+    /app/ai_observation.py \
+    /app/supervisedAgent.py \
+    /app/web_server.py

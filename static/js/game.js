@@ -10,7 +10,17 @@ let awaitingSortChoice = false;
 let lastCardWarnings = new Set(); // Track which players have been warned about having 1 card
 let turnTimer = null; // Current turn timer
 let timeLeft = 0; // Seconds left in current turn
-let lastDirectionChanged = false; // Track the last direction_changed state
+let lastDirection = null; // Last rendered direction, used for reversal animation
+let directionAnimationTimer = null;
+let lastCurrentPlayerId = null;
+let lastTopCard = null;
+let lastPenaltyAmount = 0;
+let renderedSeatIds = new Set();
+let musicTimer = null;
+let audioContext = null;
+let masterGain = null;
+let soundEffectsEnabled = localStorage.getItem('pestenSoundEffects') !== 'off';
+let musicEnabled = localStorage.getItem('pestenMusic') === 'on';
 
 // DOM elements
 const lobbySection = document.getElementById('lobby-section');
@@ -22,12 +32,21 @@ const leaveGameBtn = document.getElementById('leave-game');
 const playerHandElement = document.getElementById('player-hand');
 const otherPlayersElement = document.getElementById('other-players');
 const playerQueueElement = document.getElementById('player-queue');
+const roundTableElement = document.getElementById('round-table');
+const directionOrbitElement = document.getElementById('direction-orbit');
+const directionBadgeElement = document.getElementById('direction-badge');
+const directionLabelElement = document.getElementById('direction-label');
+const directionDescriptionElement = document.getElementById('direction-description');
+const tableCenterElement = document.querySelector('.table-center');
 const topCardElement = document.getElementById('top-card');
 const currentTurnElement = document.getElementById('current-turn');
 const gameDirectionElement = document.getElementById('game-direction');
 const penaltyInfoElement = document.getElementById('penalty-info');
 const penaltyAmountElement = document.getElementById('penalty-amount');
 const passBtn = document.getElementById('pass-btn');
+const drawPileElement = document.getElementById('draw-pile');
+const soundToggle = document.getElementById('sound-toggle');
+const musicToggle = document.getElementById('music-toggle');
 const sortModal = document.getElementById('sort-modal');
 const logContent = document.getElementById('log-content');
 const drawPileCount = document.getElementById('draw-pile-count');
@@ -49,6 +68,165 @@ if (!roomCode) {
 if (!roomCode) {
     window.location.href = '/';
 }
+
+// ---------------------------------------------------------------------------
+// Gesture-gated procedural audio
+// ---------------------------------------------------------------------------
+// Sound effects are enabled by default, while music is deliberately opt-in so
+// opening a room never starts audio unexpectedly. The AudioContext is created
+// only from a user gesture (pointer/keyboard or an audio-control click).
+function updateAudioControls() {
+    if (soundToggle) {
+        soundToggle.setAttribute('aria-pressed', String(soundEffectsEnabled));
+        soundToggle.title = soundEffectsEnabled ? 'Mute sound effects' : 'Enable sound effects';
+        const label = soundToggle.querySelector('.audio-control-label');
+        if (label) label.textContent = soundEffectsEnabled ? 'Sound on' : 'Sound off';
+        const icon = soundToggle.querySelector('.audio-control-icon');
+        if (icon) icon.textContent = soundEffectsEnabled ? '🔔' : '🔕';
+    }
+    if (musicToggle) {
+        musicToggle.setAttribute('aria-pressed', String(musicEnabled));
+        musicToggle.title = musicEnabled ? 'Turn background music off' : 'Turn background music on';
+        const label = musicToggle.querySelector('.audio-control-label');
+        if (label) label.textContent = musicEnabled ? 'Music on' : 'Music off';
+        const icon = musicToggle.querySelector('.audio-control-icon');
+        if (icon) icon.textContent = musicEnabled ? '♫' : '♪';
+    }
+}
+
+function ensureAudioContext() {
+    if (audioContext) {
+        if (audioContext.state === 'suspended') audioContext.resume().catch(() => {});
+        return audioContext;
+    }
+
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return null;
+
+    try {
+        audioContext = new AudioContextClass();
+        masterGain = audioContext.createGain();
+        masterGain.gain.value = 0.055;
+        masterGain.connect(audioContext.destination);
+        audioContext.resume().catch(() => {});
+    } catch (error) {
+        console.warn('Audio unavailable:', error);
+        audioContext = null;
+        masterGain = null;
+    }
+    return audioContext;
+}
+
+function scheduleTone(frequency, duration, startTime, volume = 0.16, wave = 'sine') {
+    if (!audioContext || !masterGain) return;
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    oscillator.type = wave;
+    oscillator.frequency.setValueAtTime(frequency, startTime);
+    gain.gain.setValueAtTime(0.0001, startTime);
+    gain.gain.exponentialRampToValueAtTime(Math.max(volume, 0.0002), startTime + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+    oscillator.connect(gain);
+    gain.connect(masterGain);
+    oscillator.start(startTime);
+    oscillator.stop(startTime + duration + 0.025);
+}
+
+function playSoundEffect(effect) {
+    if (!soundEffectsEnabled || !audioContext || !masterGain) return;
+    const now = audioContext.currentTime + 0.005;
+    switch (effect) {
+        case 'card':
+            scheduleTone(420, 0.09, now, 0.11, 'triangle');
+            scheduleTone(620, 0.12, now + 0.045, 0.08, 'sine');
+            break;
+        case 'turn':
+            scheduleTone(330, 0.11, now, 0.08, 'sine');
+            scheduleTone(494, 0.18, now + 0.08, 0.07, 'sine');
+            break;
+        case 'reverse':
+            scheduleTone(520, 0.12, now, 0.08, 'triangle');
+            scheduleTone(390, 0.12, now + 0.08, 0.08, 'triangle');
+            scheduleTone(520, 0.17, now + 0.16, 0.07, 'triangle');
+            break;
+        case 'penalty':
+            scheduleTone(180, 0.18, now, 0.1, 'sawtooth');
+            scheduleTone(130, 0.23, now + 0.12, 0.08, 'sawtooth');
+            break;
+        case 'skip':
+            scheduleTone(260, 0.08, now, 0.06, 'square');
+            scheduleTone(190, 0.13, now + 0.06, 0.05, 'square');
+            break;
+        case 'win':
+            [523, 659, 784, 1047].forEach((frequency, index) => {
+                scheduleTone(frequency, 0.26, now + index * 0.13, 0.09, 'sine');
+            });
+            break;
+        default:
+            scheduleTone(440, 0.08, now, 0.06, 'sine');
+    }
+}
+
+function scheduleMusicPhrase() {
+    if (!musicEnabled || !audioContext || document.hidden) return;
+    const now = audioContext.currentTime + 0.02;
+    [196, 247, 294].forEach((frequency, index) => {
+        scheduleTone(frequency, 1.8, now + index * 0.22, 0.018, 'sine');
+    });
+}
+
+function startMusicLoop() {
+    if (!musicEnabled || musicTimer) return;
+    if (!ensureAudioContext()) return;
+    scheduleMusicPhrase();
+    musicTimer = window.setInterval(scheduleMusicPhrase, 2400);
+}
+
+function stopMusicLoop() {
+    if (musicTimer) {
+        window.clearInterval(musicTimer);
+        musicTimer = null;
+    }
+}
+
+function initializeAudioFromGesture() {
+    if (soundEffectsEnabled || musicEnabled) ensureAudioContext();
+    if (musicEnabled) startMusicLoop();
+}
+
+updateAudioControls();
+document.addEventListener('pointerdown', initializeAudioFromGesture, { passive: true });
+document.addEventListener('keydown', initializeAudioFromGesture, { passive: true });
+
+soundToggle?.addEventListener('click', () => {
+    soundEffectsEnabled = !soundEffectsEnabled;
+    localStorage.setItem('pestenSoundEffects', soundEffectsEnabled ? 'on' : 'off');
+    updateAudioControls();
+    if (soundEffectsEnabled) {
+        ensureAudioContext();
+        playSoundEffect('turn');
+    }
+});
+
+musicToggle?.addEventListener('click', () => {
+    musicEnabled = !musicEnabled;
+    localStorage.setItem('pestenMusic', musicEnabled ? 'on' : 'off');
+    updateAudioControls();
+    if (musicEnabled) {
+        ensureAudioContext();
+        startMusicLoop();
+    } else {
+        stopMusicLoop();
+    }
+});
+
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        stopMusicLoop();
+    } else if (musicEnabled && audioContext) {
+        startMusicLoop();
+    }
+});
 
 // Event listeners
 addAiBtn.addEventListener('click', () => {
@@ -79,6 +257,7 @@ leaveGameBtn.addEventListener('click', () => {
 });
 
 passBtn.addEventListener('click', () => {
+    if (!gameState?.players) return;
     const currentPlayer = gameState.players.find(p => p.id === playerId);
     if (currentPlayer && currentPlayer.is_observer) {
         showToast("You are observing - cannot pass", 'info');
@@ -109,6 +288,17 @@ document.querySelectorAll('.sort-btn').forEach(btn => {
         awaitingSortChoice = false;
     });
 });
+
+// The draw pile is a visual shortcut for the same draw/pass action. Keep the
+// primary button below the hand as the explicit fallback for keyboard users.
+function activateDrawPile(event) {
+    if (event && event.type === 'keydown' && event.key !== 'Enter' && event.key !== ' ') return;
+    event?.preventDefault();
+    passBtn.click();
+}
+
+drawPileElement?.addEventListener('click', activateDrawPile);
+drawPileElement?.addEventListener('keydown', activateDrawPile);
 
 // Win modal handlers
 winCloseBtn.addEventListener('click', () => {
@@ -151,8 +341,8 @@ socket.on('ai_player_added', (data) => {
 });
 
 socket.on('game_started', (data) => {
-    updateGameState(data.game_state);
     showGameSection();
+    updateGameState(data.game_state);
     addLogEntry('Game started!', true);
 });
 
@@ -347,6 +537,9 @@ function updateLobby() {
 function showGameSection() {
     lobbySection.style.display = 'none';
     gameSection.style.display = 'grid';
+    // The first state packet can arrive while this section is hidden, in
+    // which case intrinsic dimensions are wrong for perimeter seat math.
+    window.requestAnimationFrame(() => updatePlayerQueue());
 }
 
 function updateGameInterface() {
@@ -361,121 +554,122 @@ function updateGameInterface() {
 }
 
 function updatePlayerQueue() {
-    console.log('🔄 Updating player queue');
-    
-    // Only animate when direction_changed goes from false to true
-    if (gameState.direction_changed && !lastDirectionChanged) {
-        console.log('↩️ DIRECTION CHANGED - triggering reversal animation');
-        
-        // Trigger arrow wobble animation
-        const arrows = playerQueueElement.querySelectorAll('.queue-arrow');
-        arrows.forEach(arrow => {
-            arrow.classList.remove('wobble');
-            void arrow.offsetWidth; // Force reflow
-            arrow.classList.add('wobble');
-        });
+    console.log('🔄 Updating round-table seats');
+
+    if (!playerQueueElement || !gameState?.players) return;
+
+    // The server's player array is the stable seating order. `turn_order` is
+    // intentionally used only to label the next seat; reversing direction
+    // should change the path, not make players jump to new chairs.
+    const activePlayers = gameState.players.filter(player => !player.is_observer);
+    if (!activePlayers.length) {
+        playerQueueElement.innerHTML = '';
+        return;
     }
-    
-    // Update the last state
-    lastDirectionChanged = gameState.direction_changed;
-    
-    console.log('📊 GameState turn_order:', gameState.turn_order);
-    
-    if (!playerQueueElement || !gameState.turn_order) return;
-    
-    const currentPlayer = gameState.players.find(p => p.id === playerId);
-    if (!currentPlayer) return;
-    
-    // Use server's turn_order directly - it's already calculated correctly
-    const serverTurnOrder = gameState.turn_order;
-    
-    // Find my position in the server's turn order
-    const myIndexInTurnOrder = serverTurnOrder.findIndex(id => id === playerId);
-    
-    // Build queue with "You" at the start, others following server order
-    const queueOrder = [];
-    
-    if (myIndexInTurnOrder !== -1) {
-        // Start with me, then add others in server turn order
-        for (let i = 0; i < serverTurnOrder.length; i++) {
-            const adjustedIndex = (myIndexInTurnOrder + i) % serverTurnOrder.length;
-            const playerId_at_index = serverTurnOrder[adjustedIndex];
-            const player = gameState.players.find(p => p.id === playerId_at_index);
-            if (player && !player.is_observer) {
-                queueOrder.push(player);
-            }
-        }
-    }
-    
-    // Clear existing queue
+
+    const activeCount = activePlayers.length;
+    const mySeatIndex = activePlayers.findIndex(player => player.id === playerId);
+    const currentPlayerIndex = activePlayers.findIndex(
+        player => gameState.players.indexOf(player) === gameState.current_player_index
+    );
+    const anchorIndex = mySeatIndex >= 0 ? mySeatIndex : Math.max(currentPlayerIndex, 0);
+    const serverTurnOrder = Array.isArray(gameState.turn_order) ? gameState.turn_order : [];
+    const direction = gameState.direction === -1 ? -1 : 1;
+    const previousSeatIds = renderedSeatIds;
+    const stageWidth = roundTableElement?.clientWidth || playerQueueElement.clientWidth || 1000;
+    const stageHeight = roundTableElement?.clientHeight || 460;
+    const isCompact = stageWidth <= 700;
+    const isCrowded = activeCount > 8;
+    const seatWidth = isCompact ? (isCrowded ? 57 : 78) : (isCrowded ? 64 : 110);
+    const seatHeight = isCompact ? (isCrowded ? 56 : 84) : (isCrowded ? 60 : 90);
+    const surfaceInsetX = isCompact ? 0.22 : 0.10;
+    const surfaceInsetY = isCompact ? 0.15 : 0.18;
+    const perimeterGap = isCompact ? (isCrowded ? 3 : 7) : (isCrowded ? 7 : 12);
+    const xRadius = stageWidth * (1 - (surfaceInsetX * 2)) / 2 + (seatWidth / 2) + perimeterGap;
+    const yRadius = stageHeight * (1 - (surfaceInsetY * 2)) / 2 + (seatHeight / 2) + perimeterGap;
+    const currentPlayer = gameState.players[gameState.current_player_index];
+
+    playerQueueElement.dataset.playerCount = String(activeCount);
+    playerQueueElement.dataset.density = activeCount > 8 ? 'crowded' : 'comfortable';
+    playerQueueElement.dataset.direction = direction === 1 ? 'clockwise' : 'counterclockwise';
+    playerQueueElement.style.setProperty('--seat-count', activeCount);
     playerQueueElement.innerHTML = '';
-    
-    queueOrder.forEach((player, queueIndex) => {
+
+    activePlayers.forEach((player, seatIndex) => {
         const playerIndex = gameState.players.indexOf(player);
         const isCurrentTurn = gameState.current_player_index === playerIndex;
         const isMe = player.id === playerId;
-        
-        // Create queue player element
+        const turnStep = serverTurnOrder.indexOf(player.id);
+        const relativeSeat = (seatIndex - anchorIndex + activeCount) % activeCount;
+        // Keep the viewer at the bottom when possible. Seats use an ellipse
+        // around the felt, so the horizontal and vertical perimeter gaps stay
+        // visible on both wide and narrow screens.
+        const seatAngle = 180 + (relativeSeat * 360 / activeCount);
+        const radians = seatAngle * Math.PI / 180;
+        const seatX = Math.sin(radians) * xRadius;
+        const seatY = -Math.cos(radians) * yRadius;
+        const handSize = Array.isArray(player.hand) ? player.hand.length : (player.hand_size ?? 0);
+
         const queuePlayer = document.createElement('div');
-        let classes = ['queue-player'];
-        
-        if (isCurrentTurn) {
-            classes.push('spotlight');
-        }
-        if (isMe) {
-            classes.push('you');
-        }
-        
+        const classes = ['queue-player'];
+        if (isCurrentTurn) classes.push('spotlight');
+        if (isMe) classes.push('you');
+        if (turnStep === 1) classes.push('next-up');
+        if (!previousSeatIds.has(player.id)) classes.push('seat-entering');
+        if (isCurrentTurn && lastCurrentPlayerId !== player.id) classes.push('turn-pulse');
         queuePlayer.className = classes.join(' ');
-        queuePlayer.setAttribute('data-player-id', player.id);
-        
-        // Player avatar (first letter of name or AI icon)
+        queuePlayer.dataset.playerId = player.id;
+        queuePlayer.dataset.turnStep = String(turnStep);
+        queuePlayer.setAttribute('role', 'listitem');
+        queuePlayer.setAttribute('aria-label', getSeatAriaLabel(player, isCurrentTurn, isMe, turnStep));
+        queuePlayer.style.setProperty('--seat-angle', `${seatAngle}deg`);
+        queuePlayer.style.setProperty('--seat-x', `${seatX}px`);
+        queuePlayer.style.setProperty('--seat-y', `${seatY}px`);
+
         const avatar = document.createElement('div');
         avatar.className = 'queue-player-avatar';
-        avatar.textContent = player.is_ai ? '🤖' : player.name.charAt(0).toUpperCase();
-        
-        // Player name
+        avatar.textContent = player.is_ai ? '🤖' : (player.name || '?').charAt(0).toUpperCase();
+        avatar.setAttribute('aria-hidden', 'true');
+
         const name = document.createElement('div');
         name.className = 'queue-player-name';
-        name.textContent = isMe ? 'You!' : player.name;
-        
-        // Card count
+        name.textContent = isMe ? 'You' : (player.name || 'Player');
+
         const cards = document.createElement('div');
         cards.className = 'queue-player-cards';
-        cards.textContent = `${player.hand_size} cards`;
-        
+        cards.textContent = `${handSize} card${handSize === 1 ? '' : 's'}`;
+
+        const status = document.createElement('div');
+        status.className = 'queue-player-status';
+        if (isCurrentTurn) {
+            status.textContent = 'Playing now';
+        } else if (turnStep === 1) {
+            status.textContent = 'Next up';
+        } else if (isMe) {
+            status.textContent = 'Your seat';
+        }
+
         queuePlayer.appendChild(avatar);
         queuePlayer.appendChild(name);
         queuePlayer.appendChild(cards);
-        
+        if (status.textContent) queuePlayer.appendChild(status);
         playerQueueElement.appendChild(queuePlayer);
-        
-        // Add arrow between players (except after last player)
-        if (queueIndex < queueOrder.length - 1) {
-            const arrow = document.createElement('div');
-            arrow.className = 'queue-arrow';
-            arrow.textContent = '→'; // Always point right
-            playerQueueElement.appendChild(arrow);
-        }
     });
-    
-    // Scroll spotlight player into view
-    setTimeout(() => {
-        const spotlightPlayer = playerQueueElement.querySelector('.queue-player.spotlight');
-        if (spotlightPlayer) {
-            spotlightPlayer.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'nearest', 
-                inline: 'center' 
-            });
-        }
-    }, 100);
-    
-    // Trigger reversal animation if server says direction changed
-    if (gameState.direction_changed) {
-        console.log('🔄 Server reports direction changed, triggering animation');
-        animateDirectionReversal();
+
+    renderedSeatIds = new Set(activePlayers.map(player => player.id));
+    if (currentPlayer && lastCurrentPlayerId !== null && lastCurrentPlayerId !== currentPlayer.id) {
+        playSoundEffect('turn');
     }
+    lastCurrentPlayerId = currentPlayer?.id || null;
+}
+
+function getSeatAriaLabel(player, isCurrentTurn, isMe, turnStep) {
+    const handSize = Array.isArray(player.hand) ? player.hand.length : (player.hand_size ?? 0);
+    const turnDescription = isCurrentTurn
+        ? 'playing now'
+        : (turnStep === 1 ? 'next up' : 'waiting');
+    const name = isMe ? 'You' : (player.name || 'Player');
+    return `${name}, ${handSize} card${handSize === 1 ? '' : 's'}, ${turnDescription}`;
 }
 
 
@@ -484,41 +678,49 @@ function animateSkippedPlayer(playerId) {
     
     const queuePlayer = playerQueueElement.querySelector(`[data-player-id="${playerId}"]`);
     if (queuePlayer) {
+        queuePlayer.classList.remove('skipped');
+        void queuePlayer.offsetWidth;
         queuePlayer.classList.add('skipped');
+        roundTableElement?.classList.remove('skip-feedback');
+        void roundTableElement?.offsetWidth;
+        roundTableElement?.classList.add('skip-feedback');
+        playSoundEffect('skip');
         
         // Remove animation class after animation completes
         setTimeout(() => {
             queuePlayer.classList.remove('skipped');
+            roundTableElement?.classList.remove('skip-feedback');
         }, 600);
     }
 }
 
 function animateDirectionReversal() {
-    console.log('🔄 Animating direction reversal');
-    
-    // Add reversal animation to all queue players (except "You")
-    const queuePlayers = playerQueueElement.querySelectorAll('.queue-player:not(.you)');
-    queuePlayers.forEach(player => {
-        player.classList.add('reversing');
+    console.log('🔄 Animating round-table direction reversal');
+
+    [roundTableElement, directionOrbitElement, directionBadgeElement].forEach(element => {
+        if (!element) return;
+        element.classList.remove('reversing');
+        void element.offsetWidth;
+        element.classList.add('reversing');
     });
-    
-    // Add wobble animation to all arrows
-    const arrows = playerQueueElement.querySelectorAll('.queue-arrow');
-    arrows.forEach(arrow => {
-        arrow.classList.add('wobble');
-    });
-    
-    // Remove animation classes and rebuild queue after animation completes
-    setTimeout(() => {
-        queuePlayers.forEach(player => {
+
+    if (playerQueueElement) {
+        playerQueueElement.querySelectorAll('.queue-player').forEach(player => {
+            player.classList.remove('reversing');
+            void player.offsetWidth;
+            player.classList.add('reversing');
+        });
+    }
+
+    window.clearTimeout(directionAnimationTimer);
+    directionAnimationTimer = window.setTimeout(() => {
+        [roundTableElement, directionOrbitElement, directionBadgeElement].forEach(element => {
+            element?.classList.remove('reversing');
+        });
+        playerQueueElement?.querySelectorAll('.queue-player.reversing').forEach(player => {
             player.classList.remove('reversing');
         });
-        arrows.forEach(arrow => {
-            arrow.classList.remove('wobble');
-        });
-        // Rebuild queue with new order
-        updatePlayerQueue();
-    }, 800);
+    }, 900);
 }
 
 function updatePlayerHand() {
@@ -607,8 +809,9 @@ function createCardElement(cardNum) {
 }
 
 function updateTopCard() {
-    if (!gameState.top_card) return;
-    
+    if (gameState.top_card === null || gameState.top_card === undefined) return;
+
+    const cardChanged = lastTopCard !== null && lastTopCard !== gameState.top_card;
     const cardData = getCardData(gameState.top_card);
     topCardElement.className = `card ${cardData.suit}`;
     topCardElement.innerHTML = `
@@ -616,6 +819,15 @@ function updateTopCard() {
         <div class="card-value">${cardData.value}</div>
         <span style="display:none;" data-card-num="${gameState.top_card}"></span>
     `;
+
+    if (cardChanged) {
+        tableCenterElement?.classList.remove('card-landing');
+        void tableCenterElement?.offsetWidth;
+        tableCenterElement?.classList.add('card-landing');
+        playSoundEffect('card');
+        window.setTimeout(() => tableCenterElement?.classList.remove('card-landing'), 700);
+    }
+    lastTopCard = gameState.top_card;
 }
 
 function updateCurrentTurn() {
@@ -714,17 +926,45 @@ function stopTurnTimer() {
 }
 
 function updateGameDirection() {
-    gameDirectionElement.textContent = gameState.direction === 1 ? '↻' : '↺';
-    gameDirectionElement.title = gameState.direction === 1 ? 'Clockwise' : 'Counter-clockwise';
+    const direction = gameState.direction === -1 ? -1 : 1;
+    const isClockwise = direction === 1;
+    const directionName = isClockwise ? 'Clockwise' : 'Counter-clockwise';
+    const directionDescription = isClockwise
+        ? 'Play moves clockwise around the table'
+        : 'Play moves counter-clockwise around the table';
+    const directionKey = isClockwise ? 'clockwise' : 'counterclockwise';
+    const directionChanged = lastDirection !== null && lastDirection !== direction;
+
+    gameDirectionElement.textContent = isClockwise ? '↻' : '↺';
+    gameDirectionElement.title = directionName;
+    gameDirectionElement.setAttribute('aria-label', directionName);
+    directionLabelElement?.replaceChildren(document.createTextNode(directionName));
+    directionDescriptionElement?.replaceChildren(document.createTextNode(directionDescription));
+    directionOrbitElement?.setAttribute('data-direction', directionKey);
+    roundTableElement?.setAttribute('data-direction', directionKey);
+    directionBadgeElement?.setAttribute('data-direction', directionKey);
+
+    if (directionChanged || gameState.direction_changed) {
+        animateDirectionReversal();
+        if (directionChanged) playSoundEffect('reverse');
+    }
+    lastDirection = direction;
 }
 
 function updatePenaltyInfo() {
     if (gameState.penalty_amount > 0) {
         penaltyInfoElement.style.display = 'block';
         penaltyAmountElement.textContent = gameState.penalty_amount;
+        tableCenterElement?.classList.add('penalty-active');
+        if (lastPenaltyAmount !== gameState.penalty_amount) {
+            playSoundEffect('penalty');
+            window.setTimeout(() => tableCenterElement?.classList.remove('penalty-active'), 900);
+        }
     } else {
         penaltyInfoElement.style.display = 'none';
+        tableCenterElement?.classList.remove('penalty-active');
     }
+    lastPenaltyAmount = gameState.penalty_amount || 0;
 }
 
 function updateDrawPile() {
@@ -921,6 +1161,31 @@ function showWinModal(playerName) {
     }
     
     winModal.style.display = 'flex';
+    celebrateWinner();
+}
+
+function celebrateWinner() {
+    if (!roundTableElement) return;
+    roundTableElement.classList.remove('winner-celebration');
+    void roundTableElement.offsetWidth;
+    roundTableElement.classList.add('winner-celebration');
+    playSoundEffect('win');
+
+    const colors = ['#f6c969', '#ff8d73', '#8cb8ff', '#9ff5bc', '#fff5ca'];
+    for (let index = 0; index < 18; index += 1) {
+        const spark = document.createElement('span');
+        const angle = (index / 18) * Math.PI * 2;
+        const distance = 100 + ((index * 17) % 90);
+        spark.className = 'celebration-spark';
+        spark.style.left = `${45 + ((index * 7) % 12)}%`;
+        spark.style.top = `${42 + ((index * 11) % 16)}%`;
+        spark.style.setProperty('--spark-x', `${Math.cos(angle) * distance}px`);
+        spark.style.setProperty('--spark-y', `${Math.sin(angle) * distance}px`);
+        spark.style.setProperty('--spark-color', colors[index % colors.length]);
+        roundTableElement.appendChild(spark);
+        window.setTimeout(() => spark.remove(), 1200);
+    }
+    window.setTimeout(() => roundTableElement.classList.remove('winner-celebration'), 3000);
 }
 
 function showTieModal() {
@@ -1126,4 +1391,13 @@ function showToast(message, type = 'info') {
 // Handle page refresh - try to reconnect
 window.addEventListener('beforeunload', () => {
     socket.disconnect();
+});
+
+let seatResizeFrame = null;
+window.addEventListener('resize', () => {
+    if (!gameState?.started || seatResizeFrame !== null) return;
+    seatResizeFrame = window.requestAnimationFrame(() => {
+        seatResizeFrame = null;
+        updatePlayerQueue();
+    });
 });

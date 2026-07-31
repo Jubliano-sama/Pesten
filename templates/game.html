@@ -15,6 +15,16 @@
                 <div class="room-code">Room: <span id="room-code">{{ room_code }}</span></div>
             </div>
             <div class="game-controls">
+                <div class="audio-controls" role="group" aria-label="Audio controls">
+                    <button id="sound-toggle" class="audio-control" type="button" aria-pressed="true" title="Toggle sound effects">
+                        <span class="audio-control-icon" aria-hidden="true">🔔</span>
+                        <span class="audio-control-label">Sound on</span>
+                    </button>
+                    <button id="music-toggle" class="audio-control" type="button" aria-pressed="false" title="Toggle background music">
+                        <span class="audio-control-icon" aria-hidden="true">♫</span>
+                        <span class="audio-control-label">Music off</span>
+                    </button>
+                </div>
                 <button id="leave-game" class="btn btn-danger">Leave Game</button>
             </div>
         </header>
@@ -35,50 +45,75 @@
 
         <!-- Game Section -->
         <div id="game-section" class="game-section" style="display: none;">
-            <!-- Player Queue Area -->
-            <div class="player-queue-area">
-                <div id="player-queue" class="player-queue">
-                    <!-- Player queue will be rendered here -->
+            <div class="table-status-row" aria-label="Table status">
+                <div class="direction-badge" id="direction-badge" role="status" aria-live="polite">
+                    <span class="direction-glyph" id="game-direction" aria-hidden="true">↻</span>
+                    <span class="direction-copy">
+                        <span class="direction-kicker">Play direction</span>
+                        <strong id="direction-label">Clockwise</strong>
+                        <span class="direction-description" id="direction-description">Play moves clockwise around the table</span>
+                    </span>
+                </div>
+                <div class="table-hint">
+                    <span class="table-hint-dot" aria-hidden="true"></span>
+                    <span>Players are seated around the table</span>
                 </div>
             </div>
 
-            <!-- Game Table Area -->
-            <div class="game-table">
-                <div class="table-center">
-                    <div class="deck-area">
-                        <div class="draw-pile">
-                            <div class="card-back" id="draw-pile">
-                                <span id="draw-pile-count">0</span>
-                            </div>
+            <!-- Round Table Area -->
+            <section class="game-table" aria-label="Pesten round table">
+                <div class="round-table" id="round-table" data-direction="clockwise">
+                    <div class="table-surface">
+                        <div class="direction-orbit" id="direction-orbit" data-direction="clockwise" aria-hidden="true">
+                            <span class="orbit-arrow orbit-arrow-top-right">➜</span>
+                            <span class="orbit-arrow orbit-arrow-bottom-right">➜</span>
+                            <span class="orbit-arrow orbit-arrow-bottom-left">➜</span>
                         </div>
-                        <div class="discard-pile">
-                            <div id="top-card" class="card">
-                                <!-- Top card will be rendered here -->
+
+                        <div class="table-center">
+                            <div class="table-center-label">The table</div>
+                            <div class="deck-area">
+                                <div class="draw-pile deck-pile">
+                                    <span class="pile-label">Draw pile</span>
+                                    <div class="card-back" id="draw-pile" role="button" tabindex="0" aria-label="Draw a card or pass">
+                                        <span id="draw-pile-count">0</span>
+                                    </div>
+                                </div>
+                                <div class="discard-pile deck-pile">
+                                    <span class="pile-label">Discard</span>
+                                    <div id="top-card" class="card" aria-label="Top discard card">
+                                        <!-- Top card will be rendered here -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="game-info">
+                                <div class="current-turn" id="current-turn" role="status" aria-live="polite">Waiting for game to start...</div>
+                                <div class="turn-caption">The highlighted seat plays next</div>
+                                <div class="penalty-info" id="penalty-info" style="display: none;">
+                                    <span class="penalty-text">Penalty: +<span id="penalty-amount">0</span> cards</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="game-info">
-                        <div class="current-turn" id="current-turn">Waiting for game to start...</div>
-                        <div class="game-direction" id="game-direction">↻</div>
-                        <div class="penalty-info" id="penalty-info" style="display: none;">
-                            <span class="penalty-text">Penalty: +<span id="penalty-amount">0</span></span>
-                        </div>
+
+                    <div id="player-queue" class="player-queue" role="list" aria-label="Players seated around the table">
+                        <!-- Players will be positioned around the table by game.js -->
                     </div>
                 </div>
-            </div>
+            </section>
 
             <!-- Player Hand Area -->
             <div class="player-hand-area">
                 <div class="hand-info">
-                    <span id="player-name">You</span>
+                    <span class="hand-heading"><span id="player-name">You</span><span class="hand-subtitle">Your hand</span></span>
                     <span id="hand-count">7 cards</span>
                 </div>
                 <div id="player-hand" class="player-hand">
                     <!-- Player's cards will be rendered here -->
                 </div>
                 <div class="hand-controls">
-                    <button id="pass-btn" class="btn btn-secondary">Pass / Draw</button>
+                    <button id="pass-btn" class="btn btn-secondary">Draw / Pass</button>
                 </div>
             </div>
         </div>

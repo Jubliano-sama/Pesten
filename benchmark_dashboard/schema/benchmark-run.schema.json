@@ -1,0 +1,412 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pesten.local/schemas/benchmark-run.schema.json",
+  "title": "Pesten normalized benchmark run",
+  "description": "Portable normalized contract for training, evaluation, tournament, and microbenchmark runs. Null means not reported; missing evidence must never be encoded as zero.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "run_id",
+    "run_kind",
+    "status",
+    "recorded_at",
+    "game",
+    "models",
+    "performance",
+    "provenance"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run_kind": {
+      "enum": [
+        "training",
+        "tournament",
+        "microbenchmark",
+        "evaluation"
+      ]
+    },
+    "status": {
+      "enum": [
+        "complete",
+        "incomplete",
+        "failed"
+      ]
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date"
+    },
+    "label": {
+      "type": "string"
+    },
+    "stage": {
+      "type": "string"
+    },
+    "game": {
+      "type": "object",
+      "required": [
+        "player_count"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "player_count": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "enum": [
+            2,
+            3,
+            4,
+            null
+          ]
+        },
+        "observation_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "rules_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "models": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "role"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "role": {
+            "description": "Use champion and candidate only for explicit benchmark roles; other labels are descriptive.",
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "performance": {
+      "$ref": "#/$defs/performance"
+    },
+    "outcome": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/outcome"
+        }
+      ]
+    },
+    "timing": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "phase",
+          "seconds"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "phase": {
+            "type": "string"
+          },
+          "seconds": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cpu_utilization_pct": {
+          "$ref": "#/$defs/nullableNonNegative"
+        },
+        "gpu_utilization_pct": {
+          "$ref": "#/$defs/nullableNonNegative"
+        },
+        "peak_cpu_memory_mib": {
+          "$ref": "#/$defs/nullableNonNegative"
+        },
+        "peak_gpu_memory_mib": {
+          "$ref": "#/$defs/nullableNonNegative"
+        }
+      }
+    },
+    "guardrails": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "status"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "passed",
+              "failed",
+              "observed",
+              "not_run"
+            ]
+          },
+          "value": {},
+          "threshold": {},
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "learning_curve": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "metric",
+          "value"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "checkpoint_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "wall_time_seconds": {
+            "$ref": "#/$defs/nullableNonNegative"
+          },
+          "environment_decisions": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "metric": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          },
+          "seed": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": [
+        "source_path",
+        "source_sha256"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "source_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{64}$"
+        },
+        "git_sha": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "seed": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "hardware": {
+          "type": [
+            "object",
+            "string",
+            "null"
+          ]
+        },
+        "recipe": {
+          "type": [
+            "object",
+            "string",
+            "null"
+          ]
+        },
+        "checkpoint_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-fA-F]{64}$"
+        }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "nullableNonNegative": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "performance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "games": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "environment_turns": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "policy_decisions": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "wall_time_seconds": {
+          "$ref": "#/$defs/nullableNonNegative"
+        },
+        "games_per_second": {
+          "$ref": "#/$defs/nullableNonNegative"
+        },
+        "rollout_games_per_second": {
+          "$ref": "#/$defs/nullableNonNegative"
+        },
+        "environment_turns_per_second": {
+          "$ref": "#/$defs/nullableNonNegative"
+        },
+        "rollout_environment_turns_per_second": {
+          "$ref": "#/$defs/nullableNonNegative"
+        },
+        "policy_decisions_per_second": {
+          "$ref": "#/$defs/nullableNonNegative"
+        },
+        "collected_policy_decisions_per_second": {
+          "$ref": "#/$defs/nullableNonNegative"
+        },
+        "update_time_seconds": {
+          "$ref": "#/$defs/nullableNonNegative"
+        },
+        "total_time_seconds": {
+          "$ref": "#/$defs/nullableNonNegative"
+        }
+      }
+    },
+    "outcome": {
+      "type": "object",
+      "required": [
+        "agent",
+        "opponent",
+        "wins",
+        "losses",
+        "draws",
+        "games",
+        "win_rate",
+        "win_rate_ci95"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "agent": {
+          "type": "string"
+        },
+        "opponent": {
+          "type": "string"
+        },
+        "wins": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "losses": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "draws": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "games": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "win_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "win_rate_ci95": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        }
+      }
+    }
+  }
+}

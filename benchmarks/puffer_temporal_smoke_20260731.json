@@ -1,0 +1,34 @@
+{
+  "elapsed_seconds": 0.142876,
+  "integration": {
+    "installed_for_runtime": false,
+    "native_pufferlib": false,
+    "pufferlib3_blocker": "numpy<2 conflicts with ml-dtypes numpy>=2.1 on Python 3.13",
+    "pufferlib4_blocker": "PyPI provides only pufferlib<=3.0.0",
+    "status": "Puffer-style recurrent adapter; PufferLib 4 is unavailable and PufferLib 3.0.0 has no PufferNet/MinGRU API",
+    "verified_pufferlib": "3.0.0"
+  },
+  "model": {
+    "actor_actions": 55,
+    "critic_privileged": false,
+    "hidden_size": 48,
+    "name": "PufferStyleTemporalNet",
+    "recurrent_cell": "GRUCell"
+  },
+  "rollout": {
+    "decisions": 84,
+    "episodes": 2,
+    "turns": 193,
+    "wins": 0
+  },
+  "schema_version": 1,
+  "seed": 731,
+  "training": {
+    "entropy": 1.0450505018234253,
+    "loss": 1.128615379333496,
+    "parameters_changed": true,
+    "policy_loss": 0.7988985180854797,
+    "samples": 84,
+    "value_loss": 0.680334746837616
+  }
+}

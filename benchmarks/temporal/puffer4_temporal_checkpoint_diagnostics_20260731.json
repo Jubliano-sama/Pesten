@@ -1,0 +1,3435 @@
+{
+  "best_checkpoint": {
+    "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed731_league7.pt",
+    "checkpoint_sha256": "0fc19fba435d132ddf307455093e9e2452d33882d5b50970449cedf1a8c7bea8",
+    "development_seed": 4310000,
+    "epoch": 7,
+    "pairs_per_opponent": 20,
+    "pool": {
+      "bayesian_tree": {
+        "average_turns": 45.975,
+        "candidate": "temporal_seed731_league7",
+        "draws": 0,
+        "elapsed_seconds": 2.7337455689994385,
+        "games": 40,
+        "gate_passed": false,
+        "losses": 17,
+        "opponent": "bayesian_tree",
+        "paired_bootstrap_ci95": [
+          0.4,
+          0.75
+        ],
+        "pairs": 20,
+        "score": 0.575,
+        "seed": 4410000,
+        "wins": 23,
+        "wins_as_seat_0": 12,
+        "wins_as_seat_1": 11
+      },
+      "ppo_champion": {
+        "average_turns": 42.2,
+        "candidate": "temporal_seed731_league7",
+        "draws": 0,
+        "elapsed_seconds": 1.2484696640021866,
+        "games": 40,
+        "gate_passed": false,
+        "losses": 20,
+        "opponent": "ppo_champion",
+        "paired_bootstrap_ci95": [
+          0.375,
+          0.625
+        ],
+        "pairs": 20,
+        "score": 0.5,
+        "seed": 4310000,
+        "wins": 20,
+        "wins_as_seat_0": 6,
+        "wins_as_seat_1": 14
+      },
+      "random": {
+        "average_turns": 53.8,
+        "candidate": "temporal_seed731_league7",
+        "draws": 0,
+        "elapsed_seconds": 1.0299369190033758,
+        "games": 40,
+        "gate_passed": false,
+        "losses": 15,
+        "opponent": "random",
+        "paired_bootstrap_ci95": [
+          0.475,
+          0.775
+        ],
+        "pairs": 20,
+        "score": 0.625,
+        "seed": 4610000,
+        "wins": 25,
+        "wins_as_seat_0": 13,
+        "wins_as_seat_1": 12
+      },
+      "smart_rule": {
+        "average_turns": 33.825,
+        "candidate": "temporal_seed731_league7",
+        "draws": 0,
+        "elapsed_seconds": 0.6297355979913846,
+        "games": 40,
+        "gate_passed": false,
+        "losses": 17,
+        "opponent": "smart_rule",
+        "paired_bootstrap_ci95": [
+          0.475,
+          0.675
+        ],
+        "pairs": 20,
+        "score": 0.575,
+        "seed": 4510000,
+        "wins": 23,
+        "wins_as_seat_0": 16,
+        "wins_as_seat_1": 7
+      }
+    },
+    "selection_score": 0.5425,
+    "stage": "league",
+    "training_seed": 731
+  },
+  "best_checkpoint_disagreement_audit": {
+    "accuracy": 0.90963030579644,
+    "buckets": {
+      "after_own_draw_retry": {
+        "no": {
+          "accuracy": 0.8878504672897196,
+          "agreements": 1425,
+          "mean_cross_entropy": 0.2732781721830275,
+          "samples": 1605
+        },
+        "yes": {
+          "accuracy": 0.9692832764505119,
+          "agreements": 568,
+          "mean_cross_entropy": 0.09589197683343172,
+          "samples": 586
+        }
+      },
+      "decision_sequence_index": {
+        "0-4": {
+          "accuracy": 0.8688888888888889,
+          "agreements": 391,
+          "mean_cross_entropy": 0.32447215885958736,
+          "samples": 450
+        },
+        "15+": {
+          "accuracy": 0.9367588932806324,
+          "agreements": 948,
+          "mean_cross_entropy": 0.16624838759423935,
+          "samples": 1012
+        },
+        "5-14": {
+          "accuracy": 0.897119341563786,
+          "agreements": 654,
+          "mean_cross_entropy": 0.2476657408037937,
+          "samples": 729
+        }
+      },
+      "direction": {
+        "forward": {
+          "accuracy": 0.9071322436849926,
+          "agreements": 1221,
+          "mean_cross_entropy": 0.23654325424781225,
+          "samples": 1346
+        },
+        "reverse": {
+          "accuracy": 0.9136094674556213,
+          "agreements": 772,
+          "mean_cross_entropy": 0.20877744918413593,
+          "samples": 845
+        }
+      },
+      "legal_action_count": {
+        "1": {
+          "accuracy": 1.0,
+          "agreements": 578,
+          "mean_cross_entropy": 0.0,
+          "samples": 578
+        },
+        "2": {
+          "accuracy": 1.0,
+          "agreements": 696,
+          "mean_cross_entropy": 0.00046267662016372465,
+          "samples": 696
+        },
+        "3": {
+          "accuracy": 0.8388888888888889,
+          "agreements": 302,
+          "mean_cross_entropy": 0.3597720398205436,
+          "samples": 360
+        },
+        "4+": {
+          "accuracy": 0.748653500897666,
+          "agreements": 417,
+          "mean_cross_entropy": 0.655231970404166,
+          "samples": 557
+        }
+      },
+      "opponent_endgame": {
+        "min<=2": {
+          "accuracy": 0.9210526315789473,
+          "agreements": 420,
+          "mean_cross_entropy": 0.20873116208339956,
+          "samples": 456
+        },
+        "min>2": {
+          "accuracy": 0.906628242074928,
+          "agreements": 1573,
+          "mean_cross_entropy": 0.23033011807960804,
+          "samples": 1735
+        }
+      },
+      "own_hand_size": {
+        "1": {
+          "accuracy": 0.9375,
+          "agreements": 180,
+          "mean_cross_entropy": 0.16974693637651703,
+          "samples": 192
+        },
+        "2-3": {
+          "accuracy": 0.9591240875912409,
+          "agreements": 657,
+          "mean_cross_entropy": 0.1044813092766554,
+          "samples": 685
+        },
+        "4-6": {
+          "accuracy": 0.9064837905236908,
+          "agreements": 727,
+          "mean_cross_entropy": 0.21142889479839444,
+          "samples": 802
+        },
+        "7+": {
+          "accuracy": 0.837890625,
+          "agreements": 429,
+          "mean_cross_entropy": 0.4317911767793703,
+          "samples": 512
+        }
+      },
+      "own_last_card": {
+        "no": {
+          "accuracy": 0.9069534767383692,
+          "agreements": 1813,
+          "mean_cross_entropy": 0.23122198749067477,
+          "samples": 1999
+        },
+        "yes": {
+          "accuracy": 0.9375,
+          "agreements": 180,
+          "mean_cross_entropy": 0.16974693637651703,
+          "samples": 192
+        }
+      },
+      "penalty": {
+        "active": {
+          "accuracy": 0.99375,
+          "agreements": 159,
+          "mean_cross_entropy": 0.008844245225191116,
+          "samples": 160
+        },
+        "none": {
+          "accuracy": 0.9030034465780403,
+          "agreements": 1834,
+          "mean_cross_entropy": 0.24292914108425384,
+          "samples": 2031
+        }
+      },
+      "public_event_sequence_length": {
+        "0-15": {
+          "accuracy": 0.862776025236593,
+          "agreements": 547,
+          "mean_cross_entropy": 0.3406184884610847,
+          "samples": 634
+        },
+        "16-40": {
+          "accuracy": 0.920253164556962,
+          "agreements": 727,
+          "mean_cross_entropy": 0.19665062869095856,
+          "samples": 790
+        },
+        "41+": {
+          "accuracy": 0.9374185136897001,
+          "agreements": 719,
+          "mean_cross_entropy": 0.16101440212251,
+          "samples": 767
+        }
+      }
+    },
+    "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed731_league7.pt",
+    "checkpoint_sha256": "0fc19fba435d132ddf307455093e9e2452d33882d5b50970449cedf1a8c7bea8",
+    "development_seed": 5110000,
+    "games": 90,
+    "inference_contract": {
+      "action_count": 55,
+      "illegal_candidate_actions": 0,
+      "illegal_teacher_actions": 0,
+      "nonzero_initial_states": 0,
+      "policy_eval_mode": true,
+      "sequential_vs_native_batched_argmax_mismatches": 0,
+      "sequential_vs_native_batched_max_legal_logit_abs_diff": 0.0001163482666015625,
+      "state_reset_per_episode": true,
+      "teacher_target_count_matches": true
+    },
+    "mean_public_events_per_decision": 1.988589685075308,
+    "privacy": {
+      "aggregate_only": true,
+      "raw_decisions_serialized": false,
+      "raw_events_serialized": false,
+      "recurrent_states_serialized": false
+    },
+    "samples": 2191,
+    "top_action_confusions": [
+      {
+        "candidate_action": 50,
+        "count": 17,
+        "teacher_action": 53
+      },
+      {
+        "candidate_action": 50,
+        "count": 12,
+        "teacher_action": 52
+      },
+      {
+        "candidate_action": 50,
+        "count": 8,
+        "teacher_action": 51
+      },
+      {
+        "candidate_action": 53,
+        "count": 5,
+        "teacher_action": 52
+      },
+      {
+        "candidate_action": 53,
+        "count": 3,
+        "teacher_action": 51
+      },
+      {
+        "candidate_action": 49,
+        "count": 3,
+        "teacher_action": 48
+      },
+      {
+        "candidate_action": 51,
+        "count": 3,
+        "teacher_action": 53
+      },
+      {
+        "candidate_action": 17,
+        "count": 2,
+        "teacher_action": 16
+      },
+      {
+        "candidate_action": 33,
+        "count": 2,
+        "teacher_action": 34
+      },
+      {
+        "candidate_action": 22,
+        "count": 2,
+        "teacher_action": 37
+      },
+      {
+        "candidate_action": 16,
+        "count": 2,
+        "teacher_action": 23
+      },
+      {
+        "candidate_action": 29,
+        "count": 2,
+        "teacher_action": 48
+      },
+      {
+        "candidate_action": 40,
+        "count": 2,
+        "teacher_action": 47
+      },
+      {
+        "candidate_action": 37,
+        "count": 1,
+        "teacher_action": 40
+      },
+      {
+        "candidate_action": 17,
+        "count": 1,
+        "teacher_action": 37
+      },
+      {
+        "candidate_action": 17,
+        "count": 1,
+        "teacher_action": 31
+      },
+      {
+        "candidate_action": 44,
+        "count": 1,
+        "teacher_action": 8
+      },
+      {
+        "candidate_action": 52,
+        "count": 1,
+        "teacher_action": 50
+      },
+      {
+        "candidate_action": 29,
+        "count": 1,
+        "teacher_action": 41
+      },
+      {
+        "candidate_action": 24,
+        "count": 1,
+        "teacher_action": 7
+      }
+    ]
+  },
+  "checkpoint_count": 33,
+  "development_seed": 4310000,
+  "elapsed_seconds": 187.49486661399715,
+  "evaluations": [
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed731_imitation.pt",
+      "checkpoint_sha256": "25417e5ac6cbb59d532914e6ae9419516eb006badb229c4893b77ff6564da90a",
+      "development_seed": 4310000,
+      "epoch": 0,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 41.325,
+          "candidate": "temporal_seed731_imitation0",
+          "draws": 0,
+          "elapsed_seconds": 2.4722289350029314,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 17,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.4,
+            0.725
+          ],
+          "pairs": 20,
+          "score": 0.575,
+          "seed": 4410000,
+          "wins": 23,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 11
+        },
+        "ppo_champion": {
+          "average_turns": 39.075,
+          "candidate": "temporal_seed731_imitation0",
+          "draws": 0,
+          "elapsed_seconds": 1.1443692780012498,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 22,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.325,
+            0.575
+          ],
+          "pairs": 20,
+          "score": 0.45,
+          "seed": 4310000,
+          "wins": 18,
+          "wins_as_seat_0": 6,
+          "wins_as_seat_1": 12
+        },
+        "random": {
+          "average_turns": 52.425,
+          "candidate": "temporal_seed731_imitation0",
+          "draws": 0,
+          "elapsed_seconds": 0.9799561249965336,
+          "games": 40,
+          "gate_passed": true,
+          "losses": 14,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.525,
+            0.775
+          ],
+          "pairs": 20,
+          "score": 0.65,
+          "seed": 4610000,
+          "wins": 26,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 14
+        },
+        "smart_rule": {
+          "average_turns": 32.275,
+          "candidate": "temporal_seed731_imitation0",
+          "draws": 0,
+          "elapsed_seconds": 0.6116641120024724,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 16,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.5,
+            0.7
+          ],
+          "pairs": 20,
+          "score": 0.6,
+          "seed": 4510000,
+          "wins": 24,
+          "wins_as_seat_0": 16,
+          "wins_as_seat_1": 8
+        }
+      },
+      "selection_score": 0.525,
+      "stage": "imitation",
+      "training_seed": 731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed731_league1.pt",
+      "checkpoint_sha256": "cf290b73041ace01d20ceb25832880f003e36e045b8ac4f515498a00a495417f",
+      "development_seed": 4310000,
+      "epoch": 1,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 42.775,
+          "candidate": "temporal_seed731_league1",
+          "draws": 0,
+          "elapsed_seconds": 2.5585343889979413,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 19,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.35,
+            0.675
+          ],
+          "pairs": 20,
+          "score": 0.525,
+          "seed": 4410000,
+          "wins": 21,
+          "wins_as_seat_0": 11,
+          "wins_as_seat_1": 10
+        },
+        "ppo_champion": {
+          "average_turns": 39.05,
+          "candidate": "temporal_seed731_league1",
+          "draws": 0,
+          "elapsed_seconds": 1.1388722230040003,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 22,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.325,
+            0.575
+          ],
+          "pairs": 20,
+          "score": 0.45,
+          "seed": 4310000,
+          "wins": 18,
+          "wins_as_seat_0": 7,
+          "wins_as_seat_1": 11
+        },
+        "random": {
+          "average_turns": 51.1,
+          "candidate": "temporal_seed731_league1",
+          "draws": 0,
+          "elapsed_seconds": 0.9541115379979601,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 15,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.475,
+            0.75
+          ],
+          "pairs": 20,
+          "score": 0.625,
+          "seed": 4610000,
+          "wins": 25,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 13
+        },
+        "smart_rule": {
+          "average_turns": 35.425,
+          "candidate": "temporal_seed731_league1",
+          "draws": 0,
+          "elapsed_seconds": 0.6550058379943948,
+          "games": 40,
+          "gate_passed": true,
+          "losses": 15,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.55,
+            0.725
+          ],
+          "pairs": 20,
+          "score": 0.625,
+          "seed": 4510000,
+          "wins": 25,
+          "wins_as_seat_0": 17,
+          "wins_as_seat_1": 8
+        }
+      },
+      "selection_score": 0.5175000000000001,
+      "stage": "league",
+      "training_seed": 731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed731_league2.pt",
+      "checkpoint_sha256": "e1d6e283114a249142a2dbcf6ae37ad5a7e751572c4190484f1881cced1e342b",
+      "development_seed": 4310000,
+      "epoch": 2,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 45.625,
+          "candidate": "temporal_seed731_league2",
+          "draws": 0,
+          "elapsed_seconds": 2.7092832990019815,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 19,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.35,
+            0.675
+          ],
+          "pairs": 20,
+          "score": 0.525,
+          "seed": 4410000,
+          "wins": 21,
+          "wins_as_seat_0": 11,
+          "wins_as_seat_1": 10
+        },
+        "ppo_champion": {
+          "average_turns": 39.375,
+          "candidate": "temporal_seed731_league2",
+          "draws": 0,
+          "elapsed_seconds": 1.1500089750043117,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 22,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.325,
+            0.6
+          ],
+          "pairs": 20,
+          "score": 0.45,
+          "seed": 4310000,
+          "wins": 18,
+          "wins_as_seat_0": 6,
+          "wins_as_seat_1": 12
+        },
+        "random": {
+          "average_turns": 52.675,
+          "candidate": "temporal_seed731_league2",
+          "draws": 0,
+          "elapsed_seconds": 1.0065610210003797,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 15,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.475,
+            0.75
+          ],
+          "pairs": 20,
+          "score": 0.625,
+          "seed": 4610000,
+          "wins": 25,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 13
+        },
+        "smart_rule": {
+          "average_turns": 35.75,
+          "candidate": "temporal_seed731_league2",
+          "draws": 0,
+          "elapsed_seconds": 0.6578602619993035,
+          "games": 40,
+          "gate_passed": true,
+          "losses": 15,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.55,
+            0.725
+          ],
+          "pairs": 20,
+          "score": 0.625,
+          "seed": 4510000,
+          "wins": 25,
+          "wins_as_seat_0": 17,
+          "wins_as_seat_1": 8
+        }
+      },
+      "selection_score": 0.5175000000000001,
+      "stage": "league",
+      "training_seed": 731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed731_league3.pt",
+      "checkpoint_sha256": "9434b8aff46803cce803afb41608b75d9435863964ef2b9df3656abecfeeb2ec",
+      "development_seed": 4310000,
+      "epoch": 3,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 46.4,
+          "candidate": "temporal_seed731_league3",
+          "draws": 0,
+          "elapsed_seconds": 2.736575212999014,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 19,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.35,
+            0.675
+          ],
+          "pairs": 20,
+          "score": 0.525,
+          "seed": 4410000,
+          "wins": 21,
+          "wins_as_seat_0": 11,
+          "wins_as_seat_1": 10
+        },
+        "ppo_champion": {
+          "average_turns": 41.35,
+          "candidate": "temporal_seed731_league3",
+          "draws": 0,
+          "elapsed_seconds": 1.2074548870004946,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 22,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.325,
+            0.6
+          ],
+          "pairs": 20,
+          "score": 0.45,
+          "seed": 4310000,
+          "wins": 18,
+          "wins_as_seat_0": 6,
+          "wins_as_seat_1": 12
+        },
+        "random": {
+          "average_turns": 53.775,
+          "candidate": "temporal_seed731_league3",
+          "draws": 0,
+          "elapsed_seconds": 1.0075207530026091,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 16,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.45,
+            0.75
+          ],
+          "pairs": 20,
+          "score": 0.6,
+          "seed": 4610000,
+          "wins": 24,
+          "wins_as_seat_0": 11,
+          "wins_as_seat_1": 13
+        },
+        "smart_rule": {
+          "average_turns": 32.1,
+          "candidate": "temporal_seed731_league3",
+          "draws": 0,
+          "elapsed_seconds": 0.5828165999992052,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 18,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.425,
+            0.675
+          ],
+          "pairs": 20,
+          "score": 0.55,
+          "seed": 4510000,
+          "wins": 22,
+          "wins_as_seat_0": 15,
+          "wins_as_seat_1": 7
+        }
+      },
+      "selection_score": 0.5,
+      "stage": "league",
+      "training_seed": 731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed731_league4.pt",
+      "checkpoint_sha256": "0371cc738c7f7e035e3ed2c2c3e3c3f47ed57fe0a1a6cf5e9adb050dd9a98219",
+      "development_seed": 4310000,
+      "epoch": 4,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 47.325,
+          "candidate": "temporal_seed731_league4",
+          "draws": 0,
+          "elapsed_seconds": 2.768670125005883,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 19,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.375,
+            0.675
+          ],
+          "pairs": 20,
+          "score": 0.525,
+          "seed": 4410000,
+          "wins": 21,
+          "wins_as_seat_0": 13,
+          "wins_as_seat_1": 8
+        },
+        "ppo_champion": {
+          "average_turns": 43.05,
+          "candidate": "temporal_seed731_league4",
+          "draws": 0,
+          "elapsed_seconds": 1.2600519310071832,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 22,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.325,
+            0.6
+          ],
+          "pairs": 20,
+          "score": 0.45,
+          "seed": 4310000,
+          "wins": 18,
+          "wins_as_seat_0": 6,
+          "wins_as_seat_1": 12
+        },
+        "random": {
+          "average_turns": 52.0,
+          "candidate": "temporal_seed731_league4",
+          "draws": 0,
+          "elapsed_seconds": 0.971434043996851,
+          "games": 40,
+          "gate_passed": true,
+          "losses": 13,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.525,
+            0.825
+          ],
+          "pairs": 20,
+          "score": 0.675,
+          "seed": 4610000,
+          "wins": 27,
+          "wins_as_seat_0": 13,
+          "wins_as_seat_1": 14
+        },
+        "smart_rule": {
+          "average_turns": 31.775,
+          "candidate": "temporal_seed731_league4",
+          "draws": 0,
+          "elapsed_seconds": 0.5753465309971943,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 18,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.425,
+            0.675
+          ],
+          "pairs": 20,
+          "score": 0.55,
+          "seed": 4510000,
+          "wins": 22,
+          "wins_as_seat_0": 15,
+          "wins_as_seat_1": 7
+        }
+      },
+      "selection_score": 0.5075000000000001,
+      "stage": "league",
+      "training_seed": 731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed731_league5.pt",
+      "checkpoint_sha256": "e9075a330f436204640937415e35dcd19dcd2f4bed737f9e69dc88e2d116704d",
+      "development_seed": 4310000,
+      "epoch": 5,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 48.75,
+          "candidate": "temporal_seed731_league5",
+          "draws": 0,
+          "elapsed_seconds": 3.084651886994834,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 21,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.3,
+            0.625
+          ],
+          "pairs": 20,
+          "score": 0.475,
+          "seed": 4410000,
+          "wins": 19,
+          "wins_as_seat_0": 11,
+          "wins_as_seat_1": 8
+        },
+        "ppo_champion": {
+          "average_turns": 42.725,
+          "candidate": "temporal_seed731_league5",
+          "draws": 0,
+          "elapsed_seconds": 1.2785562610079069,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 21,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.35,
+            0.6
+          ],
+          "pairs": 20,
+          "score": 0.475,
+          "seed": 4310000,
+          "wins": 19,
+          "wins_as_seat_0": 6,
+          "wins_as_seat_1": 13
+        },
+        "random": {
+          "average_turns": 52.425,
+          "candidate": "temporal_seed731_league5",
+          "draws": 0,
+          "elapsed_seconds": 1.0987853259866824,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 14,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.5,
+            0.8
+          ],
+          "pairs": 20,
+          "score": 0.65,
+          "seed": 4610000,
+          "wins": 26,
+          "wins_as_seat_0": 13,
+          "wins_as_seat_1": 13
+        },
+        "smart_rule": {
+          "average_turns": 33.025,
+          "candidate": "temporal_seed731_league5",
+          "draws": 0,
+          "elapsed_seconds": 0.7333724579948466,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 17,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.475,
+            0.675
+          ],
+          "pairs": 20,
+          "score": 0.575,
+          "seed": 4510000,
+          "wins": 23,
+          "wins_as_seat_0": 16,
+          "wins_as_seat_1": 7
+        }
+      },
+      "selection_score": 0.5125,
+      "stage": "league",
+      "training_seed": 731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed731_league6.pt",
+      "checkpoint_sha256": "e2bba2925c29aa9f42c1fafd934e2a1d723cca4dcf476b7b0ea4609d6c70c2dd",
+      "development_seed": 4310000,
+      "epoch": 6,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 45.6,
+          "candidate": "temporal_seed731_league6",
+          "draws": 0,
+          "elapsed_seconds": 2.6993427609995706,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 18,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.375,
+            0.725
+          ],
+          "pairs": 20,
+          "score": 0.55,
+          "seed": 4410000,
+          "wins": 22,
+          "wins_as_seat_0": 11,
+          "wins_as_seat_1": 11
+        },
+        "ppo_champion": {
+          "average_turns": 42.2,
+          "candidate": "temporal_seed731_league6",
+          "draws": 0,
+          "elapsed_seconds": 1.2568550629948732,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 20,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.375,
+            0.625
+          ],
+          "pairs": 20,
+          "score": 0.5,
+          "seed": 4310000,
+          "wins": 20,
+          "wins_as_seat_0": 6,
+          "wins_as_seat_1": 14
+        },
+        "random": {
+          "average_turns": 53.2,
+          "candidate": "temporal_seed731_league6",
+          "draws": 0,
+          "elapsed_seconds": 0.9881611529999645,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 15,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.475,
+            0.775
+          ],
+          "pairs": 20,
+          "score": 0.625,
+          "seed": 4610000,
+          "wins": 25,
+          "wins_as_seat_0": 13,
+          "wins_as_seat_1": 12
+        },
+        "smart_rule": {
+          "average_turns": 33.0,
+          "candidate": "temporal_seed731_league6",
+          "draws": 0,
+          "elapsed_seconds": 0.6035257959883893,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 17,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.475,
+            0.675
+          ],
+          "pairs": 20,
+          "score": 0.575,
+          "seed": 4510000,
+          "wins": 23,
+          "wins_as_seat_0": 16,
+          "wins_as_seat_1": 7
+        }
+      },
+      "selection_score": 0.5375,
+      "stage": "league",
+      "training_seed": 731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed731_league7.pt",
+      "checkpoint_sha256": "0fc19fba435d132ddf307455093e9e2452d33882d5b50970449cedf1a8c7bea8",
+      "development_seed": 4310000,
+      "epoch": 7,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 45.975,
+          "candidate": "temporal_seed731_league7",
+          "draws": 0,
+          "elapsed_seconds": 2.7337455689994385,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 17,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.4,
+            0.75
+          ],
+          "pairs": 20,
+          "score": 0.575,
+          "seed": 4410000,
+          "wins": 23,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 11
+        },
+        "ppo_champion": {
+          "average_turns": 42.2,
+          "candidate": "temporal_seed731_league7",
+          "draws": 0,
+          "elapsed_seconds": 1.2484696640021866,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 20,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.375,
+            0.625
+          ],
+          "pairs": 20,
+          "score": 0.5,
+          "seed": 4310000,
+          "wins": 20,
+          "wins_as_seat_0": 6,
+          "wins_as_seat_1": 14
+        },
+        "random": {
+          "average_turns": 53.8,
+          "candidate": "temporal_seed731_league7",
+          "draws": 0,
+          "elapsed_seconds": 1.0299369190033758,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 15,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.475,
+            0.775
+          ],
+          "pairs": 20,
+          "score": 0.625,
+          "seed": 4610000,
+          "wins": 25,
+          "wins_as_seat_0": 13,
+          "wins_as_seat_1": 12
+        },
+        "smart_rule": {
+          "average_turns": 33.825,
+          "candidate": "temporal_seed731_league7",
+          "draws": 0,
+          "elapsed_seconds": 0.6297355979913846,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 17,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.475,
+            0.675
+          ],
+          "pairs": 20,
+          "score": 0.575,
+          "seed": 4510000,
+          "wins": 23,
+          "wins_as_seat_0": 16,
+          "wins_as_seat_1": 7
+        }
+      },
+      "selection_score": 0.5425,
+      "stage": "league",
+      "training_seed": 731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed731_league8.pt",
+      "checkpoint_sha256": "2d33af673df196f461bc2c572a73d8e97b362db73846638113ba37c40ca1da62",
+      "development_seed": 4310000,
+      "epoch": 8,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 45.725,
+          "candidate": "temporal_seed731_league8",
+          "draws": 0,
+          "elapsed_seconds": 2.6861267540080007,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 18,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.375,
+            0.725
+          ],
+          "pairs": 20,
+          "score": 0.55,
+          "seed": 4410000,
+          "wins": 22,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 10
+        },
+        "ppo_champion": {
+          "average_turns": 44.075,
+          "candidate": "temporal_seed731_league8",
+          "draws": 0,
+          "elapsed_seconds": 1.2907399459945736,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 21,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.35,
+            0.6
+          ],
+          "pairs": 20,
+          "score": 0.475,
+          "seed": 4310000,
+          "wins": 19,
+          "wins_as_seat_0": 6,
+          "wins_as_seat_1": 13
+        },
+        "random": {
+          "average_turns": 52.925,
+          "candidate": "temporal_seed731_league8",
+          "draws": 0,
+          "elapsed_seconds": 0.9789905139914481,
+          "games": 40,
+          "gate_passed": true,
+          "losses": 13,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.55,
+            0.8
+          ],
+          "pairs": 20,
+          "score": 0.675,
+          "seed": 4610000,
+          "wins": 27,
+          "wins_as_seat_0": 14,
+          "wins_as_seat_1": 13
+        },
+        "smart_rule": {
+          "average_turns": 32.725,
+          "candidate": "temporal_seed731_league8",
+          "draws": 0,
+          "elapsed_seconds": 0.5858493960113265,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 19,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.425,
+            0.625
+          ],
+          "pairs": 20,
+          "score": 0.525,
+          "seed": 4510000,
+          "wins": 21,
+          "wins_as_seat_0": 15,
+          "wins_as_seat_1": 6
+        }
+      },
+      "selection_score": 0.52,
+      "stage": "league",
+      "training_seed": 731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed731_league9.pt",
+      "checkpoint_sha256": "7ac5c5f3ec0c4849a4d10a71161e5cb28ed940c949a346023d6351f717563e58",
+      "development_seed": 4310000,
+      "epoch": 9,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 45.75,
+          "candidate": "temporal_seed731_league9",
+          "draws": 0,
+          "elapsed_seconds": 2.6657734329928644,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 18,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.375,
+            0.725
+          ],
+          "pairs": 20,
+          "score": 0.55,
+          "seed": 4410000,
+          "wins": 22,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 10
+        },
+        "ppo_champion": {
+          "average_turns": 44.4,
+          "candidate": "temporal_seed731_league9",
+          "draws": 0,
+          "elapsed_seconds": 1.2811704319901764,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 21,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.35,
+            0.6
+          ],
+          "pairs": 20,
+          "score": 0.475,
+          "seed": 4310000,
+          "wins": 19,
+          "wins_as_seat_0": 6,
+          "wins_as_seat_1": 13
+        },
+        "random": {
+          "average_turns": 54.1,
+          "candidate": "temporal_seed731_league9",
+          "draws": 0,
+          "elapsed_seconds": 1.014415764992009,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 14,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.5,
+            0.775
+          ],
+          "pairs": 20,
+          "score": 0.65,
+          "seed": 4610000,
+          "wins": 26,
+          "wins_as_seat_0": 14,
+          "wins_as_seat_1": 12
+        },
+        "smart_rule": {
+          "average_turns": 32.725,
+          "candidate": "temporal_seed731_league9",
+          "draws": 0,
+          "elapsed_seconds": 0.5887249910010723,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 19,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.425,
+            0.625
+          ],
+          "pairs": 20,
+          "score": 0.525,
+          "seed": 4510000,
+          "wins": 21,
+          "wins_as_seat_0": 15,
+          "wins_as_seat_1": 6
+        }
+      },
+      "selection_score": 0.5175000000000001,
+      "stage": "league",
+      "training_seed": 731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed731_league10.pt",
+      "checkpoint_sha256": "5546033372ac5093069d3bc898d6828cb7d3ae2fb589f269756ef4b025ced906",
+      "development_seed": 4310000,
+      "epoch": 10,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 45.75,
+          "candidate": "temporal_seed731_league10",
+          "draws": 0,
+          "elapsed_seconds": 2.666235458003939,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 18,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.375,
+            0.725
+          ],
+          "pairs": 20,
+          "score": 0.55,
+          "seed": 4410000,
+          "wins": 22,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 10
+        },
+        "ppo_champion": {
+          "average_turns": 44.4,
+          "candidate": "temporal_seed731_league10",
+          "draws": 0,
+          "elapsed_seconds": 1.28530715200759,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 21,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.35,
+            0.6
+          ],
+          "pairs": 20,
+          "score": 0.475,
+          "seed": 4310000,
+          "wins": 19,
+          "wins_as_seat_0": 6,
+          "wins_as_seat_1": 13
+        },
+        "random": {
+          "average_turns": 54.325,
+          "candidate": "temporal_seed731_league10",
+          "draws": 0,
+          "elapsed_seconds": 1.0416478580009425,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 14,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.5,
+            0.775
+          ],
+          "pairs": 20,
+          "score": 0.65,
+          "seed": 4610000,
+          "wins": 26,
+          "wins_as_seat_0": 14,
+          "wins_as_seat_1": 12
+        },
+        "smart_rule": {
+          "average_turns": 32.225,
+          "candidate": "temporal_seed731_league10",
+          "draws": 0,
+          "elapsed_seconds": 0.5807512249884894,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 20,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.375,
+            0.625
+          ],
+          "pairs": 20,
+          "score": 0.5,
+          "seed": 4510000,
+          "wins": 20,
+          "wins_as_seat_0": 14,
+          "wins_as_seat_1": 6
+        }
+      },
+      "selection_score": 0.5125,
+      "stage": "league",
+      "training_seed": 731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed1731_imitation.pt",
+      "checkpoint_sha256": "57e6a08166e0680fc96cf025695291f248dc55385012f6418a46992137da9934",
+      "development_seed": 4310000,
+      "epoch": 0,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 50.625,
+          "candidate": "temporal_seed1731_imitation0",
+          "draws": 0,
+          "elapsed_seconds": 2.9945198759960476,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 23,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.3,
+            0.55
+          ],
+          "pairs": 20,
+          "score": 0.425,
+          "seed": 4410000,
+          "wins": 17,
+          "wins_as_seat_0": 9,
+          "wins_as_seat_1": 8
+        },
+        "ppo_champion": {
+          "average_turns": 39.9,
+          "candidate": "temporal_seed1731_imitation0",
+          "draws": 0,
+          "elapsed_seconds": 1.1821363159979228,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 23,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.3,
+            0.55
+          ],
+          "pairs": 20,
+          "score": 0.425,
+          "seed": 4310000,
+          "wins": 17,
+          "wins_as_seat_0": 7,
+          "wins_as_seat_1": 10
+        },
+        "random": {
+          "average_turns": 53.775,
+          "candidate": "temporal_seed1731_imitation0",
+          "draws": 0,
+          "elapsed_seconds": 1.0100763039954472,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 15,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.5,
+            0.75
+          ],
+          "pairs": 20,
+          "score": 0.625,
+          "seed": 4610000,
+          "wins": 25,
+          "wins_as_seat_0": 10,
+          "wins_as_seat_1": 15
+        },
+        "smart_rule": {
+          "average_turns": 32.675,
+          "candidate": "temporal_seed1731_imitation0",
+          "draws": 0,
+          "elapsed_seconds": 0.5952050769992638,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 24,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.275,
+            0.525
+          ],
+          "pairs": 20,
+          "score": 0.4,
+          "seed": 4510000,
+          "wins": 16,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 4
+        }
+      },
+      "selection_score": 0.44,
+      "stage": "imitation",
+      "training_seed": 1731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed1731_league1.pt",
+      "checkpoint_sha256": "c0bb9fe8224610266a90224ac70efba38badece8c8bbabc341398616b85897c6",
+      "development_seed": 4310000,
+      "epoch": 1,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 49.275,
+          "candidate": "temporal_seed1731_league1",
+          "draws": 0,
+          "elapsed_seconds": 2.8853546000027563,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 24,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.275,
+            0.525
+          ],
+          "pairs": 20,
+          "score": 0.4,
+          "seed": 4410000,
+          "wins": 16,
+          "wins_as_seat_0": 9,
+          "wins_as_seat_1": 7
+        },
+        "ppo_champion": {
+          "average_turns": 38.225,
+          "candidate": "temporal_seed1731_league1",
+          "draws": 0,
+          "elapsed_seconds": 1.1085396129928995,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 23,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.325,
+            0.525
+          ],
+          "pairs": 20,
+          "score": 0.425,
+          "seed": 4310000,
+          "wins": 17,
+          "wins_as_seat_0": 7,
+          "wins_as_seat_1": 10
+        },
+        "random": {
+          "average_turns": 52.4,
+          "candidate": "temporal_seed1731_league1",
+          "draws": 0,
+          "elapsed_seconds": 0.9774871060071746,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 16,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.475,
+            0.725
+          ],
+          "pairs": 20,
+          "score": 0.6,
+          "seed": 4610000,
+          "wins": 24,
+          "wins_as_seat_0": 10,
+          "wins_as_seat_1": 14
+        },
+        "smart_rule": {
+          "average_turns": 32.875,
+          "candidate": "temporal_seed1731_league1",
+          "draws": 0,
+          "elapsed_seconds": 0.6015898229961749,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 23,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.3,
+            0.55
+          ],
+          "pairs": 20,
+          "score": 0.425,
+          "seed": 4510000,
+          "wins": 17,
+          "wins_as_seat_0": 11,
+          "wins_as_seat_1": 6
+        }
+      },
+      "selection_score": 0.4375,
+      "stage": "league",
+      "training_seed": 1731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed1731_league2.pt",
+      "checkpoint_sha256": "bfd23fa85dc675173fab4f38c0dc44afc549e1c0f67936adfe9517d6a79dca73",
+      "development_seed": 4310000,
+      "epoch": 2,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 49.35,
+          "candidate": "temporal_seed1731_league2",
+          "draws": 0,
+          "elapsed_seconds": 2.9148748599982355,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 23,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.275,
+            0.575
+          ],
+          "pairs": 20,
+          "score": 0.425,
+          "seed": 4410000,
+          "wins": 17,
+          "wins_as_seat_0": 9,
+          "wins_as_seat_1": 8
+        },
+        "ppo_champion": {
+          "average_turns": 34.7,
+          "candidate": "temporal_seed1731_league2",
+          "draws": 0,
+          "elapsed_seconds": 1.0097556889959378,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 22,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.35,
+            0.55
+          ],
+          "pairs": 20,
+          "score": 0.45,
+          "seed": 4310000,
+          "wins": 18,
+          "wins_as_seat_0": 8,
+          "wins_as_seat_1": 10
+        },
+        "random": {
+          "average_turns": 54.425,
+          "candidate": "temporal_seed1731_league2",
+          "draws": 0,
+          "elapsed_seconds": 1.0060712249978678,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 17,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.45,
+            0.7
+          ],
+          "pairs": 20,
+          "score": 0.575,
+          "seed": 4610000,
+          "wins": 23,
+          "wins_as_seat_0": 9,
+          "wins_as_seat_1": 14
+        },
+        "smart_rule": {
+          "average_turns": 33.6,
+          "candidate": "temporal_seed1731_league2",
+          "draws": 0,
+          "elapsed_seconds": 0.6126436949998606,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 23,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.3,
+            0.55
+          ],
+          "pairs": 20,
+          "score": 0.425,
+          "seed": 4510000,
+          "wins": 17,
+          "wins_as_seat_0": 11,
+          "wins_as_seat_1": 6
+        }
+      },
+      "selection_score": 0.4525,
+      "stage": "league",
+      "training_seed": 1731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed1731_league3.pt",
+      "checkpoint_sha256": "30b44104ee1d60a94b2e9492b0227383515c4f5fb1b5605b548150a053060fc5",
+      "development_seed": 4310000,
+      "epoch": 3,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 45.925,
+          "candidate": "temporal_seed1731_league3",
+          "draws": 0,
+          "elapsed_seconds": 2.7401617760042427,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 21,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.325,
+            0.625
+          ],
+          "pairs": 20,
+          "score": 0.475,
+          "seed": 4410000,
+          "wins": 19,
+          "wins_as_seat_0": 11,
+          "wins_as_seat_1": 8
+        },
+        "ppo_champion": {
+          "average_turns": 34.7,
+          "candidate": "temporal_seed1731_league3",
+          "draws": 0,
+          "elapsed_seconds": 1.0125855529913679,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 22,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.35,
+            0.55
+          ],
+          "pairs": 20,
+          "score": 0.45,
+          "seed": 4310000,
+          "wins": 18,
+          "wins_as_seat_0": 8,
+          "wins_as_seat_1": 10
+        },
+        "random": {
+          "average_turns": 53.425,
+          "candidate": "temporal_seed1731_league3",
+          "draws": 0,
+          "elapsed_seconds": 1.0041846439999063,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 19,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.4,
+            0.65
+          ],
+          "pairs": 20,
+          "score": 0.525,
+          "seed": 4610000,
+          "wins": 21,
+          "wins_as_seat_0": 9,
+          "wins_as_seat_1": 12
+        },
+        "smart_rule": {
+          "average_turns": 33.625,
+          "candidate": "temporal_seed1731_league3",
+          "draws": 0,
+          "elapsed_seconds": 0.6176001429994358,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 23,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.3,
+            0.55
+          ],
+          "pairs": 20,
+          "score": 0.425,
+          "seed": 4510000,
+          "wins": 17,
+          "wins_as_seat_0": 11,
+          "wins_as_seat_1": 6
+        }
+      },
+      "selection_score": 0.4575,
+      "stage": "league",
+      "training_seed": 1731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed1731_league4.pt",
+      "checkpoint_sha256": "7e7857ec7b9ed039e02ccbe77874ea73c800ac81bc1bc66d4663fb8de5a5913c",
+      "development_seed": 4310000,
+      "epoch": 4,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 46.45,
+          "candidate": "temporal_seed1731_league4",
+          "draws": 0,
+          "elapsed_seconds": 2.7393517759919632,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 21,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.325,
+            0.625
+          ],
+          "pairs": 20,
+          "score": 0.475,
+          "seed": 4410000,
+          "wins": 19,
+          "wins_as_seat_0": 11,
+          "wins_as_seat_1": 8
+        },
+        "ppo_champion": {
+          "average_turns": 36.05,
+          "candidate": "temporal_seed1731_league4",
+          "draws": 0,
+          "elapsed_seconds": 1.07278350800334,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 22,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.35,
+            0.55
+          ],
+          "pairs": 20,
+          "score": 0.45,
+          "seed": 4310000,
+          "wins": 18,
+          "wins_as_seat_0": 8,
+          "wins_as_seat_1": 10
+        },
+        "random": {
+          "average_turns": 48.65,
+          "candidate": "temporal_seed1731_league4",
+          "draws": 0,
+          "elapsed_seconds": 0.9087151800049469,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 19,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.4,
+            0.65
+          ],
+          "pairs": 20,
+          "score": 0.525,
+          "seed": 4610000,
+          "wins": 21,
+          "wins_as_seat_0": 9,
+          "wins_as_seat_1": 12
+        },
+        "smart_rule": {
+          "average_turns": 33.325,
+          "candidate": "temporal_seed1731_league4",
+          "draws": 0,
+          "elapsed_seconds": 0.6088498799945228,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 21,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.35,
+            0.6
+          ],
+          "pairs": 20,
+          "score": 0.475,
+          "seed": 4510000,
+          "wins": 19,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 7
+        }
+      },
+      "selection_score": 0.4675,
+      "stage": "league",
+      "training_seed": 1731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed1731_league5.pt",
+      "checkpoint_sha256": "0bced96f5a0e0b5fd9ee4c1ed44927fbe3a77faa3780ca1b688403523f52de32",
+      "development_seed": 4310000,
+      "epoch": 5,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 46.5,
+          "candidate": "temporal_seed1731_league5",
+          "draws": 0,
+          "elapsed_seconds": 2.732755927994731,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 20,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.35,
+            0.65
+          ],
+          "pairs": 20,
+          "score": 0.5,
+          "seed": 4410000,
+          "wins": 20,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 8
+        },
+        "ppo_champion": {
+          "average_turns": 37.3,
+          "candidate": "temporal_seed1731_league5",
+          "draws": 0,
+          "elapsed_seconds": 1.0743134759977693,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 22,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.325,
+            0.575
+          ],
+          "pairs": 20,
+          "score": 0.45,
+          "seed": 4310000,
+          "wins": 18,
+          "wins_as_seat_0": 7,
+          "wins_as_seat_1": 11
+        },
+        "random": {
+          "average_turns": 50.625,
+          "candidate": "temporal_seed1731_league5",
+          "draws": 0,
+          "elapsed_seconds": 0.9524005080020288,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 17,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.45,
+            0.7
+          ],
+          "pairs": 20,
+          "score": 0.575,
+          "seed": 4610000,
+          "wins": 23,
+          "wins_as_seat_0": 11,
+          "wins_as_seat_1": 12
+        },
+        "smart_rule": {
+          "average_turns": 33.325,
+          "candidate": "temporal_seed1731_league5",
+          "draws": 0,
+          "elapsed_seconds": 0.6110674759984249,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 21,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.35,
+            0.6
+          ],
+          "pairs": 20,
+          "score": 0.475,
+          "seed": 4510000,
+          "wins": 19,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 7
+        }
+      },
+      "selection_score": 0.47750000000000004,
+      "stage": "league",
+      "training_seed": 1731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed1731_league6.pt",
+      "checkpoint_sha256": "68c851f3ddbd8864cbf4a4dc70dcba235dee0bae69aa2d012246bdfb483e6aa9",
+      "development_seed": 4310000,
+      "epoch": 6,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 46.575,
+          "candidate": "temporal_seed1731_league6",
+          "draws": 0,
+          "elapsed_seconds": 2.711354573999415,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 18,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.425,
+            0.675
+          ],
+          "pairs": 20,
+          "score": 0.55,
+          "seed": 4410000,
+          "wins": 22,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 10
+        },
+        "ppo_champion": {
+          "average_turns": 37.6,
+          "candidate": "temporal_seed1731_league6",
+          "draws": 0,
+          "elapsed_seconds": 1.07568760200229,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 22,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.325,
+            0.575
+          ],
+          "pairs": 20,
+          "score": 0.45,
+          "seed": 4310000,
+          "wins": 18,
+          "wins_as_seat_0": 6,
+          "wins_as_seat_1": 12
+        },
+        "random": {
+          "average_turns": 54.625,
+          "candidate": "temporal_seed1731_league6",
+          "draws": 0,
+          "elapsed_seconds": 1.032260766995023,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 15,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.5,
+            0.75
+          ],
+          "pairs": 20,
+          "score": 0.625,
+          "seed": 4610000,
+          "wins": 25,
+          "wins_as_seat_0": 11,
+          "wins_as_seat_1": 14
+        },
+        "smart_rule": {
+          "average_turns": 31.9,
+          "candidate": "temporal_seed1731_league6",
+          "draws": 0,
+          "elapsed_seconds": 0.6044216970039997,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 21,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.35,
+            0.6
+          ],
+          "pairs": 20,
+          "score": 0.475,
+          "seed": 4510000,
+          "wins": 19,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 7
+        }
+      },
+      "selection_score": 0.49250000000000005,
+      "stage": "league",
+      "training_seed": 1731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed1731_league7.pt",
+      "checkpoint_sha256": "adc398ef9475f3a2ae00db24ba68cf381a283ff7f8e65f56267eb7cc28ce98cd",
+      "development_seed": 4310000,
+      "epoch": 7,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 46.725,
+          "candidate": "temporal_seed1731_league7",
+          "draws": 0,
+          "elapsed_seconds": 2.778088226012187,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 18,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.425,
+            0.675
+          ],
+          "pairs": 20,
+          "score": 0.55,
+          "seed": 4410000,
+          "wins": 22,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 10
+        },
+        "ppo_champion": {
+          "average_turns": 37.35,
+          "candidate": "temporal_seed1731_league7",
+          "draws": 0,
+          "elapsed_seconds": 1.0856224410090363,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 22,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.325,
+            0.575
+          ],
+          "pairs": 20,
+          "score": 0.45,
+          "seed": 4310000,
+          "wins": 18,
+          "wins_as_seat_0": 6,
+          "wins_as_seat_1": 12
+        },
+        "random": {
+          "average_turns": 56.15,
+          "candidate": "temporal_seed1731_league7",
+          "draws": 0,
+          "elapsed_seconds": 1.0645320600015111,
+          "games": 40,
+          "gate_passed": true,
+          "losses": 12,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.575,
+            0.825
+          ],
+          "pairs": 20,
+          "score": 0.7,
+          "seed": 4610000,
+          "wins": 28,
+          "wins_as_seat_0": 13,
+          "wins_as_seat_1": 15
+        },
+        "smart_rule": {
+          "average_turns": 32.3,
+          "candidate": "temporal_seed1731_league7",
+          "draws": 0,
+          "elapsed_seconds": 0.5910031169914873,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 21,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.35,
+            0.6
+          ],
+          "pairs": 20,
+          "score": 0.475,
+          "seed": 4510000,
+          "wins": 19,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 7
+        }
+      },
+      "selection_score": 0.5,
+      "stage": "league",
+      "training_seed": 1731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed1731_league8.pt",
+      "checkpoint_sha256": "00c556dddecd59311dc8783316cac344d084beca14a20746c9ade748c068a286",
+      "development_seed": 4310000,
+      "epoch": 8,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 44.95,
+          "candidate": "temporal_seed1731_league8",
+          "draws": 0,
+          "elapsed_seconds": 2.656761104997713,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 17,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.45,
+            0.7
+          ],
+          "pairs": 20,
+          "score": 0.575,
+          "seed": 4410000,
+          "wins": 23,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 11
+        },
+        "ppo_champion": {
+          "average_turns": 43.55,
+          "candidate": "temporal_seed1731_league8",
+          "draws": 0,
+          "elapsed_seconds": 1.2575183409935562,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 21,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.35,
+            0.6
+          ],
+          "pairs": 20,
+          "score": 0.475,
+          "seed": 4310000,
+          "wins": 19,
+          "wins_as_seat_0": 7,
+          "wins_as_seat_1": 12
+        },
+        "random": {
+          "average_turns": 54.0,
+          "candidate": "temporal_seed1731_league8",
+          "draws": 0,
+          "elapsed_seconds": 0.9909587459987961,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 14,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.5,
+            0.775
+          ],
+          "pairs": 20,
+          "score": 0.65,
+          "seed": 4610000,
+          "wins": 26,
+          "wins_as_seat_0": 11,
+          "wins_as_seat_1": 15
+        },
+        "smart_rule": {
+          "average_turns": 32.3,
+          "candidate": "temporal_seed1731_league8",
+          "draws": 0,
+          "elapsed_seconds": 0.5773639959952561,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 21,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.35,
+            0.6
+          ],
+          "pairs": 20,
+          "score": 0.475,
+          "seed": 4510000,
+          "wins": 19,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 7
+        }
+      },
+      "selection_score": 0.5125,
+      "stage": "league",
+      "training_seed": 1731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed1731_league9.pt",
+      "checkpoint_sha256": "65c0e1735bb86eddc45931f13bed490f79a750611c2b8e1aabd958c7851d0e9c",
+      "development_seed": 4310000,
+      "epoch": 9,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 46.125,
+          "candidate": "temporal_seed1731_league9",
+          "draws": 0,
+          "elapsed_seconds": 2.7471407979901414,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 17,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.45,
+            0.7
+          ],
+          "pairs": 20,
+          "score": 0.575,
+          "seed": 4410000,
+          "wins": 23,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 11
+        },
+        "ppo_champion": {
+          "average_turns": 42.35,
+          "candidate": "temporal_seed1731_league9",
+          "draws": 0,
+          "elapsed_seconds": 1.21766885901161,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 20,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.375,
+            0.625
+          ],
+          "pairs": 20,
+          "score": 0.5,
+          "seed": 4310000,
+          "wins": 20,
+          "wins_as_seat_0": 7,
+          "wins_as_seat_1": 13
+        },
+        "random": {
+          "average_turns": 54.0,
+          "candidate": "temporal_seed1731_league9",
+          "draws": 0,
+          "elapsed_seconds": 0.9910591769876191,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 14,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.5,
+            0.775
+          ],
+          "pairs": 20,
+          "score": 0.65,
+          "seed": 4610000,
+          "wins": 26,
+          "wins_as_seat_0": 11,
+          "wins_as_seat_1": 15
+        },
+        "smart_rule": {
+          "average_turns": 32.3,
+          "candidate": "temporal_seed1731_league9",
+          "draws": 0,
+          "elapsed_seconds": 0.5847580840054434,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 21,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.35,
+            0.6
+          ],
+          "pairs": 20,
+          "score": 0.475,
+          "seed": 4510000,
+          "wins": 19,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 7
+        }
+      },
+      "selection_score": 0.525,
+      "stage": "league",
+      "training_seed": 1731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed1731_league10.pt",
+      "checkpoint_sha256": "c2f351e27e7c774ffd25b5024923de41976e8031421621a233de66503eddb8cd",
+      "development_seed": 4310000,
+      "epoch": 10,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 45.925,
+          "candidate": "temporal_seed1731_league10",
+          "draws": 0,
+          "elapsed_seconds": 2.7661106239975197,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 17,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.45,
+            0.7
+          ],
+          "pairs": 20,
+          "score": 0.575,
+          "seed": 4410000,
+          "wins": 23,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 11
+        },
+        "ppo_champion": {
+          "average_turns": 42.35,
+          "candidate": "temporal_seed1731_league10",
+          "draws": 0,
+          "elapsed_seconds": 1.2131565349991433,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 20,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.375,
+            0.625
+          ],
+          "pairs": 20,
+          "score": 0.5,
+          "seed": 4310000,
+          "wins": 20,
+          "wins_as_seat_0": 7,
+          "wins_as_seat_1": 13
+        },
+        "random": {
+          "average_turns": 48.85,
+          "candidate": "temporal_seed1731_league10",
+          "draws": 0,
+          "elapsed_seconds": 0.909132344997488,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 14,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.5,
+            0.775
+          ],
+          "pairs": 20,
+          "score": 0.65,
+          "seed": 4610000,
+          "wins": 26,
+          "wins_as_seat_0": 11,
+          "wins_as_seat_1": 15
+        },
+        "smart_rule": {
+          "average_turns": 32.35,
+          "candidate": "temporal_seed1731_league10",
+          "draws": 0,
+          "elapsed_seconds": 0.5856577539962018,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 21,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.35,
+            0.6
+          ],
+          "pairs": 20,
+          "score": 0.475,
+          "seed": 4510000,
+          "wins": 19,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 7
+        }
+      },
+      "selection_score": 0.525,
+      "stage": "league",
+      "training_seed": 1731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed2731_imitation.pt",
+      "checkpoint_sha256": "a26f849d5f660cf70fd8870d5ece28d253572331b32c459193eadd00775ff983",
+      "development_seed": 4310000,
+      "epoch": 0,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 45.825,
+          "candidate": "temporal_seed2731_imitation0",
+          "draws": 0,
+          "elapsed_seconds": 2.7655986979953013,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 16,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.45,
+            0.75
+          ],
+          "pairs": 20,
+          "score": 0.6,
+          "seed": 4410000,
+          "wins": 24,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 12
+        },
+        "ppo_champion": {
+          "average_turns": 40.575,
+          "candidate": "temporal_seed2731_imitation0",
+          "draws": 0,
+          "elapsed_seconds": 1.229655511007877,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 25,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.275,
+            0.45
+          ],
+          "pairs": 20,
+          "score": 0.375,
+          "seed": 4310000,
+          "wins": 15,
+          "wins_as_seat_0": 6,
+          "wins_as_seat_1": 9
+        },
+        "random": {
+          "average_turns": 52.75,
+          "candidate": "temporal_seed2731_imitation0",
+          "draws": 0,
+          "elapsed_seconds": 1.0055076190037653,
+          "games": 40,
+          "gate_passed": true,
+          "losses": 12,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.55,
+            0.85
+          ],
+          "pairs": 20,
+          "score": 0.7,
+          "seed": 4610000,
+          "wins": 28,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 16
+        },
+        "smart_rule": {
+          "average_turns": 31.375,
+          "candidate": "temporal_seed2731_imitation0",
+          "draws": 0,
+          "elapsed_seconds": 0.5703467019920936,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 18,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.425,
+            0.675
+          ],
+          "pairs": 20,
+          "score": 0.55,
+          "seed": 4510000,
+          "wins": 22,
+          "wins_as_seat_0": 14,
+          "wins_as_seat_1": 8
+        }
+      },
+      "selection_score": 0.4875,
+      "stage": "imitation",
+      "training_seed": 2731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed2731_league1.pt",
+      "checkpoint_sha256": "8bde83ff2625e4a8f5fa3a6809a7a0f8e580860efdd5a040222f60a69a9f7fc6",
+      "development_seed": 4310000,
+      "epoch": 1,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 46.675,
+          "candidate": "temporal_seed2731_league1",
+          "draws": 0,
+          "elapsed_seconds": 2.765859270992223,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 18,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.4,
+            0.675
+          ],
+          "pairs": 20,
+          "score": 0.55,
+          "seed": 4410000,
+          "wins": 22,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 10
+        },
+        "ppo_champion": {
+          "average_turns": 38.9,
+          "candidate": "temporal_seed2731_league1",
+          "draws": 0,
+          "elapsed_seconds": 1.145332308995421,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 23,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.35,
+            0.5
+          ],
+          "pairs": 20,
+          "score": 0.425,
+          "seed": 4310000,
+          "wins": 17,
+          "wins_as_seat_0": 6,
+          "wins_as_seat_1": 11
+        },
+        "random": {
+          "average_turns": 52.575,
+          "candidate": "temporal_seed2731_league1",
+          "draws": 0,
+          "elapsed_seconds": 0.9951959970057942,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 13,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.5,
+            0.825
+          ],
+          "pairs": 20,
+          "score": 0.675,
+          "seed": 4610000,
+          "wins": 27,
+          "wins_as_seat_0": 11,
+          "wins_as_seat_1": 16
+        },
+        "smart_rule": {
+          "average_turns": 32.1,
+          "candidate": "temporal_seed2731_league1",
+          "draws": 0,
+          "elapsed_seconds": 0.5849424559855834,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 18,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.425,
+            0.675
+          ],
+          "pairs": 20,
+          "score": 0.55,
+          "seed": 4510000,
+          "wins": 22,
+          "wins_as_seat_0": 14,
+          "wins_as_seat_1": 8
+        }
+      },
+      "selection_score": 0.5,
+      "stage": "league",
+      "training_seed": 2731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed2731_league2.pt",
+      "checkpoint_sha256": "153c7393a15415a7084d0f82d934122143323130f7797f9edf020043a639c0f7",
+      "development_seed": 4310000,
+      "epoch": 2,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 50.975,
+          "candidate": "temporal_seed2731_league2",
+          "draws": 0,
+          "elapsed_seconds": 2.9611333789944183,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 18,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.4,
+            0.675
+          ],
+          "pairs": 20,
+          "score": 0.55,
+          "seed": 4410000,
+          "wins": 22,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 10
+        },
+        "ppo_champion": {
+          "average_turns": 41.225,
+          "candidate": "temporal_seed2731_league2",
+          "draws": 0,
+          "elapsed_seconds": 1.2124523670063354,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 24,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.3,
+            0.475
+          ],
+          "pairs": 20,
+          "score": 0.4,
+          "seed": 4310000,
+          "wins": 16,
+          "wins_as_seat_0": 6,
+          "wins_as_seat_1": 10
+        },
+        "random": {
+          "average_turns": 57.65,
+          "candidate": "temporal_seed2731_league2",
+          "draws": 0,
+          "elapsed_seconds": 1.0835480160021689,
+          "games": 40,
+          "gate_passed": true,
+          "losses": 12,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.55,
+            0.825
+          ],
+          "pairs": 20,
+          "score": 0.7,
+          "seed": 4610000,
+          "wins": 28,
+          "wins_as_seat_0": 11,
+          "wins_as_seat_1": 17
+        },
+        "smart_rule": {
+          "average_turns": 32.85,
+          "candidate": "temporal_seed2731_league2",
+          "draws": 0,
+          "elapsed_seconds": 0.6106172809959389,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 19,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.4,
+            0.65
+          ],
+          "pairs": 20,
+          "score": 0.525,
+          "seed": 4510000,
+          "wins": 21,
+          "wins_as_seat_0": 13,
+          "wins_as_seat_1": 8
+        }
+      },
+      "selection_score": 0.48500000000000004,
+      "stage": "league",
+      "training_seed": 2731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed2731_league3.pt",
+      "checkpoint_sha256": "69f1d62e472d96e8d622f5afe84ac8780f07c2acbb964a27e93f72814ea9d524",
+      "development_seed": 4310000,
+      "epoch": 3,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 49.225,
+          "candidate": "temporal_seed2731_league3",
+          "draws": 0,
+          "elapsed_seconds": 2.8244148259982467,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 16,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.45,
+            0.75
+          ],
+          "pairs": 20,
+          "score": 0.6,
+          "seed": 4410000,
+          "wins": 24,
+          "wins_as_seat_0": 13,
+          "wins_as_seat_1": 11
+        },
+        "ppo_champion": {
+          "average_turns": 41.3,
+          "candidate": "temporal_seed2731_league3",
+          "draws": 0,
+          "elapsed_seconds": 1.2132971459941473,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 26,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.25,
+            0.45
+          ],
+          "pairs": 20,
+          "score": 0.35,
+          "seed": 4310000,
+          "wins": 14,
+          "wins_as_seat_0": 6,
+          "wins_as_seat_1": 8
+        },
+        "random": {
+          "average_turns": 50.95,
+          "candidate": "temporal_seed2731_league3",
+          "draws": 0,
+          "elapsed_seconds": 0.9599741979909595,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 13,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.5,
+            0.825
+          ],
+          "pairs": 20,
+          "score": 0.675,
+          "seed": 4610000,
+          "wins": 27,
+          "wins_as_seat_0": 10,
+          "wins_as_seat_1": 17
+        },
+        "smart_rule": {
+          "average_turns": 33.15,
+          "candidate": "temporal_seed2731_league3",
+          "draws": 0,
+          "elapsed_seconds": 0.6006451919965912,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 19,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.4,
+            0.65
+          ],
+          "pairs": 20,
+          "score": 0.525,
+          "seed": 4510000,
+          "wins": 21,
+          "wins_as_seat_0": 13,
+          "wins_as_seat_1": 8
+        }
+      },
+      "selection_score": 0.4675,
+      "stage": "league",
+      "training_seed": 2731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed2731_league4.pt",
+      "checkpoint_sha256": "5fd5d0d05de4fc458e158f6a3b1958a33673016988a8312cf791c55f5f53f64e",
+      "development_seed": 4310000,
+      "epoch": 4,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 50.3,
+          "candidate": "temporal_seed2731_league4",
+          "draws": 0,
+          "elapsed_seconds": 2.8563073850091314,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 15,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.45,
+            0.775
+          ],
+          "pairs": 20,
+          "score": 0.625,
+          "seed": 4410000,
+          "wins": 25,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 13
+        },
+        "ppo_champion": {
+          "average_turns": 41.925,
+          "candidate": "temporal_seed2731_league4",
+          "draws": 0,
+          "elapsed_seconds": 1.2199414350034203,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 25,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.25,
+            0.5
+          ],
+          "pairs": 20,
+          "score": 0.375,
+          "seed": 4310000,
+          "wins": 15,
+          "wins_as_seat_0": 5,
+          "wins_as_seat_1": 10
+        },
+        "random": {
+          "average_turns": 51.4,
+          "candidate": "temporal_seed2731_league4",
+          "draws": 0,
+          "elapsed_seconds": 0.963515390001703,
+          "games": 40,
+          "gate_passed": true,
+          "losses": 12,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.525,
+            0.85
+          ],
+          "pairs": 20,
+          "score": 0.7,
+          "seed": 4610000,
+          "wins": 28,
+          "wins_as_seat_0": 11,
+          "wins_as_seat_1": 17
+        },
+        "smart_rule": {
+          "average_turns": 36.275,
+          "candidate": "temporal_seed2731_league4",
+          "draws": 0,
+          "elapsed_seconds": 0.6803737490117783,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 18,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.425,
+            0.675
+          ],
+          "pairs": 20,
+          "score": 0.55,
+          "seed": 4510000,
+          "wins": 22,
+          "wins_as_seat_0": 14,
+          "wins_as_seat_1": 8
+        }
+      },
+      "selection_score": 0.4925,
+      "stage": "league",
+      "training_seed": 2731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed2731_league5.pt",
+      "checkpoint_sha256": "e9367effd018b093b82899832d59aadbfa4838b7bcc298b360bfe9fef6f317e0",
+      "development_seed": 4310000,
+      "epoch": 5,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 47.6,
+          "candidate": "temporal_seed2731_league5",
+          "draws": 0,
+          "elapsed_seconds": 2.7492519640072715,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 14,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.475,
+            0.8
+          ],
+          "pairs": 20,
+          "score": 0.65,
+          "seed": 4410000,
+          "wins": 26,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 14
+        },
+        "ppo_champion": {
+          "average_turns": 42.05,
+          "candidate": "temporal_seed2731_league5",
+          "draws": 0,
+          "elapsed_seconds": 1.2261560289916815,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 24,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.275,
+            0.525
+          ],
+          "pairs": 20,
+          "score": 0.4,
+          "seed": 4310000,
+          "wins": 16,
+          "wins_as_seat_0": 5,
+          "wins_as_seat_1": 11
+        },
+        "random": {
+          "average_turns": 52.1,
+          "candidate": "temporal_seed2731_league5",
+          "draws": 0,
+          "elapsed_seconds": 0.9854961219971301,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 13,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.5,
+            0.825
+          ],
+          "pairs": 20,
+          "score": 0.675,
+          "seed": 4610000,
+          "wins": 27,
+          "wins_as_seat_0": 11,
+          "wins_as_seat_1": 16
+        },
+        "smart_rule": {
+          "average_turns": 33.425,
+          "candidate": "temporal_seed2731_league5",
+          "draws": 0,
+          "elapsed_seconds": 0.6115029110078467,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 17,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.45,
+            0.7
+          ],
+          "pairs": 20,
+          "score": 0.575,
+          "seed": 4510000,
+          "wins": 23,
+          "wins_as_seat_0": 14,
+          "wins_as_seat_1": 9
+        }
+      },
+      "selection_score": 0.5125,
+      "stage": "league",
+      "training_seed": 2731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed2731_league6.pt",
+      "checkpoint_sha256": "8771a43976ea9a041c9df56a301b8fc2a76fa41cf7d114b9ce259fb39b8cffe1",
+      "development_seed": 4310000,
+      "epoch": 6,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 47.125,
+          "candidate": "temporal_seed2731_league6",
+          "draws": 0,
+          "elapsed_seconds": 2.794072466000216,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 17,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.425,
+            0.7
+          ],
+          "pairs": 20,
+          "score": 0.575,
+          "seed": 4410000,
+          "wins": 23,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 11
+        },
+        "ppo_champion": {
+          "average_turns": 43.85,
+          "candidate": "temporal_seed2731_league6",
+          "draws": 0,
+          "elapsed_seconds": 1.2763010950002354,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 25,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.25,
+            0.5
+          ],
+          "pairs": 20,
+          "score": 0.375,
+          "seed": 4310000,
+          "wins": 15,
+          "wins_as_seat_0": 5,
+          "wins_as_seat_1": 10
+        },
+        "random": {
+          "average_turns": 52.1,
+          "candidate": "temporal_seed2731_league6",
+          "draws": 0,
+          "elapsed_seconds": 1.0567945880029583,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 14,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.5,
+            0.8
+          ],
+          "pairs": 20,
+          "score": 0.65,
+          "seed": 4610000,
+          "wins": 26,
+          "wins_as_seat_0": 10,
+          "wins_as_seat_1": 16
+        },
+        "smart_rule": {
+          "average_turns": 33.65,
+          "candidate": "temporal_seed2731_league6",
+          "draws": 0,
+          "elapsed_seconds": 0.6302013929962413,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 18,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.425,
+            0.675
+          ],
+          "pairs": 20,
+          "score": 0.55,
+          "seed": 4510000,
+          "wins": 22,
+          "wins_as_seat_0": 13,
+          "wins_as_seat_1": 9
+        }
+      },
+      "selection_score": 0.47750000000000004,
+      "stage": "league",
+      "training_seed": 2731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed2731_league7.pt",
+      "checkpoint_sha256": "13cf09a4a79c0e2a4776f4b8890ee849fae62b41eaace6a6bdfc41b41bcc23bc",
+      "development_seed": 4310000,
+      "epoch": 7,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 46.65,
+          "candidate": "temporal_seed2731_league7",
+          "draws": 0,
+          "elapsed_seconds": 2.774820106991683,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 17,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.425,
+            0.725
+          ],
+          "pairs": 20,
+          "score": 0.575,
+          "seed": 4410000,
+          "wins": 23,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 11
+        },
+        "ppo_champion": {
+          "average_turns": 42.025,
+          "candidate": "temporal_seed2731_league7",
+          "draws": 0,
+          "elapsed_seconds": 1.2294547180063091,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 25,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.275,
+            0.475
+          ],
+          "pairs": 20,
+          "score": 0.375,
+          "seed": 4310000,
+          "wins": 15,
+          "wins_as_seat_0": 4,
+          "wins_as_seat_1": 11
+        },
+        "random": {
+          "average_turns": 52.35,
+          "candidate": "temporal_seed2731_league7",
+          "draws": 0,
+          "elapsed_seconds": 1.0143805539992172,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 14,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.475,
+            0.8
+          ],
+          "pairs": 20,
+          "score": 0.65,
+          "seed": 4610000,
+          "wins": 26,
+          "wins_as_seat_0": 10,
+          "wins_as_seat_1": 16
+        },
+        "smart_rule": {
+          "average_turns": 34.375,
+          "candidate": "temporal_seed2731_league7",
+          "draws": 0,
+          "elapsed_seconds": 0.641335626001819,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 18,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.425,
+            0.675
+          ],
+          "pairs": 20,
+          "score": 0.55,
+          "seed": 4510000,
+          "wins": 22,
+          "wins_as_seat_0": 13,
+          "wins_as_seat_1": 9
+        }
+      },
+      "selection_score": 0.47750000000000004,
+      "stage": "league",
+      "training_seed": 2731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed2731_league8.pt",
+      "checkpoint_sha256": "72c6604c53cec15adcfb200055915c59509eb1653ac32fb92f6d71140ddcb298",
+      "development_seed": 4310000,
+      "epoch": 8,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 44.675,
+          "candidate": "temporal_seed2731_league8",
+          "draws": 0,
+          "elapsed_seconds": 2.66224428100395,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 16,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.45,
+            0.75
+          ],
+          "pairs": 20,
+          "score": 0.6,
+          "seed": 4410000,
+          "wins": 24,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 12
+        },
+        "ppo_champion": {
+          "average_turns": 42.2,
+          "candidate": "temporal_seed2731_league8",
+          "draws": 0,
+          "elapsed_seconds": 1.2229977420065552,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 27,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.225,
+            0.425
+          ],
+          "pairs": 20,
+          "score": 0.325,
+          "seed": 4310000,
+          "wins": 13,
+          "wins_as_seat_0": 3,
+          "wins_as_seat_1": 10
+        },
+        "random": {
+          "average_turns": 52.1,
+          "candidate": "temporal_seed2731_league8",
+          "draws": 0,
+          "elapsed_seconds": 0.9633459390024655,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 15,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.475,
+            0.775
+          ],
+          "pairs": 20,
+          "score": 0.625,
+          "seed": 4610000,
+          "wins": 25,
+          "wins_as_seat_0": 10,
+          "wins_as_seat_1": 15
+        },
+        "smart_rule": {
+          "average_turns": 36.0,
+          "candidate": "temporal_seed2731_league8",
+          "draws": 0,
+          "elapsed_seconds": 0.6563411529932637,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 17,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.45,
+            0.7
+          ],
+          "pairs": 20,
+          "score": 0.575,
+          "seed": 4510000,
+          "wins": 23,
+          "wins_as_seat_0": 14,
+          "wins_as_seat_1": 9
+        }
+      },
+      "selection_score": 0.45999999999999996,
+      "stage": "league",
+      "training_seed": 2731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed2731_league9.pt",
+      "checkpoint_sha256": "abfc04c2cc063837454f1e08689a6ea686efaea9bdfc6573bfba690515cde6c1",
+      "development_seed": 4310000,
+      "epoch": 9,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 42.65,
+          "candidate": "temporal_seed2731_league9",
+          "draws": 0,
+          "elapsed_seconds": 2.5686428690096363,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 16,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.45,
+            0.75
+          ],
+          "pairs": 20,
+          "score": 0.6,
+          "seed": 4410000,
+          "wins": 24,
+          "wins_as_seat_0": 12,
+          "wins_as_seat_1": 12
+        },
+        "ppo_champion": {
+          "average_turns": 42.0,
+          "candidate": "temporal_seed2731_league9",
+          "draws": 0,
+          "elapsed_seconds": 1.2209142270003213,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 25,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.275,
+            0.45
+          ],
+          "pairs": 20,
+          "score": 0.375,
+          "seed": 4310000,
+          "wins": 15,
+          "wins_as_seat_0": 4,
+          "wins_as_seat_1": 11
+        },
+        "random": {
+          "average_turns": 52.125,
+          "candidate": "temporal_seed2731_league9",
+          "draws": 0,
+          "elapsed_seconds": 0.9838496320007835,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 15,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.475,
+            0.775
+          ],
+          "pairs": 20,
+          "score": 0.625,
+          "seed": 4610000,
+          "wins": 25,
+          "wins_as_seat_0": 11,
+          "wins_as_seat_1": 14
+        },
+        "smart_rule": {
+          "average_turns": 36.475,
+          "candidate": "temporal_seed2731_league9",
+          "draws": 0,
+          "elapsed_seconds": 0.6728816899994854,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 18,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.425,
+            0.675
+          ],
+          "pairs": 20,
+          "score": 0.55,
+          "seed": 4510000,
+          "wins": 22,
+          "wins_as_seat_0": 14,
+          "wins_as_seat_1": 8
+        }
+      },
+      "selection_score": 0.48,
+      "stage": "league",
+      "training_seed": 2731
+    },
+    {
+      "checkpoint": "benchmarks/puffer4_temporal_checkpoints/temporal_native_seed2731_league10.pt",
+      "checkpoint_sha256": "b75f7c83680cb0dae6d72089a71b6887397ee64891d269bec9ffabb0069570a1",
+      "development_seed": 4310000,
+      "epoch": 10,
+      "pairs_per_opponent": 20,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 46.325,
+          "candidate": "temporal_seed2731_league10",
+          "draws": 0,
+          "elapsed_seconds": 2.7571670280012768,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 18,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.4,
+            0.7
+          ],
+          "pairs": 20,
+          "score": 0.55,
+          "seed": 4410000,
+          "wins": 22,
+          "wins_as_seat_0": 10,
+          "wins_as_seat_1": 12
+        },
+        "ppo_champion": {
+          "average_turns": 41.175,
+          "candidate": "temporal_seed2731_league10",
+          "draws": 0,
+          "elapsed_seconds": 1.2017535499908263,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 25,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.275,
+            0.45
+          ],
+          "pairs": 20,
+          "score": 0.375,
+          "seed": 4310000,
+          "wins": 15,
+          "wins_as_seat_0": 4,
+          "wins_as_seat_1": 11
+        },
+        "random": {
+          "average_turns": 48.25,
+          "candidate": "temporal_seed2731_league10",
+          "draws": 0,
+          "elapsed_seconds": 0.9116818649927154,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 16,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.475,
+            0.725
+          ],
+          "pairs": 20,
+          "score": 0.6,
+          "seed": 4610000,
+          "wins": 24,
+          "wins_as_seat_0": 11,
+          "wins_as_seat_1": 13
+        },
+        "smart_rule": {
+          "average_turns": 36.475,
+          "candidate": "temporal_seed2731_league10",
+          "draws": 0,
+          "elapsed_seconds": 0.6747596920031356,
+          "games": 40,
+          "gate_passed": false,
+          "losses": 19,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.375,
+            0.675
+          ],
+          "pairs": 20,
+          "score": 0.525,
+          "seed": 4510000,
+          "wins": 21,
+          "wins_as_seat_0": 13,
+          "wins_as_seat_1": 8
+        }
+      },
+      "selection_score": 0.4625,
+      "stage": "league",
+      "training_seed": 2731
+    }
+  ],
+  "purpose": "development-only checkpoint selection and aggregate disagreement diagnosis; not held-out final evidence",
+  "schema_version": 1,
+  "selection_weights": {
+    "bayesian_tree": 0.2,
+    "ppo_champion": 0.5,
+    "random": 0.1,
+    "smart_rule": 0.2
+  }
+}

@@ -27,6 +27,17 @@ from flask_socketio import SocketIO, emit, join_room, leave_room, rooms
 import card
 import deck
 from supervisedAgent import StudentNet
+from ai_observation import (
+    ACTION_COUNT,
+    COMPATIBLE_START,
+    HAND_END,
+    MODE_INDEX,
+    OBSERVATION_SIZE,
+    PASS_ACTION,
+    SUIT_ACTION_END,
+    SUIT_ACTION_START,
+    populate_game_context,
+)
 
 # Custom card handling for web game
 def get_web_card_data(card_num: int) -> Dict[str, Any]:
@@ -113,6 +124,20 @@ def is_web_card_compatible(card_num: int, current_sort: str, current_true_number
     
     return False
 
+
+def is_web_card_playable(card_num: int, game_state: "GameState") -> bool:
+    """Apply the same penalty-aware legality used by the training engine."""
+    if game_state.penalty_amount > 0:
+        return (
+            get_web_card_data(card_num)["truenumber"]
+            == game_state.current_true_number
+        )
+    return is_web_card_compatible(
+        card_num,
+        game_state.current_sort,
+        game_state.current_true_number,
+    )
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -191,7 +216,10 @@ class AIPlayer:
                 continue
                 
             try:
-                self.model = StudentNet(input_dim=121, output_dim=55).to(self.device)
+                self.model = StudentNet(
+                    input_dim=OBSERVATION_SIZE,
+                    output_dim=ACTION_COUNT,
+                ).to(self.device)
                 
                 # Try loading with different map locations for compatibility
                 try:
@@ -223,7 +251,7 @@ class AIPlayer:
 
     def get_observation(self, player: PlayerState, game_state: GameState) -> np.ndarray:
         """Create observation vector for AI player"""
-        obs = np.zeros(121, dtype=np.float32)
+        obs = np.zeros(OBSERVATION_SIZE, dtype=np.float32)
         
         # Player's hand (cards 0-49 at positions 0-49, compatible flags at 50-99)
         for card_num in player.hand:
@@ -232,29 +260,19 @@ class AIPlayer:
             if card_num >= 50 and card_num <= 53:
                 obs_card_num = 48  # All Jack variants treated as generic Jack for AI
             
-            if obs_card_num <= 49:  # Ensure valid range (0-49)
+            if obs_card_num < HAND_END:  # Ensure valid range (0-49)
                 obs[obs_card_num] += 1
-                if self._is_compatible(card_num, game_state.current_sort, game_state.current_true_number):
-                    obs[obs_card_num + 50] += 1  # Compatible flags start at position 50
-        
-        # Suits played (108-112)
-        for i in range(5):
-            obs[108 + i] = game_state.sorts_played[i]
-        
-        # Play mode flag (113)
-        obs[113] = 0  # 0 = play card, 1 = change sort
-        
-        # Other players' hand sizes (114-117) - truncate to max 4 players in observation
+                if is_web_card_playable(card_num, game_state):
+                    obs[obs_card_num + COMPATIBLE_START] += 1
+
         player_idx = next(i for i, p in enumerate(game_state.players) if p.id == player.id)
-        for i in range(min(len(game_state.players), 4)):  # Truncate to max 4 players
-            relative_idx = (player_idx + i) % len(game_state.players)
-            obs[114 + i] = len(game_state.players[relative_idx].hand)
-        
-        # Player index and direction (118-119)
-        obs[118] = player_idx
-        obs[119] = game_state.direction
-        
-        return obs
+        return populate_game_context(
+            obs,
+            sorts_played=game_state.sorts_played,
+            hand_sizes=[len(other_player.hand) for other_player in game_state.players],
+            player_index=player_idx,
+            direction=game_state.direction,
+        )
 
     def _is_compatible(self, card_num: int, current_sort: str, current_true_number: int) -> bool:
         """Check if card is compatible with current table state"""
@@ -262,21 +280,21 @@ class AIPlayer:
 
     def get_action_mask(self, obs: np.ndarray, is_change_sort: bool = False) -> np.ndarray:
         """Get valid action mask"""
-        mask = np.zeros(55, dtype=np.float32)
+        mask = np.zeros(ACTION_COUNT, dtype=np.float32)
         
         if not is_change_sort:  # Play card mode
             # Check compatible cards (positions 50-99 in observation for cards 0-49)
             compatible_cards = []
-            for card_num in range(50):  # Cards 0-49
-                if obs[card_num + 50] >= 1:  # Check compatible flag at position 50+card_num
+            for card_num in range(HAND_END):  # Cards 0-49
+                if obs[card_num + COMPATIBLE_START] >= 1:
                     mask[card_num] = 1
                     compatible_cards.append(card_num)
-            mask[54] = 1  # Can always pass
+            mask[PASS_ACTION] = 1  # Can always pass
             logger.info(f"AI ACTION MASK: compatible cards {compatible_cards}, pass=True")
         else:  # Change sort mode
-            for x in range(50, 54):  # Suits 0-3
+            for x in range(SUIT_ACTION_START, SUIT_ACTION_END):
                 mask[x] = 1
-            mask[54] = 0  # Cannot pass when changing sort
+            mask[PASS_ACTION] = 0  # Cannot pass when changing sort
             logger.info(f"AI SUIT MASK: suits 50-53 available, pass=False")
         
         return mask
@@ -293,7 +311,7 @@ class AIPlayer:
         
         obs = self.get_observation(player, game_state)
         if is_change_sort:
-            obs[113] = 1
+            obs[MODE_INDEX] = 1
         
         mask = self.get_action_mask(obs, is_change_sort)
         
@@ -329,27 +347,13 @@ class AIPlayer:
         if self.model is None:
             return self._random_action_with_drawn_card(player, game_state, drawn_card)
         
-        # Create temporary observation with drawn card added to compatible cards
+        # The draw operation updates player.hand before this method is called,
+        # so get_observation already contains the drawn card exactly once.
         obs = self.get_observation(player, game_state)
-        
-        # Temporarily add the drawn card to observation as if it's in hand
-        obs_card_num = drawn_card
-        if drawn_card >= 50 and drawn_card <= 53:
-            obs_card_num = 48  # Map Jack variants to generic Jack for AI
-        
-        if obs_card_num <= 49:
-            obs[obs_card_num] += 1  # Add to hand representation
-            if self._is_compatible(drawn_card, game_state.current_sort, game_state.current_true_number):
-                obs[obs_card_num + 50] += 1  # Add to compatible flags
-        
-        # Create action mask that includes the drawn card if compatible
-        mask = np.zeros(55, dtype=np.float32)
-        
-        # Add drawn card to mask if compatible
-        if self._is_compatible(drawn_card, game_state.current_sort, game_state.current_true_number):
-            mask[drawn_card if drawn_card <= 49 else 48] = 1
-            
-        mask[54] = 1  # Can always pass
+
+        # Training performed a normal policy decision after adding the drawn
+        # card, then only played when the policy selected that exact card.
+        mask = self.get_action_mask(obs)
         
         try:
             # PyTorch inference
@@ -379,7 +383,7 @@ class AIPlayer:
         # Find compatible cards
         compatible_cards = []
         for card_num in player.hand:
-            if card_num <= 53 and self._is_compatible(card_num, game_state.current_sort, game_state.current_true_number):
+            if card_num <= 53 and is_web_card_playable(card_num, game_state):
                 compatible_cards.append(card_num)
         
         if compatible_cards:
@@ -392,12 +396,8 @@ class AIPlayer:
         # Find compatible cards in hand
         compatible_cards = []
         for card_num in player.hand:
-            if card_num <= 53 and self._is_compatible(card_num, game_state.current_sort, game_state.current_true_number):
+            if card_num <= 53 and is_web_card_playable(card_num, game_state):
                 compatible_cards.append(card_num)
-        
-        # Add drawn card if compatible
-        if self._is_compatible(drawn_card, game_state.current_sort, game_state.current_true_number):
-            compatible_cards.append(drawn_card)
         
         # 70% chance to play drawn card if it's compatible, otherwise random choice
         if drawn_card in compatible_cards and random.random() < 0.7:
@@ -717,8 +717,9 @@ class GameRoom:
         
         # Update suits played
         sorts = ["harten", "ruiten", "schoppen", "klaveren", "special"]
-        if card_data["sort"] in sorts:
-            sort_index = sorts.index(card_data["sort"])
+        observed_sort = "special" if card_data["truenumber"] == 13 else card_data["sort"]
+        if observed_sort in sorts:
+            sort_index = sorts.index(observed_sort)
             self.game_state.sorts_played[sort_index] += 1
         
         # Check for win
@@ -1245,14 +1246,25 @@ class GameRoom:
             else:
                 return self.play_card(current_player.id, action)
     
-    def get_public_state(self, player_id: str = None) -> Dict[str, Any]:
+    def get_public_state(
+        self,
+        player_id: str = None,
+        check_direction_changed: bool = False,
+    ) -> Dict[str, Any]:
         """Get public game state for clients"""
         direction_changed_value = getattr(self.game_state, 'direction_just_changed', False)
-        logger.info(f"🌍 PUBLIC STATE: direction_changed = {direction_changed_value}")
+        logger.info(
+            "🌍 PUBLIC STATE: direction_changed = "
+            f"{direction_changed_value}, checking = {check_direction_changed}"
+        )
         
-        # Reset the flag immediately after reading it to prevent multiple broadcasts
-        if direction_changed_value:
-            logger.info(f"🔄 RESET: Setting direction_just_changed to False after first broadcast")
+        # Only include direction_changed when the client explicitly checks, and
+        # reset it after providing it.
+        if check_direction_changed and direction_changed_value:
+            logger.info(
+                "🔄 CLIENT REQUESTED: Providing direction_changed = True "
+                "and resetting flag"
+            )
             self.game_state.direction_just_changed = False
         
         # Hide other players' hands
@@ -1286,7 +1298,9 @@ class GameRoom:
             "winner": self.game_state.winner,
             "turn_count": self.game_state.turn_count,
             "turn_order": self.game_state.turn_order,
-            "direction_changed": getattr(self.game_state, 'direction_just_changed', False),
+            "direction_changed": (
+                direction_changed_value if check_direction_changed else False
+            ),
             "started": self.started,
             "grab_deck_size": len(self.game_state.grab_deck)
         }
@@ -1473,7 +1487,12 @@ def handle_add_ai_player(data):
             emit('error', {'message': 'Game already started'})
             return
         
-        ai_names = ["AI Jelle", "AI Luc", "AI Tadeema", "AI Ronald", "AI Ramon", "AI Remco", "AI Pim", "AI Lars", "AI Martin", "AI Levi", "AI Thomas", "AI Otger", "MechaHitler"]
+        ai_names = [
+            "AI Jelle", "AI Luc", "AI Tadeema", "AI Ronald", "AI Ramon",
+            "AI Remco", "AI Pim", "AI Lars", "AI Martin", "AI Levi",
+            "AI Thomas", "AI Otger", "MechaHitler", "AI Dribbel",
+            "AI Bartje", "AI Bowy", "AI Gertje", "AI Liesbeth",
+        ]
         np.random.shuffle(ai_names)
         ai_name = ai_names[len([p for p in game_room.game_state.players if p.is_ai]) % len(ai_names)]
         
@@ -1756,6 +1775,26 @@ def handle_leave_room(data):
                 'game_state': game_room.get_public_state()
             }, room=room_code)
 
+@socketio.on('check_direction_changed')
+def handle_check_direction_changed(data):
+    """Handle client request to check if direction changed"""
+    room_code = data.get('room_code', '').upper()
+
+    logger.info(f"CLIENT CHECK: Direction changed request for room {room_code}")
+
+    # Don't use rooms_lock here to avoid deadlock - just check if room exists
+    if room_code not in game_rooms:
+        emit('error', {'message': 'Room not found'})
+        return
+
+    game_room = game_rooms[room_code]
+    public_state = game_room.get_public_state(check_direction_changed=True)
+
+    emit('direction_status', {
+        'direction_changed': public_state['direction_changed'],
+        'direction': public_state['direction']
+    })
+
 @socketio.on('player_timeout')
 def handle_player_timeout(data):
     """Handle client-side timeout notification"""
@@ -1827,4 +1866,15 @@ def handle_disconnect():
                     return
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, host='0.0.0.0', port=5000)
+    debug_mode = os.environ.get("FLASK_DEBUG", "").lower() in {
+        "1",
+        "true",
+        "yes",
+    }
+    socketio.run(
+        app,
+        debug=debug_mode,
+        use_reloader=debug_mode,
+        host="0.0.0.0",
+        port=5000,
+    )

@@ -4,9 +4,26 @@ import torch.nn.functional as F
 import card
 import deck
 import numpy as np
+from ai_observation import (
+    ACTION_COUNT,
+    COMPATIBLE_END,
+    COMPATIBLE_START,
+    MODE_INDEX,
+    OBSERVATION_SIZE,
+    PASS_ACTION,
+    SUIT_ACTION_END,
+    SUIT_ACTION_START,
+    populate_game_context,
+)
 
 class DenseSkipNet(nn.Module):
-    def __init__(self, input_dim=121, hidden_dims=None, output_dim=55, dropout_prob=0.0):
+    def __init__(
+        self,
+        input_dim=OBSERVATION_SIZE,
+        hidden_dims=None,
+        output_dim=ACTION_COUNT,
+        dropout_prob=0.0,
+    ):
         super(DenseSkipNet, self).__init__()
         if hidden_dims is None:
             hidden_dims = [128, 128, 128, 128, 128, 128, 128]
@@ -47,50 +64,47 @@ class SupervisedAgent:
         self.mydeck = deck.Deck([])
     
     def obs(self):
-        obs = torch.zeros(121, dtype=torch.float)
+        obs = torch.zeros(OBSERVATION_SIZE, dtype=torch.float)
         for card_obj in self.mydeck.cards:
             obs[card_obj.number] += 1
-            if card_obj.compatible(self.game.current_sort, self.game.current_true_number):
+            if self.game.penalty_amount > 0:
+                is_playable = (
+                    card_obj.truenumber == self.game.current_true_number
+                )
+            else:
+                is_playable = card_obj.compatible(
+                    self.game.current_sort,
+                    self.game.current_true_number,
+                )
+            if is_playable:
                 obs[card_obj.number + 50] += 1
-        for i in range(5):
-            obs[100 + i] = self.game.sorts_played[i]
-        obs[105] = 0  # flag for playCard
         try:
             ai_index = self.game.players.index(self)
         except ValueError:
-            ai_index = 0
-        order = []
-        cur_index = ai_index
-        for _ in range(len(self.game.players)):
-            order.append(cur_index)
-            cur_index = self.game.calculate_next_player(cur_index, self.game.direction)
-        idx = 106
-        for player_index in order:
-            player = self.game.players[player_index]
-            obs[idx] = player.mydeck.cardCount()
-            idx += 1
-        try:
-            obs[119] = self.game.players.index(self)
-        except ValueError:
-            obs[119] = -1
-        obs[120] = self.game.direction
-        return obs
+            ai_index = -1
+        return populate_game_context(
+            obs,
+            sorts_played=self.game.sorts_played,
+            hand_sizes=[player.mydeck.cardCount() for player in self.game.players],
+            player_index=ai_index,
+            direction=self.game.direction,
+        )
 
     def get_action_mask(self, obs):
         if isinstance(obs, torch.Tensor):
             obs_list = obs.detach().cpu().numpy().tolist()
         else:
             obs_list = obs
-        mask = np.zeros(55, dtype=np.float32)
-        if obs_list[105] == 0:
-            for x in range(50, 100):
+        mask = np.zeros(ACTION_COUNT, dtype=np.float32)
+        if obs_list[MODE_INDEX] == 0:
+            for x in range(COMPATIBLE_START, COMPATIBLE_END):
                 if obs_list[x] >= 1:
-                    mask[x - 50] = 1
-            mask[54] = 1
+                    mask[x - COMPATIBLE_START] = 1
+            mask[PASS_ACTION] = 1
         else:
-            for x in range(50, 54):
+            for x in range(SUIT_ACTION_START, SUIT_ACTION_END):
                 mask[x] = 1
-            mask[54] = 0
+            mask[PASS_ACTION] = 0
         return torch.tensor(mask, device=self.device, dtype=torch.float)
 
     def act(self, obs):
@@ -112,7 +126,7 @@ class SupervisedAgent:
 
     def changeSort(self):
         observation = self.obs()
-        observation[105] = 1
+        observation[MODE_INDEX] = 1
         observation = observation.to(self.device)
         action = self.act(observation)
         return card.sorts[action - 50]
@@ -136,7 +150,7 @@ class StudentNet(nn.Module):
     Student network: a larger variant of DenseSkipNet with an extra layer and doubled hidden widths.
     Here we use 8 hidden layers of 256 units each.
     """
-    def __init__(self, input_dim=121, output_dim=55):
+    def __init__(self, input_dim=OBSERVATION_SIZE, output_dim=ACTION_COUNT):
         super(StudentNet, self).__init__()
         hidden_dims = [256] * 8
         self.model = DenseSkipNet(input_dim=input_dim, hidden_dims=hidden_dims, output_dim=output_dim, dropout_prob=0.3)
@@ -152,50 +166,47 @@ class SupervisedAgent2:
         self.mydeck = deck.Deck([])
     
     def obs(self):
-        obs = torch.zeros(121, dtype=torch.float)
+        obs = torch.zeros(OBSERVATION_SIZE, dtype=torch.float)
         for card_obj in self.mydeck.cards:
             obs[card_obj.number] += 1
-            if card_obj.compatible(self.game.current_sort, self.game.current_true_number):
+            if self.game.penalty_amount > 0:
+                is_playable = (
+                    card_obj.truenumber == self.game.current_true_number
+                )
+            else:
+                is_playable = card_obj.compatible(
+                    self.game.current_sort,
+                    self.game.current_true_number,
+                )
+            if is_playable:
                 obs[card_obj.number + 50] += 1
-        for i in range(5):
-            obs[100 + i] = self.game.sorts_played[i]
-        obs[105] = 0  # flag for playCard
         try:
             ai_index = self.game.players.index(self)
         except ValueError:
-            ai_index = 0
-        order = []
-        cur_index = ai_index
-        for _ in range(len(self.game.players)):
-            order.append(cur_index)
-            cur_index = self.game.calculate_next_player(cur_index, self.game.direction)
-        idx = 106
-        for player_index in order:
-            player = self.game.players[player_index]
-            obs[idx] = player.mydeck.cardCount()
-            idx += 1
-        try:
-            obs[119] = self.game.players.index(self)
-        except ValueError:
-            obs[119] = -1
-        obs[120] = self.game.direction
-        return obs
+            ai_index = -1
+        return populate_game_context(
+            obs,
+            sorts_played=self.game.sorts_played,
+            hand_sizes=[player.mydeck.cardCount() for player in self.game.players],
+            player_index=ai_index,
+            direction=self.game.direction,
+        )
 
     def get_action_mask(self, obs):
         if isinstance(obs, torch.Tensor):
             obs_list = obs.detach().cpu().numpy().tolist()
         else:
             obs_list = obs
-        mask = np.zeros(55, dtype=np.float32)
-        if obs_list[105] == 0:
-            for x in range(50, 100):
+        mask = np.zeros(ACTION_COUNT, dtype=np.float32)
+        if obs_list[MODE_INDEX] == 0:
+            for x in range(COMPATIBLE_START, COMPATIBLE_END):
                 if obs_list[x] >= 1:
-                    mask[x - 50] = 1
-            mask[54] = 1
+                    mask[x - COMPATIBLE_START] = 1
+            mask[PASS_ACTION] = 1
         else:
-            for x in range(50, 54):
+            for x in range(SUIT_ACTION_START, SUIT_ACTION_END):
                 mask[x] = 1
-            mask[54] = 0
+            mask[PASS_ACTION] = 0
         return torch.tensor(mask, device=self.device, dtype=torch.float)
 
     def act(self, obs):
@@ -217,7 +228,7 @@ class SupervisedAgent2:
 
     def changeSort(self):
         observation = self.obs()
-        observation[105] = 1
+        observation[MODE_INDEX] = 1
         observation = observation.to(self.device)
         action = self.act(observation)
         return card.sorts[action - 50]

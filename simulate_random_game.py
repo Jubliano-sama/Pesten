@@ -3,6 +3,7 @@ import argparse
 import multiprocessing
 import time
 import game
+import hardcodedAgent
 import randomAgent
 import smartAgent
 import supervisedAgent
@@ -204,7 +205,7 @@ def process_results(results, execution_time, label):
 def main():
     parser = argparse.ArgumentParser(description='Simulate games between agents.')
     parser.add_argument('-n', '--num_games', type=int, default=100, help='Total number of games to simulate (default: 100)')
-    parser.add_argument('--agents', type=str, default='teacher,student', help='Comma-separated list of agents. Options include teacher, student, smart, random, supervised')
+    parser.add_argument('--agents', type=str, default='teacher,student', help='Comma-separated list of agents. Options include teacher, student, smart, hardcoded, random, supervised')
     parser.add_argument('--batch_size', type=int, default=10, help='Batch size for parallel execution (default: 10)')
     parser.add_argument('--parallel', action='store_true', help='Run in parallel using multiprocessing')
     args = parser.parse_args()
@@ -214,8 +215,10 @@ def main():
         'teacher': TeacherAgentWrapper,
         'student': StudentAgentWrapper,
         'smart': smartAgent.Agent,
+        'hardcoded': hardcodedAgent.HardcodedStrategyAgent,
+        'tree': hardcodedAgent.HardcodedStrategyAgent,
         'random': randomAgent.AgentRandom,
-        'supervised': SupervisedAgentWrapper,
+        'supervised': supervisedAgent.SupervisedAgent,
         'smarter': smartAgent.SmarterAgent
     }
     

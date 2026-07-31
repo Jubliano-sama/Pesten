@@ -1,0 +1,196 @@
+{
+  "status": "final",
+  "recorded_at": "2026-07-30",
+  "environment": {
+    "python": "3.13.11",
+    "torch": "2.13.0+cu130",
+    "gpu": "NVIDIA GeForce RTX 3090",
+    "gpu_memory_mib": 24576
+  },
+  "workload": {
+    "seed": 20260730,
+    "agent_sets": [
+      [
+        "smart",
+        "rl"
+      ]
+    ],
+    "pretrained": false,
+    "historical_checkpoints": false,
+    "policy_updates": 3,
+    "temperature": 0.8,
+    "penalty_aware_action_masks": true
+  },
+  "baseline": {
+    "revision": "working tree before training performance changes",
+    "correctness_caveat": "Game.reset did not clear hands and ppo2 called reset before auto_simulate reset again, so each baseline game dealt 14 cards per player.",
+    "cpu": {
+      "episodes": 20,
+      "samples": 1166,
+      "rollout_seconds": 1.1272427840012824,
+      "gae_seconds": 0.07588575000409037,
+      "mask_seconds": 0.04831659299088642,
+      "update_seconds": 0.45763972599525005,
+      "total_seconds": 1.6607682600006228,
+      "episodes_per_second": 12.04261935978503,
+      "samples_per_second": 702.0847086754673
+    },
+    "cuda": {
+      "episodes": 20,
+      "samples": 936,
+      "rollout_seconds": 2.188021601003129,
+      "gae_seconds": 0.08656294600223191,
+      "mask_seconds": 0.11090731399599463,
+      "update_seconds": 0.31982878199778497,
+      "total_seconds": 2.594413329003146,
+      "episodes_per_second": 7.70887189655498,
+      "samples_per_second": 360.77520475877304,
+      "peak_cuda_mib": 283.17724609375
+    }
+  },
+  "rollout_cpu_thread_sweep": [
+    {
+      "threads": 1,
+      "episodes": 50,
+      "samples": 2678,
+      "seconds": 2.629707887012046,
+      "episodes_per_second": 19.013518667585366,
+      "samples_per_second": 1018.3640598358721
+    },
+    {
+      "threads": 2,
+      "episodes": 50,
+      "samples": 2678,
+      "seconds": 2.610523680006736,
+      "episodes_per_second": 19.15324514500132,
+      "samples_per_second": 1025.847809966271
+    },
+    {
+      "threads": 4,
+      "episodes": 50,
+      "samples": 2678,
+      "seconds": 2.6098866619868204,
+      "episodes_per_second": 19.15792004620486,
+      "samples_per_second": 1026.0981976747323
+    },
+    {
+      "threads": 8,
+      "episodes": 50,
+      "samples": 2678,
+      "seconds": 2.6376284309953917,
+      "episodes_per_second": 18.956422903407564,
+      "samples_per_second": 1015.3060107065091
+    },
+    {
+      "threads": 16,
+      "episodes": 50,
+      "samples": 2678,
+      "seconds": 2.7361645190103445,
+      "episodes_per_second": 18.273754978039378,
+      "samples_per_second": 978.7423166237891
+    }
+  ],
+  "optimized_interim": {
+    "correctness_caveat": "These measurements use corrected seven-card game resets. Actor BatchNorm and dtype policy consistency was still under review.",
+    "cpu_rollout_cuda_training": {
+      "episodes": 50,
+      "samples": 2070,
+      "rollout_seconds": 1.4630972059967462,
+      "prep_seconds": 0.13970737598720007,
+      "update_seconds": 0.34766341200156603,
+      "total_seconds": 1.9504679939855123,
+      "episodes_per_second": 25.634873350488515,
+      "samples_per_second": 1061.2837567102245,
+      "rollout_samples_per_second": 1414.8068846798164
+    },
+    "cuda_rollout_cuda_training": {
+      "episodes": 50,
+      "samples": 2323,
+      "rollout_seconds": 3.6930505630007247,
+      "prep_seconds": 0.10341672600770835,
+      "update_seconds": 0.03609504800988361,
+      "total_seconds": 3.8325623370183166,
+      "episodes_per_second": 13.046102216539378,
+      "samples_per_second": 606.1219089804196,
+      "rollout_samples_per_second": 629.0192783367922
+    }
+  },
+  "initial_ratio_integrity": {
+    "train_bf16": {
+      "mean_abs_ratio_error": 0.2514415383338928,
+      "max_abs_ratio_error": 6.943974018096924,
+      "mean_old_minus_new_log_prob": 0.038136858493089676,
+      "ratio_mean": 1.0191844701766968
+    },
+    "eval_bf16": {
+      "mean_abs_ratio_error": 0.021478839218616486,
+      "max_abs_ratio_error": 0.162733793258667,
+      "mean_old_minus_new_log_prob": 0.0003614463785197586,
+      "ratio_mean": 1.0000492334365845
+    },
+    "eval_fp32": {
+      "mean_abs_ratio_error": 0.021389154717326164,
+      "max_abs_ratio_error": 0.1747288703918457,
+      "mean_old_minus_new_log_prob": 0.00032340449979528785,
+      "ratio_mean": 1.0000832080841064
+    }
+  },
+  "final": {
+    "architecture": "CPU FP32 actor rollout and policy updates with CUDA critic training",
+    "correctness": "Actor stays in eval mode for rollout and PPO updates, and the first update aborts if the unchanged-policy ratio differs from one by more than 0.02.",
+    "runs": [
+      {
+        "seed": 20260730,
+        "episodes": 100,
+        "samples": 4252,
+        "mean_episode_samples": 42.52,
+        "rollout_seconds": 2.971270662994357,
+        "non_rollout_seconds": 0.8643691620090976,
+        "total_seconds": 3.8356398250034545,
+        "episodes_per_second": 26.07126960882203,
+        "samples_per_second": 1108.5503837671126,
+        "rollout_samples_per_second": 1431.037587035226
+      },
+      {
+        "seed": 20260731,
+        "episodes": 100,
+        "samples": 4784,
+        "mean_episode_samples": 47.84,
+        "rollout_seconds": 3.4656675870064646,
+        "non_rollout_seconds": 0.747829219995765,
+        "total_seconds": 4.21349680700223,
+        "episodes_per_second": 23.7332563854835,
+        "samples_per_second": 1135.3989854815306,
+        "rollout_samples_per_second": 1380.3978252086981
+      },
+      {
+        "seed": 20260732,
+        "episodes": 100,
+        "samples": 3488,
+        "mean_episode_samples": 34.88,
+        "rollout_seconds": 2.667865613999311,
+        "non_rollout_seconds": 0.5912313050066587,
+        "total_seconds": 3.2590969190059695,
+        "episodes_per_second": 30.683346486823773,
+        "samples_per_second": 1070.2351254604132,
+        "rollout_samples_per_second": 1307.4121806200171
+      }
+    ],
+    "median": {
+      "rollout_seconds": 2.971270662994357,
+      "non_rollout_seconds": 0.747829219995765,
+      "total_seconds": 3.8356398250034545,
+      "episodes_per_second": 26.07126960882203,
+      "samples_per_second": 1108.5503837671126,
+      "rollout_samples_per_second": 1380.3978252086981
+    },
+    "speedup_vs_original_cuda_baseline": {
+      "episodes_per_second": 3.38198,
+      "episodes_per_second_percent_increase": 238.198,
+      "samples_per_second": 3.07269,
+      "samples_per_second_percent_increase": 207.269,
+      "rollout_samples_per_second": 3.22686
+    },
+    "comparability_caveat": "The original CUDA baseline dealt 14 cards per player because of a double-reset bug; the final benchmark correctly deals seven. Samples-per-second and rollout-samples-per-second are the less game-length-sensitive comparisons."
+  }
+}

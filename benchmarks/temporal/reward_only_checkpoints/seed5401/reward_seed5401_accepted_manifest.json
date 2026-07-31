@@ -1,0 +1,233 @@
+{
+  "accepted_training_path": "random_initialized_reward_only",
+  "best_checkpoint": {
+    "checkpoint": {
+      "lineage": {
+        "imitation_checkpoint": null,
+        "initial_state_sha256": "104e1044d6ad3db2ff0fb3407168afb6e46e3593c870364b0051742d16a37cb9",
+        "initialization": "torch_random_initialization",
+        "initialization_seed": 5401,
+        "parent_checkpoint": null,
+        "ppo_training_opponent": false,
+        "prohibited_training_sources_used": false,
+        "teacher_checkpoint": null
+      },
+      "path": "benchmarks/temporal/reward_only_checkpoints/seed5401/reward_seed5401_epoch5.pt",
+      "sha256": "ec3af4b0abe5cc3e4695cb633a3806d6115c42f6c90c6b2091471e5db9ee118c"
+    },
+    "development_evaluation": {
+      "contains_ppo_benchmark": false,
+      "historical_recent": [
+        {
+          "average_turns": 63.575,
+          "candidate": "temporal_reward_only",
+          "draws": 1,
+          "elapsed_seconds": 4.326669877991662,
+          "games": 40,
+          "losses": 17,
+          "opponent": "historical_recent_0",
+          "paired_bootstrap_ci95": [
+            0.425,
+            0.7
+          ],
+          "pairs": 20,
+          "score": 0.5625,
+          "seed": 4305401,
+          "wins": 22,
+          "wins_as_seat_0": 13,
+          "wins_as_seat_1": 9
+        },
+        {
+          "average_turns": 57.625,
+          "candidate": "temporal_reward_only",
+          "draws": 1,
+          "elapsed_seconds": 4.007467246992746,
+          "games": 40,
+          "losses": 14,
+          "opponent": "historical_recent_1",
+          "paired_bootstrap_ci95": [
+            0.4871875000000003,
+            0.7875
+          ],
+          "pairs": 20,
+          "score": 0.6375,
+          "seed": 4315401,
+          "wins": 25,
+          "wins_as_seat_0": 14,
+          "wins_as_seat_1": 11
+        },
+        {
+          "average_turns": 63.275,
+          "candidate": "temporal_reward_only",
+          "draws": 1,
+          "elapsed_seconds": 4.357321677991422,
+          "games": 40,
+          "losses": 18,
+          "opponent": "historical_recent_2",
+          "paired_bootstrap_ci95": [
+            0.425,
+            0.65
+          ],
+          "pairs": 20,
+          "score": 0.5375,
+          "seed": 4325401,
+          "wins": 21,
+          "wins_as_seat_0": 11,
+          "wins_as_seat_1": 10
+        },
+        {
+          "average_turns": 59.925,
+          "candidate": "temporal_reward_only",
+          "draws": 0,
+          "elapsed_seconds": 4.129199125993182,
+          "games": 40,
+          "losses": 19,
+          "opponent": "historical_recent_3",
+          "paired_bootstrap_ci95": [
+            0.375,
+            0.675
+          ],
+          "pairs": 20,
+          "score": 0.525,
+          "seed": 4335401,
+          "wins": 21,
+          "wins_as_seat_0": 11,
+          "wins_as_seat_1": 10
+        }
+      ],
+      "historical_worst_score": 0.525,
+      "pool": {
+        "bayesian_tree": {
+          "average_turns": 47.475,
+          "candidate": "temporal_reward_only",
+          "draws": 0,
+          "elapsed_seconds": 4.1754587040049955,
+          "games": 40,
+          "losses": 17,
+          "opponent": "bayesian_tree",
+          "paired_bootstrap_ci95": [
+            0.4,
+            0.725
+          ],
+          "pairs": 20,
+          "score": 0.575,
+          "seed": 4005401,
+          "wins": 23,
+          "wins_as_seat_0": 14,
+          "wins_as_seat_1": 9
+        },
+        "random": {
+          "average_turns": 57.125,
+          "candidate": "temporal_reward_only",
+          "draws": 0,
+          "elapsed_seconds": 2.6700761130050523,
+          "games": 40,
+          "losses": 17,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.425,
+            0.725
+          ],
+          "pairs": 20,
+          "score": 0.575,
+          "seed": 4205401,
+          "wins": 23,
+          "wins_as_seat_0": 10,
+          "wins_as_seat_1": 13
+        },
+        "smart_rule": {
+          "average_turns": 47.9,
+          "candidate": "temporal_reward_only",
+          "draws": 0,
+          "elapsed_seconds": 2.241872776998207,
+          "games": 40,
+          "losses": 25,
+          "opponent": "smart_rule",
+          "paired_bootstrap_ci95": [
+            0.25,
+            0.525
+          ],
+          "pairs": 20,
+          "score": 0.375,
+          "seed": 4105401,
+          "wins": 15,
+          "wins_as_seat_0": 10,
+          "wins_as_seat_1": 5
+        }
+      },
+      "selection_components": {
+        "bayesian_tree": 0.575,
+        "historical_worst": 0.525,
+        "random": 0.575,
+        "smart_rule": 0.375
+      },
+      "selection_score": 0.505,
+      "selection_weights": {
+        "bayesian_tree": 0.35,
+        "historical_worst": 0.2,
+        "random": 0.15,
+        "smart_rule": 0.3
+      }
+    },
+    "epoch": 5,
+    "selection_score": 0.505
+  },
+  "checkpoint_selection": {
+    "best_not_automatically_last": true,
+    "development_pool_contains_ppo": false,
+    "weights": {
+      "bayesian_tree": 0.35,
+      "historical_worst": 0.2,
+      "random": 0.15,
+      "smart_rule": 0.3
+    }
+  },
+  "format": "pesten-temporal-accepted-manifest-v1",
+  "ppo_or_imitation_used_in_training": false,
+  "random_initialization": {
+    "initial_state_sha256": "104e1044d6ad3db2ff0fb3407168afb6e46e3593c870364b0051742d16a37cb9",
+    "parent_checkpoint": null,
+    "seed": 5401
+  },
+  "recipe": {
+    "clip_ratio": 0.2,
+    "entropy_coefficient": 0.01,
+    "gae_lambda": 0.95,
+    "gamma": 0.97,
+    "learning_rate": 0.0003,
+    "minibatch_trajectories": 16,
+    "mixture": {
+      "bayesian_tree": 0.1,
+      "current_selfplay": 0.6,
+      "historical_temporal": 0.2,
+      "smart_rule": 0.1
+    },
+    "pfsp": {
+      "evaluation_pairs_per_history": 8,
+      "population_slots": 32,
+      "weight": "(max(0.05, 1 - current_win_rate))^2"
+    },
+    "prohibited_training_sources": [
+      "deployed PPO actor checkpoint",
+      "PPO actions or logits",
+      "PPO trajectories or rewards",
+      "imitation or behavior cloning",
+      "distillation or action-agreement loss"
+    ],
+    "schedule": [
+      "current_selfplay",
+      "current_selfplay",
+      "current_selfplay",
+      "current_selfplay",
+      "current_selfplay",
+      "current_selfplay",
+      "historical_temporal",
+      "historical_temporal",
+      "bayesian_tree",
+      "smart_rule"
+    ],
+    "target_kl": 0.02,
+    "update_epochs": 4,
+    "value_coefficient": 0.5
+  }
+}

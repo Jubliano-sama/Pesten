@@ -10,6 +10,9 @@ This repository contains a Python implementation of the Dutch card game "Pesten"
 *   **Diverse AI Agents**:
     *   **Random Agent**: A baseline agent that plays a random valid card.
     *   **Smart Agent**: A rule-based agent using a set of tunable heuristics to make decisions.
+    *   **Bayesian Tree-Search Agent**: A deterministic information-set agent
+        that updates beliefs about hidden hands from public play history and
+        searches plausible replies from every player.
     *   **Supervised/RL Agent (Teacher)**: A powerful neural network-based agent trained using Proximal Policy Optimization (PPO) through self-play and against other agents.
     *   **Distilled Student Agent**: A more powerful agent with a larger architecture, initialized by distilling knowledge from the RL "teacher". This bootstrapping process creates a highly capable final agent.
 *   **Reinforcement Learning Pipeline**: A complete PPO training script (`ppo2.py`) to train the neural network agent. It includes features like reward shaping, GAE, and playing against past versions of itself.
@@ -33,6 +36,7 @@ The codebase is organized into several key components:
 | **AI Agents**           |                                                                                                         |
 | `randomAgent.py`        | A simple agent that plays random valid moves.                                                           |
 | `smartAgent.py`         | A heuristic-based agent with tunable parameters.                                                        |
+| `hardcodedAgent.py`     | Bayesian hidden-hand sampling plus bounded multi-player tree search.                                    |
 | `supervisedAgent.py`    | Defines the neural network architecture (`DenseSkipNet`) and a base agent wrapper.                      |
 | **Training & Learning** |                                                                                                         |
 | `ppo2.py`               | The main PPO training script for the Reinforcement Learning agent.                                      |
@@ -81,7 +85,8 @@ You can play an interactive game against any combination of agents.
 python interactive_game.py --agents human,smart,random
 ```
 
-The `--agents` flag takes a comma-separated list of agent types: `human`, `random`, `smart`, `supervised`, `student`.
+The `--agents` flag takes a comma-separated list of agent types: `human`,
+`random`, `smart`, `hardcoded` (or `tree`), `supervised`, `student`.
 
 ### 2. Train the RL Agent
 
@@ -122,6 +127,62 @@ Run a large number of games to get win-rate statistics. The `--parallel` flag is
 ```bash
 # Simulate 1000 games between the Student and Smart agents
 python simulate_random_game.py -n 1000 --agents student,smart --parallel
+```
+
+#### Bayesian tree search versus a checkpoint
+
+`benchmark_agents.py` alternates seats and reuses each seed once per seat, so
+the comparison is not biased toward the starting player. The PPO policy is
+evaluated with deterministic masked argmax.
+
+```bash
+python benchmark_agents.py \
+  --opponent ppo \
+  --model ppo_actor_100run3.pth \
+  --games 2000 \
+  --output benchmarks/tree-vs-ppo.json
+```
+
+The tree-search player starts from the uniform hidden-deal prior. Previously
+played suits/ranks update a Dirichlet posterior; an announced Jack suit counts
+as stronger public evidence. Posterior hand samples are then searched with a
+bounded multi-player minimax tree. It never reads another player's actual hand.
+
+#### One persistent Codex player
+
+`luna_benchmark.py` exposes an stdin/stdout game protocol for a single
+long-lived model context. Start it once in a PTY, answer every `DECISION` and
+`SUIT_DECISION` with one listed token, and keep the same model thread through
+all games:
+
+```bash
+python luna_benchmark.py \
+  --games 20 \
+  --output benchmarks/luna-vs-tree.json
+```
+
+The protocol alternates seats but uses a fresh, unrevealed deal for every game;
+replaying a paired deal would leak the opponent's initial hand to a persistent
+model. It writes every public observation and response to an audit JSONL and
+reports first-half versus second-half performance so in-context adaptation can
+be inspected.
+
+Use the same protocol against the deployed PPO architecture with:
+
+```bash
+python luna_benchmark.py \
+  --games 20 \
+  --opponent ppo \
+  --model ppo_actor_100run3.pth \
+  --output benchmarks/luna-vs-ppo.json
+```
+
+Validate a completed transcript independently:
+
+```bash
+python audit_luna_benchmark.py \
+  benchmarks/luna-vs-ppo.audit.jsonl \
+  --result benchmarks/luna-vs-ppo.json
 ```
 
 #### Elo Rating

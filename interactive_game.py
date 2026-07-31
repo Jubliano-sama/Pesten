@@ -12,6 +12,7 @@ import sys
 
 import game
 import card
+import hardcodedAgent
 import randomAgent
 import smartAgent
 import supervisedAgent
@@ -113,22 +114,27 @@ def main():
         "--agents",
         type=str,
         default="human,random,smart,supervised",
-        help="comma-separated list of agents (human, random, smart, supervised)",
+        help=(
+            "comma-separated list of agents "
+            "(human, random, smart, hardcoded, supervised)"
+        ),
     )
     args = parser.parse_args()
 
     # mapping agent names to classes, using the wrapper for supervised
     mapping = {
         "human": HumanAgent,
-        "random": randomAgent.Agent,
+        "random": randomAgent.AgentRandom,
         "smart": smartAgent.Agent,
+        "hardcoded": hardcodedAgent.HardcodedStrategyAgent,
+        "tree": hardcodedAgent.HardcodedStrategyAgent,
         "supervised": SupervisedAgentWrapper,
     }
 
     agent_names = [a.strip().lower() for a in args.agents.split(",")]
     agents = []
     for name in agent_names:
-        agent_cls = mapping.get(name, randomAgent.Agent)
+        agent_cls = mapping.get(name, randomAgent.AgentRandom)
         agents.append(agent_cls)
     if "human" not in agent_names:
         print("yo, no human agent specified. adding one for you as player 0.")

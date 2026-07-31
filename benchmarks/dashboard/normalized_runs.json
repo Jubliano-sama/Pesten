@@ -1,0 +1,5286 @@
+{
+  "schema_version": 1,
+  "generated_from": [
+    {
+      "path": "benchmarks/bayesian_tree_vs_live_ppo_20260731.json",
+      "sha256": "345b81437e1349145ad4c8e69a45623831c0d3fb01eda50753b479961099bb10",
+      "recorded_at": "2026-07-31"
+    },
+    {
+      "path": "benchmarks/bayesian_tree_vs_live_ppo_matched_luna20_20260731.json",
+      "sha256": "9cb79432ab0367be6e2dac9d042294ebf39dcf1edb930fa5b928189f89579e21",
+      "recorded_at": "2026-07-31"
+    },
+    {
+      "path": "benchmarks/bayesian_tree_vs_random_20260731.json",
+      "sha256": "7b34fff98b9194b805548aab129cc56e3d1481e40d1616c0ea9168c95eb79f31",
+      "recorded_at": "2026-07-31"
+    },
+    {
+      "path": "benchmarks/bayesian_tree_vs_smart_20260731.json",
+      "sha256": "abc6a95e71f261fca1c5d72ba6deb458850ebb543dcd0d148a127ca27cf58b62",
+      "recorded_at": "2026-07-31"
+    },
+    {
+      "path": "benchmarks/puffer4_native_temporal_smoke_20260731.json",
+      "sha256": "aa9d44fd2b895439c0bb9d903de9e472ca0cdc7dcd9f1150ad17521c255e41f7",
+      "recorded_at": "2026-07-31"
+    },
+    {
+      "path": "benchmarks/puffer_temporal_smoke_20260731.json",
+      "sha256": "37f7578756691a92c60d9b28c6faa12cd4900d4ba534ebd3ff025d7176dc3643",
+      "recorded_at": "2026-07-31"
+    },
+    {
+      "path": "benchmarks/training_performance_20260730.json",
+      "sha256": "28fc8ac99b2b12770476d320d534607779034c2ac5d2cc9a3f79b0cc1f966a07",
+      "recorded_at": "2026-07-30"
+    },
+    {
+      "path": "benchmarks/training_speed_vectorized_20260731.json",
+      "sha256": "5602a1efd00756ad8b8c23c6f5378c0ad5dfda73845b4f2daf1578487fceb12d",
+      "recorded_at": "2026-07-31"
+    },
+    {
+      "path": "benchmarks/training_speed_vectorized_20260731_initial.json",
+      "sha256": "164e630a8721564aa1a3a82d8d64e3bc73fad14d720037466322c28f6a347aa4",
+      "recorded_at": "2026-07-31"
+    },
+    {
+      "path": "benchmarks/training_speed_vectorized_cuda_before_update_20260731.json",
+      "sha256": "e93c0cbecbd778b37fde5170712ef4870662356d6b4cc4e7e5beef2646a4d42f",
+      "recorded_at": "2026-07-31"
+    }
+  ],
+  "warnings": [
+    "benchmarks/bayesian_tree_vs_live_ppo_20260731.json: player_count inferred as 2 from complete seat-0/seat-1 counts.",
+    "benchmarks/bayesian_tree_vs_live_ppo_matched_luna20_20260731.json: player_count inferred as 2 from complete seat-0/seat-1 counts.",
+    "benchmarks/bayesian_tree_vs_random_20260731.json: player_count inferred as 2 from complete seat-0/seat-1 counts.",
+    "benchmarks/bayesian_tree_vs_smart_20260731.json: player_count inferred as 2 from complete seat-0/seat-1 counts.",
+    "benchmarks/training_performance_20260730.json: legacy 'samples' mapped to collected policy decisions; environment turns were not separately reported."
+  ],
+  "runs": [
+    {
+      "schema_version": 1,
+      "run_id": "tournament-bayesian_tree_vs_live_ppo_20260731",
+      "run_kind": "tournament",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "bayesian_tree_search",
+          "role": "evaluated"
+        },
+        {
+          "id": "ppo",
+          "role": "opponent"
+        }
+      ],
+      "performance": {
+        "games": 2000,
+        "environment_turns": 88640,
+        "policy_decisions": null,
+        "wall_time_seconds": 108.49336618300003,
+        "games_per_second": 18.43430681859867,
+        "rollout_games_per_second": null,
+        "environment_turns_per_second": 817.0084782002931,
+        "rollout_environment_turns_per_second": null,
+        "policy_decisions_per_second": null,
+        "collected_policy_decisions_per_second": null,
+        "update_time_seconds": null,
+        "total_time_seconds": 108.49336618300003
+      },
+      "outcome": {
+        "agent": "bayesian_tree_search",
+        "opponent": "ppo",
+        "wins": 838,
+        "losses": 1162,
+        "draws": 0,
+        "games": 2000,
+        "win_rate": 0.419,
+        "win_rate_ci95": [
+          0.39755185088828765,
+          0.4407587107712752
+        ],
+        "average_environment_turns": 44.32,
+        "seats": [
+          {
+            "seat": 0,
+            "wins": 444,
+            "games": 1000
+          },
+          {
+            "seat": 1,
+            "wins": 394,
+            "games": 1000
+          }
+        ]
+      },
+      "timing": [],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": null,
+        "peak_gpu_memory_mib": null
+      },
+      "guardrails": [],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/bayesian_tree_vs_live_ppo_20260731.json",
+        "source_sha256": "345b81437e1349145ad4c8e69a45623831c0d3fb01eda50753b479961099bb10",
+        "git_sha": null,
+        "seed": 20260901,
+        "hardware": null,
+        "recipe": {
+          "belief_samples": 8,
+          "search_depth": 3,
+          "beam_width": 3,
+          "belief_model": "Dirichlet posterior over suits and ranks from public plays and announced suits"
+        },
+        "checkpoint_sha256": "aac589b3c7300895604e6c77755631ab4a31c8bf9810768448ab2f3ff5bbe186",
+        "checkpoint_path": "ppo_actor_100run3.pth"
+      },
+      "notes": [],
+      "label": "bayesian_tree_search vs ppo \u00b7 2,000 games",
+      "stage": "evaluation"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "tournament-bayesian_tree_vs_live_ppo_matched_luna20_20260731",
+      "run_kind": "tournament",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "bayesian_tree_search",
+          "role": "evaluated"
+        },
+        {
+          "id": "ppo",
+          "role": "opponent"
+        }
+      ],
+      "performance": {
+        "games": 20,
+        "environment_turns": 1188,
+        "policy_decisions": null,
+        "wall_time_seconds": 3.722237802998279,
+        "games_per_second": 5.373111837156109,
+        "rollout_games_per_second": null,
+        "environment_turns_per_second": 319.16284312707285,
+        "rollout_environment_turns_per_second": null,
+        "policy_decisions_per_second": null,
+        "collected_policy_decisions_per_second": null,
+        "update_time_seconds": null,
+        "total_time_seconds": 3.722237802998279
+      },
+      "outcome": {
+        "agent": "bayesian_tree_search",
+        "opponent": "ppo",
+        "wins": 9,
+        "losses": 11,
+        "draws": 0,
+        "games": 20,
+        "win_rate": 0.45,
+        "win_rate_ci95": [
+          0.2581978582556243,
+          0.6579146575496577
+        ],
+        "average_environment_turns": 59.4,
+        "seats": [
+          {
+            "seat": 0,
+            "wins": 4,
+            "games": 10
+          },
+          {
+            "seat": 1,
+            "wins": 5,
+            "games": 10
+          }
+        ]
+      },
+      "timing": [],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": null,
+        "peak_gpu_memory_mib": null
+      },
+      "guardrails": [],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/bayesian_tree_vs_live_ppo_matched_luna20_20260731.json",
+        "source_sha256": "9cb79432ab0367be6e2dac9d042294ebf39dcf1edb930fa5b928189f89579e21",
+        "git_sha": null,
+        "seed": 20260901,
+        "hardware": null,
+        "recipe": {
+          "belief_samples": 8,
+          "search_depth": 3,
+          "beam_width": 3,
+          "belief_model": "Dirichlet posterior over suits and ranks from public plays and announced suits"
+        },
+        "checkpoint_sha256": "aac589b3c7300895604e6c77755631ab4a31c8bf9810768448ab2f3ff5bbe186",
+        "checkpoint_path": "ppo_actor_100run3.pth"
+      },
+      "notes": [],
+      "label": "bayesian_tree_search vs ppo \u00b7 20 games",
+      "stage": "evaluation"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "tournament-bayesian_tree_vs_random_20260731",
+      "run_kind": "tournament",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "bayesian_tree_search",
+          "role": "evaluated"
+        },
+        {
+          "id": "random",
+          "role": "opponent"
+        }
+      ],
+      "performance": {
+        "games": 1000,
+        "environment_turns": 52566,
+        "policy_decisions": null,
+        "wall_time_seconds": 50.05321879799885,
+        "games_per_second": 19.978735114633235,
+        "rollout_games_per_second": null,
+        "environment_turns_per_second": 1050.2021900358106,
+        "rollout_environment_turns_per_second": null,
+        "policy_decisions_per_second": null,
+        "collected_policy_decisions_per_second": null,
+        "update_time_seconds": null,
+        "total_time_seconds": 50.05321879799885
+      },
+      "outcome": {
+        "agent": "bayesian_tree_search",
+        "opponent": "random",
+        "wins": 628,
+        "losses": 372,
+        "draws": 0,
+        "games": 1000,
+        "win_rate": 0.628,
+        "win_rate_ci95": [
+          0.5976064637900358,
+          0.6574138860376622
+        ],
+        "average_environment_turns": 52.566,
+        "seats": [
+          {
+            "seat": 0,
+            "wins": 316,
+            "games": 500
+          },
+          {
+            "seat": 1,
+            "wins": 312,
+            "games": 500
+          }
+        ]
+      },
+      "timing": [],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": null,
+        "peak_gpu_memory_mib": null
+      },
+      "guardrails": [],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/bayesian_tree_vs_random_20260731.json",
+        "source_sha256": "7b34fff98b9194b805548aab129cc56e3d1481e40d1616c0ea9168c95eb79f31",
+        "git_sha": null,
+        "seed": 20260901,
+        "hardware": null,
+        "recipe": {
+          "belief_samples": 8,
+          "search_depth": 3,
+          "beam_width": 3,
+          "belief_model": "Dirichlet posterior over suits and ranks from public plays and announced suits"
+        },
+        "checkpoint_sha256": null
+      },
+      "notes": [],
+      "label": "bayesian_tree_search vs random \u00b7 1,000 games",
+      "stage": "evaluation"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "tournament-bayesian_tree_vs_smart_20260731",
+      "run_kind": "tournament",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "bayesian_tree_search",
+          "role": "evaluated"
+        },
+        {
+          "id": "smart",
+          "role": "opponent"
+        }
+      ],
+      "performance": {
+        "games": 1000,
+        "environment_turns": 42311,
+        "policy_decisions": null,
+        "wall_time_seconds": 40.730656879997696,
+        "games_per_second": 24.551531367300075,
+        "rollout_games_per_second": null,
+        "environment_turns_per_second": 1038.7998436818334,
+        "rollout_environment_turns_per_second": null,
+        "policy_decisions_per_second": null,
+        "collected_policy_decisions_per_second": null,
+        "update_time_seconds": null,
+        "total_time_seconds": 40.730656879997696
+      },
+      "outcome": {
+        "agent": "bayesian_tree_search",
+        "opponent": "smart",
+        "wins": 490,
+        "losses": 510,
+        "draws": 0,
+        "games": 1000,
+        "win_rate": 0.49,
+        "win_rate_ci95": [
+          0.45911403097425707,
+          0.520962504195454
+        ],
+        "average_environment_turns": 42.311,
+        "seats": [
+          {
+            "seat": 0,
+            "wins": 252,
+            "games": 500
+          },
+          {
+            "seat": 1,
+            "wins": 238,
+            "games": 500
+          }
+        ]
+      },
+      "timing": [],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": null,
+        "peak_gpu_memory_mib": null
+      },
+      "guardrails": [],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/bayesian_tree_vs_smart_20260731.json",
+        "source_sha256": "abc6a95e71f261fca1c5d72ba6deb458850ebb543dcd0d148a127ca27cf58b62",
+        "git_sha": null,
+        "seed": 20260901,
+        "hardware": null,
+        "recipe": {
+          "belief_samples": 8,
+          "search_depth": 3,
+          "beam_width": 3,
+          "belief_model": "Dirichlet posterior over suits and ranks from public plays and announced suits"
+        },
+        "checkpoint_sha256": null
+      },
+      "notes": [],
+      "label": "bayesian_tree_search vs smart \u00b7 1,000 games",
+      "stage": "evaluation"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "puffer-smoke-puffer4_native_temporal_smoke_20260731",
+      "run_kind": "evaluation",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": null,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "puffer_style_temporal_net",
+          "role": "integration candidate"
+        }
+      ],
+      "performance": {
+        "games": 2,
+        "environment_turns": 301,
+        "policy_decisions": 123,
+        "wall_time_seconds": 0.285878,
+        "games_per_second": 6.995991296986826,
+        "rollout_games_per_second": null,
+        "environment_turns_per_second": 1052.8966901965173,
+        "rollout_environment_turns_per_second": null,
+        "policy_decisions_per_second": 430.2534647646898,
+        "collected_policy_decisions_per_second": null,
+        "update_time_seconds": null,
+        "total_time_seconds": 0.285878
+      },
+      "outcome": null,
+      "timing": [],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": null,
+        "peak_gpu_memory_mib": null
+      },
+      "guardrails": [
+        {
+          "name": "Training parameters changed",
+          "status": "passed",
+          "value": true,
+          "notes": "Smoke-run source verdict."
+        },
+        {
+          "name": "Privileged critic disabled",
+          "status": "observed",
+          "value": false,
+          "notes": "Configuration observation; not a complete information-leakage test."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/puffer4_native_temporal_smoke_20260731.json",
+        "source_sha256": "aa9d44fd2b895439c0bb9d903de9e472ca0cdc7dcd9f1150ad17521c255e41f7",
+        "git_sha": null,
+        "seed": 431,
+        "hardware": null,
+        "recipe": {
+          "model": {
+            "actor_actions": 55,
+            "critic_privileged": false,
+            "hidden_size": 48,
+            "num_layers": 1
+          },
+          "training": {
+            "samples": 123,
+            "loss": 1.2726466655731201,
+            "policy_loss": 0.8348245620727539,
+            "value_loss": 0.8915082216262817,
+            "entropy": 0.7931950688362122
+          },
+          "integration": {
+            "native_pufferlib": true,
+            "network_class": "pufferlib.models.MinGRU",
+            "official_git_revision": "c5d3c637446047a6efbcaa74c039c5295d201ab0",
+            "policy_class": "pufferlib.models.Policy",
+            "pufferlib_version": "4.0"
+          }
+        },
+        "checkpoint_sha256": null
+      },
+      "notes": [
+        "Integration status not reported"
+      ],
+      "label": "Puffer-style model smoke test",
+      "stage": "integration_smoke"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "puffer-smoke-puffer_temporal_smoke_20260731",
+      "run_kind": "evaluation",
+      "status": "incomplete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": null,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "PufferStyleTemporalNet",
+          "role": "integration candidate"
+        }
+      ],
+      "performance": {
+        "games": 2,
+        "environment_turns": 193,
+        "policy_decisions": 84,
+        "wall_time_seconds": 0.142876,
+        "games_per_second": 13.998152243903805,
+        "rollout_games_per_second": null,
+        "environment_turns_per_second": 1350.821691536717,
+        "rollout_environment_turns_per_second": null,
+        "policy_decisions_per_second": 587.9223942439597,
+        "collected_policy_decisions_per_second": null,
+        "update_time_seconds": null,
+        "total_time_seconds": 0.142876
+      },
+      "outcome": null,
+      "timing": [],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": null,
+        "peak_gpu_memory_mib": null
+      },
+      "guardrails": [
+        {
+          "name": "Training parameters changed",
+          "status": "passed",
+          "value": true,
+          "notes": "Smoke-run source verdict."
+        },
+        {
+          "name": "Privileged critic disabled",
+          "status": "observed",
+          "value": false,
+          "notes": "Configuration observation; not a complete information-leakage test."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/puffer_temporal_smoke_20260731.json",
+        "source_sha256": "37f7578756691a92c60d9b28c6faa12cd4900d4ba534ebd3ff025d7176dc3643",
+        "git_sha": null,
+        "seed": 731,
+        "hardware": null,
+        "recipe": {
+          "model": {
+            "actor_actions": 55,
+            "critic_privileged": false,
+            "hidden_size": 48,
+            "name": "PufferStyleTemporalNet",
+            "recurrent_cell": "GRUCell"
+          },
+          "training": {
+            "samples": 84,
+            "loss": 1.128615379333496,
+            "policy_loss": 0.7988985180854797,
+            "value_loss": 0.680334746837616,
+            "entropy": 1.0450505018234253
+          },
+          "integration": {
+            "installed_for_runtime": false,
+            "native_pufferlib": false,
+            "pufferlib3_blocker": "numpy<2 conflicts with ml-dtypes numpy>=2.1 on Python 3.13",
+            "pufferlib4_blocker": "PyPI provides only pufferlib<=3.0.0",
+            "status": "Puffer-style recurrent adapter; PufferLib 4 is unavailable and PufferLib 3.0.0 has no PufferNet/MinGRU API",
+            "verified_pufferlib": "3.0.0"
+          }
+        },
+        "checkpoint_sha256": null
+      },
+      "notes": [
+        "Puffer-style recurrent adapter; PufferLib 4 is unavailable and PufferLib 3.0.0 has no PufferNet/MinGRU API"
+      ],
+      "label": "PufferStyleTemporalNet smoke test",
+      "stage": "integration_smoke"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "training-legacy-baseline-cpu-2026-07-30",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-30",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "rl",
+          "role": "training participant"
+        },
+        {
+          "id": "smart",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 20,
+        "environment_turns": null,
+        "policy_decisions": 1166,
+        "wall_time_seconds": 1.6607682600006228,
+        "games_per_second": 12.04261935978503,
+        "rollout_games_per_second": 17.7424067679614,
+        "environment_turns_per_second": null,
+        "rollout_environment_turns_per_second": null,
+        "policy_decisions_per_second": 702.0847086754673,
+        "collected_policy_decisions_per_second": 1034.3823145721494,
+        "update_time_seconds": 0.45763972599525005,
+        "total_time_seconds": 1.6607682600006228
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 1.1272427840012824
+        },
+        {
+          "phase": "GAE",
+          "seconds": 0.07588575000409037
+        },
+        {
+          "phase": "Action masking",
+          "seconds": 0.04831659299088642
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 0.45763972599525005
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": null,
+        "peak_gpu_memory_mib": null
+      },
+      "guardrails": [],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_performance_20260730.json",
+        "source_sha256": "28fc8ac99b2b12770476d320d534607779034c2ac5d2cc9a3f79b0cc1f966a07",
+        "git_sha": null,
+        "seed": 20260730,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "gpu": "NVIDIA GeForce RTX 3090",
+          "gpu_memory_mib": 24576
+        },
+        "recipe": {
+          "pretrained": false,
+          "historical_checkpoints": false,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "penalty_aware_action_masks": true
+        },
+        "checkpoint_sha256": null
+      },
+      "notes": [
+        "Game.reset did not clear hands and ppo2 called reset before auto_simulate reset again, so each baseline game dealt 14 cards per player.",
+        "Revision: working tree before training performance changes"
+      ],
+      "label": "Original baseline (CPU)",
+      "stage": "baseline"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "training-legacy-baseline-cuda-2026-07-30",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-30",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "rl",
+          "role": "training participant"
+        },
+        {
+          "id": "smart",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 20,
+        "environment_turns": null,
+        "policy_decisions": 936,
+        "wall_time_seconds": 2.594413329003146,
+        "games_per_second": 7.70887189655498,
+        "rollout_games_per_second": 9.140677583270074,
+        "environment_turns_per_second": null,
+        "rollout_environment_turns_per_second": null,
+        "policy_decisions_per_second": 360.77520475877304,
+        "collected_policy_decisions_per_second": 427.7837108970395,
+        "update_time_seconds": 0.31982878199778497,
+        "total_time_seconds": 2.594413329003146
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 2.188021601003129
+        },
+        {
+          "phase": "GAE",
+          "seconds": 0.08656294600223191
+        },
+        {
+          "phase": "Action masking",
+          "seconds": 0.11090731399599463
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 0.31982878199778497
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": null,
+        "peak_gpu_memory_mib": 283.17724609375
+      },
+      "guardrails": [],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_performance_20260730.json",
+        "source_sha256": "28fc8ac99b2b12770476d320d534607779034c2ac5d2cc9a3f79b0cc1f966a07",
+        "git_sha": null,
+        "seed": 20260730,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "gpu": "NVIDIA GeForce RTX 3090",
+          "gpu_memory_mib": 24576
+        },
+        "recipe": {
+          "pretrained": false,
+          "historical_checkpoints": false,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "penalty_aware_action_masks": true
+        },
+        "checkpoint_sha256": null
+      },
+      "notes": [
+        "Game.reset did not clear hands and ppo2 called reset before auto_simulate reset again, so each baseline game dealt 14 cards per player.",
+        "Revision: working tree before training performance changes"
+      ],
+      "label": "Original baseline (CUDA)",
+      "stage": "baseline"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "training-interim-cpu-rollout-cuda-training-2026-07-30",
+      "run_kind": "training",
+      "status": "incomplete",
+      "recorded_at": "2026-07-30",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "rl",
+          "role": "training participant"
+        },
+        {
+          "id": "smart",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 50,
+        "environment_turns": null,
+        "policy_decisions": 2070,
+        "wall_time_seconds": 1.9504679939855123,
+        "games_per_second": 25.634873350488515,
+        "rollout_games_per_second": 34.174079340092185,
+        "environment_turns_per_second": null,
+        "rollout_environment_turns_per_second": null,
+        "policy_decisions_per_second": 1061.2837567102245,
+        "collected_policy_decisions_per_second": 1414.8068846798164,
+        "update_time_seconds": 0.34766341200156603,
+        "total_time_seconds": 1.9504679939855123
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 1.4630972059967462
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.13970737598720007
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 0.34766341200156603
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": null,
+        "peak_gpu_memory_mib": null
+      },
+      "guardrails": [],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_performance_20260730.json",
+        "source_sha256": "28fc8ac99b2b12770476d320d534607779034c2ac5d2cc9a3f79b0cc1f966a07",
+        "git_sha": null,
+        "seed": 20260730,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "gpu": "NVIDIA GeForce RTX 3090",
+          "gpu_memory_mib": 24576
+        },
+        "recipe": {
+          "pretrained": false,
+          "historical_checkpoints": false,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "penalty_aware_action_masks": true
+        },
+        "checkpoint_sha256": null
+      },
+      "notes": [
+        "These measurements use corrected seven-card game resets. Actor BatchNorm and dtype policy consistency was still under review."
+      ],
+      "label": "Interim CPU rollout + CUDA training",
+      "stage": "interim"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "training-interim-cuda-rollout-cuda-training-2026-07-30",
+      "run_kind": "training",
+      "status": "incomplete",
+      "recorded_at": "2026-07-30",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "rl",
+          "role": "training participant"
+        },
+        {
+          "id": "smart",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 50,
+        "environment_turns": null,
+        "policy_decisions": 2323,
+        "wall_time_seconds": 3.8325623370183166,
+        "games_per_second": 13.046102216539378,
+        "rollout_games_per_second": 13.538942710649854,
+        "environment_turns_per_second": null,
+        "rollout_environment_turns_per_second": null,
+        "policy_decisions_per_second": 606.1219089804196,
+        "collected_policy_decisions_per_second": 629.0192783367922,
+        "update_time_seconds": 0.03609504800988361,
+        "total_time_seconds": 3.8325623370183166
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 3.6930505630007247
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.10341672600770835
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 0.03609504800988361
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": null,
+        "peak_gpu_memory_mib": null
+      },
+      "guardrails": [],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_performance_20260730.json",
+        "source_sha256": "28fc8ac99b2b12770476d320d534607779034c2ac5d2cc9a3f79b0cc1f966a07",
+        "git_sha": null,
+        "seed": 20260730,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "gpu": "NVIDIA GeForce RTX 3090",
+          "gpu_memory_mib": 24576
+        },
+        "recipe": {
+          "pretrained": false,
+          "historical_checkpoints": false,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "penalty_aware_action_masks": true
+        },
+        "checkpoint_sha256": null
+      },
+      "notes": [
+        "These measurements use corrected seven-card game resets. Actor BatchNorm and dtype policy consistency was still under review."
+      ],
+      "label": "Interim CUDA rollout + CUDA training",
+      "stage": "interim"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "training-final-seed-20260730",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-30",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "rl",
+          "role": "training participant"
+        },
+        {
+          "id": "smart",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 100,
+        "environment_turns": null,
+        "policy_decisions": 4252,
+        "wall_time_seconds": 3.8356398250034545,
+        "games_per_second": 26.07126960882203,
+        "rollout_games_per_second": 33.65563469038631,
+        "environment_turns_per_second": null,
+        "rollout_environment_turns_per_second": null,
+        "policy_decisions_per_second": 1108.5503837671126,
+        "collected_policy_decisions_per_second": 1431.037587035226,
+        "update_time_seconds": null,
+        "total_time_seconds": 3.8356398250034545
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 2.971270662994357
+        },
+        {
+          "phase": "Non-rollout",
+          "seconds": 0.8643691620090976
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": null,
+        "peak_gpu_memory_mib": null
+      },
+      "guardrails": [
+        {
+          "name": "Unchanged-policy ratio integrity",
+          "status": "observed",
+          "value": {
+            "train_bf16": {
+              "mean_abs_ratio_error": 0.2514415383338928,
+              "max_abs_ratio_error": 6.943974018096924,
+              "mean_old_minus_new_log_prob": 0.038136858493089676,
+              "ratio_mean": 1.0191844701766968
+            },
+            "eval_bf16": {
+              "mean_abs_ratio_error": 0.021478839218616486,
+              "max_abs_ratio_error": 0.162733793258667,
+              "mean_old_minus_new_log_prob": 0.0003614463785197586,
+              "ratio_mean": 1.0000492334365845
+            },
+            "eval_fp32": {
+              "mean_abs_ratio_error": 0.021389154717326164,
+              "max_abs_ratio_error": 0.1747288703918457,
+              "mean_old_minus_new_log_prob": 0.00032340449979528785,
+              "ratio_mean": 1.0000832080841064
+            }
+          },
+          "threshold": 0.02,
+          "notes": "Actor stays in eval mode for rollout and PPO updates, and the first update aborts if the unchanged-policy ratio differs from one by more than 0.02."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_performance_20260730.json",
+        "source_sha256": "28fc8ac99b2b12770476d320d534607779034c2ac5d2cc9a3f79b0cc1f966a07",
+        "git_sha": null,
+        "seed": 20260730,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "gpu": "NVIDIA GeForce RTX 3090",
+          "gpu_memory_mib": 24576
+        },
+        "recipe": {
+          "pretrained": false,
+          "historical_checkpoints": false,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "penalty_aware_action_masks": true
+        },
+        "checkpoint_sha256": null
+      },
+      "notes": [
+        "Actor stays in eval mode for rollout and PPO updates, and the first update aborts if the unchanged-policy ratio differs from one by more than 0.02.",
+        "The original CUDA baseline dealt 14 cards per player because of a double-reset bug; the final benchmark correctly deals seven. Samples-per-second and rollout-samples-per-second are the less game-length-sensitive comparisons.",
+        "Architecture: CPU FP32 actor rollout and policy updates with CUDA critic training"
+      ],
+      "label": "Final recipe \u00b7 seed 20260730",
+      "stage": "final"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "training-final-seed-20260731",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-30",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "rl",
+          "role": "training participant"
+        },
+        {
+          "id": "smart",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 100,
+        "environment_turns": null,
+        "policy_decisions": 4784,
+        "wall_time_seconds": 4.21349680700223,
+        "games_per_second": 23.7332563854835,
+        "rollout_games_per_second": 28.854469590482818,
+        "environment_turns_per_second": null,
+        "rollout_environment_turns_per_second": null,
+        "policy_decisions_per_second": 1135.3989854815306,
+        "collected_policy_decisions_per_second": 1380.3978252086981,
+        "update_time_seconds": null,
+        "total_time_seconds": 4.21349680700223
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 3.4656675870064646
+        },
+        {
+          "phase": "Non-rollout",
+          "seconds": 0.747829219995765
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": null,
+        "peak_gpu_memory_mib": null
+      },
+      "guardrails": [
+        {
+          "name": "Unchanged-policy ratio integrity",
+          "status": "observed",
+          "value": {
+            "train_bf16": {
+              "mean_abs_ratio_error": 0.2514415383338928,
+              "max_abs_ratio_error": 6.943974018096924,
+              "mean_old_minus_new_log_prob": 0.038136858493089676,
+              "ratio_mean": 1.0191844701766968
+            },
+            "eval_bf16": {
+              "mean_abs_ratio_error": 0.021478839218616486,
+              "max_abs_ratio_error": 0.162733793258667,
+              "mean_old_minus_new_log_prob": 0.0003614463785197586,
+              "ratio_mean": 1.0000492334365845
+            },
+            "eval_fp32": {
+              "mean_abs_ratio_error": 0.021389154717326164,
+              "max_abs_ratio_error": 0.1747288703918457,
+              "mean_old_minus_new_log_prob": 0.00032340449979528785,
+              "ratio_mean": 1.0000832080841064
+            }
+          },
+          "threshold": 0.02,
+          "notes": "Actor stays in eval mode for rollout and PPO updates, and the first update aborts if the unchanged-policy ratio differs from one by more than 0.02."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_performance_20260730.json",
+        "source_sha256": "28fc8ac99b2b12770476d320d534607779034c2ac5d2cc9a3f79b0cc1f966a07",
+        "git_sha": null,
+        "seed": 20260731,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "gpu": "NVIDIA GeForce RTX 3090",
+          "gpu_memory_mib": 24576
+        },
+        "recipe": {
+          "pretrained": false,
+          "historical_checkpoints": false,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "penalty_aware_action_masks": true
+        },
+        "checkpoint_sha256": null
+      },
+      "notes": [
+        "Actor stays in eval mode for rollout and PPO updates, and the first update aborts if the unchanged-policy ratio differs from one by more than 0.02.",
+        "The original CUDA baseline dealt 14 cards per player because of a double-reset bug; the final benchmark correctly deals seven. Samples-per-second and rollout-samples-per-second are the less game-length-sensitive comparisons.",
+        "Architecture: CPU FP32 actor rollout and policy updates with CUDA critic training"
+      ],
+      "label": "Final recipe \u00b7 seed 20260731",
+      "stage": "final"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "training-final-seed-20260732",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-30",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "rl",
+          "role": "training participant"
+        },
+        {
+          "id": "smart",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 100,
+        "environment_turns": null,
+        "policy_decisions": 3488,
+        "wall_time_seconds": 3.2590969190059695,
+        "games_per_second": 30.683346486823773,
+        "rollout_games_per_second": 37.48314738016104,
+        "environment_turns_per_second": null,
+        "rollout_environment_turns_per_second": null,
+        "policy_decisions_per_second": 1070.2351254604132,
+        "collected_policy_decisions_per_second": 1307.4121806200171,
+        "update_time_seconds": null,
+        "total_time_seconds": 3.2590969190059695
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 2.667865613999311
+        },
+        {
+          "phase": "Non-rollout",
+          "seconds": 0.5912313050066587
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": null,
+        "peak_gpu_memory_mib": null
+      },
+      "guardrails": [
+        {
+          "name": "Unchanged-policy ratio integrity",
+          "status": "observed",
+          "value": {
+            "train_bf16": {
+              "mean_abs_ratio_error": 0.2514415383338928,
+              "max_abs_ratio_error": 6.943974018096924,
+              "mean_old_minus_new_log_prob": 0.038136858493089676,
+              "ratio_mean": 1.0191844701766968
+            },
+            "eval_bf16": {
+              "mean_abs_ratio_error": 0.021478839218616486,
+              "max_abs_ratio_error": 0.162733793258667,
+              "mean_old_minus_new_log_prob": 0.0003614463785197586,
+              "ratio_mean": 1.0000492334365845
+            },
+            "eval_fp32": {
+              "mean_abs_ratio_error": 0.021389154717326164,
+              "max_abs_ratio_error": 0.1747288703918457,
+              "mean_old_minus_new_log_prob": 0.00032340449979528785,
+              "ratio_mean": 1.0000832080841064
+            }
+          },
+          "threshold": 0.02,
+          "notes": "Actor stays in eval mode for rollout and PPO updates, and the first update aborts if the unchanged-policy ratio differs from one by more than 0.02."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_performance_20260730.json",
+        "source_sha256": "28fc8ac99b2b12770476d320d534607779034c2ac5d2cc9a3f79b0cc1f966a07",
+        "git_sha": null,
+        "seed": 20260732,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "gpu": "NVIDIA GeForce RTX 3090",
+          "gpu_memory_mib": 24576
+        },
+        "recipe": {
+          "pretrained": false,
+          "historical_checkpoints": false,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "penalty_aware_action_masks": true
+        },
+        "checkpoint_sha256": null
+      },
+      "notes": [
+        "Actor stays in eval mode for rollout and PPO updates, and the first update aborts if the unchanged-policy ratio differs from one by more than 0.02.",
+        "The original CUDA baseline dealt 14 cards per player because of a double-reset bug; the final benchmark correctly deals seven. Samples-per-second and rollout-samples-per-second are the less game-length-sensitive comparisons.",
+        "Architecture: CPU FP32 actor rollout and policy updates with CUDA critic training"
+      ],
+      "label": "Final recipe \u00b7 seed 20260732",
+      "stage": "final"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "rollout-thread-sweep-1-2026-07-30",
+      "run_kind": "microbenchmark",
+      "status": "complete",
+      "recorded_at": "2026-07-30",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [],
+      "performance": {
+        "games": 50,
+        "environment_turns": null,
+        "policy_decisions": 2678,
+        "wall_time_seconds": 2.629707887012046,
+        "games_per_second": 19.013518667585366,
+        "rollout_games_per_second": 19.013518667585366,
+        "environment_turns_per_second": null,
+        "rollout_environment_turns_per_second": null,
+        "policy_decisions_per_second": 1018.3640598358721,
+        "collected_policy_decisions_per_second": 1018.3640598358721,
+        "update_time_seconds": null,
+        "total_time_seconds": null
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 2.629707887012046
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": null,
+        "peak_gpu_memory_mib": null
+      },
+      "guardrails": [],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_performance_20260730.json",
+        "source_sha256": "28fc8ac99b2b12770476d320d534607779034c2ac5d2cc9a3f79b0cc1f966a07",
+        "git_sha": null,
+        "seed": 20260730,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "gpu": "NVIDIA GeForce RTX 3090",
+          "gpu_memory_mib": 24576
+        },
+        "recipe": {
+          "cpu_threads": 1
+        },
+        "checkpoint_sha256": null
+      },
+      "notes": [],
+      "label": "CPU rollout \u00b7 1 thread",
+      "stage": "thread_sweep"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "rollout-thread-sweep-2-2026-07-30",
+      "run_kind": "microbenchmark",
+      "status": "complete",
+      "recorded_at": "2026-07-30",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [],
+      "performance": {
+        "games": 50,
+        "environment_turns": null,
+        "policy_decisions": 2678,
+        "wall_time_seconds": 2.610523680006736,
+        "games_per_second": 19.15324514500132,
+        "rollout_games_per_second": 19.15324514500132,
+        "environment_turns_per_second": null,
+        "rollout_environment_turns_per_second": null,
+        "policy_decisions_per_second": 1025.847809966271,
+        "collected_policy_decisions_per_second": 1025.847809966271,
+        "update_time_seconds": null,
+        "total_time_seconds": null
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 2.610523680006736
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": null,
+        "peak_gpu_memory_mib": null
+      },
+      "guardrails": [],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_performance_20260730.json",
+        "source_sha256": "28fc8ac99b2b12770476d320d534607779034c2ac5d2cc9a3f79b0cc1f966a07",
+        "git_sha": null,
+        "seed": 20260730,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "gpu": "NVIDIA GeForce RTX 3090",
+          "gpu_memory_mib": 24576
+        },
+        "recipe": {
+          "cpu_threads": 2
+        },
+        "checkpoint_sha256": null
+      },
+      "notes": [],
+      "label": "CPU rollout \u00b7 2 threads",
+      "stage": "thread_sweep"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "rollout-thread-sweep-4-2026-07-30",
+      "run_kind": "microbenchmark",
+      "status": "complete",
+      "recorded_at": "2026-07-30",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [],
+      "performance": {
+        "games": 50,
+        "environment_turns": null,
+        "policy_decisions": 2678,
+        "wall_time_seconds": 2.6098866619868204,
+        "games_per_second": 19.15792004620486,
+        "rollout_games_per_second": 19.15792004620486,
+        "environment_turns_per_second": null,
+        "rollout_environment_turns_per_second": null,
+        "policy_decisions_per_second": 1026.0981976747323,
+        "collected_policy_decisions_per_second": 1026.0981976747323,
+        "update_time_seconds": null,
+        "total_time_seconds": null
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 2.6098866619868204
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": null,
+        "peak_gpu_memory_mib": null
+      },
+      "guardrails": [],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_performance_20260730.json",
+        "source_sha256": "28fc8ac99b2b12770476d320d534607779034c2ac5d2cc9a3f79b0cc1f966a07",
+        "git_sha": null,
+        "seed": 20260730,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "gpu": "NVIDIA GeForce RTX 3090",
+          "gpu_memory_mib": 24576
+        },
+        "recipe": {
+          "cpu_threads": 4
+        },
+        "checkpoint_sha256": null
+      },
+      "notes": [],
+      "label": "CPU rollout \u00b7 4 threads",
+      "stage": "thread_sweep"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "rollout-thread-sweep-8-2026-07-30",
+      "run_kind": "microbenchmark",
+      "status": "complete",
+      "recorded_at": "2026-07-30",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [],
+      "performance": {
+        "games": 50,
+        "environment_turns": null,
+        "policy_decisions": 2678,
+        "wall_time_seconds": 2.6376284309953917,
+        "games_per_second": 18.956422903407564,
+        "rollout_games_per_second": 18.956422903407564,
+        "environment_turns_per_second": null,
+        "rollout_environment_turns_per_second": null,
+        "policy_decisions_per_second": 1015.3060107065091,
+        "collected_policy_decisions_per_second": 1015.3060107065091,
+        "update_time_seconds": null,
+        "total_time_seconds": null
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 2.6376284309953917
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": null,
+        "peak_gpu_memory_mib": null
+      },
+      "guardrails": [],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_performance_20260730.json",
+        "source_sha256": "28fc8ac99b2b12770476d320d534607779034c2ac5d2cc9a3f79b0cc1f966a07",
+        "git_sha": null,
+        "seed": 20260730,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "gpu": "NVIDIA GeForce RTX 3090",
+          "gpu_memory_mib": 24576
+        },
+        "recipe": {
+          "cpu_threads": 8
+        },
+        "checkpoint_sha256": null
+      },
+      "notes": [],
+      "label": "CPU rollout \u00b7 8 threads",
+      "stage": "thread_sweep"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "rollout-thread-sweep-16-2026-07-30",
+      "run_kind": "microbenchmark",
+      "status": "complete",
+      "recorded_at": "2026-07-30",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [],
+      "performance": {
+        "games": 50,
+        "environment_turns": null,
+        "policy_decisions": 2678,
+        "wall_time_seconds": 2.7361645190103445,
+        "games_per_second": 18.273754978039378,
+        "rollout_games_per_second": 18.273754978039378,
+        "environment_turns_per_second": null,
+        "rollout_environment_turns_per_second": null,
+        "policy_decisions_per_second": 978.7423166237891,
+        "collected_policy_decisions_per_second": 978.7423166237891,
+        "update_time_seconds": null,
+        "total_time_seconds": null
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 2.7361645190103445
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": null,
+        "peak_gpu_memory_mib": null
+      },
+      "guardrails": [],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_performance_20260730.json",
+        "source_sha256": "28fc8ac99b2b12770476d320d534607779034c2ac5d2cc9a3f79b0cc1f966a07",
+        "git_sha": null,
+        "seed": 20260730,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "gpu": "NVIDIA GeForce RTX 3090",
+          "gpu_memory_mib": 24576
+        },
+        "recipe": {
+          "cpu_threads": 16
+        },
+        "checkpoint_sha256": null
+      },
+      "notes": [],
+      "label": "CPU rollout \u00b7 16 threads",
+      "stage": "thread_sweep"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_20260731-sequential-cold-seed-20260731",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 11452,
+        "policy_decisions": 6227,
+        "wall_time_seconds": 7.639259225004935,
+        "games_per_second": 16.755551321131836,
+        "rollout_games_per_second": 28.24911338867068,
+        "environment_turns_per_second": 1499.0982322625139,
+        "rollout_environment_turns_per_second": 2527.41286349263,
+        "policy_decisions_per_second": 815.1313912241245,
+        "collected_policy_decisions_per_second": 1374.2752271191587,
+        "update_time_seconds": 2.8522000160010066,
+        "total_time_seconds": 7.639259225004935
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 4.53111565799918
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.25594355100474786
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 2.8522000160010066
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 2073.23046875,
+        "peak_gpu_memory_mib": 0.0
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 2.6226043701171875e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_20260731.json",
+        "source_sha256": "5602a1efd00756ad8b8c23c6f5378c0ad5dfda73845b4f2daf1578487fceb12d",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260731,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": false,
+          "gpu": null
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "sequential",
+          "thermal_state": "cold"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.  The vector engine also partitions deck randomness into one independent stream per game.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "This machine exposed no CUDA device to the benchmark process; the recorded workload is CPU rollout and CPU PPO update."
+      ],
+      "label": "Sequential \u00b7 cold \u00b7 seed 20260731",
+      "stage": "vectorized_final"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_20260731-sequential-cold-seed-20260732",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 9168,
+        "policy_decisions": 4376,
+        "wall_time_seconds": 5.123113248992013,
+        "games_per_second": 24.984807826605113,
+        "rollout_games_per_second": 41.328902244241426,
+        "environment_turns_per_second": 1789.5368605805913,
+        "rollout_environment_turns_per_second": 2960.182623243792,
+        "policy_decisions_per_second": 854.1681175720623,
+        "collected_policy_decisions_per_second": 1412.9318454750037,
+        "update_time_seconds": 1.8673957669961965,
+        "total_time_seconds": 5.123113248992013
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 3.097106215005624
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.15861126699019223
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 1.8673957669961965
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1689.63671875,
+        "peak_gpu_memory_mib": 0.0
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 2.384185791015625e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_20260731.json",
+        "source_sha256": "5602a1efd00756ad8b8c23c6f5378c0ad5dfda73845b4f2daf1578487fceb12d",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260732,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": false,
+          "gpu": null
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "sequential",
+          "thermal_state": "cold"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.  The vector engine also partitions deck randomness into one independent stream per game.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "This machine exposed no CUDA device to the benchmark process; the recorded workload is CPU rollout and CPU PPO update."
+      ],
+      "label": "Sequential \u00b7 cold \u00b7 seed 20260732",
+      "stage": "vectorized_final"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_20260731-sequential-cold-seed-20260733",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 10266,
+        "policy_decisions": 5590,
+        "wall_time_seconds": 6.786864969995804,
+        "games_per_second": 18.85995972601163,
+        "rollout_games_per_second": 31.796949995417094,
+        "environment_turns_per_second": 1512.6277074002767,
+        "rollout_environment_turns_per_second": 2550.2147551011867,
+        "policy_decisions_per_second": 823.6498036594141,
+        "collected_policy_decisions_per_second": 1388.632425581106,
+        "update_time_seconds": 2.5400992130016675,
+        "total_time_seconds": 6.786864969995804
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 4.025543330993969
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.22122242600016762
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 2.5400992130016675
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1967.8203125,
+        "peak_gpu_memory_mib": 0.0
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 1.9073486328125e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_20260731.json",
+        "source_sha256": "5602a1efd00756ad8b8c23c6f5378c0ad5dfda73845b4f2daf1578487fceb12d",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260733,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": false,
+          "gpu": null
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "sequential",
+          "thermal_state": "cold"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.  The vector engine also partitions deck randomness into one independent stream per game.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "This machine exposed no CUDA device to the benchmark process; the recorded workload is CPU rollout and CPU PPO update."
+      ],
+      "label": "Sequential \u00b7 cold \u00b7 seed 20260733",
+      "stage": "vectorized_final"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_20260731-sequential-warm-seed-20260731",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 11452,
+        "policy_decisions": 6227,
+        "wall_time_seconds": 7.568283529981272,
+        "games_per_second": 16.912685616617846,
+        "rollout_games_per_second": 28.581404489631574,
+        "environment_turns_per_second": 1513.1568412617778,
+        "rollout_environment_turns_per_second": 2557.142532931725,
+        "policy_decisions_per_second": 822.7757291771823,
+        "collected_policy_decisions_per_second": 1390.4406699760611,
+        "update_time_seconds": 2.779988277994562,
+        "total_time_seconds": 7.568283529981272
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 4.478436321995105
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.3098589299916057
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 2.779988277994562
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 2073.30078125,
+        "peak_gpu_memory_mib": 0.0
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 2.6226043701171875e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_20260731.json",
+        "source_sha256": "5602a1efd00756ad8b8c23c6f5378c0ad5dfda73845b4f2daf1578487fceb12d",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260731,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": false,
+          "gpu": null
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "sequential",
+          "thermal_state": "warm"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.  The vector engine also partitions deck randomness into one independent stream per game.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "This machine exposed no CUDA device to the benchmark process; the recorded workload is CPU rollout and CPU PPO update."
+      ],
+      "label": "Sequential \u00b7 warm \u00b7 seed 20260731",
+      "stage": "vectorized_final"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_20260731-sequential-warm-seed-20260732",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 9168,
+        "policy_decisions": 4376,
+        "wall_time_seconds": 5.3575216379831545,
+        "games_per_second": 23.89164405655779,
+        "rollout_games_per_second": 40.18962694297813,
+        "environment_turns_per_second": 1711.2390055509518,
+        "rollout_environment_turns_per_second": 2878.5820297908085,
+        "policy_decisions_per_second": 816.7955811835695,
+        "collected_policy_decisions_per_second": 1373.982871113065,
+        "update_time_seconds": 1.9573715269943932,
+        "total_time_seconds": 5.3575216379831545
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 3.184901421991526
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.21524868899723515
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 1.9573715269943932
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1679.859375,
+        "peak_gpu_memory_mib": 0.0
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 2.384185791015625e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_20260731.json",
+        "source_sha256": "5602a1efd00756ad8b8c23c6f5378c0ad5dfda73845b4f2daf1578487fceb12d",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260732,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": false,
+          "gpu": null
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "sequential",
+          "thermal_state": "warm"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.  The vector engine also partitions deck randomness into one independent stream per game.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "This machine exposed no CUDA device to the benchmark process; the recorded workload is CPU rollout and CPU PPO update."
+      ],
+      "label": "Sequential \u00b7 warm \u00b7 seed 20260732",
+      "stage": "vectorized_final"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_20260731-sequential-warm-seed-20260733",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 10266,
+        "policy_decisions": 5590,
+        "wall_time_seconds": 6.857218766002916,
+        "games_per_second": 18.666460028168448,
+        "rollout_games_per_second": 32.0645589592856,
+        "environment_turns_per_second": 1497.1084269466976,
+        "rollout_environment_turns_per_second": 2571.6778302814528,
+        "policy_decisions_per_second": 815.1993090426689,
+        "collected_policy_decisions_per_second": 1400.3194108000507,
+        "update_time_seconds": 2.604039063997334,
+        "total_time_seconds": 6.857218766002916
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 3.991946378009743
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.2612333239958389
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 2.604039063997334
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1971.578125,
+        "peak_gpu_memory_mib": 0.0
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 1.9073486328125e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_20260731.json",
+        "source_sha256": "5602a1efd00756ad8b8c23c6f5378c0ad5dfda73845b4f2daf1578487fceb12d",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260733,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": false,
+          "gpu": null
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "sequential",
+          "thermal_state": "warm"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.  The vector engine also partitions deck randomness into one independent stream per game.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "This machine exposed no CUDA device to the benchmark process; the recorded workload is CPU rollout and CPU PPO update."
+      ],
+      "label": "Sequential \u00b7 warm \u00b7 seed 20260733",
+      "stage": "vectorized_final"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_20260731-vectorized-cold-seed-20260731",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 10181,
+        "policy_decisions": 5464,
+        "wall_time_seconds": 3.4183677770051872,
+        "games_per_second": 37.44477140845859,
+        "rollout_games_per_second": 171.28214530498667,
+        "environment_turns_per_second": 2978.322013355601,
+        "rollout_environment_turns_per_second": 13623.621260547416,
+        "policy_decisions_per_second": 1598.4236794985763,
+        "collected_policy_decisions_per_second": 7311.606577706619,
+        "update_time_seconds": 2.4703927320078947,
+        "total_time_seconds": 3.4183677770051872
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 0.7473049789987272
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.2006700659985654
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 2.4703927320078947
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1920.375,
+        "peak_gpu_memory_mib": 0.0
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 1.5497207641601562e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_20260731.json",
+        "source_sha256": "5602a1efd00756ad8b8c23c6f5378c0ad5dfda73845b4f2daf1578487fceb12d",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260731,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": false,
+          "gpu": null
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "vectorized",
+          "thermal_state": "cold"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.  The vector engine also partitions deck randomness into one independent stream per game.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "This machine exposed no CUDA device to the benchmark process; the recorded workload is CPU rollout and CPU PPO update."
+      ],
+      "label": "Vectorized \u00b7 cold \u00b7 seed 20260731",
+      "stage": "vectorized_final"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_20260731-vectorized-cold-seed-20260732",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 8246,
+        "policy_decisions": 3950,
+        "wall_time_seconds": 2.332910733995959,
+        "games_per_second": 54.867080053574696,
+        "rollout_games_per_second": 233.5754280000074,
+        "environment_turns_per_second": 3534.6401728263827,
+        "rollout_environment_turns_per_second": 15047.367025687978,
+        "policy_decisions_per_second": 1693.1637985282816,
+        "collected_policy_decisions_per_second": 7207.991723437729,
+        "update_time_seconds": 1.6369229219999397,
+        "total_time_seconds": 2.332910733995959
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 0.5480028489982942
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.14798496299772523
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 1.6369229219999397
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1614.24609375,
+        "peak_gpu_memory_mib": 0.0
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 1.1920928955078125e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_20260731.json",
+        "source_sha256": "5602a1efd00756ad8b8c23c6f5378c0ad5dfda73845b4f2daf1578487fceb12d",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260732,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": false,
+          "gpu": null
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "vectorized",
+          "thermal_state": "cold"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.  The vector engine also partitions deck randomness into one independent stream per game.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "This machine exposed no CUDA device to the benchmark process; the recorded workload is CPU rollout and CPU PPO update."
+      ],
+      "label": "Vectorized \u00b7 cold \u00b7 seed 20260732",
+      "stage": "vectorized_final"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_20260731-vectorized-cold-seed-20260733",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 9667,
+        "policy_decisions": 5277,
+        "wall_time_seconds": 3.8398765080055455,
+        "games_per_second": 33.33440534692715,
+        "rollout_games_per_second": 132.32267288251867,
+        "environment_turns_per_second": 2517.5288788183184,
+        "rollout_environment_turns_per_second": 9993.463115275845,
+        "policy_decisions_per_second": 1374.2629454354262,
+        "collected_policy_decisions_per_second": 5455.208943758212,
+        "update_time_seconds": 2.6343475739995483,
+        "total_time_seconds": 3.8398765080055455
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 0.9673323339957278
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.23819660001026932
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 2.6343475739995483
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1905.0625,
+        "peak_gpu_memory_mib": 0.0
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 2.86102294921875e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_20260731.json",
+        "source_sha256": "5602a1efd00756ad8b8c23c6f5378c0ad5dfda73845b4f2daf1578487fceb12d",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260733,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": false,
+          "gpu": null
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "vectorized",
+          "thermal_state": "cold"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.  The vector engine also partitions deck randomness into one independent stream per game.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "This machine exposed no CUDA device to the benchmark process; the recorded workload is CPU rollout and CPU PPO update."
+      ],
+      "label": "Vectorized \u00b7 cold \u00b7 seed 20260733",
+      "stage": "vectorized_final"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_20260731-vectorized-warm-seed-20260731",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 10181,
+        "policy_decisions": 5464,
+        "wall_time_seconds": 3.7083278200007044,
+        "games_per_second": 34.51690525029572,
+        "rollout_games_per_second": 151.96063938306702,
+        "environment_turns_per_second": 2745.4422840098496,
+        "rollout_environment_turns_per_second": 12086.806793429729,
+        "policy_decisions_per_second": 1473.4403928719987,
+        "collected_policy_decisions_per_second": 6486.819793664674,
+        "update_time_seconds": 2.5843764010060113,
+        "total_time_seconds": 3.7083278200007044
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 0.8423233840003377
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.2816280349943554
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 2.5843764010060113
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1879.27734375,
+        "peak_gpu_memory_mib": 0.0
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 1.5497207641601562e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_20260731.json",
+        "source_sha256": "5602a1efd00756ad8b8c23c6f5378c0ad5dfda73845b4f2daf1578487fceb12d",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260731,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": false,
+          "gpu": null
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "vectorized",
+          "thermal_state": "warm"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.  The vector engine also partitions deck randomness into one independent stream per game.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "This machine exposed no CUDA device to the benchmark process; the recorded workload is CPU rollout and CPU PPO update."
+      ],
+      "label": "Vectorized \u00b7 warm \u00b7 seed 20260731",
+      "stage": "vectorized_final"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_20260731-vectorized-warm-seed-20260732",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 8246,
+        "policy_decisions": 3950,
+        "wall_time_seconds": 2.432885468006134,
+        "games_per_second": 52.612423265819466,
+        "rollout_games_per_second": 222.67739763121077,
+        "environment_turns_per_second": 3389.3909550777134,
+        "rollout_environment_turns_per_second": 14345.295475523157,
+        "policy_decisions_per_second": 1623.5864992186475,
+        "collected_policy_decisions_per_second": 6871.685317525645,
+        "update_time_seconds": 1.7090929170080926,
+        "total_time_seconds": 2.432885468006134
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 0.5748225970019121
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.14896995399612933
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 1.7090929170080926
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1640.99609375,
+        "peak_gpu_memory_mib": 0.0
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 1.1920928955078125e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_20260731.json",
+        "source_sha256": "5602a1efd00756ad8b8c23c6f5378c0ad5dfda73845b4f2daf1578487fceb12d",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260732,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": false,
+          "gpu": null
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "vectorized",
+          "thermal_state": "warm"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.  The vector engine also partitions deck randomness into one independent stream per game.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "This machine exposed no CUDA device to the benchmark process; the recorded workload is CPU rollout and CPU PPO update."
+      ],
+      "label": "Vectorized \u00b7 warm \u00b7 seed 20260732",
+      "stage": "vectorized_final"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_20260731-vectorized-warm-seed-20260733",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 9667,
+        "policy_decisions": 5277,
+        "wall_time_seconds": 3.359911524996278,
+        "games_per_second": 38.09624123960877,
+        "rollout_games_per_second": 150.81280620739696,
+        "environment_turns_per_second": 2877.1590942445155,
+        "rollout_environment_turns_per_second": 11389.901543803957,
+        "policy_decisions_per_second": 1570.5770704798085,
+        "collected_policy_decisions_per_second": 6217.49358090964,
+        "update_time_seconds": 2.306309338993742,
+        "total_time_seconds": 3.359911524996278
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 0.8487342900043586
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.20486789599817712
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 2.306309338993742
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1905.26171875,
+        "peak_gpu_memory_mib": 0.0
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 2.86102294921875e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_20260731.json",
+        "source_sha256": "5602a1efd00756ad8b8c23c6f5378c0ad5dfda73845b4f2daf1578487fceb12d",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260733,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": false,
+          "gpu": null
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "vectorized",
+          "thermal_state": "warm"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.  The vector engine also partitions deck randomness into one independent stream per game.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "This machine exposed no CUDA device to the benchmark process; the recorded workload is CPU rollout and CPU PPO update."
+      ],
+      "label": "Vectorized \u00b7 warm \u00b7 seed 20260733",
+      "stage": "vectorized_final"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_20260731_initial-sequential-cold-seed-20260731",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 9394,
+        "policy_decisions": 5108,
+        "wall_time_seconds": 5.769873165991157,
+        "games_per_second": 22.18419648363483,
+        "rollout_games_per_second": 36.235056133204296,
+        "environment_turns_per_second": 1628.1120450567626,
+        "rollout_environment_turns_per_second": 2659.313416525946,
+        "policy_decisions_per_second": 885.2880909250524,
+        "collected_policy_decisions_per_second": 1446.0052088156838,
+        "update_time_seconds": 2.0253998069965746,
+        "total_time_seconds": 5.769873165991157
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 3.5324907329923008
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.2119826260022819
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 2.0253998069965746
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1883.95703125,
+        "peak_gpu_memory_mib": 0.0
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 2.1457672119140625e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_20260731_initial.json",
+        "source_sha256": "164e630a8721564aa1a3a82d8d64e3bc73fad14d720037466322c28f6a347aa4",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260731,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": false,
+          "gpu": null
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "sequential",
+          "thermal_state": "cold"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "This machine exposed no CUDA device to the benchmark process; the recorded workload is CPU rollout and CPU PPO update."
+      ],
+      "label": "Sequential \u00b7 cold \u00b7 seed 20260731 \u00b7 interim source",
+      "stage": "vectorized_interim"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_20260731_initial-sequential-cold-seed-20260732",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 9046,
+        "policy_decisions": 4317,
+        "wall_time_seconds": 5.099035710009048,
+        "games_per_second": 25.102785561737686,
+        "rollout_games_per_second": 41.88747102979035,
+        "environment_turns_per_second": 1774.0609233709306,
+        "rollout_environment_turns_per_second": 2960.266116683465,
+        "policy_decisions_per_second": 846.6306661720437,
+        "collected_policy_decisions_per_second": 1412.7204096531636,
+        "update_time_seconds": 1.903499558000476,
+        "total_time_seconds": 5.099035710009048
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 3.0558063509961357
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.13972980101243593
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 1.903499558000476
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1746.53515625,
+        "peak_gpu_memory_mib": 0.0
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 1.9073486328125e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_20260731_initial.json",
+        "source_sha256": "164e630a8721564aa1a3a82d8d64e3bc73fad14d720037466322c28f6a347aa4",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260732,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": false,
+          "gpu": null
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "sequential",
+          "thermal_state": "cold"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "This machine exposed no CUDA device to the benchmark process; the recorded workload is CPU rollout and CPU PPO update."
+      ],
+      "label": "Sequential \u00b7 cold \u00b7 seed 20260732 \u00b7 interim source",
+      "stage": "vectorized_interim"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_20260731_initial-sequential-cold-seed-20260733",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 9215,
+        "policy_decisions": 5044,
+        "wall_time_seconds": 5.827697437009192,
+        "games_per_second": 21.96407781693113,
+        "rollout_games_per_second": 35.74531280530553,
+        "environment_turns_per_second": 1581.2420084610967,
+        "rollout_environment_turns_per_second": 2573.3832617257067,
+        "policy_decisions_per_second": 865.5219414734423,
+        "collected_policy_decisions_per_second": 1408.588732734071,
+        "update_time_seconds": 2.0750593400007347,
+        "total_time_seconds": 5.827697437009192
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 3.580889072007267
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.1717490250011906
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 2.0750593400007347
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1886.77734375,
+        "peak_gpu_memory_mib": 0.0
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 2.86102294921875e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_20260731_initial.json",
+        "source_sha256": "164e630a8721564aa1a3a82d8d64e3bc73fad14d720037466322c28f6a347aa4",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260733,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": false,
+          "gpu": null
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "sequential",
+          "thermal_state": "cold"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "This machine exposed no CUDA device to the benchmark process; the recorded workload is CPU rollout and CPU PPO update."
+      ],
+      "label": "Sequential \u00b7 cold \u00b7 seed 20260733 \u00b7 interim source",
+      "stage": "vectorized_interim"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_20260731_initial-sequential-warm-seed-20260731",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 11452,
+        "policy_decisions": 6227,
+        "wall_time_seconds": 7.09410161600681,
+        "games_per_second": 18.043158517942086,
+        "rollout_games_per_second": 28.88107988663266,
+        "environment_turns_per_second": 1614.298838652131,
+        "rollout_environment_turns_per_second": 2583.9541161071656,
+        "policy_decisions_per_second": 877.7714694626982,
+        "collected_policy_decisions_per_second": 1405.0194097973558,
+        "update_time_seconds": 2.4500763370015193,
+        "total_time_seconds": 7.09410161600681
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 4.431967242999235
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.21205803600605577
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 2.4500763370015193
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 2072.9375,
+        "peak_gpu_memory_mib": 0.0
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 2.6226043701171875e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_20260731_initial.json",
+        "source_sha256": "164e630a8721564aa1a3a82d8d64e3bc73fad14d720037466322c28f6a347aa4",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260731,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": false,
+          "gpu": null
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "sequential",
+          "thermal_state": "warm"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "This machine exposed no CUDA device to the benchmark process; the recorded workload is CPU rollout and CPU PPO update."
+      ],
+      "label": "Sequential \u00b7 warm \u00b7 seed 20260731 \u00b7 interim source",
+      "stage": "vectorized_interim"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_20260731_initial-sequential-warm-seed-20260732",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 9168,
+        "policy_decisions": 4376,
+        "wall_time_seconds": 4.890558888000669,
+        "games_per_second": 26.17287776946251,
+        "rollout_games_per_second": 42.1046444272991,
+        "environment_turns_per_second": 1874.6323702377522,
+        "rollout_environment_turns_per_second": 3015.745157105298,
+        "policy_decisions_per_second": 894.7852587434995,
+        "collected_policy_decisions_per_second": 1439.452531358288,
+        "update_time_seconds": 1.7035835870046867,
+        "total_time_seconds": 4.890558888000669
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 3.040044673005468
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.14693062799051404
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 1.7035835870046867
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1689.12890625,
+        "peak_gpu_memory_mib": 0.0
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 2.384185791015625e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_20260731_initial.json",
+        "source_sha256": "164e630a8721564aa1a3a82d8d64e3bc73fad14d720037466322c28f6a347aa4",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260732,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": false,
+          "gpu": null
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "sequential",
+          "thermal_state": "warm"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "This machine exposed no CUDA device to the benchmark process; the recorded workload is CPU rollout and CPU PPO update."
+      ],
+      "label": "Sequential \u00b7 warm \u00b7 seed 20260732 \u00b7 interim source",
+      "stage": "vectorized_interim"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_20260731_initial-sequential-warm-seed-20260733",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 10266,
+        "policy_decisions": 5590,
+        "wall_time_seconds": 6.886626173974946,
+        "games_per_second": 18.586750139527126,
+        "rollout_games_per_second": 32.02727655060905,
+        "environment_turns_per_second": 1490.7154447842618,
+        "rollout_environment_turns_per_second": 2568.6876645980665,
+        "policy_decisions_per_second": 811.7182287496613,
+        "collected_policy_decisions_per_second": 1398.6912181086298,
+        "update_time_seconds": 2.6684420779929496,
+        "total_time_seconds": 6.886626173974946
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 3.9965933349885745
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.221590760993422
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 2.6684420779929496
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1972.6484375,
+        "peak_gpu_memory_mib": 0.0
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 1.9073486328125e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_20260731_initial.json",
+        "source_sha256": "164e630a8721564aa1a3a82d8d64e3bc73fad14d720037466322c28f6a347aa4",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260733,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": false,
+          "gpu": null
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "sequential",
+          "thermal_state": "warm"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "This machine exposed no CUDA device to the benchmark process; the recorded workload is CPU rollout and CPU PPO update."
+      ],
+      "label": "Sequential \u00b7 warm \u00b7 seed 20260733 \u00b7 interim source",
+      "stage": "vectorized_interim"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_20260731_initial-vectorized-cold-seed-20260731",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 10245,
+        "policy_decisions": 5503,
+        "wall_time_seconds": 3.307258309010649,
+        "games_per_second": 38.702752564341004,
+        "rollout_games_per_second": 142.06613463232875,
+        "environment_turns_per_second": 3097.7320314193253,
+        "rollout_environment_turns_per_second": 11370.840228970375,
+        "policy_decisions_per_second": 1663.9159950122544,
+        "collected_policy_decisions_per_second": 6107.733897513322,
+        "update_time_seconds": 2.2205529700004263,
+        "total_time_seconds": 3.307258309010649
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 0.9009888270084048
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.18571651200181805
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 2.2205529700004263
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1948.46484375,
+        "peak_gpu_memory_mib": 0.0
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 2.5033950805664062e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_20260731_initial.json",
+        "source_sha256": "164e630a8721564aa1a3a82d8d64e3bc73fad14d720037466322c28f6a347aa4",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260731,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": false,
+          "gpu": null
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "vectorized",
+          "thermal_state": "cold"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "This machine exposed no CUDA device to the benchmark process; the recorded workload is CPU rollout and CPU PPO update."
+      ],
+      "label": "Vectorized \u00b7 cold \u00b7 seed 20260731 \u00b7 interim source",
+      "stage": "vectorized_interim"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_20260731_initial-vectorized-cold-seed-20260732",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 7900,
+        "policy_decisions": 3818,
+        "wall_time_seconds": 2.0666014089802047,
+        "games_per_second": 61.937439626136474,
+        "rollout_games_per_second": 226.15105498602514,
+        "environment_turns_per_second": 3822.7013519256107,
+        "rollout_environment_turns_per_second": 13957.760424918739,
+        "policy_decisions_per_second": 1847.477691348352,
+        "collected_policy_decisions_per_second": 6745.661937005031,
+        "update_time_seconds": 1.3662716419930803,
+        "total_time_seconds": 2.0666014089802047
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 0.5659933799906867
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.1343363869964378
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 1.3662716419930803
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1580.78515625,
+        "peak_gpu_memory_mib": 0.0
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 1.7881393432617188e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_20260731_initial.json",
+        "source_sha256": "164e630a8721564aa1a3a82d8d64e3bc73fad14d720037466322c28f6a347aa4",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260732,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": false,
+          "gpu": null
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "vectorized",
+          "thermal_state": "cold"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "This machine exposed no CUDA device to the benchmark process; the recorded workload is CPU rollout and CPU PPO update."
+      ],
+      "label": "Vectorized \u00b7 cold \u00b7 seed 20260732 \u00b7 interim source",
+      "stage": "vectorized_interim"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_20260731_initial-vectorized-cold-seed-20260733",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 9477,
+        "policy_decisions": 5120,
+        "wall_time_seconds": 3.1428790929930983,
+        "games_per_second": 40.72698828452231,
+        "rollout_games_per_second": 161.72531047758446,
+        "environment_turns_per_second": 3015.388031034515,
+        "rollout_environment_turns_per_second": 11973.990370281781,
+        "policy_decisions_per_second": 1629.0795313808921,
+        "collected_policy_decisions_per_second": 6469.012419103378,
+        "update_time_seconds": 2.1690324539958965,
+        "total_time_seconds": 3.1428790929930983
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 0.7914654769992922
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.18238116199790966
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 2.1690324539958965
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1856.5625,
+        "peak_gpu_memory_mib": 0.0
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 2.384185791015625e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_20260731_initial.json",
+        "source_sha256": "164e630a8721564aa1a3a82d8d64e3bc73fad14d720037466322c28f6a347aa4",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260733,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": false,
+          "gpu": null
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "vectorized",
+          "thermal_state": "cold"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "This machine exposed no CUDA device to the benchmark process; the recorded workload is CPU rollout and CPU PPO update."
+      ],
+      "label": "Vectorized \u00b7 cold \u00b7 seed 20260733 \u00b7 interim source",
+      "stage": "vectorized_interim"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_20260731_initial-vectorized-warm-seed-20260731",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 10181,
+        "policy_decisions": 5464,
+        "wall_time_seconds": 3.288309092997224,
+        "games_per_second": 38.92578111728868,
+        "rollout_games_per_second": 182.2277329537619,
+        "environment_turns_per_second": 3096.120137149344,
+        "rollout_environment_turns_per_second": 14494.223040642577,
+        "policy_decisions_per_second": 1661.6442814442603,
+        "collected_policy_decisions_per_second": 7778.846350463711,
+        "update_time_seconds": 2.3985209590027807,
+        "total_time_seconds": 3.288309092997224
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 0.7024177819985198
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.18737035199592356
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 2.3985209590027807
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1897.671875,
+        "peak_gpu_memory_mib": 0.0
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 1.5497207641601562e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_20260731_initial.json",
+        "source_sha256": "164e630a8721564aa1a3a82d8d64e3bc73fad14d720037466322c28f6a347aa4",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260731,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": false,
+          "gpu": null
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "vectorized",
+          "thermal_state": "warm"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "This machine exposed no CUDA device to the benchmark process; the recorded workload is CPU rollout and CPU PPO update."
+      ],
+      "label": "Vectorized \u00b7 warm \u00b7 seed 20260731 \u00b7 interim source",
+      "stage": "vectorized_interim"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_20260731_initial-vectorized-warm-seed-20260732",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 8246,
+        "policy_decisions": 3950,
+        "wall_time_seconds": 2.220807343997876,
+        "games_per_second": 57.636697008384175,
+        "rollout_games_per_second": 211.41704850262295,
+        "environment_turns_per_second": 3713.0640900869994,
+        "rollout_environment_turns_per_second": 13619.882671504913,
+        "policy_decisions_per_second": 1778.6324467431054,
+        "collected_policy_decisions_per_second": 6524.1979811356305,
+        "update_time_seconds": 1.4795593269955134,
+        "total_time_seconds": 2.220807343997876
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 0.6054384019953432
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.1358096150070196
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 1.4795593269955134
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1610.1015625,
+        "peak_gpu_memory_mib": 0.0
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 1.1920928955078125e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_20260731_initial.json",
+        "source_sha256": "164e630a8721564aa1a3a82d8d64e3bc73fad14d720037466322c28f6a347aa4",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260732,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": false,
+          "gpu": null
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "vectorized",
+          "thermal_state": "warm"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "This machine exposed no CUDA device to the benchmark process; the recorded workload is CPU rollout and CPU PPO update."
+      ],
+      "label": "Vectorized \u00b7 warm \u00b7 seed 20260732 \u00b7 interim source",
+      "stage": "vectorized_interim"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_20260731_initial-vectorized-warm-seed-20260733",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 9667,
+        "policy_decisions": 5277,
+        "wall_time_seconds": 3.2191902349877637,
+        "games_per_second": 39.76155202287588,
+        "rollout_games_per_second": 150.40627749553087,
+        "environment_turns_per_second": 3002.9290891026653,
+        "rollout_environment_turns_per_second": 11359.199098041381,
+        "policy_decisions_per_second": 1639.232109568094,
+        "collected_policy_decisions_per_second": 6200.733799561846,
+        "update_time_seconds": 2.1560512589931022,
+        "total_time_seconds": 3.2191902349877637
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 0.8510283089999575
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.21211066699470393
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 2.1560512589931022
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1867.734375,
+        "peak_gpu_memory_mib": 0.0
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 2.86102294921875e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_20260731_initial.json",
+        "source_sha256": "164e630a8721564aa1a3a82d8d64e3bc73fad14d720037466322c28f6a347aa4",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260733,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": false,
+          "gpu": null
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "vectorized",
+          "thermal_state": "warm"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "This machine exposed no CUDA device to the benchmark process; the recorded workload is CPU rollout and CPU PPO update."
+      ],
+      "label": "Vectorized \u00b7 warm \u00b7 seed 20260733 \u00b7 interim source",
+      "stage": "vectorized_interim"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_cuda_before_update_20260731-sequential-cold-seed-20260731",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 11452,
+        "policy_decisions": 6227,
+        "wall_time_seconds": 5.597426019987324,
+        "games_per_second": 22.86765372922068,
+        "rollout_games_per_second": 28.307322059107495,
+        "environment_turns_per_second": 2045.9403945862127,
+        "rollout_environment_turns_per_second": 2532.6207204757734,
+        "policy_decisions_per_second": 1112.4756232176342,
+        "collected_policy_decisions_per_second": 1377.1069879848621,
+        "update_time_seconds": 0.8849423989886418,
+        "total_time_seconds": 5.597426019987324
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 4.521798272995511
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.19068534800317138
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 0.8849423989886418
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 2026.03125,
+        "peak_gpu_memory_mib": 629.70263671875
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 2.6226043701171875e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_cuda_before_update_20260731.json",
+        "source_sha256": "e93c0cbecbd778b37fde5170712ef4870662356d6b4cc4e7e5beef2646a4d42f",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260731,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": true,
+          "gpu": "NVIDIA GeForce RTX 3090"
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "sequential",
+          "thermal_state": "cold"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.  The vector engine also partitions deck randomness into one independent stream per game.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "Rollouts use the requested device and the critic uses CUDA; CUDA allocated memory excludes driver/context reservations."
+      ],
+      "label": "Sequential \u00b7 cold \u00b7 seed 20260731 \u00b7 interim source",
+      "stage": "vectorized_interim"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_cuda_before_update_20260731-sequential-cold-seed-20260732",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 9168,
+        "policy_decisions": 4376,
+        "wall_time_seconds": 3.815873974992428,
+        "games_per_second": 33.54408474673328,
+        "rollout_games_per_second": 42.75056987569777,
+        "environment_turns_per_second": 2402.5950699847713,
+        "rollout_environment_turns_per_second": 3062.009567346853,
+        "policy_decisions_per_second": 1146.788397278944,
+        "collected_policy_decisions_per_second": 1461.5351076254176,
+        "update_time_seconds": 0.6590468039939879,
+        "total_time_seconds": 3.815873974992428
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 2.9941121339943493
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.16271503700409085
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 0.6590468039939879
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1936.94921875,
+        "peak_gpu_memory_mib": 487.22265625
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 2.384185791015625e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_cuda_before_update_20260731.json",
+        "source_sha256": "e93c0cbecbd778b37fde5170712ef4870662356d6b4cc4e7e5beef2646a4d42f",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260732,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": true,
+          "gpu": "NVIDIA GeForce RTX 3090"
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "sequential",
+          "thermal_state": "cold"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.  The vector engine also partitions deck randomness into one independent stream per game.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "Rollouts use the requested device and the critic uses CUDA; CUDA allocated memory excludes driver/context reservations."
+      ],
+      "label": "Sequential \u00b7 cold \u00b7 seed 20260732 \u00b7 interim source",
+      "stage": "vectorized_interim"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_cuda_before_update_20260731-sequential-cold-seed-20260733",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 10266,
+        "policy_decisions": 5590,
+        "wall_time_seconds": 5.027667492991895,
+        "games_per_second": 25.459121984184552,
+        "rollout_games_per_second": 31.998406263401154,
+        "environment_turns_per_second": 2041.9011428878016,
+        "rollout_environment_turns_per_second": 2566.372177344346,
+        "policy_decisions_per_second": 1111.8475929030596,
+        "collected_policy_decisions_per_second": 1397.4303985344723,
+        "update_time_seconds": 0.8579349389910931,
+        "total_time_seconds": 5.027667492991895
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 4.000199226997211
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.1695333270035917
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 0.8579349389910931
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1976.86328125,
+        "peak_gpu_memory_mib": 577.5947265625
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 1.9073486328125e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_cuda_before_update_20260731.json",
+        "source_sha256": "e93c0cbecbd778b37fde5170712ef4870662356d6b4cc4e7e5beef2646a4d42f",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260733,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": true,
+          "gpu": "NVIDIA GeForce RTX 3090"
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "sequential",
+          "thermal_state": "cold"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.  The vector engine also partitions deck randomness into one independent stream per game.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "Rollouts use the requested device and the critic uses CUDA; CUDA allocated memory excludes driver/context reservations."
+      ],
+      "label": "Sequential \u00b7 cold \u00b7 seed 20260733 \u00b7 interim source",
+      "stage": "vectorized_interim"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_cuda_before_update_20260731-sequential-warm-seed-20260731",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 11452,
+        "policy_decisions": 6227,
+        "wall_time_seconds": 5.491957071004435,
+        "games_per_second": 23.306810003267163,
+        "rollout_games_per_second": 29.370150704914163,
+        "environment_turns_per_second": 2085.231157479809,
+        "rollout_environment_turns_per_second": 2627.710670880289,
+        "policy_decisions_per_second": 1133.8398897683173,
+        "collected_policy_decisions_per_second": 1428.8119409335977,
+        "update_time_seconds": 0.9555211050028447,
+        "total_time_seconds": 5.491957071004435
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 4.358166264995816
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.17826970100577455
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 0.9555211050028447
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 2026.8046875,
+        "peak_gpu_memory_mib": 629.70263671875
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 2.6226043701171875e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_cuda_before_update_20260731.json",
+        "source_sha256": "e93c0cbecbd778b37fde5170712ef4870662356d6b4cc4e7e5beef2646a4d42f",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260731,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": true,
+          "gpu": "NVIDIA GeForce RTX 3090"
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "sequential",
+          "thermal_state": "warm"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.  The vector engine also partitions deck randomness into one independent stream per game.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "Rollouts use the requested device and the critic uses CUDA; CUDA allocated memory excludes driver/context reservations."
+      ],
+      "label": "Sequential \u00b7 warm \u00b7 seed 20260731 \u00b7 interim source",
+      "stage": "vectorized_interim"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_cuda_before_update_20260731-sequential-warm-seed-20260732",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 9168,
+        "policy_decisions": 4376,
+        "wall_time_seconds": 3.9541853519913275,
+        "games_per_second": 32.370763787170276,
+        "rollout_games_per_second": 41.99897979361245,
+        "environment_turns_per_second": 2318.5559562560707,
+        "rollout_environment_turns_per_second": 3008.1769277174917,
+        "policy_decisions_per_second": 1106.6754869738836,
+        "collected_policy_decisions_per_second": 1435.8401216941256,
+        "update_time_seconds": 0.738548155000899,
+        "total_time_seconds": 3.9541853519913275
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 3.0476930779987015
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.167944118991727
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 0.738548155000899
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1928.16015625,
+        "peak_gpu_memory_mib": 487.22265625
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 2.384185791015625e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_cuda_before_update_20260731.json",
+        "source_sha256": "e93c0cbecbd778b37fde5170712ef4870662356d6b4cc4e7e5beef2646a4d42f",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260732,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": true,
+          "gpu": "NVIDIA GeForce RTX 3090"
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "sequential",
+          "thermal_state": "warm"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.  The vector engine also partitions deck randomness into one independent stream per game.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "Rollouts use the requested device and the critic uses CUDA; CUDA allocated memory excludes driver/context reservations."
+      ],
+      "label": "Sequential \u00b7 warm \u00b7 seed 20260732 \u00b7 interim source",
+      "stage": "vectorized_interim"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_cuda_before_update_20260731-sequential-warm-seed-20260733",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 10266,
+        "policy_decisions": 5590,
+        "wall_time_seconds": 5.151884553983109,
+        "games_per_second": 24.845277229870874,
+        "rollout_games_per_second": 31.405357141679666,
+        "environment_turns_per_second": 1992.6688753269873,
+        "rollout_environment_turns_per_second": 2518.807784503777,
+        "policy_decisions_per_second": 1085.0398415232671,
+        "collected_policy_decisions_per_second": 1371.5308314217916,
+        "update_time_seconds": 0.9043738089967519,
+        "total_time_seconds": 5.151884553983109
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 4.075737760998891
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.17177298398746643
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 0.9043738089967519
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1976.48828125,
+        "peak_gpu_memory_mib": 577.5947265625
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 1.9073486328125e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_cuda_before_update_20260731.json",
+        "source_sha256": "e93c0cbecbd778b37fde5170712ef4870662356d6b4cc4e7e5beef2646a4d42f",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260733,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": true,
+          "gpu": "NVIDIA GeForce RTX 3090"
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "sequential",
+          "thermal_state": "warm"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.  The vector engine also partitions deck randomness into one independent stream per game.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "Rollouts use the requested device and the critic uses CUDA; CUDA allocated memory excludes driver/context reservations."
+      ],
+      "label": "Sequential \u00b7 warm \u00b7 seed 20260733 \u00b7 interim source",
+      "stage": "vectorized_interim"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_cuda_before_update_20260731-vectorized-cold-seed-20260731",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 10181,
+        "policy_decisions": 5464,
+        "wall_time_seconds": 1.740863614002592,
+        "games_per_second": 73.52672487978684,
+        "rollout_games_per_second": 175.37761046722255,
+        "environment_turns_per_second": 5848.24676563367,
+        "rollout_environment_turns_per_second": 13949.37072005307,
+        "policy_decisions_per_second": 3138.6720683059007,
+        "collected_policy_decisions_per_second": 7486.431746819563,
+        "update_time_seconds": 0.8355607640114613,
+        "total_time_seconds": 1.740863614002592
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 0.7298537119932007
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.17544913799792994
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 0.8355607640114613
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1980.62109375,
+        "peak_gpu_memory_mib": 569.7353515625
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 1.5497207641601562e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_cuda_before_update_20260731.json",
+        "source_sha256": "e93c0cbecbd778b37fde5170712ef4870662356d6b4cc4e7e5beef2646a4d42f",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260731,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": true,
+          "gpu": "NVIDIA GeForce RTX 3090"
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "vectorized",
+          "thermal_state": "cold"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.  The vector engine also partitions deck randomness into one independent stream per game.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "Rollouts use the requested device and the critic uses CUDA; CUDA allocated memory excludes driver/context reservations."
+      ],
+      "label": "Vectorized \u00b7 cold \u00b7 seed 20260731 \u00b7 interim source",
+      "stage": "vectorized_interim"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_cuda_before_update_20260731-vectorized-cold-seed-20260732",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 8246,
+        "policy_decisions": 3950,
+        "wall_time_seconds": 1.4350345429993467,
+        "games_per_second": 89.19645915454333,
+        "rollout_games_per_second": 215.50771857389964,
+        "environment_turns_per_second": 5746.203142096597,
+        "rollout_environment_turns_per_second": 13883.411307502942,
+        "policy_decisions_per_second": 2752.546981722236,
+        "collected_policy_decisions_per_second": 6650.4335028664345,
+        "update_time_seconds": 0.6727428459998919,
+        "total_time_seconds": 1.4350345429993467
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 0.593946244000108
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.1683454529993469
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 0.6727428459998919
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1875.765625,
+        "peak_gpu_memory_mib": 462.419921875
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 1.1920928955078125e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_cuda_before_update_20260731.json",
+        "source_sha256": "e93c0cbecbd778b37fde5170712ef4870662356d6b4cc4e7e5beef2646a4d42f",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260732,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": true,
+          "gpu": "NVIDIA GeForce RTX 3090"
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "vectorized",
+          "thermal_state": "cold"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.  The vector engine also partitions deck randomness into one independent stream per game.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "Rollouts use the requested device and the critic uses CUDA; CUDA allocated memory excludes driver/context reservations."
+      ],
+      "label": "Vectorized \u00b7 cold \u00b7 seed 20260732 \u00b7 interim source",
+      "stage": "vectorized_interim"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_cuda_before_update_20260731-vectorized-cold-seed-20260733",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 9667,
+        "policy_decisions": 5277,
+        "wall_time_seconds": 1.8486717810010305,
+        "games_per_second": 69.2388996875853,
+        "rollout_games_per_second": 150.18711343109788,
+        "environment_turns_per_second": 5229.159713124118,
+        "rollout_environment_turns_per_second": 11342.64707451893,
+        "policy_decisions_per_second": 2854.481825401466,
+        "collected_policy_decisions_per_second": 6191.698418561746,
+        "update_time_seconds": 0.8184568919969024,
+        "total_time_seconds": 1.8486717810010305
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 0.852270192001015
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.1779446970031131
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 0.8184568919969024
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1967.66015625,
+        "peak_gpu_memory_mib": 555.375
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 2.86102294921875e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_cuda_before_update_20260731.json",
+        "source_sha256": "e93c0cbecbd778b37fde5170712ef4870662356d6b4cc4e7e5beef2646a4d42f",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260733,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": true,
+          "gpu": "NVIDIA GeForce RTX 3090"
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "vectorized",
+          "thermal_state": "cold"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.  The vector engine also partitions deck randomness into one independent stream per game.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "Rollouts use the requested device and the critic uses CUDA; CUDA allocated memory excludes driver/context reservations."
+      ],
+      "label": "Vectorized \u00b7 cold \u00b7 seed 20260733 \u00b7 interim source",
+      "stage": "vectorized_interim"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_cuda_before_update_20260731-vectorized-warm-seed-20260731",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 10181,
+        "policy_decisions": 5464,
+        "wall_time_seconds": 1.7417446830077097,
+        "games_per_second": 73.48953107120433,
+        "rollout_games_per_second": 166.0155939294136,
+        "environment_turns_per_second": 5845.2884049682125,
+        "rollout_environment_turns_per_second": 13204.72470152625,
+        "policy_decisions_per_second": 3137.0843576020343,
+        "collected_policy_decisions_per_second": 7086.790665861843,
+        "update_time_seconds": 0.7950279340002453,
+        "total_time_seconds": 1.7417446830077097
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 0.7710119090043008
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.17570484000316355
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 0.7950279340002453
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1970.6640625,
+        "peak_gpu_memory_mib": 569.7353515625
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 1.5497207641601562e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_cuda_before_update_20260731.json",
+        "source_sha256": "e93c0cbecbd778b37fde5170712ef4870662356d6b4cc4e7e5beef2646a4d42f",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260731,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": true,
+          "gpu": "NVIDIA GeForce RTX 3090"
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "vectorized",
+          "thermal_state": "warm"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.  The vector engine also partitions deck randomness into one independent stream per game.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "Rollouts use the requested device and the critic uses CUDA; CUDA allocated memory excludes driver/context reservations."
+      ],
+      "label": "Vectorized \u00b7 warm \u00b7 seed 20260731 \u00b7 interim source",
+      "stage": "vectorized_interim"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_cuda_before_update_20260731-vectorized-warm-seed-20260732",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 8246,
+        "policy_decisions": 3950,
+        "wall_time_seconds": 1.384739904999151,
+        "games_per_second": 92.4361315348087,
+        "rollout_games_per_second": 218.264043951702,
+        "environment_turns_per_second": 5954.908911219003,
+        "rollout_environment_turns_per_second": 14060.978956451052,
+        "policy_decisions_per_second": 2852.521246581987,
+        "collected_policy_decisions_per_second": 6735.491981322054,
+        "update_time_seconds": 0.6303948330023559,
+        "total_time_seconds": 1.384739904999151
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 0.586445654000272
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.16789941799652297
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 0.6303948330023559
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1864.82421875,
+        "peak_gpu_memory_mib": 462.419921875
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 1.1920928955078125e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_cuda_before_update_20260731.json",
+        "source_sha256": "e93c0cbecbd778b37fde5170712ef4870662356d6b4cc4e7e5beef2646a4d42f",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260732,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": true,
+          "gpu": "NVIDIA GeForce RTX 3090"
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "vectorized",
+          "thermal_state": "warm"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.  The vector engine also partitions deck randomness into one independent stream per game.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "Rollouts use the requested device and the critic uses CUDA; CUDA allocated memory excludes driver/context reservations."
+      ],
+      "label": "Vectorized \u00b7 warm \u00b7 seed 20260732 \u00b7 interim source",
+      "stage": "vectorized_interim"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "vectorized-training-training_speed_vectorized_cuda_before_update_20260731-vectorized-warm-seed-20260733",
+      "run_kind": "training",
+      "status": "complete",
+      "recorded_at": "2026-07-31",
+      "game": {
+        "player_count": 2,
+        "observation_version": null,
+        "rules_version": null
+      },
+      "models": [
+        {
+          "id": "smart",
+          "role": "training participant"
+        },
+        {
+          "id": "rl",
+          "role": "training participant"
+        }
+      ],
+      "performance": {
+        "games": 128,
+        "environment_turns": 9667,
+        "policy_decisions": 5277,
+        "wall_time_seconds": 1.893325228986214,
+        "games_per_second": 67.60592318760678,
+        "rollout_games_per_second": 148.29311994995828,
+        "environment_turns_per_second": 5105.831714489022,
+        "rollout_environment_turns_per_second": 11199.606176220677,
+        "policy_decisions_per_second": 2787.15981766407,
+        "collected_policy_decisions_per_second": 6113.615577936952,
+        "update_time_seconds": 0.8405361030017957,
+        "total_time_seconds": 1.893325228986214
+      },
+      "outcome": null,
+      "timing": [
+        {
+          "phase": "Rollout",
+          "seconds": 0.8631553509912919
+        },
+        {
+          "phase": "Batch preparation",
+          "seconds": 0.18963377499312628
+        },
+        {
+          "phase": "Policy update",
+          "seconds": 0.8405361030017957
+        }
+      ],
+      "resources": {
+        "cpu_utilization_pct": null,
+        "gpu_utilization_pct": null,
+        "peak_cpu_memory_mib": 1958.6484375,
+        "peak_gpu_memory_mib": 555.375
+      },
+      "guardrails": [
+        {
+          "name": "First-update unchanged-policy ratio error",
+          "status": "observed",
+          "value": 2.86102294921875e-06,
+          "notes": "Source reports the maximum first-update ratio error but no pass/fail threshold."
+        }
+      ],
+      "learning_curve": [],
+      "provenance": {
+        "source_path": "benchmarks/training_speed_vectorized_cuda_before_update_20260731.json",
+        "source_sha256": "e93c0cbecbd778b37fde5170712ef4870662356d6b4cc4e7e5beef2646a4d42f",
+        "git_sha": "60e367e4e91ebc2b2a0143649cdf7c671fd5e7b6",
+        "seed": 20260733,
+        "hardware": {
+          "python": "3.13.11",
+          "torch": "2.13.0+cu130",
+          "numpy": "2.5.1",
+          "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+          "cpu": "x86_64",
+          "torch_threads": 8,
+          "cuda_available": true,
+          "gpu": "NVIDIA GeForce RTX 3090"
+        },
+        "recipe": {
+          "actor": "StudentNet: DenseSkipNet, eight 256-wide hidden layers",
+          "critic": "StudentCritic: DenseSkipNet, eight 512-wide hidden layers",
+          "rollout_device": "cpu",
+          "vector_game_batch_size": 128,
+          "observation_features": 121,
+          "actions": 55,
+          "policy_updates": 3,
+          "temperature": 0.8,
+          "implementation": "vectorized",
+          "thermal_state": "warm"
+        },
+        "checkpoint_sha256": null,
+        "worktree_dirty": true
+      },
+      "notes": [
+        "Each fixed seed resets Python, NumPy, and Torch RNGs, but batched categorical sampling consumes the Torch stream in a different order from scalar sampling, so trajectories and decision counts are distribution-comparable rather than pairwise identical.  The vector engine also partitions deck randomness into one independent stream per game.",
+        "The canonical differential suite separately proves exact rules, deck, hand-order, duplicate, terminal, and truncation equivalence under deterministic decisions across 128 seeds.",
+        "Rollouts use the requested device and the critic uses CUDA; CUDA allocated memory excludes driver/context reservations."
+      ],
+      "label": "Vectorized \u00b7 warm \u00b7 seed 20260733 \u00b7 interim source",
+      "stage": "vectorized_interim"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "result": {
+    "agent": "bayesian_tree_search",
+    "opponent": "ppo",
+    "games": 20,
+    "wins": 9,
+    "losses": 11,
+    "draws": 0,
+    "win_rate": 0.45,
+    "win_rate_ci95": [
+      0.2581978582556243,
+      0.6579146575496578
+    ],
+    "average_turns": 59.4,
+    "elapsed_seconds": 3.722237802998279,
+    "wins_as_seat_0": 4,
+    "games_as_seat_0": 10,
+    "wins_as_seat_1": 5,
+    "games_as_seat_1": 10,
+    "seed": 20260901
+  },
+  "tree_search": {
+    "belief_samples": 8,
+    "search_depth": 3,
+    "beam_width": 3,
+    "belief_model": "Dirichlet posterior over suits and ranks from public plays and announced suits"
+  },
+  "ppo_checkpoint": {
+    "path": "ppo_actor_100run3.pth",
+    "sha256": "aac589b3c7300895604e6c77755631ab4a31c8bf9810768448ab2f3ff5bbe186"
+  }
+}
