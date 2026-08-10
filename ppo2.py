@@ -1844,10 +1844,23 @@ class PPO_Supervised:
                     max_initial_ratio_error = (
                         ratios.detach().sub(1).abs().max().item()
                     )
-                    if max_initial_ratio_error > 0.02:
+                    ratio_error_limit = float(
+                        os.environ.get(
+                            "PPO_MAX_INITIAL_RATIO_ERROR", "0.02"
+                        )
+                    )
+                    if max_initial_ratio_error > ratio_error_limit:
                         raise RuntimeError(
                             "rollout/update policy mismatch: unchanged-policy "
                             f"ratio error reached {max_initial_ratio_error:.5f}"
+                        )
+                    elif max_initial_ratio_error > 0.02:
+                        print(
+                            f"[ppo] first-update ratio error "
+                            f"{max_initial_ratio_error:.5f} exceeded the "
+                            "legacy 0.02 guard but remains inside the "
+                            f"configured limit {ratio_error_limit}",
+                            flush=True,
                         )
 
                 with autocast_for(self.device):
