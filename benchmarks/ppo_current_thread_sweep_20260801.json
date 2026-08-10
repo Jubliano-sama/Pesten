@@ -1,0 +1,64 @@
+{
+  "benchmark": "ppo_current_thread_sweep",
+  "decision": "use six Torch threads by default",
+  "development_only": true,
+  "sealed_seeds_or_outcomes_used": false,
+  "contention": {
+    "concurrent_cpu_job": "separate Puffer trainer using approximately 2.7 cores",
+    "note": "Six threads both improved this process and reduced oversubscription pressure on the concurrent trainer."
+  },
+  "collector_sweep": {
+    "workload": {
+      "games": 1024,
+      "pairs_per_thread_count": 7,
+      "rollout_batch_size": 1024,
+      "thread_counts": [
+        4,
+        6,
+        8
+      ]
+    },
+    "median_seconds": {
+      "4": 1.0812186789989937,
+      "6": 0.8277482189987495,
+      "8": 0.8806007749990385
+    },
+    "six_vs_eight_speedup": 1.0638510053989847
+  },
+  "fixed_state_gpu_pairs": {
+    "workload": {
+      "games": 1024,
+      "updates": 3,
+      "pairs": 5,
+      "rollout_device": "cpu",
+      "training_device": "cuda",
+      "gpu": "NVIDIA GeForce RTX 3090"
+    },
+    "paired_total_speedups": [
+      0.42541021747985597,
+      1.0444806158068933,
+      1.0752388928268912,
+      1.0780074305487732,
+      1.0880439083099622
+    ],
+    "paired_rollout_speedups": [
+      0.9574261320515947,
+      1.0988750447376132,
+      1.1018236073755607,
+      1.086021817670265,
+      1.1207269066375143
+    ],
+    "median_total_speedup": 1.0752388928268912,
+    "median_rollout_speedup": 1.0988750447376132,
+    "note": "The first six-thread pair paid compilation warmup; medians are robust to that deliberately retained outlier."
+  },
+  "parity": {
+    "observations_exact": true,
+    "actions_exact": true,
+    "rewards_exact": true,
+    "episode_lengths_exact": true,
+    "turn_and_decision_counts_exact": true,
+    "log_probability_max_abs_difference": 1.9073486328125e-06,
+    "log_probability_mean_abs_difference": 9.875343209841958e-08
+  }
+}

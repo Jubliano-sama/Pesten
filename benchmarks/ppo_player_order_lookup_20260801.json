@@ -1,0 +1,15 @@
+{
+  "benchmark": "ppo_player_order_lookup",
+  "decision": "retain direct relative-player index calculation",
+  "development_only": true,
+  "exact_outputs": true,
+  "grouped_subexpression_speedup": 1.223956772784809,
+  "paired_subexpression_speedup_median": 1.2244779597573237,
+  "projected_full_rollout_speedup": 1.004,
+  "sealed_seeds_or_outcomes_used": false,
+  "workload": {
+    "game_batch_sizes": [1, 4, 16, 64, 256, 512],
+    "player_count": 8,
+    "pairs": 15
+  }
+}

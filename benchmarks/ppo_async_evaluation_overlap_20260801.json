@@ -1,0 +1,32 @@
+{
+  "benchmark": "ppo_async_evaluation_overlap",
+  "decision": "retain synchronous scheduled evaluation",
+  "development_only": true,
+  "four_worker_overlap": {
+    "evaluation_seconds": 21.984889737999765,
+    "maximum_training_rollout_seconds": 6.001730618001602,
+    "training_seconds": 16.42866216299808,
+    "wall_seconds": 23.315271363
+  },
+  "synchronous_reference": {
+    "evaluation_seconds": 13.08926292850083,
+    "sum_seconds": 27.585469445501075,
+    "training_seconds": 14.496206517000246
+  },
+  "four_worker_overlap_speedup": 1.1831543684518676,
+  "eight_worker_overlap": {
+    "evaluation_seconds": 17.051950137996755,
+    "maximum_training_rollout_seconds": 14.992316117000883,
+    "training_seconds": 24.297450389000005,
+    "wall_seconds": 25.382556588
+  },
+  "rejection_reason": "aggregate gain came with severe rollout stalls, slower evaluation, thread/process lifecycle complexity, and amplified contention with the live background trainer",
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "workload": {
+    "evaluation_games": 4000,
+    "gpu": "NVIDIA GeForce RTX 3090",
+    "training_games_per_iteration": 1024,
+    "training_iterations": 10
+  }
+}

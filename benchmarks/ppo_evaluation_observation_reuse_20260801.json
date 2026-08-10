@@ -1,0 +1,43 @@
+{
+  "benchmark": "ppo_evaluation_observation_reuse",
+  "decision": "retain per-observation allocation",
+  "development_only": true,
+  "exact_results": true,
+  "grouped_median_speedup": 1.0093699672616856,
+  "material_speedup_threshold": 1.02,
+  "paired_median_speedup": 1.0159990531521654,
+  "paired_speedups": [
+    0.9851884717792501,
+    0.8938944974857169,
+    1.077961922088549,
+    1.0468096345250808
+  ],
+  "raw_seconds": {
+    "allocate": [
+      6.555111796998972,
+      6.545213704001071,
+      6.913731076001568,
+      6.634697943998617
+    ],
+    "reuse": [
+      6.65366270999948,
+      7.322132222998334,
+      6.41370621200258,
+      6.338017654001305
+    ]
+  },
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "workload": {
+    "agent_sets": [
+      [
+        "smart",
+        "rl"
+      ]
+    ],
+    "background_load": "concurrent CPU Puffer trainer",
+    "games": 256,
+    "repeats": 4,
+    "seed_start": 85260001
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "benchmark": "ppo_single_engine_direct_dispatch",
+  "decision": "use the direct collector when only one rollout engine exists",
+  "development_only": true,
+  "exact_parity": {
+    "actor_state_hash_exact": true,
+    "critic_state_hash_exact": true,
+    "rollout_hash_exact": true
+  },
+  "paired_speedups": [
+    1.0688872316821175,
+    1.168596758570325
+  ],
+  "paired_speedup_median": 1.1187419951262213,
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "total_seconds": {
+    "coordinator": [
+      1.4593277989952185,
+      1.7347072789962112
+    ],
+    "direct": [
+      1.3652757320014643,
+      1.4844376700020803
+    ]
+  },
+  "workload": {
+    "agent_sets": [
+      [
+        "smart",
+        "rl"
+      ]
+    ],
+    "compile_updates": false,
+    "games": 1024,
+    "gpu": "NVIDIA GeForce RTX 3090",
+    "seeds": [
+      85350001,
+      85350002
+    ],
+    "updates": 3,
+    "warmup_games": 64
+  }
+}

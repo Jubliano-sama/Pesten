@@ -1,0 +1,57 @@
+{
+  "campaign_id": "canonical_random_recovery_20260802_v1",
+  "candidate_training_started": false,
+  "created_at_utc": "2026-08-02T03:05:20.771818+00:00",
+  "deal_interval": {
+    "count": 8,
+    "end_exclusive": 4028451547,
+    "start_inclusive": 4028451539
+  },
+  "format": "pesten-canonical-random-native-calibration-smoke-v1",
+  "model": {
+    "class": "NativePufferTemporalPolicy",
+    "device": "cuda:0",
+    "hidden_size": 96,
+    "native_pufferlib": true,
+    "num_layers": 1
+  },
+  "opponent": {
+    "deal_rng_batched": "BatchedPesten.rngs[game_index] RandomState(deal_seed)",
+    "deal_rng_scalar": "np.random.seed(deal_seed)",
+    "game_rng": "per-game numpy.random.RandomState(deal_seed), shared by deal, hand shuffle, and recycle",
+    "id": "randomAgent.AgentRandom-canonical-v1",
+    "invalid_audited_uniform_substitution": true,
+    "name": "canonical randomAgent.AgentRandom",
+    "opponent_kind": "randomAgent.AgentRandom",
+    "opponent_rng_bank": false,
+    "opponent_rng_seed": null,
+    "policy_visibility": "canonical opponent RNG state never crosses the DecisionInput boundary",
+    "scalar_source": "randomAgent.AgentRandom",
+    "shared_numpy_stream": [
+      "initial deck shuffle and deal",
+      "AgentRandom hand shuffle before every playCard call",
+      "discard-pile recycle shuffle"
+    ],
+    "suit_rng": "per-game random.Random(deal_seed).randint(0, 3)",
+    "suit_rng_batched": "random.Random(deal_seed).randint(0, 3)",
+    "suit_rng_scalar": "random.seed(deal_seed); randomAgent.randint(0, 3)"
+  },
+  "passed": true,
+  "rollout": {
+    "all_actions_legal": true,
+    "elapsed_seconds": 0.4264980600000854,
+    "episodes": 8,
+    "games_per_second": 18.757412401825224,
+    "metadata": {
+      "decisions": {
+        "canonical_random": 289
+      },
+      "games": {
+        "canonical_random": 8
+      },
+      "total_turns": 496,
+      "trajectories": 8
+    },
+    "optimizer_steps": 0
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "benchmark": "ppo_rollout_engine_reuse",
+  "decision": "accept exact same-shape rollout engine reuse",
+  "development_only": true,
+  "exact_rollout_hashes": true,
+  "grouped_speedup": 1.0322319582169583,
+  "paired_speedup_median": 1.025796689634854,
+  "paired_speedups": [
+    1.0023109055199728,
+    1.0568484792977542,
+    0.9807047859004476,
+    1.0048160303410116,
+    1.0451911710267818,
+    1.0656683483295548,
+    1.025796689634854
+  ],
+  "raw_seconds": [
+    {
+      "allocate": 1.4271179049992497,
+      "reuse": 1.4238275739990058,
+      "seed": 85210101
+    },
+    {
+      "allocate": 1.4404369730000326,
+      "reuse": 1.362955050999517,
+      "seed": 85210102
+    },
+    {
+      "allocate": 1.4101848729987978,
+      "reuse": 1.4379300410000724,
+      "seed": 85210103
+    },
+    {
+      "allocate": 1.6280061960005696,
+      "reuse": 1.6202032479995978,
+      "seed": 85210104
+    },
+    {
+      "allocate": 1.5296040020002692,
+      "reuse": 1.463468161999117,
+      "seed": 85210105
+    },
+    {
+      "allocate": 1.484277342000496,
+      "reuse": 1.392813574999309,
+      "seed": 85210106
+    },
+    {
+      "allocate": 1.7891110379987367,
+      "reuse": 1.7441185530005896,
+      "seed": 85210107
+    }
+  ],
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "workload": {
+    "games": 512,
+    "pairs": 7,
+    "rollout_device": "cpu",
+    "schedule": "live mixed player-count MLP schedule",
+    "threads": 8
+  }
+}

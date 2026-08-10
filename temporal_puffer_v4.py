@@ -116,11 +116,17 @@ class NativePufferTemporalPolicy(nn.Module):
         parameter = next(self.parameters())
         device, dtype = parameter.device, parameter.dtype
         next_state = state
-        for row in self._event_features(decision):
-            token = torch.tensor(row, device=device, dtype=dtype).unsqueeze(0)
-            _, _, next_state = self.puffer_policy.forward_eval(
-                token, next_state
+        event_rows = self._event_features(decision)
+        if event_rows:
+            event_tokens = torch.tensor(
+                event_rows,
+                device=device,
+                dtype=dtype,
             )
+            for token in event_tokens:
+                _, _, next_state = self.puffer_policy.forward_eval(
+                    token.unsqueeze(0), next_state
+                )
 
         token = torch.tensor(
             self._decision_features(decision),

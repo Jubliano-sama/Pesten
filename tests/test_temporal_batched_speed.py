@@ -8,13 +8,14 @@ pufferlib = pytest.importorskip("pufferlib")
 if not str(getattr(pufferlib, "__version__", "")).startswith("4"):
     pytest.skip("requires pinned PufferLib 4 runtime", allow_module_level=True)
 
-from batched_pesten import BatchedPesten, POLICY_RL
+from batched_pesten import BatchedPesten, PHASE_DRAW_RETRY, POLICY_RL
 from benchmark_agents import load_ppo_agent
 from temporal_league import _snapshot, collect_league_batch
 from temporal_observation import (
     DecisionInput,
     EventKind,
     PublicEventToken,
+    build_draw_retry_legal_actions,
     build_legal_actions,
     build_private_observation,
     serialize_safe_history,
@@ -177,6 +178,28 @@ def test_drawn_identity_and_opponent_cards_never_cross_safe_boundary():
     assert serialized == serialize_safe_history((decision_b,))
     assert b"drawn_card" not in serialized
     assert b"opponent_hand" not in serialized
+
+
+def test_draw_retry_safe_mask_matches_engine_legality():
+    kinds = np.full((1, 2), POLICY_RL, dtype=np.int8)
+    keys = np.full((1, 2), None, dtype=object)
+    engine = BatchedPesten(kinds, keys, np.asarray([84], np.uint32))
+    drawn_card = int(engine.hands[0, 0, 0])
+    engine.current_player[0] = 0
+    engine.phase[0] = PHASE_DRAW_RETRY
+    engine.drawn_card[0] = drawn_card
+    cursor = SafeEventCursor(
+        last_hand_sizes=tuple(int(value) for value in engine.hand_sizes[0]),
+        decision_count=1,
+    )
+
+    safe_decision = build_safe_decision(engine, 0, 0, cursor)
+
+    assert safe_decision.legal_actions[drawn_card]
+    assert safe_decision.legal_actions[54]
+    assert safe_decision.legal_actions == build_draw_retry_legal_actions(
+        drawn_card
+    )
 
 
 def test_full_fixed_mixture_matches_scalar_league_exactly_on_cpu():

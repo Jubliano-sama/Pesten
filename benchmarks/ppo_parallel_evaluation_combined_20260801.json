@@ -1,0 +1,43 @@
+{
+  "benchmark": "ppo_parallel_evaluation_combined",
+  "decision": "accept combined canonical evaluation fast path",
+  "development_only": true,
+  "exact_results": true,
+  "includes_process_startup": true,
+  "legacy_sequential_median_seconds": 14.027661536001688,
+  "legacy_to_combined_speedup": 3.573239368575368,
+  "median_seconds": {
+    "current_parallel": 3.9257637890004844,
+    "current_sequential": 11.22399812599906
+  },
+  "parallel_speedup_within_current_path": 2.8590609953271633,
+  "raw_seconds": {
+    "current_parallel": [
+      3.9257637890004844,
+      4.153728264001984,
+      3.365636407997954
+    ],
+    "current_sequential": [
+      11.22399812599906,
+      11.85809549699843,
+      10.976007698998728
+    ]
+  },
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "semantic_contract": "fresh float32 feature tensors, sampled actions, per-game turns, and winners remain exact",
+  "workload": {
+    "agent_sets": [
+      [
+        "smart",
+        "rl"
+      ]
+    ],
+    "background_load": "concurrent CPU Puffer trainer",
+    "games": 512,
+    "pairs": 3,
+    "process_start_method": "spawn",
+    "seed_start": 85220001,
+    "workers": 8
+  }
+}

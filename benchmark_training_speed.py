@@ -27,6 +27,7 @@ from torch.distributions import Categorical
 from ai_observation import OBSERVATION_SIZE
 from ppo2 import (
     PPO_Supervised,
+    action_log_probabilities,
     autocast_for,
     compute_gae,
 )
@@ -88,13 +89,40 @@ def _training_update(ppo, batch, temperature: float) -> dict:
     prep_start = time.perf_counter()
     critic_observations = observations.to(ppo.device)
     critic_rewards = rewards.to(ppo.device)
-    with torch.no_grad():
-        advantages, returns = compute_gae(
-            critic_rewards,
-            ppo.critic_update_forward(critic_observations).squeeze(-1),
-            episode_lengths=lengths,
-            lam=0.95,
+    reusable_critic_values = None
+    if (
+        ppo.reuse_cpu_critic_forward
+        and ppo.device.type == "cpu"
+    ):
+        reusable_critic_values = (
+            ppo._critic_forward_with_two_bn_updates(
+                critic_observations
+            )
         )
+        gae_values = reusable_critic_values.detach()
+    else:
+        with torch.no_grad():
+            gae_values = ppo.critic_update_forward(
+                critic_observations
+            ).squeeze(-1)
+    with torch.no_grad():
+        if ppo.native_gae:
+            from numba_gae import compute_gae_native
+
+            advantages, returns = compute_gae_native(
+                critic_rewards,
+                gae_values,
+                lengths,
+                gamma=0.97,
+                lam=0.95,
+            )
+        else:
+            advantages, returns = compute_gae(
+                critic_rewards,
+                gae_values,
+                episode_lengths=lengths,
+                lam=0.95,
+            )
     advantages = (
         advantages - advantages.mean()
     ) / (advantages.std() + 1e-8)
@@ -117,11 +145,10 @@ def _training_update(ppo, batch, temperature: float) -> dict:
                 ~masks,
                 torch.finfo(logits.dtype).min,
             )
-            distribution = Categorical(
-                logits=masked_logits,
-                validate_args=False,
+            new_log_probabilities = action_log_probabilities(
+                masked_logits,
+                actions,
             )
-            new_log_probabilities = distribution.log_prob(actions)
             ratios = torch.exp(
                 new_log_probabilities - old_log_probabilities
             )
@@ -152,9 +179,16 @@ def _training_update(ppo, batch, temperature: float) -> dict:
                 )
             first_kl = float(kl_divergence.detach().item())
         with autocast_for(ppo.device):
-            values = ppo.critic_update_forward(
-                critic_observations
-            ).squeeze(-1)
+            values = (
+                reusable_critic_values
+                if (
+                    update_index == 0
+                    and reusable_critic_values is not None
+                )
+                else ppo.critic_update_forward(
+                    critic_observations
+                ).squeeze(-1)
+            )
             critic_loss = functional.mse_loss(values, returns)
 
         ppo.actor_optim.zero_grad(set_to_none=True)
@@ -223,6 +257,30 @@ def _worker(args) -> dict:
         compile_updates=(
             args.compile_updates and torch.cuda.is_available()
         ),
+        hybrid_rollout_inference=args.hybrid_rollout_inference,
+        hybrid_rollout_threshold=args.hybrid_rollout_threshold,
+        cuda_rollout_autocast=args.cuda_rollout_autocast,
+        reuse_cpu_critic_forward=args.reuse_cpu_critic_forward,
+        native_gae=getattr(args, "native_gae", True),
+        trace_cpu_rollout_actor=args.trace_cpu_rollout_actor,
+        native_smart_policy=args.native_smart_policy,
+        native_rollout_engine=args.native_rollout_engine,
+        record_rollout_public_events=args.record_rollout_public_events,
+        direct_rollout_sampling=args.direct_rollout_sampling,
+        numpy_rollout_masks=args.numpy_rollout_masks,
+        reuse_rollout_workspaces=args.reuse_rollout_workspaces,
+        coalesce_rollout_agent_sets=args.coalesce_rollout_agent_sets,
+        group_compatible_rollout_agent_sets=(
+            args.group_compatible_rollout_agent_sets
+        ),
+        coordinate_rollout_engines=args.coordinate_rollout_engines,
+        drain_non_neural_rollout=args.drain_non_neural_rollout,
+        reuse_rollout_engines=getattr(
+            args,
+            "reuse_rollout_engines",
+            True,
+        ),
+        past_policy_pool_size=args.past_policy_pool_size,
         torch_threads=args.threads,
     )
     generator = (
@@ -327,6 +385,26 @@ def _worker(args) -> dict:
         "actor_update_device": str(ppo.actor_device),
         "critic_update_device": str(ppo.device),
         "compiled_updates": ppo.compile_updates,
+        "hybrid_rollout_inference": ppo.hybrid_rollout_inference,
+        "hybrid_rollout_threshold": ppo.hybrid_rollout_threshold,
+        "cuda_rollout_autocast": ppo.cuda_rollout_autocast,
+        "reuse_cpu_critic_forward": ppo.reuse_cpu_critic_forward,
+        "native_gae": ppo.native_gae,
+        "traced_cpu_rollout_actor": ppo.trace_cpu_rollout_actor,
+        "native_smart_policy": ppo.native_smart_policy,
+        "native_rollout_engine": ppo.native_rollout_engine,
+        "record_rollout_public_events": ppo.record_rollout_public_events,
+        "direct_rollout_sampling": ppo.direct_rollout_sampling,
+        "numpy_rollout_masks": ppo.numpy_rollout_masks,
+        "reuse_rollout_workspaces": ppo.reuse_rollout_workspaces,
+        "coalesce_rollout_agent_sets": ppo.coalesce_rollout_agent_sets,
+        "group_compatible_rollout_agent_sets": (
+            ppo.group_compatible_rollout_agent_sets
+        ),
+        "coordinate_rollout_engines": ppo.coordinate_rollout_engines,
+        "drain_non_neural_rollout": ppo.drain_non_neural_rollout,
+        "reuse_rollout_engines": ppo.reuse_rollout_engines,
+        "past_policy_pool_size": ppo.past_policy_pool_size,
         "torch_threads": ppo.torch_threads,
         "actor_state_sha256": _module_sha256(ppo.actor),
         "critic_state_sha256": _module_sha256(ppo.critic),
@@ -411,6 +489,90 @@ def _parent(args) -> dict:
                         if args.compile_updates
                         else "--no-compile-updates"
                     ),
+                    (
+                        "--cuda-rollout-autocast"
+                        if args.cuda_rollout_autocast
+                        else "--no-cuda-rollout-autocast"
+                    ),
+                    (
+                        "--hybrid-rollout-inference"
+                        if args.hybrid_rollout_inference
+                        else "--no-hybrid-rollout-inference"
+                    ),
+                    "--hybrid-rollout-threshold",
+                    str(args.hybrid_rollout_threshold),
+                    (
+                        "--reuse-cpu-critic-forward"
+                        if args.reuse_cpu_critic_forward
+                        else "--no-reuse-cpu-critic-forward"
+                    ),
+                    (
+                        "--native-gae"
+                        if args.native_gae
+                        else "--no-native-gae"
+                    ),
+                    (
+                        "--trace-cpu-rollout-actor"
+                        if args.trace_cpu_rollout_actor
+                        else "--no-trace-cpu-rollout-actor"
+                    ),
+                    (
+                        "--native-smart-policy"
+                        if args.native_smart_policy
+                        else "--no-native-smart-policy"
+                    ),
+                    (
+                        "--direct-rollout-sampling"
+                        if args.direct_rollout_sampling
+                        else "--no-direct-rollout-sampling"
+                    ),
+                    (
+                        "--native-rollout-engine"
+                        if args.native_rollout_engine
+                        else "--no-native-rollout-engine"
+                    ),
+                    (
+                        "--record-rollout-public-events"
+                        if args.record_rollout_public_events
+                        else "--no-record-rollout-public-events"
+                    ),
+                    (
+                        "--numpy-rollout-masks"
+                        if args.numpy_rollout_masks
+                        else "--no-numpy-rollout-masks"
+                    ),
+                    (
+                        "--reuse-rollout-workspaces"
+                        if args.reuse_rollout_workspaces
+                        else "--no-reuse-rollout-workspaces"
+                    ),
+                    (
+                        "--coalesce-rollout-agent-sets"
+                        if args.coalesce_rollout_agent_sets
+                        else "--no-coalesce-rollout-agent-sets"
+                    ),
+                    (
+                        "--group-compatible-rollout-agent-sets"
+                        if args.group_compatible_rollout_agent_sets
+                        else "--no-group-compatible-rollout-agent-sets"
+                    ),
+                    (
+                        "--coordinate-rollout-engines"
+                        if args.coordinate_rollout_engines
+                        else "--no-coordinate-rollout-engines"
+                    ),
+                    (
+                        "--drain-non-neural-rollout"
+                        if args.drain_non_neural_rollout
+                        else "--no-drain-non-neural-rollout"
+                    ),
+                    (
+                        "--reuse-rollout-engines"
+                        if args.reuse_rollout_engines
+                        else "--no-reuse-rollout-engines"
+                    ),
+                    "--past-policy-pool-size",
+                    str(args.past_policy_pool_size),
                 ]
                 completed = subprocess.run(
                     command,
@@ -527,6 +689,12 @@ def _parent(args) -> dict:
             "compiled_updates": (
                 args.compile_updates and torch.cuda.is_available()
             ),
+            "hybrid_rollout_inference": (
+                args.hybrid_rollout_inference
+                and torch.cuda.is_available()
+                and args.rollout_device in ("auto", "cpu")
+            ),
+            "hybrid_rollout_threshold": args.hybrid_rollout_threshold,
             "vector_game_batch_size": args.batch_size,
             "observation_features": OBSERVATION_SIZE,
             "actions": 55,
@@ -613,6 +781,92 @@ def _parse_args():
         action=argparse.BooleanOptionalAction,
         default=True,
     )
+    parser.add_argument(
+        "--cuda-rollout-autocast",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
+        "--hybrid-rollout-inference",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+    parser.add_argument(
+        "--hybrid-rollout-threshold",
+        type=int,
+        default=64,
+    )
+    parser.add_argument(
+        "--reuse-cpu-critic-forward",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+    parser.add_argument(
+        "--native-gae",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+    parser.add_argument(
+        "--trace-cpu-rollout-actor",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+    parser.add_argument(
+        "--native-smart-policy",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+    parser.add_argument(
+        "--direct-rollout-sampling",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+    parser.add_argument(
+        "--native-rollout-engine",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+    parser.add_argument(
+        "--record-rollout-public-events",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
+        "--numpy-rollout-masks",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+    parser.add_argument(
+        "--reuse-rollout-workspaces",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+    parser.add_argument(
+        "--coalesce-rollout-agent-sets",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+    parser.add_argument(
+        "--group-compatible-rollout-agent-sets",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+    parser.add_argument(
+        "--coordinate-rollout-engines",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+    parser.add_argument(
+        "--drain-non-neural-rollout",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+    parser.add_argument(
+        "--reuse-rollout-engines",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+    parser.add_argument("--past-policy-pool-size", type=int, default=2)
     parser.add_argument(
         "--seeds",
         nargs="+",

@@ -1,0 +1,693 @@
+{
+  "champion": {
+    "path": "/home/tommie/Pesten/ppo_actor_100run3.pth",
+    "sha256": "aac589b3c7300895604e6c77755631ab4a31c8bf9810768448ab2f3ff5bbe186"
+  },
+  "critic_warmup": {
+    "actor_unchanged": true,
+    "deal_seeds": [
+      {
+        "deal_seed": 89121000
+      },
+      {
+        "deal_seed": 89121001
+      },
+      {
+        "deal_seed": 89121002
+      },
+      {
+        "deal_seed": 89121003
+      },
+      {
+        "deal_seed": 89121004
+      },
+      {
+        "deal_seed": 89121005
+      },
+      {
+        "deal_seed": 89121006
+      },
+      {
+        "deal_seed": 89121007
+      },
+      {
+        "deal_seed": 89121008
+      },
+      {
+        "deal_seed": 89121009
+      },
+      {
+        "deal_seed": 89121010
+      },
+      {
+        "deal_seed": 89121011
+      },
+      {
+        "deal_seed": 89121012
+      },
+      {
+        "deal_seed": 89121013
+      },
+      {
+        "deal_seed": 89121014
+      },
+      {
+        "deal_seed": 89121015
+      },
+      {
+        "deal_seed": 89121016
+      },
+      {
+        "deal_seed": 89121017
+      },
+      {
+        "deal_seed": 89121018
+      },
+      {
+        "deal_seed": 89121019
+      },
+      {
+        "deal_seed": 89121020
+      },
+      {
+        "deal_seed": 89121021
+      },
+      {
+        "deal_seed": 89121022
+      },
+      {
+        "deal_seed": 89121023
+      },
+      {
+        "deal_seed": 89121024
+      },
+      {
+        "deal_seed": 89121025
+      },
+      {
+        "deal_seed": 89121026
+      },
+      {
+        "deal_seed": 89121027
+      },
+      {
+        "deal_seed": 89121028
+      },
+      {
+        "deal_seed": 89121029
+      },
+      {
+        "deal_seed": 89121030
+      },
+      {
+        "deal_seed": 89121031
+      }
+    ],
+    "optimization": {
+      "epochs": 1,
+      "mean_smooth_l1_loss": 0.47570788860321045,
+      "mse_after": 0.9922465085983276,
+      "mse_before": 1.0274676084518433,
+      "training_transitions": 1194
+    },
+    "payoff_audit": {
+      "full_pair_zero_sum_verified": true,
+      "implicit_zero_decision_seats": 0,
+      "populated_episodes": 64,
+      "terminal_payoffs_verified": true
+    },
+    "policy_sampling_seed": 89122000,
+    "rollout": {
+      "completed_games": 32,
+      "draws": 0,
+      "environment_turns": 1398,
+      "inference_calls": 129,
+      "maximum_turns_observed": 109,
+      "policy_decisions": 1194
+    },
+    "wall_seconds": 1.5475204220019805
+  },
+  "method": "top_advantage_filtered_ema_ppo_shared_selfplay",
+  "paper": {
+    "name": "Superhuman AI for Generals.io Using Self-Play Reinforcement Learning",
+    "transferred_ingredients": [
+      "top-advantage actor-only filtering",
+      "parameter exponential moving average"
+    ],
+    "url": "https://arxiv.org/abs/2606.23348"
+  },
+  "privacy": {
+    "draw_pile_order": false,
+    "observation_features": 121,
+    "opponent_card_identities": false,
+    "own_hand_plus_public_state_only": true,
+    "shared_symmetric_two_player_policy": true
+  },
+  "promotion": {
+    "eligible": false,
+    "reason": "requires fresh direct and pool evaluation gates"
+  },
+  "recipe": {
+    "actor_epochs": 1,
+    "actor_gradient_clip": 0.267,
+    "actor_learning_rate": 1e-05,
+    "batch_size": 1024,
+    "clip": 0.2,
+    "critic_epochs": 1,
+    "critic_gradient_clip": 1.0,
+    "critic_learning_rate": 3e-05,
+    "critic_warmup_epochs": 1,
+    "critic_warmup_games": 32,
+    "device": "cpu",
+    "ema_decay": 0.999,
+    "entropy_coefficient": 0.0,
+    "gae_lambda": 0.9,
+    "games_per_iteration": 32,
+    "gamma": 1.0,
+    "iterations": 1,
+    "keep_fractions": [
+      0.25,
+      0.5,
+      1.0
+    ],
+    "maximum_turns": 500,
+    "temperature": 0.8,
+    "torch_threads": 8
+  },
+  "recorded_at": "2026-07-31T10:58:50.853590+00:00",
+  "schema_version": 1,
+  "seed_audit": {
+    "deal_seed_schedule": "explicit unique contiguous seeds; common across fractions",
+    "deal_seed_start": 89123000,
+    "development_only": true,
+    "development_seed_limit": 4294000000,
+    "planned_seed_count": 67,
+    "policy_seed_start": 89124000,
+    "recorded_conflict_count": 0,
+    "recorded_conflicts": [],
+    "recorded_seed_roots": [
+      "/home/tommie/Pesten/benchmarks",
+      "/home/tommie/Pesten/experiments"
+    ],
+    "recorded_seed_values_scanned": 239220,
+    "sealed_outcomes_used": false,
+    "training_seed": 89120001,
+    "warmup_deal_seed_start": 89121000,
+    "warmup_policy_seed": 89122000
+  },
+  "status": "complete",
+  "sweeps": [
+    {
+      "initial_ema_actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+      "initial_online_actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+      "iterations": [
+        {
+          "actor_optimization": {
+            "ema_updates": 1,
+            "epochs": [
+              {
+                "epoch": 1,
+                "maximum_batch_ratio_error": 4.76837158203125e-07,
+                "mean_clip_fraction": 0.0,
+                "mean_entropy": 0.047197725623846054,
+                "mean_loss": -1.2066864967346191,
+                "minibatches": 1
+              }
+            ],
+            "maximum_initial_ratio_error": 1.1920928955078125e-06,
+            "realized_keep_fraction": 0.25020048115477145,
+            "requested_keep_fraction": 0.25,
+            "retained_mean_raw_advantage": 0.6366087794303894,
+            "retained_minimum_raw_advantage": 0.42290839552879333,
+            "retained_transitions": 312,
+            "rollout_mean_raw_advantage": 0.029402954503893852,
+            "rollout_transitions": 1247
+          },
+          "checkpoints": {
+            "ema": {
+              "actor_state_sha256": "d8d327f2a191aa5c4d7bd07792334901b0463d3d858119f9e42125b7c693bf6a",
+              "path": "filteredppo_keep_0p25_iter_01_ema.pth",
+              "sha256": "dc63b8a1345d3945b4404472973908b44c77ecd81668076c47aa2319e39cd805"
+            },
+            "online": {
+              "actor_state_sha256": "2d4ca5dd97f46aeea963d3a7d38d38f1201f6c3f169ce3e18b93aeec526d08e4",
+              "path": "filteredppo_keep_0p25_iter_01_online.pth",
+              "sha256": "3a6264ca3716b32fec56c769e25aaba2cefc10157d516a83ac526def27e81887"
+            }
+          },
+          "critic_optimization": {
+            "epochs": 1,
+            "mean_smooth_l1_loss": 0.16934459656476974,
+            "mse_after": 0.26385167241096497,
+            "mse_before": 0.2540757954120636,
+            "training_transitions": 1247
+          },
+          "deal_seeds": [
+            {
+              "deal_seed": 89123000
+            },
+            {
+              "deal_seed": 89123001
+            },
+            {
+              "deal_seed": 89123002
+            },
+            {
+              "deal_seed": 89123003
+            },
+            {
+              "deal_seed": 89123004
+            },
+            {
+              "deal_seed": 89123005
+            },
+            {
+              "deal_seed": 89123006
+            },
+            {
+              "deal_seed": 89123007
+            },
+            {
+              "deal_seed": 89123008
+            },
+            {
+              "deal_seed": 89123009
+            },
+            {
+              "deal_seed": 89123010
+            },
+            {
+              "deal_seed": 89123011
+            },
+            {
+              "deal_seed": 89123012
+            },
+            {
+              "deal_seed": 89123013
+            },
+            {
+              "deal_seed": 89123014
+            },
+            {
+              "deal_seed": 89123015
+            },
+            {
+              "deal_seed": 89123016
+            },
+            {
+              "deal_seed": 89123017
+            },
+            {
+              "deal_seed": 89123018
+            },
+            {
+              "deal_seed": 89123019
+            },
+            {
+              "deal_seed": 89123020
+            },
+            {
+              "deal_seed": 89123021
+            },
+            {
+              "deal_seed": 89123022
+            },
+            {
+              "deal_seed": 89123023
+            },
+            {
+              "deal_seed": 89123024
+            },
+            {
+              "deal_seed": 89123025
+            },
+            {
+              "deal_seed": 89123026
+            },
+            {
+              "deal_seed": 89123027
+            },
+            {
+              "deal_seed": 89123028
+            },
+            {
+              "deal_seed": 89123029
+            },
+            {
+              "deal_seed": 89123030
+            },
+            {
+              "deal_seed": 89123031
+            }
+          ],
+          "iteration": 1,
+          "payoff_audit": {
+            "full_pair_zero_sum_verified": true,
+            "implicit_zero_decision_seats": 0,
+            "populated_episodes": 64,
+            "terminal_payoffs_verified": true
+          },
+          "policy_sampling_seed": 89124000,
+          "rollout": {
+            "completed_games": 32,
+            "draws": 0,
+            "environment_turns": 1493,
+            "inference_calls": 134,
+            "maximum_turns_observed": 117,
+            "policy_decisions": 1247
+          },
+          "wall_seconds": 6.070612681000057
+        }
+      ],
+      "keep_fraction": 0.25
+    },
+    {
+      "initial_ema_actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+      "initial_online_actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+      "iterations": [
+        {
+          "actor_optimization": {
+            "ema_updates": 1,
+            "epochs": [
+              {
+                "epoch": 1,
+                "maximum_batch_ratio_error": 9.5367431640625e-07,
+                "mean_clip_fraction": 0.0,
+                "mean_entropy": 0.053970955312252045,
+                "mean_loss": -0.8221905827522278,
+                "minibatches": 1
+              }
+            ],
+            "maximum_initial_ratio_error": 1.1920928955078125e-06,
+            "realized_keep_fraction": 0.5004009623095429,
+            "requested_keep_fraction": 0.5,
+            "retained_mean_raw_advantage": 0.44313010573387146,
+            "retained_minimum_raw_advantage": 0.088272325694561,
+            "retained_transitions": 624,
+            "rollout_mean_raw_advantage": 0.029402954503893852,
+            "rollout_transitions": 1247
+          },
+          "checkpoints": {
+            "ema": {
+              "actor_state_sha256": "93c49897d0ea3c3f3a01f029e4b5018d98fc22da6ded1efc212143f2662d7476",
+              "path": "filteredppo_keep_0p5_iter_01_ema.pth",
+              "sha256": "13f5ab5a0aef6268b8752aab05ef1dbc82b51d60a14ff7bcc851e0039c2b5e74"
+            },
+            "online": {
+              "actor_state_sha256": "077ee8808fbf240217df3d88f7c409c154f2f842641e04024f026e3c5faf8413",
+              "path": "filteredppo_keep_0p5_iter_01_online.pth",
+              "sha256": "6fa4027acfe2ef72df77dce57185207ea9926f45190ce649b3ef33fe241e15a7"
+            }
+          },
+          "critic_optimization": {
+            "epochs": 1,
+            "mean_smooth_l1_loss": 0.16934459656476974,
+            "mse_after": 0.26385167241096497,
+            "mse_before": 0.2540757954120636,
+            "training_transitions": 1247
+          },
+          "deal_seeds": [
+            {
+              "deal_seed": 89123000
+            },
+            {
+              "deal_seed": 89123001
+            },
+            {
+              "deal_seed": 89123002
+            },
+            {
+              "deal_seed": 89123003
+            },
+            {
+              "deal_seed": 89123004
+            },
+            {
+              "deal_seed": 89123005
+            },
+            {
+              "deal_seed": 89123006
+            },
+            {
+              "deal_seed": 89123007
+            },
+            {
+              "deal_seed": 89123008
+            },
+            {
+              "deal_seed": 89123009
+            },
+            {
+              "deal_seed": 89123010
+            },
+            {
+              "deal_seed": 89123011
+            },
+            {
+              "deal_seed": 89123012
+            },
+            {
+              "deal_seed": 89123013
+            },
+            {
+              "deal_seed": 89123014
+            },
+            {
+              "deal_seed": 89123015
+            },
+            {
+              "deal_seed": 89123016
+            },
+            {
+              "deal_seed": 89123017
+            },
+            {
+              "deal_seed": 89123018
+            },
+            {
+              "deal_seed": 89123019
+            },
+            {
+              "deal_seed": 89123020
+            },
+            {
+              "deal_seed": 89123021
+            },
+            {
+              "deal_seed": 89123022
+            },
+            {
+              "deal_seed": 89123023
+            },
+            {
+              "deal_seed": 89123024
+            },
+            {
+              "deal_seed": 89123025
+            },
+            {
+              "deal_seed": 89123026
+            },
+            {
+              "deal_seed": 89123027
+            },
+            {
+              "deal_seed": 89123028
+            },
+            {
+              "deal_seed": 89123029
+            },
+            {
+              "deal_seed": 89123030
+            },
+            {
+              "deal_seed": 89123031
+            }
+          ],
+          "iteration": 1,
+          "payoff_audit": {
+            "full_pair_zero_sum_verified": true,
+            "implicit_zero_decision_seats": 0,
+            "populated_episodes": 64,
+            "terminal_payoffs_verified": true
+          },
+          "policy_sampling_seed": 89124000,
+          "rollout": {
+            "completed_games": 32,
+            "draws": 0,
+            "environment_turns": 1493,
+            "inference_calls": 134,
+            "maximum_turns_observed": 117,
+            "policy_decisions": 1247
+          },
+          "wall_seconds": 2.0980906820004748
+        }
+      ],
+      "keep_fraction": 0.5
+    },
+    {
+      "initial_ema_actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+      "initial_online_actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+      "iterations": [
+        {
+          "actor_optimization": {
+            "ema_updates": 2,
+            "epochs": [
+              {
+                "epoch": 1,
+                "maximum_batch_ratio_error": 0.024203598499298096,
+                "mean_clip_fraction": 0.0,
+                "mean_entropy": 0.06572623737156391,
+                "mean_loss": 0.02965579554438591,
+                "minibatches": 2
+              }
+            ],
+            "maximum_initial_ratio_error": 1.1920928955078125e-06,
+            "realized_keep_fraction": 1.0,
+            "requested_keep_fraction": 1.0,
+            "retained_mean_raw_advantage": 0.029402954503893852,
+            "retained_minimum_raw_advantage": -1.238741159439087,
+            "retained_transitions": 1247,
+            "rollout_mean_raw_advantage": 0.029402954503893852,
+            "rollout_transitions": 1247
+          },
+          "checkpoints": {
+            "ema": {
+              "actor_state_sha256": "ddf592df7b19f3c011e9af7780eff169d3733febd6a51f2ded80da5bf4ddc70b",
+              "path": "filteredppo_keep_1_iter_01_ema.pth",
+              "sha256": "aca48acd0580cd783fe414c143857f4ce4be96c181ebd2cdf9c48721ca98b02e"
+            },
+            "online": {
+              "actor_state_sha256": "31d1631b1e9585b1c450a574a34fece8c1940e68e69b9706988bc60b99d863e1",
+              "path": "filteredppo_keep_1_iter_01_online.pth",
+              "sha256": "3e0cd32f46df08f4b0321b7b47298b09214f7c44a01a1a7366c9863881c40454"
+            }
+          },
+          "critic_optimization": {
+            "epochs": 1,
+            "mean_smooth_l1_loss": 0.16934459656476974,
+            "mse_after": 0.26385167241096497,
+            "mse_before": 0.2540757954120636,
+            "training_transitions": 1247
+          },
+          "deal_seeds": [
+            {
+              "deal_seed": 89123000
+            },
+            {
+              "deal_seed": 89123001
+            },
+            {
+              "deal_seed": 89123002
+            },
+            {
+              "deal_seed": 89123003
+            },
+            {
+              "deal_seed": 89123004
+            },
+            {
+              "deal_seed": 89123005
+            },
+            {
+              "deal_seed": 89123006
+            },
+            {
+              "deal_seed": 89123007
+            },
+            {
+              "deal_seed": 89123008
+            },
+            {
+              "deal_seed": 89123009
+            },
+            {
+              "deal_seed": 89123010
+            },
+            {
+              "deal_seed": 89123011
+            },
+            {
+              "deal_seed": 89123012
+            },
+            {
+              "deal_seed": 89123013
+            },
+            {
+              "deal_seed": 89123014
+            },
+            {
+              "deal_seed": 89123015
+            },
+            {
+              "deal_seed": 89123016
+            },
+            {
+              "deal_seed": 89123017
+            },
+            {
+              "deal_seed": 89123018
+            },
+            {
+              "deal_seed": 89123019
+            },
+            {
+              "deal_seed": 89123020
+            },
+            {
+              "deal_seed": 89123021
+            },
+            {
+              "deal_seed": 89123022
+            },
+            {
+              "deal_seed": 89123023
+            },
+            {
+              "deal_seed": 89123024
+            },
+            {
+              "deal_seed": 89123025
+            },
+            {
+              "deal_seed": 89123026
+            },
+            {
+              "deal_seed": 89123027
+            },
+            {
+              "deal_seed": 89123028
+            },
+            {
+              "deal_seed": 89123029
+            },
+            {
+              "deal_seed": 89123030
+            },
+            {
+              "deal_seed": 89123031
+            }
+          ],
+          "iteration": 1,
+          "payoff_audit": {
+            "full_pair_zero_sum_verified": true,
+            "implicit_zero_decision_seats": 0,
+            "populated_episodes": 64,
+            "terminal_payoffs_verified": true
+          },
+          "policy_sampling_seed": 89124000,
+          "rollout": {
+            "completed_games": 32,
+            "draws": 0,
+            "environment_turns": 1493,
+            "inference_calls": 134,
+            "maximum_turns_observed": 117,
+            "policy_decisions": 1247
+          },
+          "wall_seconds": 1.7321639330002654
+        }
+      ],
+      "keep_fraction": 1.0
+    }
+  ]
+}

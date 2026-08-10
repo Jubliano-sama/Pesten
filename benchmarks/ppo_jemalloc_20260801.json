@@ -1,0 +1,25 @@
+{
+  "benchmark": "ppo_jemalloc",
+  "decision": "provide jemalloc-backed fast PPO launcher",
+  "development_only": true,
+  "exact_rollout_tensors": true,
+  "grouped_speedup": 1.036506682437326,
+  "jemalloc_path": "/usr/lib/x86_64-linux-gnu/libjemalloc.so.2",
+  "paired_speedup_median": 1.0564256706241832,
+  "paired_speedups": [
+    1.2168880226755883,
+    1.0578017388399377,
+    1.0344322335141003,
+    0.9804223373286126,
+    1.1479175639035275,
+    0.8822629767322119,
+    1.0564256706241832
+  ],
+  "sealed_seeds_or_outcomes_used": false,
+  "workload": {
+    "games": 512,
+    "pairs": 7,
+    "rollout_device": "cpu",
+    "threads": 8
+  }
+}

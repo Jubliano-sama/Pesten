@@ -1,0 +1,59 @@
+{
+  "actor_state_sha256": "c4e8559f7302becbd55a53588f20822e84761a0d6faff81461f55e481379b919",
+  "benchmark": "ppo_current_full_stack",
+  "collected_policy_decisions": 39596,
+  "collected_policy_decisions_per_second": 46426.08746148019,
+  "contention": {
+    "concurrent_cpu_job": "Puffer trainer using approximately 2.7 cores",
+    "gpu_observed_idle_after": true,
+    "gpu_observed_idle_before": true
+  },
+  "critic_state_sha256": "a9c2c7d5a5ba9c92910fa99c9a1f3f9c5110ac874def1ff8f2d88541d8ebec1e",
+  "cuda_peak_allocated_mib": 4680.166015625,
+  "development_only": true,
+  "end_to_end_policy_decisions_per_second": 33378.65840322199,
+  "environment_turns": 76643,
+  "environment_turns_per_second": 89863.48674891973,
+  "episodes": 1024,
+  "first_update_max_ratio_error": 0.0017189383506774902,
+  "games_per_second": 1200.634244887254,
+  "implementation": "vectorized",
+  "inference_calls": 199,
+  "mean_inference_batch_size": 198.9748743718593,
+  "prep_seconds": 0.0297290719972807,
+  "rollout_seconds": 0.852882553001109,
+  "rollout_sha256": "73ef103a2732c2282baf161130ae9bb859b11c29dd569f2410f62e24a31ef3e9",
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "stack": {
+    "allocator": "jemalloc",
+    "compile_updates": true,
+    "coordinate_rollout_engines": true,
+    "direct_rollout_sampling": true,
+    "drain_non_neural_rollout": true,
+    "native_gae": true,
+    "native_rollout_engine": true,
+    "native_smart_policy": true,
+    "numpy_rollout_masks": true,
+    "reuse_rollout_engines": true,
+    "reuse_rollout_workspaces": true,
+    "rollout_device": "cpu",
+    "torch_threads": 8,
+    "training_device": "cuda"
+  },
+  "thermal_state": "warm",
+  "total_seconds": 1.186266970998986,
+  "update_seconds": 0.3036553460005962,
+  "workload": {
+    "agent_sets": [
+      [
+        "smart",
+        "rl"
+      ]
+    ],
+    "games": 1024,
+    "seed": 85350001,
+    "updates": 3,
+    "warmup_games": 64
+  }
+}

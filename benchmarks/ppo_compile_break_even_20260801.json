@@ -1,0 +1,35 @@
+{
+  "benchmark": "ppo_compile_break_even",
+  "break_even_iterations_at_1024_games": 403.6,
+  "decision": "auto-compile CUDA updates at 400000 or more requested games",
+  "development_only": true,
+  "estimated_break_even_games": 413286,
+  "measured_compile_startup_penalty_seconds": 20.06,
+  "median_steady_update_seconds": {
+    "compiled": 0.29929885350050114,
+    "eager": 0.3489903934987524
+  },
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "steady_update_speedup": 1.166027503346528,
+  "tool_wall_seconds": {
+    "compiled": [
+      25.2313,
+      26.095
+    ],
+    "eager": [
+      5.285,
+      5.9276
+    ]
+  },
+  "workload": {
+    "games": 1024,
+    "gpu": "NVIDIA GeForce RTX 3090",
+    "seeds": [
+      85350001,
+      85350002
+    ],
+    "updates": 3,
+    "warmup_games": 64
+  }
+}

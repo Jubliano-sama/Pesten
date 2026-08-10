@@ -1,0 +1,49 @@
+{
+  "benchmark": "ppo_evaluation_numpy_observation",
+  "decision": "build no-collection canonical observations in fresh NumPy arrays",
+  "development_only": true,
+  "exact_results": true,
+  "fresh_array_selected": true,
+  "grouped_median_speedup": 1.4148860674054275,
+  "paired_median_speedup": 1.3957481998845067,
+  "paired_speedups": [
+    1.3837097326078087,
+    1.4077866671612047,
+    1.366632165091293,
+    1.4389422802209026
+  ],
+  "raw_seconds": {
+    "numpy": [
+      5.7051660460019775,
+      5.472638077000738,
+      5.531304021002143,
+      5.4658324729971355
+    ],
+    "torch": [
+      7.894293783996545,
+      7.7043069190003735,
+      7.559257990000333,
+      7.865017441999953
+    ]
+  },
+  "reuse_delta": {
+    "decision": "retain fresh result ownership",
+    "grouped_median_speedup": 1.0094642756900583,
+    "paired_median_speedup": 1.0046549529839728
+  },
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "semantic_contract": "float32 feature tensors, sampled actions, per-game turns, and winners remain exact; evaluation observations retain fresh-object ownership",
+  "workload": {
+    "agent_sets": [
+      [
+        "smart",
+        "rl"
+      ]
+    ],
+    "background_load": "concurrent CPU Puffer trainer",
+    "games": 256,
+    "repeats": 4,
+    "seed_start": 85280001
+  }
+}

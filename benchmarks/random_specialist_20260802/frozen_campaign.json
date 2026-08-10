@@ -1,0 +1,687 @@
+{
+  "audited_uniform_random_opponent": {
+    "batched_implementation": "collect_league_batch_batched(schedule=('random',))",
+    "collector_source_sha256": "fc8ec09bf5299b5c6c6c42fc749858844658489e8c0d419bba70deed342f674f",
+    "deal_rng_independence": "Each game receives a separately registered opponent-RNG seed; the sampler owns a local RNG and never advances deck RNG state.",
+    "draw_retry": "only the drawn card, then pass action 54",
+    "explicit_reset": "The scalar adapter reinstantiates its local RNG at every Game reset; the batched collector creates one local RNG per game.",
+    "id": "pesten-audited-uniform-random-v1",
+    "legacy_agent_random": false,
+    "legal_action_order": "ascending integer action code",
+    "name": "audited uniform-random opponent",
+    "per_game_rng_seed_source": "registered *_opponent_rng interval with exact corresponding game index",
+    "policy_visibility": "opponent RNG seed and action sampler never cross the DecisionInput boundary",
+    "rng_algorithm": "numpy.random.RandomState (MT19937)",
+    "rng_draw": "randint(0, len(ordered_legal_actions))",
+    "scalar_implementation": "audited_uniform_agent_factory",
+    "source_sha256": "934459625633571a81efd60e8e3edf36ef333797eb8df69e9a89bfa1e2c7b3e3",
+    "suit_actions": "ascending action codes 50, 51, 52, 53"
+  },
+  "calibration": {
+    "gates": {
+      "fixed_random_scalar_batched_parity": true,
+      "legacy_agent_random_smoke": true,
+      "privacy_schema": true,
+      "recurrent_cuda_rollout_update": true,
+      "uniform_action_kernel": true
+    },
+    "path": "benchmarks/random_specialist_20260802/calibration.json",
+    "runtime": {
+      "cpu_responsibilities": [
+        "BatchedPesten integer state and rule transitions",
+        "deck/deal state",
+        "audited opponent local RNG and action sampling",
+        "safe DecisionInput assembly"
+      ],
+      "cuda_available": true,
+      "cuda_capability": [
+        8,
+        6
+      ],
+      "cuda_device_index": null,
+      "cuda_device_name": "NVIDIA GeForce RTX 3090",
+      "cuda_total_memory_bytes": 25272516608,
+      "device": "cuda",
+      "gpu_responsibilities": [
+        "NativePufferTemporalPolicy actor/critic forward inference",
+        "native recurrent PPO loss, backward pass, and optimizer update"
+      ],
+      "one_gpu_process_at_a_time": true,
+      "peak_cuda_memory_bytes": 149648384,
+      "platform": "Linux-7.0.11-76070011-generic-x86_64-with-glibc2.39",
+      "pufferlib": "4.0",
+      "pufferlib_revision": "c5d3c637446047a6efbcaa74c039c5295d201ab0",
+      "python": "3.12.12",
+      "torch": "2.13.0+cu130",
+      "torch_compile_used": false,
+      "torch_cuda": "13.0",
+      "update_parameter_device": "cuda:0"
+    },
+    "sha256": "73c7437074d44a96a60603643604f95c454be4dd2208f0097abdf60b44c49ce7"
+  },
+  "campaign_id": "random_specialist_20260802",
+  "candidate_training": {
+    "allowed_before_this_manifest": false,
+    "post_freeze_runner": "campaign command validates this manifest before it can expose a later training implementation",
+    "ran": false
+  },
+  "checkpoint_admission": {
+    "prohibited_lineage": [
+      "PPO checkpoint",
+      "imitation data",
+      "teacher logits",
+      "parent weights"
+    ],
+    "required": [
+      "complete checkpoint",
+      "complete optimizer state",
+      "complete per-checkpoint manifest",
+      "random-initialized no-parent lineage",
+      "finite parameters and metrics",
+      "100 percent legal actions",
+      "unchanged privacy fingerprint",
+      "unchanged fixed-random parity fingerprint",
+      "scheduled cumulative threshold reached"
+    ],
+    "unscheduled_checkpoint_screening": "forbidden"
+  },
+  "checkpoint_schedule": {
+    "dense_mlp": {
+      "reason": "mechanically blocked lane has no candidate lineage",
+      "scheduled_thresholds": [],
+      "screening_forbidden": true
+    },
+    "recurrent_temporal": {
+      "evenly_spaced_cumulative_game_thresholds": [
+        2169,
+        4338,
+        6507,
+        8676,
+        10845,
+        13014,
+        15183,
+        17352,
+        19521,
+        21690,
+        23859,
+        26028
+      ],
+      "exact_candidates": 12,
+      "maximum_candidates": 12,
+      "only_scheduled_thresholds_may_be_screened": true
+    }
+  },
+  "confirmation": {
+    "bootstrap": {
+      "samples": 100000,
+      "seed": 4291063157
+    },
+    "common_fresh_bank": {
+      "deal_range": {
+        "count": 2500,
+        "end_exclusive": 4291060656,
+        "start_inclusive": 4291058156
+      },
+      "games": 5000,
+      "opponent_rng_range": {
+        "count": 2500,
+        "end_exclusive": 4291063156,
+        "start_inclusive": 4291060656
+      },
+      "pairs": 2500,
+      "seat_balanced": true
+    },
+    "eligible_finalists_maximum": 3,
+    "rank_key": [
+      "point estimate descending",
+      "pair-level bootstrap 95% lower bound descending",
+      "fewer training games ascending",
+      "lexicographic checkpoint SHA256 ascending"
+    ],
+    "winner": "freeze exactly one trained winner with candidate, configuration, source, and opponent SHA256s"
+  },
+  "development_screening": {
+    "banks": {
+      "recurrent_temporal_checkpoint_01": {
+        "deal_subrange": {
+          "count": 250,
+          "end_exclusive": 4291052406,
+          "start_inclusive": 4291052156
+        },
+        "games": 500,
+        "opponent_rng_subrange": {
+          "count": 250,
+          "end_exclusive": 4291052656,
+          "start_inclusive": 4291052406
+        },
+        "pairs": 250,
+        "seat_balanced": true
+      },
+      "recurrent_temporal_checkpoint_02": {
+        "deal_subrange": {
+          "count": 250,
+          "end_exclusive": 4291052906,
+          "start_inclusive": 4291052656
+        },
+        "games": 500,
+        "opponent_rng_subrange": {
+          "count": 250,
+          "end_exclusive": 4291053156,
+          "start_inclusive": 4291052906
+        },
+        "pairs": 250,
+        "seat_balanced": true
+      },
+      "recurrent_temporal_checkpoint_03": {
+        "deal_subrange": {
+          "count": 250,
+          "end_exclusive": 4291053406,
+          "start_inclusive": 4291053156
+        },
+        "games": 500,
+        "opponent_rng_subrange": {
+          "count": 250,
+          "end_exclusive": 4291053656,
+          "start_inclusive": 4291053406
+        },
+        "pairs": 250,
+        "seat_balanced": true
+      },
+      "recurrent_temporal_checkpoint_04": {
+        "deal_subrange": {
+          "count": 250,
+          "end_exclusive": 4291053906,
+          "start_inclusive": 4291053656
+        },
+        "games": 500,
+        "opponent_rng_subrange": {
+          "count": 250,
+          "end_exclusive": 4291054156,
+          "start_inclusive": 4291053906
+        },
+        "pairs": 250,
+        "seat_balanced": true
+      },
+      "recurrent_temporal_checkpoint_05": {
+        "deal_subrange": {
+          "count": 250,
+          "end_exclusive": 4291054406,
+          "start_inclusive": 4291054156
+        },
+        "games": 500,
+        "opponent_rng_subrange": {
+          "count": 250,
+          "end_exclusive": 4291054656,
+          "start_inclusive": 4291054406
+        },
+        "pairs": 250,
+        "seat_balanced": true
+      },
+      "recurrent_temporal_checkpoint_06": {
+        "deal_subrange": {
+          "count": 250,
+          "end_exclusive": 4291054906,
+          "start_inclusive": 4291054656
+        },
+        "games": 500,
+        "opponent_rng_subrange": {
+          "count": 250,
+          "end_exclusive": 4291055156,
+          "start_inclusive": 4291054906
+        },
+        "pairs": 250,
+        "seat_balanced": true
+      },
+      "recurrent_temporal_checkpoint_07": {
+        "deal_subrange": {
+          "count": 250,
+          "end_exclusive": 4291055406,
+          "start_inclusive": 4291055156
+        },
+        "games": 500,
+        "opponent_rng_subrange": {
+          "count": 250,
+          "end_exclusive": 4291055656,
+          "start_inclusive": 4291055406
+        },
+        "pairs": 250,
+        "seat_balanced": true
+      },
+      "recurrent_temporal_checkpoint_08": {
+        "deal_subrange": {
+          "count": 250,
+          "end_exclusive": 4291055906,
+          "start_inclusive": 4291055656
+        },
+        "games": 500,
+        "opponent_rng_subrange": {
+          "count": 250,
+          "end_exclusive": 4291056156,
+          "start_inclusive": 4291055906
+        },
+        "pairs": 250,
+        "seat_balanced": true
+      },
+      "recurrent_temporal_checkpoint_09": {
+        "deal_subrange": {
+          "count": 250,
+          "end_exclusive": 4291056406,
+          "start_inclusive": 4291056156
+        },
+        "games": 500,
+        "opponent_rng_subrange": {
+          "count": 250,
+          "end_exclusive": 4291056656,
+          "start_inclusive": 4291056406
+        },
+        "pairs": 250,
+        "seat_balanced": true
+      },
+      "recurrent_temporal_checkpoint_10": {
+        "deal_subrange": {
+          "count": 250,
+          "end_exclusive": 4291056906,
+          "start_inclusive": 4291056656
+        },
+        "games": 500,
+        "opponent_rng_subrange": {
+          "count": 250,
+          "end_exclusive": 4291057156,
+          "start_inclusive": 4291056906
+        },
+        "pairs": 250,
+        "seat_balanced": true
+      },
+      "recurrent_temporal_checkpoint_11": {
+        "deal_subrange": {
+          "count": 250,
+          "end_exclusive": 4291057406,
+          "start_inclusive": 4291057156
+        },
+        "games": 500,
+        "opponent_rng_subrange": {
+          "count": 250,
+          "end_exclusive": 4291057656,
+          "start_inclusive": 4291057406
+        },
+        "pairs": 250,
+        "seat_balanced": true
+      },
+      "recurrent_temporal_checkpoint_12": {
+        "deal_subrange": {
+          "count": 250,
+          "end_exclusive": 4291057906,
+          "start_inclusive": 4291057656
+        },
+        "games": 500,
+        "opponent_rng_subrange": {
+          "count": 250,
+          "end_exclusive": 4291058156,
+          "start_inclusive": 4291057906
+        },
+        "pairs": 250,
+        "seat_balanced": true
+      }
+    },
+    "bootstrap": {
+      "rank_key": [
+        "pair-level bootstrap 95% lower bound descending",
+        "point estimate descending",
+        "fewer training games ascending",
+        "lexicographic checkpoint SHA256 ascending"
+      ],
+      "samples": 100000,
+      "seed": 4291063156
+    },
+    "finalist_admission": {
+      "dense_mlp": 1,
+      "if_fewer_eligible": "leave slot empty; never backfill another lineage",
+      "recurrent_temporal": 2
+    },
+    "pairs_per_bank": 250,
+    "per_admitted_checkpoint": "exactly one registered disjoint bank",
+    "score": "pair score with draws scored as 0.5",
+    "seat_balanced": true
+  },
+  "execution": {
+    "compilation": {
+      "allowed": false,
+      "reason": "no compiled path is preapproved by an exact model-state parity proof"
+    },
+    "one_gpu_process_at_a_time": true,
+    "privacy": {
+      "fingerprint": "7f9bd563857ccd91330bb340fb721889ac7506d75599d97f799220e7c49bc2a0",
+      "native_policy_inputs": "DecisionInput plus public event tokens only",
+      "opponent_rng_seed_visible_to_policy": false
+    }
+  },
+  "final_audit": {
+    "bank": {
+      "deal_range": {
+        "count": 5000,
+        "end_exclusive": 4291068159,
+        "start_inclusive": 4291063159
+      },
+      "games": 10000,
+      "opponent_rng_range": {
+        "count": 5000,
+        "end_exclusive": 4291078159,
+        "start_inclusive": 4291073159
+      },
+      "pairs": 5000,
+      "seat_balanced": true
+    },
+    "bootstrap": {
+      "pair_level_samples": 100000,
+      "precommitted": true,
+      "seed": 4291063158
+    },
+    "candidate_binding_before_model_load": [
+      "candidate SHA256",
+      "configuration SHA256",
+      "source SHA256",
+      "audited opponent SHA256"
+    ],
+    "does_not_reuse_legacy_consumed_sealed_holdout": true,
+    "gate": {
+      "both_required": true,
+      "ci95_lower_bound_gte": 0.8,
+      "point_estimate_gte": 0.8
+    },
+    "inference": {
+      "deterministic_recurrent_inference": true,
+      "draw_score": 0.5,
+      "explicit_per_game_recurrent_state_reset": true,
+      "max_turns": 1000
+    },
+    "ledger": {
+      "crash_or_result_burns_audit": true,
+      "exclusive_create_before_model_load": true,
+      "one_use": true,
+      "path": "benchmarks/random_specialist_20260802/final_audit_claim.json",
+      "retry_tuning_or_selection_after_claim": "forbidden"
+    },
+    "name": "random_specialist_final_audit",
+    "not_called": "sealed holdout"
+  },
+  "format": "pesten-random-specialist-frozen-campaign-v1",
+  "frozen_at_utc": "2026-08-02T00:49:21.777492+00:00",
+  "lanes": {
+    "dense_mlp": {
+      "blocker": "The existing dense PPO launch/update path is outside this task's ownership and cannot accept the separate audited opponent-RNG interface or the DecisionInput/public-event boundary without modifying unowned code.",
+      "checkpoint_count": 0,
+      "exact_game_cap": 0,
+      "no_unused_time_transfer": true,
+      "random_initialized_reward_only": true,
+      "status": "mechanically_blocked",
+      "wall_cap_seconds": 900
+    },
+    "recurrent_temporal": {
+      "capacity": {
+        "calibrated_games_per_second": 12.055007867351014,
+        "checkpoint_count": 12,
+        "checkpoint_interval_games": 2169,
+        "conservative_expected_games_before_rounding": 26038,
+        "conservative_fraction": 0.8,
+        "cumulative_checkpoint_thresholds": [
+          2169,
+          4338,
+          6507,
+          8676,
+          10845,
+          13014,
+          15183,
+          17352,
+          19521,
+          21690,
+          23859,
+          26028
+        ],
+        "exact_game_cap": 26028,
+        "stop_at_first_of": [
+          "exact_game_cap",
+          "wall_cap_seconds"
+        ],
+        "unused_time_transfer_permitted": false,
+        "wall_cap_seconds": 2700
+      },
+      "initialization": {
+        "imitation_data": null,
+        "parent_checkpoint": null,
+        "parent_weights": null,
+        "ppo_checkpoint": null,
+        "seed": 4291052155,
+        "teacher_logits": null
+      },
+      "model": {
+        "class": "NativePufferTemporalPolicy",
+        "hidden_size": 96,
+        "mode_conditioned_heads": false,
+        "num_layers": 1
+      },
+      "random_initialized_reward_only": true,
+      "status": "unblocked"
+    }
+  },
+  "namespace_allocations": {
+    "all_namespaces_pairwise_non_overlapping": true,
+    "calibration": {
+      "calibration": {
+        "count": 48,
+        "end_exclusive": 4291000048,
+        "start_inclusive": 4291000000
+      },
+      "calibration_contract_rng": {
+        "count": 1,
+        "end_exclusive": 4291000097,
+        "start_inclusive": 4291000096
+      },
+      "calibration_initialization": {
+        "count": 1,
+        "end_exclusive": 4291000098,
+        "start_inclusive": 4291000097
+      },
+      "calibration_opponent_rng": {
+        "count": 48,
+        "end_exclusive": 4291000096,
+        "start_inclusive": 4291000048
+      },
+      "calibration_update_rng": {
+        "count": 1,
+        "end_exclusive": 4291000099,
+        "start_inclusive": 4291000098
+      }
+    },
+    "future_campaign": {
+      "bootstrap_confirmation": {
+        "count": 1,
+        "end_exclusive": 4291063158,
+        "start_inclusive": 4291063157
+      },
+      "bootstrap_development": {
+        "count": 1,
+        "end_exclusive": 4291063157,
+        "start_inclusive": 4291063156
+      },
+      "bootstrap_final_audit": {
+        "count": 1,
+        "end_exclusive": 4291063159,
+        "start_inclusive": 4291063158
+      },
+      "confirmation": {
+        "count": 2500,
+        "end_exclusive": 4291060656,
+        "start_inclusive": 4291058156
+      },
+      "confirmation_opponent_rng": {
+        "count": 2500,
+        "end_exclusive": 4291063156,
+        "start_inclusive": 4291060656
+      },
+      "development_screening_opponent_rng_recurrent_01": {
+        "count": 250,
+        "end_exclusive": 4291052656,
+        "start_inclusive": 4291052406
+      },
+      "development_screening_opponent_rng_recurrent_02": {
+        "count": 250,
+        "end_exclusive": 4291053156,
+        "start_inclusive": 4291052906
+      },
+      "development_screening_opponent_rng_recurrent_03": {
+        "count": 250,
+        "end_exclusive": 4291053656,
+        "start_inclusive": 4291053406
+      },
+      "development_screening_opponent_rng_recurrent_04": {
+        "count": 250,
+        "end_exclusive": 4291054156,
+        "start_inclusive": 4291053906
+      },
+      "development_screening_opponent_rng_recurrent_05": {
+        "count": 250,
+        "end_exclusive": 4291054656,
+        "start_inclusive": 4291054406
+      },
+      "development_screening_opponent_rng_recurrent_06": {
+        "count": 250,
+        "end_exclusive": 4291055156,
+        "start_inclusive": 4291054906
+      },
+      "development_screening_opponent_rng_recurrent_07": {
+        "count": 250,
+        "end_exclusive": 4291055656,
+        "start_inclusive": 4291055406
+      },
+      "development_screening_opponent_rng_recurrent_08": {
+        "count": 250,
+        "end_exclusive": 4291056156,
+        "start_inclusive": 4291055906
+      },
+      "development_screening_opponent_rng_recurrent_09": {
+        "count": 250,
+        "end_exclusive": 4291056656,
+        "start_inclusive": 4291056406
+      },
+      "development_screening_opponent_rng_recurrent_10": {
+        "count": 250,
+        "end_exclusive": 4291057156,
+        "start_inclusive": 4291056906
+      },
+      "development_screening_opponent_rng_recurrent_11": {
+        "count": 250,
+        "end_exclusive": 4291057656,
+        "start_inclusive": 4291057406
+      },
+      "development_screening_opponent_rng_recurrent_12": {
+        "count": 250,
+        "end_exclusive": 4291058156,
+        "start_inclusive": 4291057906
+      },
+      "development_screening_recurrent_01": {
+        "count": 250,
+        "end_exclusive": 4291052406,
+        "start_inclusive": 4291052156
+      },
+      "development_screening_recurrent_02": {
+        "count": 250,
+        "end_exclusive": 4291052906,
+        "start_inclusive": 4291052656
+      },
+      "development_screening_recurrent_03": {
+        "count": 250,
+        "end_exclusive": 4291053406,
+        "start_inclusive": 4291053156
+      },
+      "development_screening_recurrent_04": {
+        "count": 250,
+        "end_exclusive": 4291053906,
+        "start_inclusive": 4291053656
+      },
+      "development_screening_recurrent_05": {
+        "count": 250,
+        "end_exclusive": 4291054406,
+        "start_inclusive": 4291054156
+      },
+      "development_screening_recurrent_06": {
+        "count": 250,
+        "end_exclusive": 4291054906,
+        "start_inclusive": 4291054656
+      },
+      "development_screening_recurrent_07": {
+        "count": 250,
+        "end_exclusive": 4291055406,
+        "start_inclusive": 4291055156
+      },
+      "development_screening_recurrent_08": {
+        "count": 250,
+        "end_exclusive": 4291055906,
+        "start_inclusive": 4291055656
+      },
+      "development_screening_recurrent_09": {
+        "count": 250,
+        "end_exclusive": 4291056406,
+        "start_inclusive": 4291056156
+      },
+      "development_screening_recurrent_10": {
+        "count": 250,
+        "end_exclusive": 4291056906,
+        "start_inclusive": 4291056656
+      },
+      "development_screening_recurrent_11": {
+        "count": 250,
+        "end_exclusive": 4291057406,
+        "start_inclusive": 4291057156
+      },
+      "development_screening_recurrent_12": {
+        "count": 250,
+        "end_exclusive": 4291057906,
+        "start_inclusive": 4291057656
+      },
+      "final_audit": {
+        "count": 5000,
+        "end_exclusive": 4291068159,
+        "start_inclusive": 4291063159
+      },
+      "final_audit_opponent_rng": {
+        "count": 5000,
+        "end_exclusive": 4291078159,
+        "start_inclusive": 4291073159
+      },
+      "training_recurrent_deals": {
+        "count": 26028,
+        "end_exclusive": 4291026127,
+        "start_inclusive": 4291000099
+      },
+      "training_recurrent_initialization": {
+        "count": 1,
+        "end_exclusive": 4291052156,
+        "start_inclusive": 4291052155
+      },
+      "training_recurrent_opponent_rng": {
+        "count": 26028,
+        "end_exclusive": 4291052155,
+        "start_inclusive": 4291026127
+      }
+    },
+    "legacy_consumed_sealed_interval": {
+      "count": 900000,
+      "end_exclusive": 4294900000,
+      "start_inclusive": 4294000000
+    }
+  },
+  "source_sha256": {
+    "batched_pesten.py": "b6c6f50034b15ef82f78a0722b11604bcb204b0a2df540d2e9520d67f93c7cb2",
+    "deck.py": "1a1374f09b824f72b8f7589613e94c593a4ce55d3afd50f21b1bf2891847d41b",
+    "game.py": "2e70ea75361170e0f87428f22649236ed8f8bdec8576b33d1148b2c3ed346a5b",
+    "randomAgent.py": "9bcb46d56d7108ef9bfb41ea01b68719087188564bc07c0f484d7f5214ed5a55",
+    "random_specialist_workflow.py": "934459625633571a81efd60e8e3edf36ef333797eb8df69e9a89bfa1e2c7b3e3",
+    "specialist_seed_registry.py": "71dd1c4738690d0ddd21ad7d827a8df9a39749f48ad7ac1c87f2b712f38e45c8",
+    "temporal_batched_speed.py": "fc8ec09bf5299b5c6c6c42fc749858844658489e8c0d419bba70deed342f674f",
+    "temporal_observation.py": "1a61572898833426eb6d511099dd1446fc09253b6d8d70d71ebcc0f81901fc34",
+    "temporal_puffer_agent.py": "0b53499a7bcb70c172354d8950bacfe2f89f4cf57cd5ab220c18de93fd799af6",
+    "temporal_puffer_v4.py": "f40629869fbdc47b43affa80c3c8f8d202669536aa107cd70ac7a8012b12b810",
+    "temporal_training.py": "eda6cc82658beeedd5a913ee965e1238dc6230b1f90b2d4d9dc37f1426bfc4c8"
+  },
+  "status": "frozen_pretraining"
+}

@@ -1,0 +1,68 @@
+{
+  "benchmark": "ppo_batched_smart_dispatch",
+  "decision": "accept exact batched native Smart dispatch",
+  "development_only": true,
+  "exact_rollout_hashes": true,
+  "grouped_speedup": 0.9877011600123412,
+  "paired_speedup_median": 1.0586331792204267,
+  "paired_speedups": [
+    1.0983403485758905,
+    1.0586331792204267,
+    1.0357596034754257,
+    1.4677054938932892,
+    0.9789155041490358,
+    0.7115806617961762,
+    1.1299388434354616
+  ],
+  "raw_seconds": [
+    {
+      "batched": 1.5456623369991576,
+      "scalar": 1.69766331000028,
+      "seed": 85130011
+    },
+    {
+      "batched": 1.5375135579997732,
+      "scalar": 1.6276628659998096,
+      "seed": 85130012
+    },
+    {
+      "batched": 1.7188025880004716,
+      "scalar": 1.780266286999904,
+      "seed": 85130013
+    },
+    {
+      "batched": 1.7675647619998927,
+      "scalar": 2.5942645119994268,
+      "seed": 85130014
+    },
+    {
+      "batched": 2.200949755999318,
+      "scalar": 2.1545438400007697,
+      "seed": 85130015
+    },
+    {
+      "batched": 2.288924688999032,
+      "scalar": 1.6287545449995378,
+      "seed": 85130016
+    },
+    {
+      "batched": 1.368390816000101,
+      "scalar": 1.5461979359988618,
+      "seed": 85130017
+    }
+  ],
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "timing_caveat": "A concurrent trainer caused visible pair-to-pair load variation; the paired median is the selection statistic.",
+  "workload": {
+    "games": 2048,
+    "pairs": 7,
+    "players": 2,
+    "policies": [
+      "smart",
+      "rl"
+    ],
+    "rollout_device": "cpu",
+    "threads": 8
+  }
+}

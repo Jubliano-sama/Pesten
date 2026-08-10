@@ -1,0 +1,41 @@
+{
+  "benchmark": "ppo_evaluation_cpu_seed",
+  "decision": "retain torch.manual_seed for evaluation games",
+  "development_only": true,
+  "exact_results": true,
+  "grouped_median_speedup": 0.9856262360471726,
+  "paired_median_speedup": 0.978919520044824,
+  "paired_speedups": [
+    0.9729225989654413,
+    0.9262824729568672,
+    0.9849164411242067,
+    0.9984120619855212
+  ],
+  "raw_seconds": {
+    "all_devices": [
+      4.05302319600014,
+      4.185379107999324,
+      4.027614080998319,
+      4.13247188600144
+    ],
+    "cpu_only": [
+      4.165822852002748,
+      4.518469506001566,
+      4.089295205998496,
+      4.139044431998627
+    ]
+  },
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "workload": {
+    "agent_sets": [
+      [
+        "smart",
+        "rl"
+      ]
+    ],
+    "games": 256,
+    "repeats": 4,
+    "seed_start": 85340001
+  }
+}

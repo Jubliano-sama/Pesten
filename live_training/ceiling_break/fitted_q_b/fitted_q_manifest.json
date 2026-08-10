@@ -1,0 +1,162 @@
+{
+  "base": {
+    "path": "/home/tommie/Pesten/live_training/long_segments/segment_0002/mlp/ppo_actor_58.pth",
+    "sha256": "5491f69feb8c72f60979eeb78a862365f7af3a8a70f6dda97cf98d6bcd8166ff"
+  },
+  "behavior": {
+    "confidence_gate": 4.0,
+    "scale": 64.0
+  },
+  "behavior_q": {
+    "path": "/home/tommie/Pesten/live_training/ceiling_break/fitted_q_a/fitted_q.pt",
+    "sha256": "5ef6a7f25f303bc32b4b216b5d89f952977496117b14514b0f7cdf3ac4c83b16"
+  },
+  "checkpoint": {
+    "path": "/home/tommie/Pesten/live_training/ceiling_break/fitted_q_b/fitted_q.pt",
+    "sha256": "d71acf1a667595611a9d124476ad3495d0b367239d3131c375f237dd8781afa0"
+  },
+  "config": {
+    "batch_size": 16384,
+    "epochs": 10,
+    "games": 131072,
+    "gamma": 0.995,
+    "learning_rate": 0.0001,
+    "rollout_batch_size": 8192,
+    "temperatures": [
+      0.8,
+      1.0,
+      1.25
+    ],
+    "validation_fraction": 0.1,
+    "weight_decay": 1e-05
+  },
+  "dataset": {
+    "collection": [
+      {
+        "decisions": 937319,
+        "draws": 0,
+        "games": 43690,
+        "losses": 13413,
+        "rollout": {
+          "environment_turns": 2177560,
+          "games": 43690,
+          "inference_calls": 897,
+          "policy_decisions": 937319
+        },
+        "sampled_score": 0.6929961089494163,
+        "temperature": 0.8,
+        "wins": 30277
+      },
+      {
+        "decisions": 933653,
+        "draws": 0,
+        "games": 43690,
+        "losses": 13219,
+        "rollout": {
+          "environment_turns": 2166481,
+          "games": 43690,
+          "inference_calls": 772,
+          "policy_decisions": 933653
+        },
+        "sampled_score": 0.697436484321355,
+        "temperature": 1.0,
+        "wins": 30471
+      },
+      {
+        "decisions": 937936,
+        "draws": 0,
+        "games": 43689,
+        "losses": 13440,
+        "rollout": {
+          "environment_turns": 2180018,
+          "games": 43692,
+          "inference_calls": 831,
+          "policy_decisions": 937936
+        },
+        "sampled_score": 0.6923710773879008,
+        "temperature": 1.25,
+        "wins": 30249
+      }
+    ],
+    "decisions": 2808908,
+    "games": 131069,
+    "train_decisions": 2524863,
+    "validation_decisions": 284045
+  },
+  "kind": "iterative_monte_carlo_fitted_action_value",
+  "privacy": {
+    "draw_pile_order": false,
+    "observation": "121 public and own-hand features only",
+    "opponent_card_identities": false
+  },
+  "runtime": {
+    "elapsed_seconds": 95.12066039599449,
+    "gpu": "NVIDIA GeForce RTX 3090",
+    "python": "3.13.11 (main, Jan 28 2026, 00:01:45) [Clang 21.1.4 ]",
+    "torch": "2.13.0+cu130"
+  },
+  "schema_version": 1,
+  "seed": 88530001,
+  "training_curve": [
+    {
+      "epoch": 1,
+      "train_loss": 0.4263152741616772,
+      "validation_correlation": 0.22360801696777344,
+      "validation_loss": 0.35417595505714417
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.42437833893683646,
+      "validation_correlation": 0.2235454022884369,
+      "validation_loss": 0.3518840968608856
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.42332023324504975,
+      "validation_correlation": 0.2268730103969574,
+      "validation_loss": 0.355220764875412
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.4218505347928693,
+      "validation_correlation": 0.22720922529697418,
+      "validation_loss": 0.3566051423549652
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.4207418224503917,
+      "validation_correlation": 0.2237633764743805,
+      "validation_loss": 0.3519258201122284
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.4191707345747179,
+      "validation_correlation": 0.2246880829334259,
+      "validation_loss": 0.3528881072998047
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.41715550730305334,
+      "validation_correlation": 0.2228877693414688,
+      "validation_loss": 0.3543272316455841
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.4152865869383658,
+      "validation_correlation": 0.22038143873214722,
+      "validation_loss": 0.35605981945991516
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.41324440202405377,
+      "validation_correlation": 0.2218431979417801,
+      "validation_loss": 0.3541097640991211
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.41087768270123387,
+      "validation_correlation": 0.22359514236450195,
+      "validation_loss": 0.35698845982551575
+    }
+  ]
+}

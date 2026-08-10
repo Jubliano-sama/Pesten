@@ -1,0 +1,57 @@
+{
+  "benchmark": "ppo_native_observations",
+  "decision": "use native observation and action-mask construction in native rollouts",
+  "development_only": true,
+  "sealed_seeds_or_outcomes_used": false,
+  "workload": {
+    "games": 1024,
+    "rollout_device": "cpu",
+    "hybrid_cuda_actor_threshold": 64,
+    "torch_threads": 6,
+    "features": 121,
+    "actions": 55
+  },
+  "isolated_rollout_pairs": {
+    "pairs": 7,
+    "paired_speedups": [
+      1.3660438136521902,
+      1.1651006003978566,
+      1.1514127747582699,
+      1.1672130824015725,
+      1.1957945476183574,
+      1.1812584585379482,
+      1.1614005406178582
+    ],
+    "median_speedup": 1.1672130824015725,
+    "median_seconds": {
+      "numpy": 0.5076979759978713,
+      "native": 0.4333109510007489
+    },
+    "exact_rollout_hashes": true
+  },
+  "repeated_production_comparison": {
+    "iterations": 10,
+    "games": 10240,
+    "before_seconds": 6.693918845001463,
+    "after_seconds": 6.3716142189987295,
+    "end_to_end_speedup": 1.0505844539428788,
+    "rollout_seconds_before": 4.435668512003758,
+    "rollout_seconds_after": 4.098802953008999,
+    "rollout_speedup": 1.0821863268024292,
+    "after_average_games_per_second": 1607.1280601808264,
+    "warm_actor_and_critic_hashes_exact": true,
+    "final_actor_and_critic_hashes_exact": true,
+    "per_iteration_turn_and_decision_counts_exact": true
+  },
+  "same_seed_cprofile": {
+    "profiled_rollout_seconds_before": 0.597,
+    "profiled_rollout_seconds_after": 0.494,
+    "observation_seconds_before": 0.09,
+    "observation_seconds_after": 0.016,
+    "note": "Profiler timings include instrumentation overhead and are used only for hotspot attribution."
+  },
+  "fallback": {
+    "numpy_path_retained": true,
+    "native_gate": "existing native_rollout_engine option plus caller-owned action-mask storage"
+  }
+}

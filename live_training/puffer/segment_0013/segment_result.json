@@ -1,0 +1,641 @@
+{
+  "curve": [
+    {
+      "checkpoint": {
+        "path": "/home/tommie/Pesten/live_training/puffer/segment_0013/puffer_epoch_0057.pt",
+        "state_sha256": "5b08aacf88d7d626f9bd7dea5b81c5c3b7320ea202c8dafbb783089dfb2d8736"
+      },
+      "contribution": {
+        "decisions": {
+          "bayesian_tree": 286,
+          "current_selfplay": 3268,
+          "historical_temporal": 747,
+          "ppo_champion": 169,
+          "smart_rule": 296
+        },
+        "games": {
+          "bayesian_tree": 9,
+          "current_selfplay": 55,
+          "historical_temporal": 18,
+          "ppo_champion": 9,
+          "smart_rule": 9
+        },
+        "total_turns": 5243,
+        "trajectories": 155
+      },
+      "decisions": 4766,
+      "epoch": 57,
+      "evaluation": {
+        "ppo_champion": {
+          "average_turns": 43.94,
+          "candidate": "puffer_epoch_57",
+          "draws": 0,
+          "elapsed_seconds": 4.0213330880001195,
+          "games": 100,
+          "gate_passed": false,
+          "losses": 65,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.27,
+            0.43
+          ],
+          "pairs": 50,
+          "score": 0.35,
+          "seed": 56580014,
+          "wins": 35,
+          "wins_as_seat_0": 19,
+          "wins_as_seat_1": 16
+        },
+        "random": {
+          "average_turns": 64.52,
+          "candidate": "puffer_epoch_57",
+          "draws": 0,
+          "elapsed_seconds": 3.413772762999997,
+          "games": 100,
+          "gate_passed": false,
+          "losses": 41,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.48,
+            0.7
+          ],
+          "pairs": 50,
+          "score": 0.59,
+          "seed": 57580014,
+          "wins": 59,
+          "wins_as_seat_0": 31,
+          "wins_as_seat_1": 28
+        },
+        "smart": {
+          "average_turns": 38.09,
+          "candidate": "puffer_epoch_57",
+          "draws": 0,
+          "elapsed_seconds": 2.0108533469997383,
+          "games": 100,
+          "gate_passed": false,
+          "losses": 50,
+          "opponent": "smart",
+          "paired_bootstrap_ci95": [
+            0.4,
+            0.6
+          ],
+          "pairs": 50,
+          "score": 0.5,
+          "seed": 58580014,
+          "wins": 50,
+          "wins_as_seat_0": 24,
+          "wins_as_seat_1": 26
+        }
+      },
+      "update": {
+        "approx_kl": 0.0019570438365995135,
+        "clip_fraction": 0.02496852728059852,
+        "entropy": 0.20514867754291197,
+        "epoch_diagnostics": [
+          {
+            "approx_kl": 0.0011425989214330912,
+            "clip_fraction": 0.013008812442421913,
+            "entropy": 0.20506446063518524,
+            "epoch": 1,
+            "explained_variance": 0.07839781045913696,
+            "old_approx_kl": -0.00022527924738824368,
+            "samples": 4766,
+            "value_mse": 0.37584856152534485
+          },
+          {
+            "approx_kl": 0.0021178361494094133,
+            "clip_fraction": 0.027066722512245178,
+            "entropy": 0.20515669882297516,
+            "epoch": 2,
+            "explained_variance": 0.08669108152389526,
+            "old_approx_kl": 0.0008068865281529725,
+            "samples": 4766,
+            "value_mse": 0.3721131980419159
+          },
+          {
+            "approx_kl": 0.003005258971825242,
+            "clip_fraction": 0.04049517586827278,
+            "entropy": 0.20345290005207062,
+            "epoch": 3,
+            "explained_variance": 0.08795404434204102,
+            "old_approx_kl": 0.0011483185226097703,
+            "samples": 4766,
+            "value_mse": 0.3719435930252075
+          },
+          {
+            "approx_kl": 0.0034454967826604843,
+            "clip_fraction": 0.042803190648555756,
+            "entropy": 0.20609763264656067,
+            "epoch": 4,
+            "explained_variance": 0.09791451692581177,
+            "old_approx_kl": 0.0026826374232769012,
+            "samples": 4766,
+            "value_mse": 0.36955347657203674
+          }
+        ],
+        "epochs_completed": 4,
+        "explained_variance": 0.16688054252886442,
+        "loss": 0.08756659356341785,
+        "old_approx_kl": 0.0007175619723085615,
+        "optimizer_steps": 40,
+        "policy_loss": -0.0038900113640713326,
+        "post_update_diagnostics": {
+          "approx_kl": 0.0034454967826604843,
+          "clip_fraction": 0.042803190648555756,
+          "entropy": 0.20609763264656067,
+          "epoch": 4,
+          "explained_variance": 0.09791451692581177,
+          "old_approx_kl": 0.0026826374232769012,
+          "samples": 4766,
+          "value_mse": 0.36955347657203674
+        },
+        "samples": 4766,
+        "stopped_early": false,
+        "target_kl": 0.02,
+        "value_loss": 0.18701618397549777
+      },
+      "wall_seconds": 17.31753645400022
+    },
+    {
+      "checkpoint": {
+        "path": "/home/tommie/Pesten/live_training/puffer/segment_0013/puffer_epoch_0058.pt",
+        "state_sha256": "5d8ef2bd7f98482c8065cd3af3cb1163d726efc3e8db38bd2aee45a8c5cf1bcf"
+      },
+      "contribution": {
+        "decisions": {
+          "bayesian_tree": 242,
+          "current_selfplay": 3731,
+          "historical_temporal": 618,
+          "ppo_champion": 182,
+          "smart_rule": 193
+        },
+        "games": {
+          "bayesian_tree": 9,
+          "current_selfplay": 55,
+          "historical_temporal": 18,
+          "ppo_champion": 9,
+          "smart_rule": 9
+        },
+        "total_turns": 5209,
+        "trajectories": 155
+      },
+      "decisions": 4966,
+      "epoch": 58,
+      "evaluation": {
+        "ppo_champion": {
+          "average_turns": 44.35,
+          "candidate": "puffer_epoch_58",
+          "draws": 0,
+          "elapsed_seconds": 3.4607191590002913,
+          "games": 100,
+          "gate_passed": false,
+          "losses": 66,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.25,
+            0.43
+          ],
+          "pairs": 50,
+          "score": 0.34,
+          "seed": 56590014,
+          "wins": 34,
+          "wins_as_seat_0": 19,
+          "wins_as_seat_1": 15
+        },
+        "random": {
+          "average_turns": 48.72,
+          "candidate": "puffer_epoch_58",
+          "draws": 0,
+          "elapsed_seconds": 2.633183141000245,
+          "games": 100,
+          "gate_passed": true,
+          "losses": 37,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.53,
+            0.72
+          ],
+          "pairs": 50,
+          "score": 0.63,
+          "seed": 57590014,
+          "wins": 63,
+          "wins_as_seat_0": 32,
+          "wins_as_seat_1": 31
+        },
+        "smart": {
+          "average_turns": 43.67,
+          "candidate": "puffer_epoch_58",
+          "draws": 0,
+          "elapsed_seconds": 2.298972400999901,
+          "games": 100,
+          "gate_passed": false,
+          "losses": 55,
+          "opponent": "smart",
+          "paired_bootstrap_ci95": [
+            0.36,
+            0.54
+          ],
+          "pairs": 50,
+          "score": 0.45,
+          "seed": 58590014,
+          "wins": 45,
+          "wins_as_seat_0": 18,
+          "wins_as_seat_1": 27
+        }
+      },
+      "update": {
+        "approx_kl": 0.0030404384320176863,
+        "clip_fraction": 0.03478654823162823,
+        "entropy": 0.21585014950149467,
+        "epoch_diagnostics": [
+          {
+            "approx_kl": 0.001051716273650527,
+            "clip_fraction": 0.010269834659993649,
+            "entropy": 0.21923911571502686,
+            "epoch": 1,
+            "explained_variance": 0.12836450338363647,
+            "old_approx_kl": -5.869970118510537e-05,
+            "samples": 4966,
+            "value_mse": 0.34493473172187805
+          },
+          {
+            "approx_kl": 0.004060559440404177,
+            "clip_fraction": 0.051751915365457535,
+            "entropy": 0.21741871535778046,
+            "epoch": 2,
+            "explained_variance": 0.13979887962341309,
+            "old_approx_kl": 0.0014317086897790432,
+            "samples": 4966,
+            "value_mse": 0.3434508442878723
+          },
+          {
+            "approx_kl": 0.004495437256991863,
+            "clip_fraction": 0.05255739018321037,
+            "entropy": 0.21140296757221222,
+            "epoch": 3,
+            "explained_variance": 0.14531934261322021,
+            "old_approx_kl": 0.0024652995634824038,
+            "samples": 4966,
+            "value_mse": 0.33797430992126465
+          },
+          {
+            "approx_kl": 0.0050101811066269875,
+            "clip_fraction": 0.057390253990888596,
+            "entropy": 0.21302929520606995,
+            "epoch": 4,
+            "explained_variance": 0.15142780542373657,
+            "old_approx_kl": 0.0028562871739268303,
+            "samples": 4966,
+            "value_mse": 0.3371497690677643
+          }
+        ],
+        "epochs_completed": 4,
+        "explained_variance": 0.18326704357715082,
+        "loss": 0.08568721806459456,
+        "old_approx_kl": 0.0015540451564260618,
+        "optimizer_steps": 40,
+        "policy_loss": -0.002270903919642037,
+        "post_update_diagnostics": {
+          "approx_kl": 0.0050101811066269875,
+          "clip_fraction": 0.057390253990888596,
+          "entropy": 0.21302929520606995,
+          "epoch": 4,
+          "explained_variance": 0.15142780542373657,
+          "old_approx_kl": 0.0028562871739268303,
+          "samples": 4966,
+          "value_mse": 0.3371497690677643
+        },
+        "samples": 4966,
+        "stopped_early": false,
+        "target_kl": 0.02,
+        "value_loss": 0.18023324636551183
+      },
+      "wall_seconds": 15.42341736499975
+    },
+    {
+      "checkpoint": {
+        "path": "/home/tommie/Pesten/live_training/puffer/segment_0013/puffer_epoch_0059.pt",
+        "state_sha256": "46fb9439522d92a07818b0b8aced845d2fc7fd8c6f074f4bbebdba0dd9677d6f"
+      },
+      "contribution": {
+        "decisions": {
+          "bayesian_tree": 283,
+          "current_selfplay": 2984,
+          "historical_temporal": 562,
+          "ppo_champion": 199,
+          "smart_rule": 114
+        },
+        "games": {
+          "bayesian_tree": 9,
+          "current_selfplay": 55,
+          "historical_temporal": 18,
+          "ppo_champion": 9,
+          "smart_rule": 9
+        },
+        "total_turns": 4427,
+        "trajectories": 155
+      },
+      "decisions": 4142,
+      "epoch": 59,
+      "evaluation": {
+        "ppo_champion": {
+          "average_turns": 46.12,
+          "candidate": "puffer_epoch_59",
+          "draws": 0,
+          "elapsed_seconds": 3.575205659999938,
+          "games": 100,
+          "gate_passed": false,
+          "losses": 67,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.24,
+            0.43
+          ],
+          "pairs": 50,
+          "score": 0.33,
+          "seed": 56600014,
+          "wins": 33,
+          "wins_as_seat_0": 19,
+          "wins_as_seat_1": 14
+        },
+        "random": {
+          "average_turns": 52.9,
+          "candidate": "puffer_epoch_59",
+          "draws": 0,
+          "elapsed_seconds": 2.8062527570000384,
+          "games": 100,
+          "gate_passed": true,
+          "losses": 31,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.61,
+            0.77
+          ],
+          "pairs": 50,
+          "score": 0.69,
+          "seed": 57600014,
+          "wins": 69,
+          "wins_as_seat_0": 31,
+          "wins_as_seat_1": 38
+        },
+        "smart": {
+          "average_turns": 43.84,
+          "candidate": "puffer_epoch_59",
+          "draws": 0,
+          "elapsed_seconds": 2.3373485739998614,
+          "games": 100,
+          "gate_passed": false,
+          "losses": 56,
+          "opponent": "smart",
+          "paired_bootstrap_ci95": [
+            0.35,
+            0.53
+          ],
+          "pairs": 50,
+          "score": 0.44,
+          "seed": 58600014,
+          "wins": 44,
+          "wins_as_seat_0": 22,
+          "wins_as_seat_1": 22
+        }
+      },
+      "update": {
+        "approx_kl": 0.0021290115771118953,
+        "clip_fraction": 0.028609367480406198,
+        "entropy": 0.22993889005557028,
+        "epoch_diagnostics": [
+          {
+            "approx_kl": 0.0015691111329942942,
+            "clip_fraction": 0.023660067468881607,
+            "entropy": 0.2315898835659027,
+            "epoch": 1,
+            "explained_variance": 0.08436167240142822,
+            "old_approx_kl": 0.0011528996983543038,
+            "samples": 4142,
+            "value_mse": 0.40336835384368896
+          },
+          {
+            "approx_kl": 0.002726219827309251,
+            "clip_fraction": 0.03959440067410469,
+            "entropy": 0.23196199536323547,
+            "epoch": 2,
+            "explained_variance": 0.07905125617980957,
+            "old_approx_kl": 0.0016986067639663815,
+            "samples": 4142,
+            "value_mse": 0.4053027331829071
+          },
+          {
+            "approx_kl": 0.002871208591386676,
+            "clip_fraction": 0.037421535700559616,
+            "entropy": 0.22808313369750977,
+            "epoch": 3,
+            "explained_variance": 0.09886866807937622,
+            "old_approx_kl": 0.002168531995266676,
+            "samples": 4142,
+            "value_mse": 0.39810943603515625
+          },
+          {
+            "approx_kl": 0.003004601923748851,
+            "clip_fraction": 0.03887011110782623,
+            "entropy": 0.22701704502105713,
+            "epoch": 4,
+            "explained_variance": 0.10538673400878906,
+            "old_approx_kl": 0.002883702050894499,
+            "samples": 4142,
+            "value_mse": 0.399524062871933
+          }
+        ],
+        "epochs_completed": 4,
+        "explained_variance": 0.1599853369117301,
+        "loss": 0.1013945303929278,
+        "old_approx_kl": 0.0014046956289346859,
+        "optimizer_steps": 40,
+        "policy_loss": -0.002996762238349736,
+        "post_update_diagnostics": {
+          "approx_kl": 0.003004601923748851,
+          "clip_fraction": 0.03887011110782623,
+          "entropy": 0.22701704502105713,
+          "epoch": 4,
+          "explained_variance": 0.10538673400878906,
+          "old_approx_kl": 0.002883702050894499,
+          "samples": 4142,
+          "value_mse": 0.399524062871933
+        },
+        "samples": 4142,
+        "stopped_early": false,
+        "target_kl": 0.02,
+        "value_loss": 0.21338136301014818
+      },
+      "wall_seconds": 14.828912536000189
+    },
+    {
+      "checkpoint": {
+        "path": "/home/tommie/Pesten/live_training/puffer/segment_0013/puffer_epoch_0060.pt",
+        "state_sha256": "d1a90722fb922355aa3440ecc668d0d2bb8a4c197a8867e75b6b8cf457044ae6"
+      },
+      "contribution": {
+        "decisions": {
+          "bayesian_tree": 179,
+          "current_selfplay": 4690,
+          "historical_temporal": 679,
+          "ppo_champion": 169,
+          "smart_rule": 225
+        },
+        "games": {
+          "bayesian_tree": 9,
+          "current_selfplay": 55,
+          "historical_temporal": 18,
+          "ppo_champion": 9,
+          "smart_rule": 9
+        },
+        "total_turns": 5972,
+        "trajectories": 155
+      },
+      "decisions": 5942,
+      "epoch": 60,
+      "evaluation": {
+        "ppo_champion": {
+          "average_turns": 42.89,
+          "candidate": "puffer_epoch_60",
+          "draws": 0,
+          "elapsed_seconds": 3.430183971000133,
+          "games": 100,
+          "gate_passed": false,
+          "losses": 69,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.23,
+            0.4
+          ],
+          "pairs": 50,
+          "score": 0.31,
+          "seed": 56610014,
+          "wins": 31,
+          "wins_as_seat_0": 16,
+          "wins_as_seat_1": 15
+        },
+        "random": {
+          "average_turns": 56.57,
+          "candidate": "puffer_epoch_60",
+          "draws": 0,
+          "elapsed_seconds": 3.030869025999891,
+          "games": 100,
+          "gate_passed": false,
+          "losses": 44,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.46,
+            0.66
+          ],
+          "pairs": 50,
+          "score": 0.56,
+          "seed": 57610014,
+          "wins": 56,
+          "wins_as_seat_0": 29,
+          "wins_as_seat_1": 27
+        },
+        "smart": {
+          "average_turns": 42.17,
+          "candidate": "puffer_epoch_60",
+          "draws": 0,
+          "elapsed_seconds": 2.2597890480001297,
+          "games": 100,
+          "gate_passed": false,
+          "losses": 48,
+          "opponent": "smart",
+          "paired_bootstrap_ci95": [
+            0.42,
+            0.62
+          ],
+          "pairs": 50,
+          "score": 0.52,
+          "seed": 58610014,
+          "wins": 52,
+          "wins_as_seat_0": 26,
+          "wins_as_seat_1": 26
+        }
+      },
+      "update": {
+        "approx_kl": 0.002647475305938083,
+        "clip_fraction": 0.02284584302039818,
+        "entropy": 0.17971971827847252,
+        "epoch_diagnostics": [
+          {
+            "approx_kl": 0.0015237918123602867,
+            "clip_fraction": 0.010602490976452827,
+            "entropy": 0.18164613842964172,
+            "epoch": 1,
+            "explained_variance": 0.05519992113113403,
+            "old_approx_kl": 0.0017473527695983648,
+            "samples": 5942,
+            "value_mse": 0.32769855856895447
+          },
+          {
+            "approx_kl": 0.003379839239642024,
+            "clip_fraction": 0.03079771250486374,
+            "entropy": 0.17927373945713043,
+            "epoch": 2,
+            "explained_variance": 0.07215261459350586,
+            "old_approx_kl": 0.003386084455996752,
+            "samples": 5942,
+            "value_mse": 0.3221232295036316
+          },
+          {
+            "approx_kl": 0.004039048217236996,
+            "clip_fraction": 0.03635139763355255,
+            "entropy": 0.17831671237945557,
+            "epoch": 3,
+            "explained_variance": 0.07962208986282349,
+            "old_approx_kl": 0.0034516197629272938,
+            "samples": 5942,
+            "value_mse": 0.31978079676628113
+          },
+          {
+            "approx_kl": 0.003577849827706814,
+            "clip_fraction": 0.02995624579489231,
+            "entropy": 0.180434912443161,
+            "epoch": 4,
+            "explained_variance": 0.060617029666900635,
+            "old_approx_kl": 0.002990529639646411,
+            "samples": 5942,
+            "value_mse": 0.32662317156791687
+          }
+        ],
+        "epochs_completed": 4,
+        "explained_variance": 0.12529827749406156,
+        "loss": 0.07867097766701293,
+        "old_approx_kl": 0.0027031837868714916,
+        "optimizer_steps": 40,
+        "policy_loss": -0.0018438176443144178,
+        "post_update_diagnostics": {
+          "approx_kl": 0.003577849827706814,
+          "clip_fraction": 0.02995624579489231,
+          "entropy": 0.180434912443161,
+          "epoch": 4,
+          "explained_variance": 0.060617029666900635,
+          "old_approx_kl": 0.002990529639646411,
+          "samples": 5942,
+          "value_mse": 0.32662317156791687
+        },
+        "samples": 5942,
+        "stopped_early": false,
+        "target_kl": 0.02,
+        "value_loss": 0.16462398563784075
+      },
+      "wall_seconds": 16.81644498200012
+    }
+  ],
+  "elapsed_seconds": 64.38899269900003,
+  "end_epoch": 60,
+  "kind": "warm_native_pufferlib_v4_segment",
+  "latest_checkpoint": "/home/tommie/Pesten/live_training/puffer/segment_0013/latest.pt",
+  "runtime": {
+    "cuda": true,
+    "device": "cuda:0",
+    "pufferlib": 4.0,
+    "torch": "2.13.0+cu130"
+  },
+  "schema_version": 1,
+  "seed": 54010014,
+  "start_epoch": 57
+}

@@ -1,0 +1,16 @@
+{
+  "benchmark": "ppo_compiled_full_loss",
+  "decision": "retain stable model-forward-only compilation",
+  "development_only": true,
+  "failure": {
+    "exit_code": 139,
+    "phase": "initial CUDA Inductor full-loss graph compilation"
+  },
+  "sealed_seeds_or_outcomes_used": false,
+  "workload": {
+    "compile_mode": "reduce-overhead",
+    "rollout_device": "cpu",
+    "training_device": "cuda",
+    "gpu": "NVIDIA GeForce RTX 3090"
+  }
+}

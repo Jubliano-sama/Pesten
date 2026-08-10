@@ -1,0 +1,43 @@
+{
+  "benchmark": "ppo_evaluation_direct_mask",
+  "decision": "mask known no-collection evaluation action regions directly",
+  "development_only": true,
+  "exact_results": true,
+  "grouped_median_speedup": 1.1499092305578387,
+  "paired_median_speedup": 1.125296935128318,
+  "paired_speedups": [
+    1.1945552778513568,
+    1.0482969168870224,
+    1.056038592405279,
+    1.2519021551497747
+  ],
+  "raw_seconds": {
+    "bool_mask": [
+      5.774303057001816,
+      4.545333394002228,
+      4.519710369000677,
+      5.4078933380005765
+    ],
+    "direct_mask": [
+      4.833851696999773,
+      4.33592174200021,
+      4.279872347000492,
+      4.319741216000693
+    ]
+  },
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "semantic_contract": "the same logits, valid action set, categorical sampling, per-game turns, and winners remain exact",
+  "workload": {
+    "agent_sets": [
+      [
+        "smart",
+        "rl"
+      ]
+    ],
+    "background_load": "concurrent CPU Puffer trainer",
+    "games": 256,
+    "repeats": 4,
+    "seed_start": 85300001
+  }
+}

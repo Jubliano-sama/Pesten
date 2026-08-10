@@ -1,0 +1,31 @@
+{
+  "benchmark": "ppo_frozen_rollout_actor",
+  "decision": "retain mutable traced CPU rollout actor",
+  "development_only": true,
+  "exact_actions_rewards_lengths_and_control_flow": true,
+  "freeze_seconds_median": 0.005226575001870515,
+  "grouped_speedup": 1.0596368787149042,
+  "max_initial_ratio_error": 2.384185791015625e-06,
+  "max_log_probability_error": 2.384185791015625e-06,
+  "paired_speedup_median": 1.0188157557911803,
+  "paired_speedups": [
+    1.025616198947383,
+    1.0188157557911803,
+    1.0276819912829216,
+    0.983154779517826,
+    1.2288886160942636,
+    1.1030799605960755,
+    1.0122159770249899,
+    1.236089792452845,
+    0.9590194374003801,
+    0.9394458418083861,
+    0.9062243444410158
+  ],
+  "sealed_seeds_or_outcomes_used": false,
+  "workload": {
+    "games": 512,
+    "pairs": 11,
+    "rollout_device": "cpu",
+    "threads": 8
+  }
+}

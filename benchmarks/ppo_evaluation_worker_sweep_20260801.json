@@ -1,0 +1,46 @@
+{
+  "benchmark": "ppo_evaluation_worker_sweep",
+  "development_only": true,
+  "exact_results_across_worker_counts": true,
+  "median_seconds": {
+    "4": 6.041760868502024,
+    "8": 4.671547422502044,
+    "12": 4.736080094000499,
+    "16": 4.955016285000966
+  },
+  "raw_seconds": {
+    "4": [
+      5.485020641001029,
+      6.5985010960030195
+    ],
+    "8": [
+      4.179346561002603,
+      5.1637482840014854
+    ],
+    "12": [
+      4.3176169569997,
+      5.154543231001298
+    ],
+    "16": [
+      4.9853685820016835,
+      4.924663988000248
+    ]
+  },
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "selected_workers": 8,
+  "selection": "retain eight default evaluation workers",
+  "workload": {
+    "agent_sets": [
+      [
+        "smart",
+        "rl"
+      ]
+    ],
+    "background_load": "concurrent CPU Puffer trainer at approximately 2.7 cores",
+    "games": 512,
+    "host_logical_cpus": 16,
+    "repeats": 2,
+    "seed_start": 85240001
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "benchmark": "ppo_evaluation_unused_logprob",
+  "decision": "skip unused log-probability work in no-collection evaluation",
+  "development_only": true,
+  "exact_results": true,
+  "grouped_median_speedup": 1.0700781280793628,
+  "paired_median_speedup": 1.030525269033605,
+  "paired_speedups": [
+    1.1328702480608233,
+    1.0475049626368789,
+    1.0135455754303313,
+    1.0098336112017758
+  ],
+  "raw_seconds": {
+    "baseline": [
+      4.07615078100207,
+      3.781795709001017,
+      3.8162565270031337,
+      4.437707907000004
+    ],
+    "skip_logprob": [
+      3.5980738199978077,
+      3.6102890620022663,
+      3.7652539949995116,
+      4.394494160002068
+    ]
+  },
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "semantic_contract": "per-game turns and winner remain exact because action sampling is unchanged; only the unused evaluation log probability is omitted",
+  "workload": {
+    "agent_sets": [
+      [
+        "smart",
+        "rl"
+      ]
+    ],
+    "games": 256,
+    "repeats": 4,
+    "seed_start": 85250001
+  }
+}

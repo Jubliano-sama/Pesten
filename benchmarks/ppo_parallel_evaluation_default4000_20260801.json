@@ -1,0 +1,27 @@
+{
+  "benchmark": "ppo_parallel_evaluation_default4000",
+  "decision": "retain eight-worker canonical evaluation for the CLI default workload",
+  "development_only": true,
+  "exact_results": true,
+  "includes_process_startup": true,
+  "parallel_seconds": 15.641012437998143,
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "sequential_seconds": 89.00108543899842,
+  "speedup": 5.690238134635066,
+  "workload": {
+    "agent_sets": [
+      [
+        "smart",
+        "rl"
+      ]
+    ],
+    "background_load": "concurrent CPU Puffer trainer",
+    "games": 4000,
+    "process_start_method": "spawn",
+    "seed_start": 85220001,
+    "turns": 314244,
+    "wins": 33,
+    "workers": 8
+  }
+}

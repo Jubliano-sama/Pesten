@@ -1,0 +1,154 @@
+{
+  "admission": {
+    "calibration_admission": {
+      "fixed_random_parity": {
+        "canonicalization": "UTF-8 json.dumps(sort_keys=True,separators=(',', ':'),allow_nan=False) over {'schema', 'fixed_random_parity'}",
+        "evidence_passed": true,
+        "schema": "pesten-random-specialist-fixed-random-parity-fingerprint-v1",
+        "sha256": "d583494d4f57cd63c1f8781bc5a2eb74fecf53e03f2bd68ad16ee9221ff7e2cf"
+      },
+      "privacy_fingerprint": "7f9bd563857ccd91330bb340fb721889ac7506d75599d97f799220e7c49bc2a0"
+    },
+    "eligible": true,
+    "gates": {
+      "100 percent legal actions": true,
+      "complete checkpoint": true,
+      "complete optimizer state": true,
+      "complete per-checkpoint manifest": true,
+      "finite parameters and metrics": true,
+      "random-initialized no-parent lineage": true,
+      "scheduled cumulative threshold reached": true,
+      "unchanged fixed-random parity fingerprint": true,
+      "unchanged privacy fingerprint": true
+    },
+    "required": [
+      "complete checkpoint",
+      "complete optimizer state",
+      "complete per-checkpoint manifest",
+      "random-initialized no-parent lineage",
+      "finite parameters and metrics",
+      "100 percent legal actions",
+      "unchanged privacy fingerprint",
+      "unchanged fixed-random parity fingerprint",
+      "scheduled cumulative threshold reached"
+    ]
+  },
+  "checkpoint_path": "live_training/random_specialist_20260802/checkpoint_04338.pt",
+  "checkpoint_sha256": "c567674fa47f040622d84f0b26fbda501f6bc8169d88ba08bc27ac1f9372c7a3",
+  "commitment_sha256": "56d8fa1022f8ca41eb30ae984590548d351b1aa673998c0602f586b36a859d67",
+  "complete_model_state": true,
+  "complete_optimizer_state": true,
+  "configuration_sha256": "ef27808c03c43c9bc6cb56ee4d0a11b66e46c6bbcd0ae97b704eb3c2016ce188",
+  "cumulative_training_games": 4338,
+  "format": "pesten-random-specialist-recurrent-checkpoint-v1",
+  "lineage": {
+    "commitment_sha256": "56d8fa1022f8ca41eb30ae984590548d351b1aa673998c0602f586b36a859d67",
+    "configuration_sha256": "ef27808c03c43c9bc6cb56ee4d0a11b66e46c6bbcd0ae97b704eb3c2016ce188",
+    "cumulative_training_games": 4338,
+    "imitation_data": null,
+    "metrics": {
+      "approx_kl": 0.0016304340734995953,
+      "clip_fraction": 0.019349845196836968,
+      "entropy": 0.21885693025785158,
+      "epoch_diagnostics": [
+        {
+          "approx_kl": 0.0007163701229728758,
+          "clip_fraction": 0.007807241752743721,
+          "entropy": 0.2173144370317459,
+          "epoch": 1,
+          "explained_variance": -0.03070509433746338,
+          "old_approx_kl": 0.0005563232116401196,
+          "samples": 7429,
+          "value_mse": 0.20547638833522797
+        },
+        {
+          "approx_kl": 0.002263951115310192,
+          "clip_fraction": 0.02920985221862793,
+          "entropy": 0.22031088173389435,
+          "epoch": 2,
+          "explained_variance": 0.05484938621520996,
+          "old_approx_kl": 0.0018837961833924055,
+          "samples": 7429,
+          "value_mse": 0.16367323696613312
+        },
+        {
+          "approx_kl": 0.0024148302618414164,
+          "clip_fraction": 0.029075244441628456,
+          "entropy": 0.22081774473190308,
+          "epoch": 3,
+          "explained_variance": 0.033342599868774414,
+          "old_approx_kl": 0.002358077559620142,
+          "samples": 7429,
+          "value_mse": 0.1660601943731308
+        },
+        {
+          "approx_kl": 0.0029260653536766768,
+          "clip_fraction": 0.03365190327167511,
+          "entropy": 0.22008825838565826,
+          "epoch": 4,
+          "explained_variance": -0.006994843482971191,
+          "old_approx_kl": 0.002961029764264822,
+          "samples": 7429,
+          "value_mse": 0.18982063233852386
+        }
+      ],
+      "epochs_completed": 4,
+      "explained_variance": 0.18037582624807447,
+      "loss": 0.028851793949069927,
+      "old_approx_kl": 0.0014289971979047425,
+      "optimizer_steps": 32,
+      "policy_loss": -0.0024811149120724653,
+      "post_update_diagnostics": {
+        "approx_kl": 0.0029260653536766768,
+        "clip_fraction": 0.03365190327167511,
+        "entropy": 0.22008825838565826,
+        "epoch": 4,
+        "explained_variance": -0.006994843482971191,
+        "old_approx_kl": 0.002961029764264822,
+        "samples": 7429,
+        "value_mse": 0.18982063233852386
+      },
+      "samples": 7429,
+      "stopped_early": false,
+      "target_kl": 0.02,
+      "value_loss": 0.06704295578221282
+    },
+    "opponent_contract_sha256": "b08edc665048ee674c7bc959433e1a177268ed5b3b1c1a53daba9f12e029fe1f",
+    "parent_checkpoint": null,
+    "parent_weights": null,
+    "ppo_checkpoint": null,
+    "random_initialized": true,
+    "reward_only": true,
+    "source_sha256": {
+      "batched_pesten.py": "b6c6f50034b15ef82f78a0722b11604bcb204b0a2df540d2e9520d67f93c7cb2",
+      "deck.py": "1a1374f09b824f72b8f7589613e94c593a4ce55d3afd50f21b1bf2891847d41b",
+      "game.py": "2e70ea75361170e0f87428f22649236ed8f8bdec8576b33d1148b2c3ed346a5b",
+      "randomAgent.py": "9bcb46d56d7108ef9bfb41ea01b68719087188564bc07c0f484d7f5214ed5a55",
+      "random_specialist_campaign.py": "266c97b78df9ba00ba97835edc20d2c355b13752baa40f494ab459a0750b924a",
+      "random_specialist_workflow.py": "934459625633571a81efd60e8e3edf36ef333797eb8df69e9a89bfa1e2c7b3e3",
+      "specialist_seed_registry.py": "71dd1c4738690d0ddd21ad7d827a8df9a39749f48ad7ac1c87f2b712f38e45c8",
+      "temporal_batched_speed.py": "fc8ec09bf5299b5c6c6c42fc749858844658489e8c0d419bba70deed342f674f",
+      "temporal_observation.py": "1a61572898833426eb6d511099dd1446fc09253b6d8d70d71ebcc0f81901fc34",
+      "temporal_puffer_agent.py": "0b53499a7bcb70c172354d8950bacfe2f89f4cf57cd5ab220c18de93fd799af6",
+      "temporal_puffer_v4.py": "f40629869fbdc47b43affa80c3c8f8d202669536aa107cd70ac7a8012b12b810",
+      "temporal_training.py": "eda6cc82658beeedd5a913ee965e1238dc6230b1f90b2d4d9dc37f1426bfc4c8"
+    },
+    "teacher_logits": null,
+    "training_wall_seconds_excluding_evaluation": 223.4827929759913
+  },
+  "opponent_contract_sha256": "b08edc665048ee674c7bc959433e1a177268ed5b3b1c1a53daba9f12e029fe1f",
+  "source_sha256": {
+    "batched_pesten.py": "b6c6f50034b15ef82f78a0722b11604bcb204b0a2df540d2e9520d67f93c7cb2",
+    "deck.py": "1a1374f09b824f72b8f7589613e94c593a4ce55d3afd50f21b1bf2891847d41b",
+    "game.py": "2e70ea75361170e0f87428f22649236ed8f8bdec8576b33d1148b2c3ed346a5b",
+    "randomAgent.py": "9bcb46d56d7108ef9bfb41ea01b68719087188564bc07c0f484d7f5214ed5a55",
+    "random_specialist_campaign.py": "266c97b78df9ba00ba97835edc20d2c355b13752baa40f494ab459a0750b924a",
+    "random_specialist_workflow.py": "934459625633571a81efd60e8e3edf36ef333797eb8df69e9a89bfa1e2c7b3e3",
+    "specialist_seed_registry.py": "71dd1c4738690d0ddd21ad7d827a8df9a39749f48ad7ac1c87f2b712f38e45c8",
+    "temporal_batched_speed.py": "fc8ec09bf5299b5c6c6c42fc749858844658489e8c0d419bba70deed342f674f",
+    "temporal_observation.py": "1a61572898833426eb6d511099dd1446fc09253b6d8d70d71ebcc0f81901fc34",
+    "temporal_puffer_agent.py": "0b53499a7bcb70c172354d8950bacfe2f89f4cf57cd5ab220c18de93fd799af6",
+    "temporal_puffer_v4.py": "f40629869fbdc47b43affa80c3c8f8d202669536aa107cd70ac7a8012b12b810",
+    "temporal_training.py": "eda6cc82658beeedd5a913ee965e1238dc6230b1f90b2d4d9dc37f1426bfc4c8"
+  }
+}

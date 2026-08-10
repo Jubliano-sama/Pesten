@@ -1,0 +1,194 @@
+{
+  "benchmark": "ppo_past_policy_pool_refinement",
+  "decision": "use a uniform pool of two historical policies",
+  "development_only": true,
+  "material_speedup_threshold": 1.1,
+  "median_metrics": {
+    "pool2": {
+      "actor_keys": 3,
+      "environment_turns": 62107,
+      "inference_calls": 1599,
+      "past_policy_games": 34,
+      "policy_decisions": 33276,
+      "seconds": 1.7563058020004974
+    },
+    "pool8": {
+      "actor_keys": 9,
+      "environment_turns": 62107,
+      "inference_calls": 2780,
+      "past_policy_games": 34,
+      "policy_decisions": 33276,
+      "seconds": 2.629348979999122
+    }
+  },
+  "median_speedup": 1.4970906416207224,
+  "paired_median_speedup": 1.32416463225718,
+  "paired_speedups": [
+    1.2946501790352145,
+    1.9749354225055502,
+    2.0543045309944055,
+    1.3222727990737666,
+    1.32416463225718
+  ],
+  "raw": {
+    "pool2": [
+      {
+        "actor_keys": 3,
+        "environment_turns": 61993,
+        "inference_calls": 1599,
+        "past_policy_games": 35,
+        "policy_decisions": 34251,
+        "seconds": 1.7563058020004974
+      },
+      {
+        "actor_keys": 3,
+        "environment_turns": 62381,
+        "inference_calls": 1568,
+        "past_policy_games": 34,
+        "policy_decisions": 33102,
+        "seconds": 1.9680207660003362
+      },
+      {
+        "actor_keys": 3,
+        "environment_turns": 61205,
+        "inference_calls": 1549,
+        "past_policy_games": 32,
+        "policy_decisions": 32960,
+        "seconds": 1.5930121559995314
+      },
+      {
+        "actor_keys": 3,
+        "environment_turns": 62107,
+        "inference_calls": 1647,
+        "past_policy_games": 34,
+        "policy_decisions": 33405,
+        "seconds": 1.9885071989992866
+      },
+      {
+        "actor_keys": 3,
+        "environment_turns": 62610,
+        "inference_calls": 1631,
+        "past_policy_games": 35,
+        "policy_decisions": 33276,
+        "seconds": 1.702924532999532
+      }
+    ],
+    "pool8": [
+      {
+        "actor_keys": 9,
+        "environment_turns": 61993,
+        "inference_calls": 2816,
+        "past_policy_games": 35,
+        "policy_decisions": 34251,
+        "seconds": 2.27380162100053
+      },
+      {
+        "actor_keys": 9,
+        "environment_turns": 62381,
+        "inference_calls": 2523,
+        "past_policy_games": 34,
+        "policy_decisions": 33102,
+        "seconds": 3.8867139230005705
+      },
+      {
+        "actor_keys": 9,
+        "environment_turns": 61205,
+        "inference_calls": 2596,
+        "past_policy_games": 32,
+        "policy_decisions": 32960,
+        "seconds": 3.272532089999004
+      },
+      {
+        "actor_keys": 9,
+        "environment_turns": 62107,
+        "inference_calls": 2819,
+        "past_policy_games": 34,
+        "policy_decisions": 33405,
+        "seconds": 2.629348979999122
+      },
+      {
+        "actor_keys": 9,
+        "environment_turns": 62610,
+        "inference_calls": 2780,
+        "past_policy_games": 35,
+        "policy_decisions": 33276,
+        "seconds": 2.2549524380010553
+      }
+    ]
+  },
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "selected_past_policy_pool_size": 2,
+  "semantic_contract": "uniform subset sampling preserves every checkpoint's marginal selection probability at 1/N; pool two increases within-iteration correlation relative to pool eight while retaining diversity",
+  "workload": {
+    "agent_sets": [
+      [
+        "smart",
+        "rl"
+      ],
+      [
+        "smart",
+        "rl"
+      ],
+      [
+        "random",
+        "rl"
+      ],
+      [
+        "self",
+        "self",
+        "rl"
+      ],
+      [
+        "self",
+        "self",
+        "rl"
+      ],
+      [
+        "smart",
+        "smart",
+        "rl",
+        "random"
+      ],
+      [
+        "random",
+        "random",
+        "rl",
+        "smart"
+      ],
+      [
+        "smart",
+        "random",
+        "random",
+        "smart",
+        "rl",
+        "random"
+      ],
+      [
+        "random",
+        "smart",
+        "random",
+        "smart",
+        "random",
+        "rl",
+        "random"
+      ],
+      [
+        "random",
+        "smart",
+        "random",
+        "smart",
+        "random",
+        "random",
+        "rl",
+        "random"
+      ]
+    ],
+    "games": 512,
+    "historical_policies": 32,
+    "past_policy_probability": 0.35,
+    "repeats": 5,
+    "seed_start": 85148101,
+    "threads": 8
+  }
+}

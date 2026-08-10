@@ -243,7 +243,7 @@ def test_live_game_reference_smart_rollout_is_also_bit_exact():
     assert_rollout_parity(reference, optimized)
 
 
-def test_ppo_thread_cap_defaults_to_eight_and_is_configurable():
+def test_ppo_thread_cap_defaults_to_six_and_is_configurable():
     previous_threads = torch.get_num_threads()
     try:
         trainer = PPO_Supervised(
@@ -254,7 +254,7 @@ def test_ppo_thread_cap_defaults_to_eight_and_is_configurable():
             compile_updates=False,
             torch_threads=2,
         )
-        assert DEFAULT_TORCH_THREADS == 8
+        assert DEFAULT_TORCH_THREADS == 6
         assert trainer.torch_threads == 2
         assert torch.get_num_threads() == 2
         with pytest.raises(ValueError, match="torch_threads"):
@@ -268,6 +268,12 @@ def test_ppo_thread_cap_defaults_to_eight_and_is_configurable():
                 use_pretrained=False,
                 old_save=(),
                 torch_threads=2.5,
+            )
+        with pytest.raises(ValueError, match="hybrid_rollout_threshold"):
+            PPO_Supervised(
+                use_pretrained=False,
+                old_save=(),
+                hybrid_rollout_threshold=0,
             )
     finally:
         torch.set_num_threads(previous_threads)

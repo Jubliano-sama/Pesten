@@ -1,0 +1,73 @@
+{
+  "agent_sets": [
+    [
+      "smart",
+      "rl"
+    ],
+    [
+      "random",
+      "rl"
+    ],
+    [
+      "self",
+      "self",
+      "rl"
+    ],
+    [
+      "smarter",
+      "rl"
+    ]
+  ],
+  "elapsed_seconds": 115.9431433220002,
+  "episodes_per_iteration": 512,
+  "iterations": 64,
+  "kind": "warm_mlp_ppo_segment",
+  "latest": {
+    "actor": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0001/mlp/ppo_actor_64.pth",
+      "sha256": "6551ed62189d4f2299bad41c5909d123f0906f465a950484d7d90b50029cb684"
+    },
+    "actor_optimizer": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0001/mlp/ppo_actor_opt_64.pth",
+      "sha256": "9ab4db079df73ba5bdd4594431b808babf76713a1c4c40869a0fae5c8b701305"
+    },
+    "critic": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0001/mlp/ppo_critic_64.pth",
+      "sha256": "1d85bc179aa7e43763ee47c0594b04ff24fad2f59abcc606d22799e9375bd555"
+    },
+    "critic_optimizer": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0001/mlp/ppo_critic_opt_64.pth",
+      "sha256": "fd8cfad76492e9d40836194bbb3781b9fd767ca32249acb6b138ae56b2abd82b"
+    }
+  },
+  "runtime": {
+    "actor_device": "cuda",
+    "compile_updates": true,
+    "cuda": true,
+    "device": "cuda",
+    "python": "3.13.11 (main, Jan 28 2026, 00:01:45) [Clang 21.1.4 ]",
+    "rollout_device": "cpu",
+    "torch": "2.13.0+cu130",
+    "torch_threads": 8
+  },
+  "schema_version": 1,
+  "seed": 2026080102,
+  "warm_parent": {
+    "actor": {
+      "path": "/home/tommie/Pesten/live_training/mlp/segment_0019/ppo_actor_4.pth",
+      "sha256": "91db7c5e0451704abde8e0e4d782fe0165a69b04369a5459b77b976db5e2b900"
+    },
+    "actor_optimizer": {
+      "path": "/home/tommie/Pesten/live_training/mlp/segment_0019/ppo_actor_opt_4.pth",
+      "sha256": "9ab4db079df73ba5bdd4594431b808babf76713a1c4c40869a0fae5c8b701305"
+    },
+    "critic": {
+      "path": "/home/tommie/Pesten/live_training/mlp/segment_0019/ppo_critic_4.pth",
+      "sha256": "107d860acb6a042e678efdcfc9c2339b894ca9ac863b4ba5be4cc5177c5a5e75"
+    },
+    "critic_optimizer": {
+      "path": "/home/tommie/Pesten/live_training/mlp/segment_0019/ppo_critic_opt_4.pth",
+      "sha256": "fd8cfad76492e9d40836194bbb3781b9fd767ca32249acb6b138ae56b2abd82b"
+    }
+  }
+}

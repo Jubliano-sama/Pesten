@@ -1,0 +1,19 @@
+{
+  "benchmark": "ppo_actor_update_fp16",
+  "decision": "retain FP32 actor updates for CPU FP32 rollouts",
+  "development_only": true,
+  "first_update_max_ratio_error_fp16": 0.003187119960784912,
+  "first_update_max_ratio_error_fp32": 0.001619577407836914,
+  "grouped_update_speedup": 1.1490210753508137,
+  "max_state_value_difference": 0.00013826042413711548,
+  "paired_update_speedup_median": 1.1497539761999975,
+  "projected_end_to_end_speedup_range": [1.012, 1.016],
+  "sealed_seeds_or_outcomes_used": false,
+  "workload": {
+    "games": 512,
+    "pairs": 11,
+    "rollout_device": "cpu",
+    "training_device": "cuda",
+    "gpu": "NVIDIA GeForce RTX 3090"
+  }
+}

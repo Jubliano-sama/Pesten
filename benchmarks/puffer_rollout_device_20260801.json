@@ -1,0 +1,83 @@
+{
+  "benchmark": "puffer_rollout_device",
+  "decision": "use CUDA when the Puffer process has GPU visibility",
+  "development_only": true,
+  "device_numerics": {
+    "checkpoint_hashes_equal": false,
+    "contribution_counts_equal": true,
+    "decisions_equal": true,
+    "evaluation_scores_equal": true,
+    "training_diagnostics": "close but device-dependent"
+  },
+  "paired_speedups": [
+    1.2822674853678736,
+    1.4211156331653404
+  ],
+  "paired_speedup_median": 1.351691559266607,
+  "raw": {
+    "cpu": [
+      {
+        "decisions": 3560,
+        "epoch": 341,
+        "ppo_score": 0.375,
+        "random_score": 0.61,
+        "smart_score": 0.53,
+        "wall_seconds": 25.445946310999716
+      },
+      {
+        "decisions": 3917,
+        "epoch": 342,
+        "ppo_score": 0.44,
+        "random_score": 0.575,
+        "smart_score": 0.46,
+        "wall_seconds": 28.949345007000375
+      }
+    ],
+    "cuda": [
+      {
+        "decisions": 3560,
+        "epoch": 341,
+        "ppo_score": 0.375,
+        "random_score": 0.61,
+        "smart_score": 0.53,
+        "wall_seconds": 19.844520996000938
+      },
+      {
+        "decisions": 3917,
+        "epoch": 342,
+        "ppo_score": 0.44,
+        "random_score": 0.575,
+        "smart_score": 0.46,
+        "wall_seconds": 20.37076004100163
+      }
+    ]
+  },
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "workload": {
+    "development_pairs": 50,
+    "epochs": [
+      341,
+      342
+    ],
+    "games_per_epoch": 100,
+    "player_count_schedule": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      3,
+      4,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "resume_checkpoint": "live_training/long_segments/segment_0005/puffer/latest.pt",
+    "seed": 54010100
+  }
+}

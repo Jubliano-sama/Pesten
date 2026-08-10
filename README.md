@@ -1,5 +1,3 @@
-
-
 # Pesten-AI: An AI for the Dutch Card Game "Pesten"
 
 This repository contains a Python implementation of the Dutch card game "Pesten" (similar to Crazy Eights or Mau-Mau) and a collection of AI agents designed to play it. The project ranges from a simple game engine and rule-based agents to a sophisticated Reinforcement Learning pipeline using Proximal Policy Optimization (PPO) and knowledge distillation.
@@ -166,6 +164,44 @@ python benchmark_nashpg_crossplay.py \
   --base-seed 89000000 \
   --output benchmarks/nashpg-alpha02-screen.json
 ```
+
+#### Exact suit-projected continuation
+
+`projected_ppo.py` trains through the same exact 24-suit mean-logit policy used
+for rollout, update, and production inference. It audits the initial behavior
+ratio, terminal zero-sum payoff, replayed deal seeds, and a full-batch target
+KL; an overshooting epoch restores the actor, critic, and both optimizers
+atomically. `projected_ppo_iterative.py` repeats that update on fresh rollouts:
+
+```bash
+python projected_ppo_iterative.py \
+  --output-dir benchmarks/projected-ppo-iterative \
+  --iterations 8 \
+  --games 256
+```
+
+The saved checkpoints contain raw shared base weights and must be wrapped in
+the exact suit projection for evaluation or deployment.
+
+#### Top-advantage filtering and EMA
+
+`filtered_ema_ppo.py` is a development-only current-policy self-play lane. The
+critic learns from every transition, while the actor can retain only the
+highest-advantage fraction; both the online actor and its parameter EMA are
+saved for separate evaluation:
+
+```bash
+python filtered_ema_ppo.py \
+  --output-dir benchmarks/filtered-ema-deep \
+  --keep-fractions 0.25 1.0 \
+  --iterations 8 \
+  --games 256 \
+  --critic-warmup-games 256
+```
+
+Every training or evaluation range must remain development-only. Use
+`benchmark_nashpg_crossplay.py --suit-project all` on fresh explicit seeds
+before making any strength claim.
 
 ### 3. Distill a Trained Model
 

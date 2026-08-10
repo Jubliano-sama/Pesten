@@ -61,6 +61,7 @@ LEAGUE_OPPONENT_TYPES = (
     "bayesian_tree",
     "smart_rule",
     "smarter_rule",
+    "random_rule",
 )
 
 
@@ -575,26 +576,57 @@ def collect_league_batch(
     seed: int,
     schedule_offset: int = 0,
     mixture: Sequence[tuple[str, int]] = LEAGUE_MIXTURE,
+    player_counts: Sequence[int] | None = None,
 ) -> tuple[list[tuple[Sequence[TrajectoryStep], bool]], dict]:
     schedule = league_schedule(mixture)
+    player_count_schedule = tuple(player_counts or (2,))
+    if not player_count_schedule or any(
+        isinstance(count, bool) or not isinstance(count, int) or count < 2
+        for count in player_count_schedule
+    ):
+        raise ValueError("player_counts must contain integers >= 2")
     episodes = []
     contributions = Counter()
     game_counts = Counter()
+    player_counts_seen = Counter()
+    deck_count_by_player_count = {}
+    league_fallbacks = Counter()
     total_turns = 0
     for index in range(games):
-        opponent_type = schedule[(schedule_offset + index) % len(schedule)]
+        requested_opponent_type = schedule[
+            (schedule_offset + index) % len(schedule)
+        ]
+        player_count = player_count_schedule[
+            (schedule_offset + index) % len(player_count_schedule)
+        ]
+        opponent_type = requested_opponent_type
+        if opponent_type == "bayesian_tree" and player_count >= 7:
+            # The tree's hidden-card sampler models one physical deck.  Keep
+            # seven/eight-player two-deck games valid by using the stronger
+            # public-rule opponent in that narrow case.
+            opponent_type = "smarter_rule"
+            league_fallbacks["bayesian_tree_multideck_to_smarter_rule"] += 1
         deal_seed = seed + index
         np.random.seed(deal_seed)
         random.seed(deal_seed)
         current_zero = temporal_agent_factory(
             policy, deterministic=False, seed=deal_seed * 2
         )
+        current_seat = index % player_count
         if opponent_type == "current_selfplay":
-            current_one = temporal_agent_factory(
-                policy, deterministic=False, seed=deal_seed * 2 + 1
-            )
-            factories = [current_zero, current_one]
-            current_seats = (0, 1)
+            factories = [
+                (
+                    current_zero
+                    if seat == 0
+                    else temporal_agent_factory(
+                        policy,
+                        deterministic=False,
+                        seed=deal_seed * 2 + seat,
+                    )
+                )
+                for seat in range(player_count)
+            ]
+            current_seats = tuple(range(player_count))
         else:
             if opponent_type == "historical_temporal":
                 frozen = historical[index % len(historical)]
@@ -609,32 +641,49 @@ def collect_league_batch(
                 opponent = SmartAgent
             elif opponent_type == "smarter_rule":
                 opponent = SmarterAgent
+            elif opponent_type == "random_rule":
+                opponent = AgentRandom
             else:  # Defensive guard if schedule validation changes.
                 raise RuntimeError(
                     f"unsupported league opponent: {opponent_type}"
                 )
-            current_seat = index % 2
-            factories = (
-                [current_zero, opponent]
-                if current_seat == 0
-                else [opponent, current_zero]
-            )
+            factories = [
+                current_zero if seat == current_seat else opponent
+                for seat in range(player_count)
+            ]
             current_seats = (current_seat,)
 
         match = game.Game(factories)
         turns, winner = match.auto_simulate()
         total_turns += turns
         game_counts[opponent_type] += 1
+        player_counts_seen[str(player_count)] += 1
+        observed_deck_count = int(match.deck_count)
+        prior_deck_count = deck_count_by_player_count.setdefault(
+            str(player_count), observed_deck_count
+        )
+        if prior_deck_count != observed_deck_count:
+            raise RuntimeError(
+                "deck count changed within a player-count batch: "
+                f"players={player_count}, "
+                f"first={prior_deck_count}, current={observed_deck_count}"
+            )
         for seat in current_seats:
             trajectory = tuple(match.players[seat].trajectory)
             episodes.append((trajectory, winner == seat))
             contributions[opponent_type] += len(trajectory)
-    return episodes, {
+    metadata = {
         "games": dict(game_counts),
         "decisions": dict(contributions),
         "total_turns": total_turns,
         "trajectories": len(episodes),
     }
+    if player_counts is not None:
+        metadata["player_counts"] = dict(player_counts_seen)
+        metadata["deck_count_by_player_count"] = deck_count_by_player_count
+        if league_fallbacks:
+            metadata["league_fallbacks"] = dict(league_fallbacks)
+    return episodes, metadata
 
 
 def paired_bootstrap_interval(

@@ -10,6 +10,9 @@ import numpy as np
 import pytest
 import torch
 
+import game
+from randomAgent import AgentRandom
+
 from temporal_model_zoo import (
     CausalTransformerTemporalPolicy,
     LargeRecurrentTemporalPolicy,
@@ -487,6 +490,81 @@ def test_smarter_only_collection_is_seed_exact_and_stays_safe(monkeypatch):
                 isinstance(event, PublicEventToken)
                 for event in step.decision.public_events
             )
+
+
+def test_random_rule_collection_is_supported_and_stays_public(monkeypatch):
+    league = _import_temporal_league(monkeypatch)
+    torch.manual_seed(74_202)
+    policy = LargeRecurrentTemporalPolicy(
+        hidden_size=12,
+        num_layers=1,
+        cell="gru",
+    ).eval()
+
+    with cpu_rollout_thread_scope("cpu", 1):
+        episodes, contribution = league.collect_league_batch(
+            policy,
+            None,
+            [policy],
+            games=2,
+            seed=74_202,
+            mixture=(("random_rule", 1),),
+        )
+
+    assert contribution["games"] == {"random_rule": 2}
+    assert episodes
+    for trajectory, _ in episodes:
+        for step in trajectory:
+            assert isinstance(step.decision, DecisionInput)
+            assert all(
+                isinstance(event, PublicEventToken)
+                for event in step.decision.public_events
+            )
+
+
+def test_league_supports_two_to_eight_player_games(monkeypatch):
+    league = _import_temporal_league(monkeypatch)
+    torch.manual_seed(74_203)
+    policy = LargeRecurrentTemporalPolicy(
+        hidden_size=8,
+        num_layers=1,
+        cell="gru",
+    ).eval()
+
+    with cpu_rollout_thread_scope("cpu", 1):
+        episodes, contribution = league.collect_league_batch(
+            policy,
+            None,
+            [policy],
+            games=7,
+            seed=74_203,
+            mixture=(("random_rule", 1),),
+            player_counts=tuple(range(2, 9)),
+        )
+
+    assert contribution["player_counts"] == {
+        str(count): 1 for count in range(2, 9)
+    }
+    assert contribution["deck_count_by_player_count"] == {
+        str(count): (2 if count >= 7 else 1)
+        for count in range(2, 9)
+    }
+    assert episodes
+    for trajectory, _ in episodes:
+        for step in trajectory:
+            assert isinstance(step.decision, DecisionInput)
+            assert all(
+                isinstance(event, PublicEventToken)
+                for event in step.decision.public_events
+            )
+
+
+def test_eight_player_table_keeps_seven_card_hands():
+    match = game.Game([AgentRandom] * 8)
+    match.reset()
+
+    assert match.deck_count == 2
+    assert [player.mydeck.cardCount() for player in match.players] == [7] * 8
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA unavailable")

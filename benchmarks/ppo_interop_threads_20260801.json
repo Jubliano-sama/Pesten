@@ -1,0 +1,24 @@
+{
+  "benchmark": "ppo_interop_threads",
+  "decision": "retain eight PyTorch inter-op threads",
+  "development_only": true,
+  "exact_rollout_tensors": true,
+  "grouped_speedup_interop8_to_interop1": 0.9215924007741926,
+  "paired_speedup_median_interop8_to_interop1": 0.938280575256423,
+  "paired_speedups": [
+    0.9641065738870422,
+    0.836345824362443,
+    1.0763028112199629,
+    0.9392003119445004,
+    0.7614921178175718,
+    0.9061324502017603,
+    0.938280575256423
+  ],
+  "sealed_seeds_or_outcomes_used": false,
+  "workload": {
+    "games": 512,
+    "intra_op_threads": 8,
+    "pairs": 7,
+    "rollout_device": "cpu"
+  }
+}

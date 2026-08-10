@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from contextlib import nullcontext
 from dataclasses import dataclass
-from typing import Hashable, Mapping, Optional
+from typing import Hashable, Mapping, Optional, Sequence
 
 import numpy as np
 import torch
@@ -27,6 +27,7 @@ from ai_observation import (
     OBSERVATION_SIZE,
     PASS_ACTION,
     PLAYER_HAND_SIZE_SLOTS,
+    PLAYER_HAND_SIZES_END,
     PLAYER_HAND_SIZES_START,
     PLAYER_INDEX,
     SORTS_PLAYED_START,
@@ -65,6 +66,18 @@ STANDARD_DECK = np.asarray(
     list(range(50)) + [49, 48, 48, 48],
     dtype=np.int8,
 )
+
+
+def deck_count_for_players(num_players: int) -> int:
+    """Return enough 54-card decks for seven cards and an opening reserve."""
+    if num_players < 2:
+        raise ValueError("Pesten requires at least two players")
+    minimum_for_capacity = (
+        num_players * 7 + 3 + len(STANDARD_DECK) - 1
+    ) // len(STANDARD_DECK)
+    # Seven players can leave only five cards in one deck; two decks keep a
+    # reliable valid-opening reserve as well as the seven-card invariant.
+    return max(2 if num_players >= 7 else 1, minimum_for_capacity)
 CARD_RANK_MASKS = (
     CARD_RANK[np.newaxis, :]
     == np.arange(14, dtype=np.int8)[:, np.newaxis]
@@ -79,6 +92,38 @@ CARD_COMPATIBILITY_MASKS = (
     )
 )
 CARD_IS_PENALTY = np.isin(CARD_RANK, tuple(PENALTY_RANKS))
+SMART_PENALTY_BONUS = (
+    -0.03556864491834867,
+    0.04122020478114498,
+    0.04665718005466267,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -1.5328572573442552,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -3.0043124890687474,
+)
+SMARTER_SPECIAL_BONUS = (
+    1.5,
+    1.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    2.0,
+    1.5,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+)
 CARD_RANK_MASKS.setflags(write=False)
 CARD_COMPATIBILITY_MASKS.setflags(write=False)
 CARD_IS_PENALTY.setflags(write=False)
@@ -102,6 +147,7 @@ class ActorPolicy:
     temperature: float
     collect_data: bool
     greedy: bool = False
+    autocast: bool = True
 
 
 @dataclass
@@ -247,6 +293,9 @@ class BatchedPesten:
         *,
         max_turns: int = 500,
         smart_agents_have_game_reference: bool = False,
+        native_smart_policy: bool = False,
+        native_rollout_engine: bool = False,
+        record_public_events: bool = True,
     ) -> None:
         policy_kinds = np.asarray(policy_kinds, dtype=np.int8)
         actor_keys = np.asarray(actor_keys, dtype=object)
@@ -264,16 +313,54 @@ class BatchedPesten:
         self.actor_keys = actor_keys
         self.num_games, self.num_players = policy_kinds.shape
         self.max_turns = int(max_turns)
+        self.record_public_events = bool(record_public_events)
         self.smart_agents_have_game_reference = smart_agents_have_game_reference
+        self.deck_count = deck_count_for_players(self.num_players)
+        self.deck_template = np.tile(STANDARD_DECK, self.deck_count)
+        self._smart_action_native = None
+        self._smart_actions_native = None
+        if native_smart_policy:
+            try:
+                from numba_smart_policy import (
+                    smart_action_native,
+                    smart_actions_native,
+                )
+            except ImportError:
+                smart_action_native = None
+                smart_actions_native = None
+            self._smart_action_native = smart_action_native
+            self._smart_actions_native = smart_actions_native
+        self._apply_simple_actions_native = None
+        self._rl_has_card_decisions_native = None
+        self._observations_into_native = None
+        self._native_event_deltas = np.zeros(8, dtype=np.int64)
+        if native_rollout_engine:
+            try:
+                from numba_rollout_engine import (
+                    apply_simple_card_actions_native,
+                    observations_into_native,
+                    rl_has_card_decisions_native,
+                )
+            except ImportError:
+                apply_simple_card_actions_native = None
+                observations_into_native = None
+                rl_has_card_decisions_native = None
+            self._apply_simple_actions_native = (
+                apply_simple_card_actions_native
+            )
+            self._rl_has_card_decisions_native = (
+                rl_has_card_decisions_native
+            )
+            self._observations_into_native = observations_into_native
         self.rngs = [np.random.RandomState(int(seed)) for seed in seeds]
 
         shape = (self.num_games,)
         player_shape = (self.num_games, self.num_players)
-        self.hands = np.full((*player_shape, len(STANDARD_DECK)), -1, dtype=np.int8)
+        self.hands = np.full((*player_shape, len(self.deck_template)), -1, dtype=np.int8)
         self.hand_counts = np.zeros((*player_shape, 50), dtype=np.uint8)
         self.hand_sizes = np.zeros(player_shape, dtype=np.uint8)
         self.draw_piles = np.full(
-            (self.num_games, len(STANDARD_DECK)),
+            (self.num_games, len(self.deck_template)),
             -1,
             dtype=np.int8,
         )
@@ -309,6 +396,54 @@ class BatchedPesten:
         }
         self._reset()
 
+    def reset_games(
+        self,
+        policy_kinds: np.ndarray,
+        actor_keys: np.ndarray,
+        seeds: np.ndarray,
+    ) -> None:
+        """Reset an allocated engine for another same-shaped rollout."""
+        policy_kinds = np.asarray(policy_kinds, dtype=np.int8)
+        actor_keys = np.asarray(actor_keys, dtype=object)
+        seeds = np.asarray(seeds, dtype=np.uint32)
+        if policy_kinds.shape != self.policy_kinds.shape:
+            raise ValueError("reused policy_kinds must preserve engine shape")
+        if actor_keys.shape != self.actor_keys.shape:
+            raise ValueError("reused actor_keys must preserve engine shape")
+        if len(seeds) != self.num_games:
+            raise ValueError("one deterministic seed is required per game")
+
+        self.policy_kinds[...] = policy_kinds
+        self.actor_keys[...] = actor_keys
+        for rng, seed in zip(self.rngs, seeds):
+            rng.seed(int(seed))
+        self.hands.fill(-1)
+        self.hand_counts.fill(0)
+        self.hand_sizes.fill(0)
+        self.draw_piles.fill(-1)
+        self.draw_counts.fill(0)
+        self.discards.fill(-1)
+        self.discard_counts.fill(0)
+        self.current_sort.fill(0)
+        self.current_rank.fill(0)
+        self.current_player.fill(0)
+        self.turn_player.fill(0)
+        self.direction.fill(1)
+        self.penalty_amount.fill(0)
+        self.sorts_played.fill(0)
+        self.turn_counts.fill(0)
+        self.cards_played.fill(0)
+        self.game_over.fill(False)
+        self.winners.fill(-1)
+        self.phase.fill(PHASE_CARD)
+        self.turn_started_with_one_card.fill(False)
+        self.drawn_card.fill(-1)
+        self.public_events = [[] for _ in range(self.num_games)]
+        for key in self.event_counts:
+            self.event_counts[key] = 0
+        self._native_event_deltas.fill(0)
+        self._reset()
+
     @property
     def allocated_bytes(self) -> int:
         arrays = (
@@ -339,7 +474,7 @@ class BatchedPesten:
 
     def _reset(self) -> None:
         for game_index, rng in enumerate(self.rngs):
-            shuffled = STANDARD_DECK.copy()
+            shuffled = self.deck_template.copy()
             rng.shuffle(shuffled)
             self.draw_piles[game_index] = shuffled
             self.draw_counts[game_index] = len(shuffled)
@@ -372,10 +507,10 @@ class BatchedPesten:
     def _remove_hand(self, game_index: int, player_index: int, number: int) -> None:
         size = int(self.hand_sizes[game_index, player_index])
         hand = self.hands[game_index, player_index]
-        matches = np.flatnonzero(hand[:size] == number)
-        if len(matches) == 0:
+        try:
+            offset = hand[:size].tolist().index(number)
+        except ValueError:
             return
-        offset = int(matches[0])
         if offset + 1 < size:
             hand[offset : size - 1] = hand[offset + 1 : size]
         hand[size - 1] = -1
@@ -418,59 +553,223 @@ class BatchedPesten:
         self.event_counts["draw"] += 1
         return number
 
-    def observation(self, game_index: int, *, suit_mode: bool = False) -> np.ndarray:
-        """Return exactly the public 121-feature view of the current player."""
-        player_index = int(self.current_player[game_index])
-        observation = np.zeros(OBSERVATION_SIZE, dtype=np.float32)
-        counts = self.hand_counts[game_index, player_index]
-        observation[:HAND_END] = counts
-        if self.phase[game_index] == PHASE_DRAW_RETRY:
+    def observations(
+        self,
+        game_indices: np.ndarray,
+        *,
+        suit_modes: np.ndarray | bool = False,
+    ) -> np.ndarray:
+        """Build public views for many current players in one array pass."""
+        game_indices = np.asarray(game_indices, dtype=np.int64)
+        if game_indices.ndim != 1:
+            raise ValueError("game_indices must be one-dimensional")
+        if len(game_indices) == 0:
+            return np.empty((0, OBSERVATION_SIZE), dtype=np.float32)
+        if np.any((game_indices < 0) | (game_indices >= self.num_games)):
+            raise IndexError("game index is out of range")
+
+        observations = np.zeros(
+            (len(game_indices), OBSERVATION_SIZE),
+            dtype=np.float32,
+        )
+        return self.observations_into(
+            game_indices,
+            observations,
+            suit_modes=suit_modes,
+        )
+
+    def observations_into(
+        self,
+        game_indices: np.ndarray,
+        observations: np.ndarray,
+        *,
+        suit_modes: np.ndarray | bool = False,
+        action_masks: Optional[np.ndarray] = None,
+    ) -> np.ndarray:
+        """Populate caller-owned observation and optional action-mask storage."""
+        game_indices = np.asarray(game_indices, dtype=np.int64)
+        if game_indices.ndim != 1:
+            raise ValueError("game_indices must be one-dimensional")
+        if np.any((game_indices < 0) | (game_indices >= self.num_games)):
+            raise IndexError("game index is out of range")
+        if (
+            observations.shape != (len(game_indices), OBSERVATION_SIZE)
+            or observations.dtype != np.float32
+        ):
+            raise ValueError(
+                "observations must be a float32 array with shape "
+                f"({len(game_indices)}, {OBSERVATION_SIZE})"
+            )
+        if action_masks is not None and (
+            action_masks.shape != (len(game_indices), ACTION_COUNT)
+            or action_masks.dtype != np.bool_
+        ):
+            raise ValueError(
+                "action_masks must be a bool array with shape "
+                f"({len(game_indices)}, {ACTION_COUNT})"
+            )
+        if len(game_indices) == 0:
+            return observations
+        if (
+            self._observations_into_native is not None
+            and action_masks is not None
+        ):
+            native_suit_modes = np.asarray(suit_modes, dtype=np.bool_)
+            if native_suit_modes.ndim == 0:
+                native_suit_modes = np.full(
+                    len(game_indices),
+                    bool(native_suit_modes),
+                    dtype=np.bool_,
+                )
+            if native_suit_modes.shape == (len(game_indices),):
+                self._observations_into_native(
+                    game_indices,
+                    native_suit_modes,
+                    self.current_player,
+                    self.hand_counts,
+                    self.current_sort,
+                    self.current_rank,
+                    self.penalty_amount,
+                    self.phase,
+                    self.drawn_card,
+                    self.sorts_played,
+                    self.direction,
+                    self.hand_sizes,
+                    self.num_players,
+                    observations,
+                    action_masks,
+                )
+                return observations
+
+        player_indices = self.current_player[game_indices].astype(
+            np.int64,
+            copy=False,
+        )
+        counts = self.hand_counts[game_indices, player_indices]
+        observations[:, :HAND_END] = counts
+        playable = CARD_COMPATIBILITY_MASKS[
+            self.current_sort[game_indices],
+            self.current_rank[game_indices],
+        ]
+        penalty_rows = self.penalty_amount[game_indices] > 0
+        if np.any(penalty_rows):
+            playable[penalty_rows] = CARD_RANK_MASKS[
+                self.current_rank[game_indices[penalty_rows]]
+            ]
+        retry_rows = self.phase[game_indices] == PHASE_DRAW_RETRY
+        if np.any(retry_rows):
             # Legacy Game permits only the card that was just drawn to be
             # played during the immediate retry.  Other compatible cards
             # already in hand are not executable in this phase.
-            playable = np.zeros(len(CARD_RANK), dtype=np.bool_)
-            drawn = int(self.drawn_card[game_index])
-            if drawn >= 0:
-                playable[drawn] = True
-        elif self.penalty_amount[game_index] > 0:
-            playable = CARD_RANK_MASKS[
-                int(self.current_rank[game_index])
-            ]
-        else:
-            playable = CARD_COMPATIBILITY_MASKS[
-                int(self.current_sort[game_index]),
-                int(self.current_rank[game_index]),
-            ]
-        observation[COMPATIBLE_START:COMPATIBLE_END] = counts * playable
-        observation[SORTS_PLAYED_START : SORTS_PLAYED_START + 5] = (
-            self.sorts_played[game_index]
+            playable[retry_rows] = False
+            retry_offsets = np.flatnonzero(retry_rows)
+            drawn = self.drawn_card[game_indices[retry_rows]].astype(
+                np.int64,
+                copy=False,
+            )
+            valid = drawn >= 0
+            playable[retry_offsets[valid], drawn[valid]] = True
+        compatible_counts = counts * playable
+        observations[:, COMPATIBLE_START:COMPATIBLE_END] = compatible_counts
+        observations[
+            :, SORTS_PLAYED_START : SORTS_PLAYED_START + 5
+        ] = self.sorts_played[game_indices]
+        observations[:, MODE_INDEX] = np.asarray(
+            suit_modes,
+            dtype=np.float32,
         )
-        observation[MODE_INDEX] = 1.0 if suit_mode else 0.0
-        direction = int(self.direction[game_index])
-        for slot in range(min(self.num_players, PLAYER_HAND_SIZE_SLOTS)):
-            ordered = (player_index + slot * direction) % self.num_players
-            observation[PLAYER_HAND_SIZES_START + slot] = self.hand_sizes[
-                game_index, ordered
+        observations[
+            :, PLAYER_HAND_SIZES_START:PLAYER_HAND_SIZES_END
+        ] = 0
+        directions = self.direction[game_indices].astype(np.int64, copy=False)
+        slots = min(self.num_players, PLAYER_HAND_SIZE_SLOTS)
+        slot_offsets = np.arange(slots, dtype=np.int64)
+        ordered_players = (
+            player_indices[:, None]
+            + directions[:, None] * slot_offsets[None, :]
+        ) % self.num_players
+        observations[
+            :,
+            PLAYER_HAND_SIZES_START : PLAYER_HAND_SIZES_START + slots,
+        ] = self.hand_sizes[game_indices[:, None], ordered_players]
+        observations[:, PLAYER_INDEX] = player_indices
+        observations[:, DIRECTION_INDEX] = directions
+        if action_masks is not None:
+            action_masks.fill(False)
+            action_masks[:, :HAND_END] = compatible_counts >= 1
+            action_masks[:, PASS_ACTION] = True
+            suit_rows = observations[:, MODE_INDEX] != 0
+            if np.any(suit_rows):
+                action_masks[suit_rows] = False
+                action_masks[
+                    suit_rows,
+                    SUIT_ACTION_START:SUIT_ACTION_END,
+                ] = True
+        return observations
+
+    def observation(
+        self,
+        game_index: int,
+        *,
+        suit_mode: bool = False,
+    ) -> np.ndarray:
+        """Return exactly the public 121-feature view of the current player."""
+        return self.observations(
+            np.asarray([game_index], dtype=np.int64),
+            suit_modes=suit_mode,
+        )[0]
+
+    def rl_has_card_decisions(
+        self,
+        game_indices: np.ndarray,
+    ) -> np.ndarray:
+        """Return executable-card availability for many current RL seats."""
+        game_indices = np.asarray(game_indices, dtype=np.int64)
+        result = np.zeros(len(game_indices), dtype=np.bool_)
+        if len(game_indices) == 0:
+            return result
+        if self._rl_has_card_decisions_native is not None:
+            return self._rl_has_card_decisions_native(
+                game_indices,
+                self.current_player,
+                self.hand_counts,
+                self.current_sort,
+                self.current_rank,
+                self.penalty_amount,
+                self.phase,
+                self.drawn_card,
+            )
+        retry_rows = self.phase[game_indices] == PHASE_DRAW_RETRY
+        result[retry_rows] = self.drawn_card[game_indices[retry_rows]] >= 0
+        card_rows = ~retry_rows
+        if not np.any(card_rows):
+            return result
+        card_games = game_indices[card_rows]
+        players = self.current_player[card_games].astype(
+            np.int64,
+            copy=False,
+        )
+        playable = CARD_COMPATIBILITY_MASKS[
+            self.current_sort[card_games],
+            self.current_rank[card_games],
+        ].copy()
+        penalty_rows = self.penalty_amount[card_games] > 0
+        if np.any(penalty_rows):
+            playable[penalty_rows] = CARD_RANK_MASKS[
+                self.current_rank[card_games[penalty_rows]]
             ]
-        observation[PLAYER_INDEX] = player_index
-        observation[DIRECTION_INDEX] = direction
-        return observation
+        result[card_rows] = np.any(
+            self.hand_counts[card_games, players] & playable,
+            axis=1,
+        )
+        return result
 
     def rl_has_card_decision(self, game_index: int) -> bool:
-        if self.phase[game_index] == PHASE_DRAW_RETRY:
-            return int(self.drawn_card[game_index]) >= 0
-        player_index = int(self.current_player[game_index])
-        counts = self.hand_counts[game_index, player_index]
-        if self.penalty_amount[game_index] > 0:
-            playable = CARD_RANK_MASKS[
-                int(self.current_rank[game_index])
-            ]
-        else:
-            playable = CARD_COMPATIBILITY_MASKS[
-                int(self.current_sort[game_index]),
-                int(self.current_rank[game_index]),
-            ]
-        return bool(np.any(counts & playable))
+        return bool(
+            self.rl_has_card_decisions(
+                np.asarray([game_index], dtype=np.int64)
+            )[0]
+        )
 
     def _ordered_hand(self, game_index: int, player_index: int) -> np.ndarray:
         size = int(self.hand_sizes[game_index, player_index])
@@ -491,9 +790,8 @@ class BatchedPesten:
         player_index = int(self.current_player[game_index])
         size = int(self.hand_sizes[game_index, player_index])
         hand = self.hands[game_index, player_index]
-        shuffled = hand[:size].copy()
+        shuffled = hand[:size]
         self.rngs[game_index].shuffle(shuffled)
-        hand[:size] = shuffled
         compatible = CARD_COMPATIBILITY_MASKS[
             int(self.current_sort[game_index]),
             int(self.current_rank[game_index]),
@@ -538,6 +836,18 @@ class BatchedPesten:
     def smart_action(self, game_index: int) -> int:
         player_index = int(self.current_player[game_index])
         hand = self._ordered_hand(game_index, player_index)
+        if self._smart_action_native is not None:
+            return int(
+                self._smart_action_native(
+                    hand,
+                    int(self.current_sort[game_index]),
+                    int(self.current_rank[game_index]),
+                    (
+                        self.smart_agents_have_game_reference
+                        and self.num_players == 2
+                    ),
+                )
+            )
         hand_ranks = CARD_RANK[hand]
         hand_suits = CARD_SORT[hand]
         current_sort = int(self.current_sort[game_index])
@@ -556,13 +866,6 @@ class BatchedPesten:
             if len(matching):
                 candidates = matching
 
-        penalty_bonuses = {
-            8: -1.5328572573442552,
-            1: 0.04122020478114498,
-            0: -0.03556864491834867,
-            13: -3.0043124890687474,
-            2: 0.04665718005466267,
-        }
         penalty_branch = (
             current_rank in PENALTY_RANKS
             and current_rank != 7
@@ -659,11 +962,39 @@ class BatchedPesten:
                     stop_score
                     - 1.0290830868190015 * remaining_length
                 )
-                score += penalty_bonuses.get(rank, 0.0)
+                score += SMART_PENALTY_BONUS[rank]
             if score > best_score:
                 best_score = score
                 best_number = number
         return best_number
+
+    def smart_actions(
+        self,
+        game_indices: np.ndarray,
+    ) -> np.ndarray:
+        """Choose exact Smart actions with one native dispatch per group."""
+        game_indices = np.asarray(game_indices, dtype=np.int64)
+        if self._smart_actions_native is not None:
+            return self._smart_actions_native(
+                self.hands,
+                self.hand_sizes,
+                self.current_player,
+                self.current_sort,
+                self.current_rank,
+                game_indices,
+                (
+                    self.smart_agents_have_game_reference
+                    and self.num_players == 2
+                ),
+            )
+        return np.fromiter(
+            (
+                self.smart_action(int(game_index))
+                for game_index in game_indices
+            ),
+            dtype=np.int64,
+            count=len(game_indices),
+        )
 
     @staticmethod
     def _smarter_hand_value(hand: np.ndarray) -> float:
@@ -676,16 +1007,8 @@ class BatchedPesten:
         # tie to the first standard suit.
         max_suit = int(np.argmax(suit_counts))
         ranks = CARD_RANK[hand]
-        special_bonus = {
-            7: 2.0,
-            8: 1.5,
-            1: 1.0,
-            0: 1.5,
-            13: 1.0,
-            2: 1.0,
-        }
         value = 0.5 * int(np.count_nonzero(standard_suits == max_suit))
-        value += sum(special_bonus.get(int(rank), 0.0) for rank in ranks)
+        value += sum(SMARTER_SPECIAL_BONUS[int(rank)] for rank in ranks)
         return value - len(hand)
 
     def smarter_action(self, game_index: int) -> int:
@@ -783,9 +1106,10 @@ class BatchedPesten:
             if not 0 <= suit < 4:
                 raise ValueError(f"invalid suit action {action}")
             self.current_sort[game_index] = suit
-            self.public_events[game_index].append(
-                ("choose_sort", int(self.current_player[game_index]), suit)
-            )
+            if self.record_public_events:
+                self.public_events[game_index].append(
+                    ("choose_sort", int(self.current_player[game_index]), suit)
+                )
             self.event_counts["suit_change"] += 1
             self._finish_turn(game_index)
             return
@@ -844,6 +1168,108 @@ class BatchedPesten:
             action,
             is_last_card=bool(self.turn_started_with_one_card[game_index]),
         )
+
+    def apply_actions(
+        self,
+        game_indices: np.ndarray,
+        actions: np.ndarray,
+    ) -> None:
+        """Apply one action per independent game, batching the common case."""
+        game_indices = np.asarray(game_indices, dtype=np.int64)
+        actions = np.asarray(actions, dtype=np.int64)
+        if game_indices.shape != actions.shape or game_indices.ndim != 1:
+            raise ValueError("game indices and actions must be matching vectors")
+        if len(game_indices) == 0:
+            return
+        if self._apply_simple_actions_native is None:
+            for game_index, action in zip(game_indices, actions):
+                self.apply_action(int(game_index), int(action))
+            return
+
+        handled = np.empty(len(game_indices), dtype=np.bool_)
+        acting_players = np.empty(len(game_indices), dtype=np.int8)
+        public_event_kinds = np.empty(len(game_indices), dtype=np.int8)
+        self._native_event_deltas.fill(0)
+        self._apply_simple_actions_native(
+            game_indices,
+            actions,
+            self.num_players,
+            CARD_SORT,
+            CARD_RANK,
+            CARD_IS_PENALTY,
+            CARD_COMPATIBILITY_MASKS,
+            self.hands,
+            self.hand_counts,
+            self.hand_sizes,
+            self.draw_piles,
+            self.draw_counts,
+            self.discards,
+            self.discard_counts,
+            self.current_sort,
+            self.current_rank,
+            self.current_player,
+            self.turn_player,
+            self.direction,
+            self.penalty_amount,
+            self.sorts_played,
+            self.turn_counts,
+            self.cards_played,
+            self.game_over,
+            self.winners,
+            self.phase,
+            self.turn_started_with_one_card,
+            self.drawn_card,
+            self._native_event_deltas,
+            handled,
+            acting_players,
+            public_event_kinds,
+        )
+        for name, delta in zip(
+            (
+                "duplicate_play",
+                "extra_turn",
+                "skip",
+                "reverse",
+                "draw",
+                "draw_retry",
+                "suit_change",
+                "penalty_draw",
+            ),
+            self._native_event_deltas,
+        ):
+            self.event_counts[name] += int(delta)
+        if self.record_public_events:
+            python_offsets = np.flatnonzero(
+                (public_event_kinds != 0) | ~handled
+            )
+        else:
+            python_offsets = np.flatnonzero(~handled)
+        for offset in python_offsets:
+            game_index = game_indices[offset]
+            player_index = acting_players[offset]
+            action = actions[offset]
+            event_kind = public_event_kinds[offset]
+            if not self.record_public_events:
+                self.apply_action(int(game_index), int(action))
+                continue
+            if event_kind == 1:
+                self.public_events[int(game_index)].append(
+                    (
+                        "play",
+                        int(player_index),
+                        int(action),
+                    )
+                )
+            elif event_kind == 2:
+                self.public_events[int(game_index)].append(
+                    (
+                        "choose_sort",
+                        int(player_index),
+                        int(action) - SUIT_ACTION_START,
+                    )
+                )
+            else:
+                self.apply_action(int(game_index), int(action))
 
     def _apply_penalty(self, game_index: int) -> None:
         amount = int(self.penalty_amount[game_index])
@@ -912,9 +1338,10 @@ class BatchedPesten:
         self.current_rank[game_index] = rank
         self.sorts_played[game_index, CARD_SORT[action]] += 1
         self._remove_hand(game_index, player_index, action)
-        self.public_events[game_index].append(
-            ("play", player_index, action)
-        )
+        if self.record_public_events:
+            self.public_events[game_index].append(
+                ("play", player_index, action)
+            )
 
         if rank == 7:
             self.current_player[game_index] = (
@@ -974,6 +1401,68 @@ class BatchedPesten:
             return self.smarter_action(game_index)
         raise ValueError("an RL action requires batched actor inference")
 
+    def non_neural_actions(
+        self,
+        game_indices: np.ndarray,
+    ) -> np.ndarray:
+        """Choose non-neural actions while batching the native Smart policy."""
+        game_indices = np.asarray(game_indices, dtype=np.int64)
+        actions = np.empty(len(game_indices), dtype=np.int64)
+        if len(game_indices) == 0:
+            return actions
+        players = self.current_player[game_indices].astype(
+            np.int64,
+            copy=False,
+        )
+        kinds = self.policy_kinds[game_indices, players]
+        all_card_phase = np.all(
+            self.phase[game_indices] != PHASE_SUIT
+        )
+        if all_card_phase and np.all(kinds == POLICY_SMART):
+            return self.smart_actions(game_indices)
+        suit_offsets = np.flatnonzero(
+            self.phase[game_indices] == PHASE_SUIT
+        )
+        for offset in suit_offsets:
+            actions[offset] = (
+                SUIT_ACTION_START
+                + self.choose_suit(
+                    int(game_indices[offset]),
+                    int(kinds[offset]),
+                )
+            )
+
+        card_offsets = np.flatnonzero(
+            self.phase[game_indices] != PHASE_SUIT
+        )
+        for kind in (
+            POLICY_FIRST_LEGAL,
+            POLICY_RANDOM,
+            POLICY_SMART,
+            POLICY_SMARTER,
+        ):
+            offsets = card_offsets[kinds[card_offsets] == kind]
+            if not len(offsets):
+                continue
+            selected = game_indices[offsets]
+            if kind == POLICY_SMART:
+                actions[offsets] = self.smart_actions(selected)
+                continue
+            chooser = {
+                POLICY_FIRST_LEGAL: self.first_legal_action,
+                POLICY_RANDOM: self.random_action,
+                POLICY_SMARTER: self.smarter_action,
+            }[int(kind)]
+            actions[offsets] = np.fromiter(
+                (
+                    chooser(int(game_index))
+                    for game_index in selected
+                ),
+                dtype=np.int64,
+                count=len(selected),
+            )
+        return actions
+
     def run_non_neural(self) -> None:
         while True:
             active = self.active_games()
@@ -1011,78 +1500,304 @@ def _action_masks(observations: torch.Tensor) -> torch.Tensor:
     return masks
 
 
+def _action_masks_numpy(observations: np.ndarray) -> np.ndarray:
+    """Build the same rollout masks without small-tensor Torch dispatch."""
+    shape = (*observations.shape[:-1], ACTION_COUNT)
+    masks = np.zeros(shape, dtype=np.bool_)
+    masks[..., : COMPATIBLE_END - COMPATIBLE_START] = (
+        observations[..., COMPATIBLE_START:COMPATIBLE_END] >= 1
+    )
+    masks[..., PASS_ACTION] = True
+    suit_mode = observations[..., MODE_INDEX] != 0
+    if np.any(suit_mode):
+        masks[suit_mode] = False
+        masks[suit_mode, SUIT_ACTION_START:SUIT_ACTION_END] = True
+    return masks
+
+
+def _sample_actions_and_log_probabilities(
+    scaled_logits: torch.Tensor,
+    *,
+    greedy: bool,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Match ``Categorical(logits=...).sample/log_prob`` without its wrappers."""
+    normalized = scaled_logits - scaled_logits.logsumexp(
+        dim=-1,
+        keepdim=True,
+    )
+    if greedy:
+        actions = torch.argmax(scaled_logits, dim=-1)
+    else:
+        probabilities = normalized.softmax(dim=-1)
+        actions = torch.multinomial(
+            probabilities,
+            num_samples=1,
+        ).squeeze(-1)
+    log_probabilities = normalized.gather(
+        dim=-1,
+        index=actions.unsqueeze(-1),
+    ).squeeze(-1)
+    return actions, log_probabilities
+
+
 def collect_batched_rollout(
     engine: BatchedPesten,
     actor_policies: Mapping[Hashable, ActorPolicy],
     *,
     output_device: torch.device,
+    direct_action_sampling: bool = False,
+    numpy_action_masks: bool = False,
+    reuse_rollout_workspaces: bool = False,
+    drain_non_neural: bool = False,
 ) -> RolloutResult:
     """Run all games, batching every simultaneously pending actor decision."""
-    episode_slots = engine.num_games * engine.num_players
-    buffer = VectorRolloutBuffer(
-        episode_slots,
-        initial_capacity=max(1024, engine.num_games * 64),
+    return collect_coordinated_batched_rollouts(
+        [engine],
+        actor_policies,
+        output_device=output_device,
+        direct_action_sampling=direct_action_sampling,
+        numpy_action_masks=numpy_action_masks,
+        reuse_rollout_workspaces=reuse_rollout_workspaces,
+        drain_non_neural=drain_non_neural,
+    )[0]
+
+
+@dataclass
+class _CoordinatedRolloutState:
+    engine: BatchedPesten
+    buffer: VectorRolloutBuffer
+    finalized: np.ndarray
+    inference_calls: int = 0
+
+
+def collect_coordinated_batched_rollouts(
+    engines: Sequence[BatchedPesten],
+    actor_policies: Mapping[Hashable, ActorPolicy],
+    *,
+    output_device: torch.device,
+    direct_action_sampling: bool = False,
+    numpy_action_masks: bool = False,
+    reuse_rollout_workspaces: bool = False,
+    drain_non_neural: bool = False,
+) -> list[RolloutResult]:
+    """Advance independent engines together and share their actor calls."""
+    if not engines:
+        return []
+    states = []
+    for engine in engines:
+        episode_slots = engine.num_games * engine.num_players
+        buffer = VectorRolloutBuffer(
+            episode_slots,
+            initial_capacity=max(1024, engine.num_games * 64),
+        )
+        states.append(
+            _CoordinatedRolloutState(
+                engine=engine,
+                buffer=buffer,
+                finalized=np.zeros(engine.num_games, dtype=np.bool_),
+            )
+        )
+    workspace_rows = sum(engine.num_games for engine in engines)
+    observation_workspace = (
+        np.empty(
+            (workspace_rows, OBSERVATION_SIZE),
+            dtype=np.float32,
+        )
+        if reuse_rollout_workspaces
+        else None
     )
-    finalized = np.zeros(engine.num_games, dtype=np.bool_)
-    inference_calls = 0
+    mask_workspace = (
+        np.empty((workspace_rows, ACTION_COUNT), dtype=np.bool_)
+        if reuse_rollout_workspaces and numpy_action_masks
+        else None
+    )
 
     while True:
-        active = engine.active_games()
-        if len(active) == 0:
-            break
         grouped: dict[Hashable, list[tuple[int, np.ndarray]]] = {}
-        immediate: list[tuple[int, int]] = []
-        for game_value in active:
-            game_index = int(game_value)
-            player_index = int(engine.current_player[game_index])
-            kind = int(engine.policy_kinds[game_index, player_index])
-            if kind != POLICY_RL:
-                immediate.append(
-                    (game_index, engine.non_neural_action(game_index))
+        any_active = False
+        for state_index, state in enumerate(states):
+            engine = state.engine
+            unsettled = engine.active_games()
+            if len(unsettled) == 0:
+                continue
+            any_active = True
+            while len(unsettled):
+                immediate_indices_list: list[int] = []
+                immediate_actions_list: list[int | None] = []
+                non_neural_indices: list[int] = []
+                non_neural_offsets: list[int] = []
+                requests: dict[Hashable, list[int]] = {}
+                active_players = engine.current_player[unsettled].astype(
+                    np.int64,
+                    copy=False,
                 )
-                continue
-            if (
-                engine.phase[game_index] != PHASE_SUIT
-                and not engine.rl_has_card_decision(game_index)
-            ):
-                immediate.append((game_index, PASS_ACTION))
-                continue
-            key = engine.actor_keys[game_index, player_index]
-            observation = engine.observation(
-                game_index,
-                suit_mode=engine.phase[game_index] == PHASE_SUIT,
-            )
-            grouped.setdefault(key, []).append((game_index, observation))
+                active_kinds = engine.policy_kinds[
+                    unsettled,
+                    active_players,
+                ]
+                has_card_decision = np.ones(
+                    len(unsettled),
+                    dtype=np.bool_,
+                )
+                rl_card_offsets = np.flatnonzero(
+                    (active_kinds == POLICY_RL)
+                    & (engine.phase[unsettled] != PHASE_SUIT)
+                )
+                if len(rl_card_offsets):
+                    has_card_decision[rl_card_offsets] = (
+                        engine.rl_has_card_decisions(
+                            unsettled[rl_card_offsets]
+                        )
+                    )
+                for offset, (game_value, kind_value) in enumerate(
+                    zip(unsettled, active_kinds)
+                ):
+                    game_index = int(game_value)
+                    player_index = int(
+                        engine.current_player[game_index]
+                    )
+                    kind = int(kind_value)
+                    if kind != POLICY_RL:
+                        non_neural_offsets.append(
+                            len(immediate_actions_list)
+                        )
+                        non_neural_indices.append(game_index)
+                        immediate_indices_list.append(game_index)
+                        immediate_actions_list.append(None)
+                        continue
+                    if not has_card_decision[offset]:
+                        immediate_indices_list.append(game_index)
+                        immediate_actions_list.append(PASS_ACTION)
+                        continue
+                    key = engine.actor_keys[game_index, player_index]
+                    requests.setdefault(key, []).append(game_index)
 
-        for game_index, action in immediate:
-            engine.apply_action(game_index, action)
+                for key, game_indices in requests.items():
+                    grouped.setdefault(key, []).append(
+                        (
+                            state_index,
+                            np.asarray(game_indices, dtype=np.int64),
+                        )
+                    )
+                if non_neural_indices:
+                    selected_actions = engine.non_neural_actions(
+                        np.asarray(non_neural_indices, dtype=np.int64)
+                    )
+                    for action_offset, action in zip(
+                        non_neural_offsets,
+                        selected_actions,
+                    ):
+                        immediate_actions_list[action_offset] = int(action)
+                if not immediate_indices_list:
+                    break
+                immediate_indices = np.asarray(
+                    immediate_indices_list,
+                    dtype=np.int64,
+                )
+                engine.apply_actions(
+                    immediate_indices,
+                    np.asarray(immediate_actions_list, dtype=np.int64),
+                )
+                if not drain_non_neural or engine.num_players != 2:
+                    break
+                still_active = ~(
+                    engine.game_over[immediate_indices]
+                    | (
+                        engine.turn_counts[immediate_indices]
+                        >= engine.max_turns
+                    )
+                )
+                unsettled = immediate_indices[still_active]
 
-        for key, requests in grouped.items():
+        if not any_active:
+            break
+
+        for key, segments in grouped.items():
             policy = actor_policies[key]
-            observations_np = np.stack(
-                [request[1] for request in requests],
-                axis=0,
+            request_count = sum(
+                len(game_indices) for _, game_indices in segments
             )
+            if observation_workspace is None:
+                observation_parts = [
+                    states[state_index].engine.observations(
+                        game_indices,
+                        suit_modes=(
+                            states[state_index].engine.phase[game_indices]
+                            == PHASE_SUIT
+                        ),
+                    )
+                    for state_index, game_indices in segments
+                ]
+                observations_np = (
+                    observation_parts[0]
+                    if len(observation_parts) == 1
+                    else np.concatenate(observation_parts)
+                )
+            else:
+                observations_np = observation_workspace[:request_count]
+                offset = 0
+                for state_index, game_indices in segments:
+                    engine = states[state_index].engine
+                    end = offset + len(game_indices)
+                    engine.observations_into(
+                        game_indices,
+                        observations_np[offset:end],
+                        suit_modes=(
+                            engine.phase[game_indices] == PHASE_SUIT
+                        ),
+                        action_masks=(
+                            mask_workspace[offset:end]
+                            if (
+                                mask_workspace is not None
+                                and policy.device.type == "cpu"
+                            )
+                            else None
+                        ),
+                    )
+                    offset = end
             observations = torch.from_numpy(observations_np).to(
                 device=policy.device
             )
-            with torch.inference_mode(), _autocast_for(policy.device):
+            with (
+                torch.inference_mode(),
+                (
+                    _autocast_for(policy.device)
+                    if policy.autocast
+                    else nullcontext()
+                ),
+            ):
                 logits = policy.actor(observations)
-                masks = _action_masks(observations)
+                if numpy_action_masks and policy.device.type == "cpu":
+                    masks = torch.from_numpy(
+                        mask_workspace[:request_count]
+                        if mask_workspace is not None
+                        else _action_masks_numpy(observations_np)
+                    )
+                else:
+                    masks = _action_masks(observations)
                 masked = logits.masked_fill(
                     ~masks,
                     torch.finfo(logits.dtype).min,
                 )
                 scaled = masked / policy.temperature
-                distribution = Categorical(
-                    logits=scaled,
-                    validate_args=False,
-                )
-                if policy.greedy:
-                    actions = torch.argmax(scaled, dim=-1)
+                if direct_action_sampling:
+                    actions, log_probabilities = (
+                        _sample_actions_and_log_probabilities(
+                            scaled,
+                            greedy=policy.greedy,
+                        )
+                    )
                 else:
-                    actions = distribution.sample()
-                log_probabilities = distribution.log_prob(actions)
+                    distribution = Categorical(
+                        logits=scaled,
+                        validate_args=False,
+                    )
+                    actions = (
+                        torch.argmax(scaled, dim=-1)
+                        if policy.greedy
+                        else distribution.sample()
+                    )
+                    log_probabilities = distribution.log_prob(actions)
             actions_np = actions.to(
                 device="cpu",
                 dtype=torch.int64,
@@ -1091,86 +1806,111 @@ def collect_batched_rollout(
                 device="cpu",
                 dtype=torch.float32,
             ).numpy()
-            inference_calls += 1
+            states[segments[0][0]].inference_calls += 1
 
-            if policy.collect_data:
-                game_indices = np.asarray(
-                    [request[0] for request in requests],
-                    dtype=np.int64,
-                )
-                player_indices = engine.current_player[game_indices].astype(
-                    np.int64,
-                    copy=True,
-                )
-                episode_ids = (
-                    game_indices * engine.num_players + player_indices
-                ).astype(np.int32)
-                rewards = np.where(
-                    actions_np == PASS_ACTION,
-                    -0.1,
-                    0.0,
-                ).astype(np.float32)
-                # A suit choice has zero shaping reward even though action 54 is
-                # impossible in this mode.
-                rewards[observations_np[:, MODE_INDEX] != 0] = 0.0
-                buffer.append(
-                    observations_np,
-                    actions_np,
-                    log_probabilities_np,
-                    rewards,
-                    episode_ids,
-                )
+            offset = 0
+            for state_index, game_indices in segments:
+                state = states[state_index]
+                engine = state.engine
+                end = offset + len(game_indices)
+                segment_actions = actions_np[offset:end]
+                if policy.collect_data:
+                    player_indices = engine.current_player[
+                        game_indices
+                    ].astype(np.int64, copy=True)
+                    episode_ids = (
+                        game_indices * engine.num_players + player_indices
+                    ).astype(np.int32)
+                    rewards = np.where(
+                        segment_actions == PASS_ACTION,
+                        -0.1,
+                        0.0,
+                    ).astype(np.float32)
+                    # A suit choice has zero shaping reward even though action
+                    # 54 is impossible in this mode.
+                    rewards[
+                        observations_np[offset:end, MODE_INDEX] != 0
+                    ] = 0.0
+                    state.buffer.append(
+                        observations_np[offset:end],
+                        segment_actions,
+                        log_probabilities_np[offset:end],
+                        rewards,
+                        episode_ids,
+                    )
+                engine.apply_actions(game_indices, segment_actions)
+                offset = end
 
-            for (game_index, _), action in zip(requests, actions_np):
-                engine.apply_action(game_index, int(action))
+        for state in states:
+            engine = state.engine
+            newly_finished = np.flatnonzero(
+                ~state.finalized
+                & (
+                    engine.game_over
+                    | (engine.turn_counts >= engine.max_turns)
+                )
+            )
+            for game_index in newly_finished:
+                collect_seats = []
+                terminal_rewards = []
+                winner = int(engine.winners[game_index])
+                for player_index in range(engine.num_players):
+                    if (
+                        engine.policy_kinds[game_index, player_index]
+                        != POLICY_RL
+                    ):
+                        continue
+                    key = engine.actor_keys[game_index, player_index]
+                    if not actor_policies[key].collect_data:
+                        continue
+                    collect_seats.append(
+                        int(game_index) * engine.num_players + player_index
+                    )
+                    terminal_rewards.append(
+                        0.0
+                        if winner < 0
+                        else (
+                            1.0 if winner == player_index else -1.0
+                        )
+                    )
+                state.buffer.add_terminal_rewards(
+                    np.asarray(collect_seats, dtype=np.int32),
+                    np.asarray(terminal_rewards, dtype=np.float32),
+                )
+            state.finalized[newly_finished] = True
 
-        newly_finished = np.flatnonzero(
-            ~finalized
-            & (
-                engine.game_over
-                | (engine.turn_counts >= engine.max_turns)
+    results = []
+    coordinated_peak_bytes = sum(
+        state.buffer.peak_bytes + state.engine.allocated_bytes
+        for state in states
+    )
+    for state_index, state in enumerate(states):
+        engine = state.engine
+        (
+            observations,
+            actions,
+            log_probabilities,
+            rewards,
+            episode_lengths,
+        ) = state.buffer.finalize(device=output_device)
+        completed_games = int(np.count_nonzero(state.finalized))
+        wins = int(np.count_nonzero(engine.winners >= 0))
+        results.append(
+            RolloutResult(
+                observations=observations,
+                actions=actions,
+                log_probabilities=log_probabilities,
+                rewards=rewards,
+                episode_lengths=episode_lengths,
+                environment_turns=int(engine.turn_counts.sum()),
+                completed_games=completed_games,
+                policy_decisions=state.buffer.size,
+                inference_calls=state.inference_calls,
+                peak_buffer_bytes=(
+                    coordinated_peak_bytes if state_index == 0 else 0
+                ),
+                wins=wins,
+                draws=completed_games - wins,
             )
         )
-        for game_index in newly_finished:
-            collect_seats = []
-            terminal_rewards = []
-            winner = int(engine.winners[game_index])
-            for player_index in range(engine.num_players):
-                if engine.policy_kinds[game_index, player_index] != POLICY_RL:
-                    continue
-                key = engine.actor_keys[game_index, player_index]
-                if not actor_policies[key].collect_data:
-                    continue
-                collect_seats.append(
-                    int(game_index) * engine.num_players + player_index
-                )
-                terminal_rewards.append(
-                    0.0
-                    if winner < 0
-                    else (1.0 if winner == player_index else -1.0)
-                )
-            buffer.add_terminal_rewards(
-                np.asarray(collect_seats, dtype=np.int32),
-                np.asarray(terminal_rewards, dtype=np.float32),
-            )
-        finalized[newly_finished] = True
-
-    observations, actions, log_probabilities, rewards, episode_lengths = (
-        buffer.finalize(device=output_device)
-    )
-    completed_games = int(np.count_nonzero(finalized))
-    wins = int(np.count_nonzero(engine.winners >= 0))
-    return RolloutResult(
-        observations=observations,
-        actions=actions,
-        log_probabilities=log_probabilities,
-        rewards=rewards,
-        episode_lengths=episode_lengths,
-        environment_turns=int(engine.turn_counts.sum()),
-        completed_games=completed_games,
-        policy_decisions=buffer.size,
-        inference_calls=inference_calls,
-        peak_buffer_bytes=buffer.peak_bytes + engine.allocated_bytes,
-        wins=wins,
-        draws=completed_games - wins,
-    )
+    return results

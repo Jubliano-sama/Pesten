@@ -1,0 +1,1223 @@
+{
+  "artifact_protocol": {
+    "audit_claim": "pesten-random-specialist-final-audit-claim-v1",
+    "audit_claim_before_model_load_or_final_seed_iteration": true,
+    "audit_paths_must_match_committed_canonical_paths": true,
+    "audit_result": "pesten-random-specialist-final-audit-result-v1",
+    "checkpoint": "pesten-random-specialist-recurrent-checkpoint-v1",
+    "exclusive_create": true,
+    "winner": "pesten-random-specialist-frozen-winner-v1"
+  },
+  "calibration_smoke": {
+    "retained_failed_smoke": {
+      "acceptance_authority": false,
+      "evaluation_sha256": "fdf02ee5a662dcf1ef838d12e7b445c81c6aed4915ffce5174ed188b00b5bb3a",
+      "passed": false,
+      "path": "benchmarks/random_specialist_20260802/runner_calibration_smoke.json",
+      "reason": "pre-fix repeat digest mismatch: the two otherwise identical evaluations used distinct phase labels that were included in the digest",
+      "repeat_evaluation_sha256": "4df4de10d67b2735e2a3a8dd02d6783e25476ca4d9f45f6765fe380468644368",
+      "sha256": "6d6b99bdc28c4f55341d5098c532f2d72b08e0ca60884c872c04421af1c9c0fc"
+    },
+    "successful_recheck": {
+      "acceptance_authority": true,
+      "evaluation_sha256": "acf4c26427e6ebd9e04824363a59eb132a261cd7553e8b8ea7650ec798ad5132",
+      "gates": {
+        "calibration_artifact_sha": true,
+        "calibration_only": true,
+        "claim_before_model_and_final_seed_iteration": true,
+        "exact_repeat_digest": true,
+        "fixed_random_parity_fingerprint": true,
+        "legal_actions": true,
+        "native_puffer_policy": true,
+        "opponent_resets": true,
+        "pair_mapping": true,
+        "privacy_fingerprint": true,
+        "recurrent_resets": true
+      },
+      "passed": true,
+      "path": "benchmarks/random_specialist_20260802/runner_calibration_smoke_recheck_v3.json",
+      "sha256": "2cf6f613ee522d567389223842e9045fb83dcc79be40abf4b9f16e0aedfdc308"
+    }
+  },
+  "campaign_id": "random_specialist_20260802",
+  "candidate_training": {
+    "checkpoint_created": false,
+    "precommit_only": true,
+    "started": false
+  },
+  "commitment_sha256": "56d8fa1022f8ca41eb30ae984590548d351b1aa673998c0602f586b36a859d67",
+  "configuration": {
+    "bootstrap": {
+      "chunk_size": 64,
+      "draw_score": 0.5,
+      "dtype": "float64",
+      "pair_score": "mean of the two seat-rotated candidate game scores",
+      "quantile_method": "numpy.quantile(method='linear')",
+      "quantiles": [
+        0.025,
+        0.975
+      ],
+      "rng_algorithm": "MT19937",
+      "rng_class": "numpy.random.RandomState",
+      "samples": 100000,
+      "sampling": "rng.randint(0, pair_count, size=(chunk, pair_count))",
+      "unit": "pair score",
+      "with_replacement": true
+    },
+    "calibration_admission": {
+      "calibration": {
+        "all_required_gates_true": true,
+        "path": "benchmarks/random_specialist_20260802/calibration.json",
+        "required_gates": {
+          "fixed_random_scalar_batched_parity": true,
+          "legacy_agent_random_smoke": true,
+          "privacy_schema": true,
+          "recurrent_cuda_rollout_update": true,
+          "uniform_action_kernel": true
+        },
+        "sha256": "73c7437074d44a96a60603643604f95c454be4dd2208f0097abdf60b44c49ce7"
+      },
+      "fixed_random_parity": {
+        "canonicalization": "UTF-8 json.dumps(sort_keys=True,separators=(',', ':'),allow_nan=False) over {'schema', 'fixed_random_parity'}",
+        "case_count": 8,
+        "evidence_passed": true,
+        "schema": "pesten-random-specialist-fixed-random-parity-fingerprint-v1",
+        "sha256": "d583494d4f57cd63c1f8781bc5a2eb74fecf53e03f2bd68ad16ee9221ff7e2cf"
+      },
+      "privacy": {
+        "fingerprint": "7f9bd563857ccd91330bb340fb721889ac7506d75599d97f799220e7c49bc2a0",
+        "frozen_fingerprint": "7f9bd563857ccd91330bb340fb721889ac7506d75599d97f799220e7c49bc2a0",
+        "matches": true
+      }
+    },
+    "checkpoint_admission": {
+      "prohibited_lineage": [
+        "PPO checkpoint",
+        "imitation data",
+        "teacher logits",
+        "parent weights"
+      ],
+      "required": [
+        "complete checkpoint",
+        "complete optimizer state",
+        "complete per-checkpoint manifest",
+        "random-initialized no-parent lineage",
+        "finite parameters and metrics",
+        "100 percent legal actions",
+        "unchanged privacy fingerprint",
+        "unchanged fixed-random parity fingerprint",
+        "scheduled cumulative threshold reached"
+      ],
+      "unscheduled_checkpoint_screening": "forbidden"
+    },
+    "confirmation": {
+      "bootstrap": {
+        "samples": 100000,
+        "seed": 4291063157
+      },
+      "common_fresh_bank": {
+        "deal_range": {
+          "count": 2500,
+          "end_exclusive": 4291060656,
+          "start_inclusive": 4291058156
+        },
+        "games": 5000,
+        "opponent_rng_range": {
+          "count": 2500,
+          "end_exclusive": 4291063156,
+          "start_inclusive": 4291060656
+        },
+        "pairs": 2500,
+        "seat_balanced": true
+      },
+      "eligible_finalists_maximum": 3,
+      "rank_key": [
+        "point estimate descending",
+        "pair-level bootstrap 95% lower bound descending",
+        "fewer training games ascending",
+        "lexicographic checkpoint SHA256 ascending"
+      ],
+      "winner": "freeze exactly one trained winner with candidate, configuration, source, and opponent SHA256s"
+    },
+    "development": {
+      "banks": {
+        "recurrent_temporal_checkpoint_01": {
+          "deal_subrange": {
+            "count": 250,
+            "end_exclusive": 4291052406,
+            "start_inclusive": 4291052156
+          },
+          "games": 500,
+          "opponent_rng_subrange": {
+            "count": 250,
+            "end_exclusive": 4291052656,
+            "start_inclusive": 4291052406
+          },
+          "pairs": 250,
+          "seat_balanced": true
+        },
+        "recurrent_temporal_checkpoint_02": {
+          "deal_subrange": {
+            "count": 250,
+            "end_exclusive": 4291052906,
+            "start_inclusive": 4291052656
+          },
+          "games": 500,
+          "opponent_rng_subrange": {
+            "count": 250,
+            "end_exclusive": 4291053156,
+            "start_inclusive": 4291052906
+          },
+          "pairs": 250,
+          "seat_balanced": true
+        },
+        "recurrent_temporal_checkpoint_03": {
+          "deal_subrange": {
+            "count": 250,
+            "end_exclusive": 4291053406,
+            "start_inclusive": 4291053156
+          },
+          "games": 500,
+          "opponent_rng_subrange": {
+            "count": 250,
+            "end_exclusive": 4291053656,
+            "start_inclusive": 4291053406
+          },
+          "pairs": 250,
+          "seat_balanced": true
+        },
+        "recurrent_temporal_checkpoint_04": {
+          "deal_subrange": {
+            "count": 250,
+            "end_exclusive": 4291053906,
+            "start_inclusive": 4291053656
+          },
+          "games": 500,
+          "opponent_rng_subrange": {
+            "count": 250,
+            "end_exclusive": 4291054156,
+            "start_inclusive": 4291053906
+          },
+          "pairs": 250,
+          "seat_balanced": true
+        },
+        "recurrent_temporal_checkpoint_05": {
+          "deal_subrange": {
+            "count": 250,
+            "end_exclusive": 4291054406,
+            "start_inclusive": 4291054156
+          },
+          "games": 500,
+          "opponent_rng_subrange": {
+            "count": 250,
+            "end_exclusive": 4291054656,
+            "start_inclusive": 4291054406
+          },
+          "pairs": 250,
+          "seat_balanced": true
+        },
+        "recurrent_temporal_checkpoint_06": {
+          "deal_subrange": {
+            "count": 250,
+            "end_exclusive": 4291054906,
+            "start_inclusive": 4291054656
+          },
+          "games": 500,
+          "opponent_rng_subrange": {
+            "count": 250,
+            "end_exclusive": 4291055156,
+            "start_inclusive": 4291054906
+          },
+          "pairs": 250,
+          "seat_balanced": true
+        },
+        "recurrent_temporal_checkpoint_07": {
+          "deal_subrange": {
+            "count": 250,
+            "end_exclusive": 4291055406,
+            "start_inclusive": 4291055156
+          },
+          "games": 500,
+          "opponent_rng_subrange": {
+            "count": 250,
+            "end_exclusive": 4291055656,
+            "start_inclusive": 4291055406
+          },
+          "pairs": 250,
+          "seat_balanced": true
+        },
+        "recurrent_temporal_checkpoint_08": {
+          "deal_subrange": {
+            "count": 250,
+            "end_exclusive": 4291055906,
+            "start_inclusive": 4291055656
+          },
+          "games": 500,
+          "opponent_rng_subrange": {
+            "count": 250,
+            "end_exclusive": 4291056156,
+            "start_inclusive": 4291055906
+          },
+          "pairs": 250,
+          "seat_balanced": true
+        },
+        "recurrent_temporal_checkpoint_09": {
+          "deal_subrange": {
+            "count": 250,
+            "end_exclusive": 4291056406,
+            "start_inclusive": 4291056156
+          },
+          "games": 500,
+          "opponent_rng_subrange": {
+            "count": 250,
+            "end_exclusive": 4291056656,
+            "start_inclusive": 4291056406
+          },
+          "pairs": 250,
+          "seat_balanced": true
+        },
+        "recurrent_temporal_checkpoint_10": {
+          "deal_subrange": {
+            "count": 250,
+            "end_exclusive": 4291056906,
+            "start_inclusive": 4291056656
+          },
+          "games": 500,
+          "opponent_rng_subrange": {
+            "count": 250,
+            "end_exclusive": 4291057156,
+            "start_inclusive": 4291056906
+          },
+          "pairs": 250,
+          "seat_balanced": true
+        },
+        "recurrent_temporal_checkpoint_11": {
+          "deal_subrange": {
+            "count": 250,
+            "end_exclusive": 4291057406,
+            "start_inclusive": 4291057156
+          },
+          "games": 500,
+          "opponent_rng_subrange": {
+            "count": 250,
+            "end_exclusive": 4291057656,
+            "start_inclusive": 4291057406
+          },
+          "pairs": 250,
+          "seat_balanced": true
+        },
+        "recurrent_temporal_checkpoint_12": {
+          "deal_subrange": {
+            "count": 250,
+            "end_exclusive": 4291057906,
+            "start_inclusive": 4291057656
+          },
+          "games": 500,
+          "opponent_rng_subrange": {
+            "count": 250,
+            "end_exclusive": 4291058156,
+            "start_inclusive": 4291057906
+          },
+          "pairs": 250,
+          "seat_balanced": true
+        }
+      },
+      "bootstrap": {
+        "rank_key": [
+          "pair-level bootstrap 95% lower bound descending",
+          "point estimate descending",
+          "fewer training games ascending",
+          "lexicographic checkpoint SHA256 ascending"
+        ],
+        "samples": 100000,
+        "seed": 4291063156
+      },
+      "finalist_admission": {
+        "dense_mlp": 1,
+        "if_fewer_eligible": "leave slot empty; never backfill another lineage",
+        "recurrent_temporal": 2
+      },
+      "pairs_per_bank": 250,
+      "per_admitted_checkpoint": "exactly one registered disjoint bank",
+      "score": "pair score with draws scored as 0.5",
+      "seat_balanced": true
+    },
+    "evaluator": {
+      "candidate_inference": "deterministic argmax over legal actions",
+      "candidate_policy": "NativePufferTemporalPolicy",
+      "candidate_policy_rng_derivation": "2 * registered deal_seed",
+      "draw_score": 0.5,
+      "implementation": "scalar Game + temporal_agent_factory + audited_uniform_agent_factory",
+      "max_turns": 1000,
+      "opponent": "audited_uniform_agent_factory",
+      "opponent_reset": "audited local MT19937 reset on every Game.reset",
+      "pair_index_mapping": {
+        "deal_seed": "deal_range.start_inclusive + pair_index",
+        "games": [
+          {
+            "candidate_seat": 0,
+            "deal_seed": "same pair deal_seed",
+            "opponent_rng_seed": "same pair opponent_rng_seed"
+          },
+          {
+            "candidate_seat": 1,
+            "deal_seed": "same pair deal_seed",
+            "opponent_rng_seed": "same pair opponent_rng_seed"
+          }
+        ],
+        "opponent_rng_seed": "opponent_rng_range.start_inclusive + pair_index"
+      },
+      "recording": {
+        "per_game": [
+          "deal/opponent RNG seeds",
+          "candidate seat/outcome/score/turn count",
+          "candidate and opponent action/legal counters and digests",
+          "public/deal/safe-history hashes",
+          "initial/final/reset recurrent hashes"
+        ],
+        "per_pair": "both rotations, common seed assertion, pair score"
+      },
+      "recurrent_reset": "new Game per rotated game plus same-instance Game.reset hash check"
+    },
+    "final_audit": {
+      "bank": {
+        "deal_range": {
+          "count": 5000,
+          "end_exclusive": 4291068159,
+          "start_inclusive": 4291063159
+        },
+        "games": 10000,
+        "opponent_rng_range": {
+          "count": 5000,
+          "end_exclusive": 4291078159,
+          "start_inclusive": 4291073159
+        },
+        "pairs": 5000,
+        "seat_balanced": true
+      },
+      "bootstrap": {
+        "pair_level_samples": 100000,
+        "precommitted": true,
+        "seed": 4291063158
+      },
+      "candidate_binding_before_model_load": [
+        "candidate SHA256",
+        "configuration SHA256",
+        "source SHA256",
+        "audited opponent SHA256"
+      ],
+      "does_not_reuse_legacy_consumed_sealed_holdout": true,
+      "gate": {
+        "both_required": true,
+        "ci95_lower_bound_gte": 0.8,
+        "point_estimate_gte": 0.8
+      },
+      "inference": {
+        "deterministic_recurrent_inference": true,
+        "draw_score": 0.5,
+        "explicit_per_game_recurrent_state_reset": true,
+        "max_turns": 1000
+      },
+      "ledger": {
+        "crash_or_result_burns_audit": true,
+        "exclusive_create_before_model_load": true,
+        "one_use": true,
+        "path": "benchmarks/random_specialist_20260802/final_audit_claim.json",
+        "retry_tuning_or_selection_after_claim": "forbidden"
+      },
+      "name": "random_specialist_final_audit",
+      "not_called": "sealed holdout",
+      "paths_must_resolve_exactly": true,
+      "result": {
+        "canonical": true,
+        "exclusive_create": true,
+        "path": "benchmarks/random_specialist_20260802/final_audit_result.json"
+      }
+    },
+    "training": {
+      "capacity": {
+        "calibrated_games_per_second": 12.055007867351014,
+        "checkpoint_count": 12,
+        "checkpoint_interval_games": 2169,
+        "conservative_expected_games_before_rounding": 26038,
+        "conservative_fraction": 0.8,
+        "cumulative_checkpoint_thresholds": [
+          2169,
+          4338,
+          6507,
+          8676,
+          10845,
+          13014,
+          15183,
+          17352,
+          19521,
+          21690,
+          23859,
+          26028
+        ],
+        "exact_game_cap": 26028,
+        "stop_at_first_of": [
+          "exact_game_cap",
+          "wall_cap_seconds"
+        ],
+        "unused_time_transfer_permitted": false,
+        "wall_cap_seconds": 2700
+      },
+      "checkpoint_thresholds": [
+        2169,
+        4338,
+        6507,
+        8676,
+        10845,
+        13014,
+        15183,
+        17352,
+        19521,
+        21690,
+        23859,
+        26028
+      ],
+      "collector": {
+        "implementation": "collect_league_batch_batched",
+        "max_turns": 1000,
+        "microbatch_games": 128,
+        "opponent": "audited_uniform_agent_factory contract via random collector role",
+        "schedule": [
+          "random"
+        ],
+        "stochastic_current_policy_rng": {
+          "derivation": "2 * registered training_recurrent_deals member",
+          "distinct_from_opponent_rng_namespace": "training_recurrent_opponent_rng",
+          "never_policy_input": true,
+          "torch_generator": "CPU torch.Generator.manual_seed"
+        }
+      },
+      "execution": {
+        "development_and_confirmation_excluded_from_wall_time": true,
+        "device": "cuda only",
+        "one_gpu_process_at_a_time": true,
+        "partial_interval_checkpoint_eligible": false,
+        "torch_compile": false,
+        "wall_time_counts": [
+          "rollout",
+          "update",
+          "checkpoint serialization"
+        ]
+      },
+      "initialization": {
+        "imitation_data": null,
+        "parent_checkpoint": null,
+        "parent_weights": null,
+        "ppo_checkpoint": null,
+        "seed": 4291052155,
+        "teacher_logits": null
+      },
+      "lane": "recurrent_temporal",
+      "model": {
+        "class": "NativePufferTemporalPolicy",
+        "hidden_size": 96,
+        "mode_conditioned_heads": false,
+        "num_layers": 1
+      },
+      "optimizer": {
+        "class": "torch.optim.Adam",
+        "clip_ratio": 0.2,
+        "entropy_coefficient": 0.01,
+        "gae_lambda": 0.95,
+        "gamma": 0.97,
+        "learning_rate": 0.0003,
+        "minibatch_trajectories": 16,
+        "normalize_advantages": true,
+        "ppo_epochs": 4,
+        "target_kl": 0.02,
+        "update_rng_derivation": "(training_recurrent_initialization_seed << 32) | cumulative_games_before_update",
+        "value_coefficient": 0.5
+      },
+      "prohibited_lineage": [
+        "PPO checkpoint",
+        "imitation data",
+        "teacher logits",
+        "parent weights"
+      ],
+      "reward_only": true
+    }
+  },
+  "configuration_sha256": "ef27808c03c43c9bc6cb56ee4d0a11b66e46c6bbcd0ae97b704eb3c2016ce188",
+  "created_at_utc": "2026-08-02T01:50:43.413332+00:00",
+  "format": "pesten-random-specialist-implementation-commitment-v3",
+  "frozen_manifest": {
+    "path": "benchmarks/random_specialist_20260802/frozen_campaign.json",
+    "sha256": "12328bb45e5409fc5bbcfa600526939f7fabeefd0121e364ba3bdb6df2e166ba"
+  },
+  "opponent_contract": {
+    "batched_implementation": "collect_league_batch_batched(schedule=('random',))",
+    "collector_source_sha256": "fc8ec09bf5299b5c6c6c42fc749858844658489e8c0d419bba70deed342f674f",
+    "deal_rng_independence": "Each game receives a separately registered opponent-RNG seed; the sampler owns a local RNG and never advances deck RNG state.",
+    "draw_retry": "only the drawn card, then pass action 54",
+    "explicit_reset": "The scalar adapter reinstantiates its local RNG at every Game reset; the batched collector creates one local RNG per game.",
+    "id": "pesten-audited-uniform-random-v1",
+    "legacy_agent_random": false,
+    "legal_action_order": "ascending integer action code",
+    "name": "audited uniform-random opponent",
+    "per_game_rng_seed_source": "registered *_opponent_rng interval with exact corresponding game index",
+    "policy_visibility": "opponent RNG seed and action sampler never cross the DecisionInput boundary",
+    "rng_algorithm": "numpy.random.RandomState (MT19937)",
+    "rng_draw": "randint(0, len(ordered_legal_actions))",
+    "scalar_implementation": "audited_uniform_agent_factory",
+    "source_sha256": "934459625633571a81efd60e8e3edf36ef333797eb8df69e9a89bfa1e2c7b3e3",
+    "suit_actions": "ascending action codes 50, 51, 52, 53"
+  },
+  "opponent_contract_sha256": "b08edc665048ee674c7bc959433e1a177268ed5b3b1c1a53daba9f12e029fe1f",
+  "seed_registry": {
+    "namespace_records": {
+      "bootstrap_confirmation": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 1,
+            "end_exclusive": 4291063158,
+            "start_inclusive": 4291063157
+          },
+          "namespace": "bootstrap_confirmation",
+          "purpose": "precommitted confirmation pair-bootstrap RNG seed",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "0d1b452a75a75a6063471dbe8a177586efc98a5d02767961ace2e79836a73f9a"
+      },
+      "bootstrap_development": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 1,
+            "end_exclusive": 4291063157,
+            "start_inclusive": 4291063156
+          },
+          "namespace": "bootstrap_development",
+          "purpose": "precommitted development pair-bootstrap RNG seed",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "087d18b3aabf3530d53d41e08b381b4a215d6b46a896f373db64a6bf08cfe85b"
+      },
+      "bootstrap_final_audit": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 1,
+            "end_exclusive": 4291063159,
+            "start_inclusive": 4291063158
+          },
+          "namespace": "bootstrap_final_audit",
+          "purpose": "precommitted 100000-sample final-audit pair-bootstrap RNG seed",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "b835f5716e8f2975d46aa65ccf4e9377c38e785dd8ab6db0ee377305f26e940e"
+      },
+      "calibration": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:48:49.178693+00:00",
+          "interval": {
+            "count": 48,
+            "end_exclusive": 4291000048,
+            "start_inclusive": 4291000000
+          },
+          "namespace": "calibration",
+          "purpose": "phase-zero scalar/batched parity, legacy smoke, and recurrent calibration deals",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "16ade485294af08192db22ae8184564a7944e74f997a0bd9d9b7090a7fbaacc5"
+      },
+      "calibration_contract_rng": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:48:49.178693+00:00",
+          "interval": {
+            "count": 1,
+            "end_exclusive": 4291000097,
+            "start_inclusive": 4291000096
+          },
+          "namespace": "calibration_contract_rng",
+          "purpose": "uniform action-kernel distributional guard RNG seed",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "7ca5f595bc170d8d6f098af652818954b13efda9b952eab9f3fd58d35c0d335b"
+      },
+      "calibration_initialization": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:48:49.178693+00:00",
+          "interval": {
+            "count": 1,
+            "end_exclusive": 4291000098,
+            "start_inclusive": 4291000097
+          },
+          "namespace": "calibration_initialization",
+          "purpose": "discarded random initialization for recurrent calibration only",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "098b9b05ff9de898a4c8d38c3225dbaecee242a8e170550d856e8cb4e569660e"
+      },
+      "calibration_opponent_rng": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:48:49.178693+00:00",
+          "interval": {
+            "count": 48,
+            "end_exclusive": 4291000096,
+            "start_inclusive": 4291000048
+          },
+          "namespace": "calibration_opponent_rng",
+          "purpose": "separate local audited-opponent RNG seeds for every calibration deal",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "462b9bfc77ebb10be6b88221bb182c4eead3c95bfd343062ddf664e8d907b460"
+      },
+      "calibration_update_rng": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:48:49.178693+00:00",
+          "interval": {
+            "count": 1,
+            "end_exclusive": 4291000099,
+            "start_inclusive": 4291000098
+          },
+          "namespace": "calibration_update_rng",
+          "purpose": "discarded recurrent calibration PPO minibatch order seed",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "b7331125a31086ad80c170265240eb585407d9730deca870bcd7d5dae891f1b6"
+      },
+      "confirmation": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 2500,
+            "end_exclusive": 4291060656,
+            "start_inclusive": 4291058156
+          },
+          "namespace": "confirmation",
+          "purpose": "one common fresh 2500-pair confirmation deal bank for all finalists",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "ada894bc40eeac3073c09cbf883be52e6ccbc5a85346b808dea5d43ae8a7b20c"
+      },
+      "confirmation_opponent_rng": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 2500,
+            "end_exclusive": 4291063156,
+            "start_inclusive": 4291060656
+          },
+          "namespace": "confirmation_opponent_rng",
+          "purpose": "one common fresh audited-opponent RNG bank for confirmation",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "1ce0c7cbcf39caaaa385c471d93acc7cbebf4d8f7f2e191a3222e9b212ec318e"
+      },
+      "development_screening_opponent_rng_recurrent_01": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 250,
+            "end_exclusive": 4291052656,
+            "start_inclusive": 4291052406
+          },
+          "namespace": "development_screening_opponent_rng_recurrent_01",
+          "purpose": "independent audited-opponent RNG bank paired with one development bank",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "f1338d9038453d573e73cf3e6eefff7d7e1fe8ed5b845335ad01b9c92e46373e"
+      },
+      "development_screening_opponent_rng_recurrent_02": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 250,
+            "end_exclusive": 4291053156,
+            "start_inclusive": 4291052906
+          },
+          "namespace": "development_screening_opponent_rng_recurrent_02",
+          "purpose": "independent audited-opponent RNG bank paired with one development bank",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "db65ecc3b20ce7a53e4f6f34113a1e7dafa4549d556b8cb4b5c04ec352cd5c3b"
+      },
+      "development_screening_opponent_rng_recurrent_03": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 250,
+            "end_exclusive": 4291053656,
+            "start_inclusive": 4291053406
+          },
+          "namespace": "development_screening_opponent_rng_recurrent_03",
+          "purpose": "independent audited-opponent RNG bank paired with one development bank",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "43875e71783699904959a900ab7ba95c338c58b9583a1f4640dba2abe5e97be4"
+      },
+      "development_screening_opponent_rng_recurrent_04": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 250,
+            "end_exclusive": 4291054156,
+            "start_inclusive": 4291053906
+          },
+          "namespace": "development_screening_opponent_rng_recurrent_04",
+          "purpose": "independent audited-opponent RNG bank paired with one development bank",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "f29f98dab04e4a6fa9c737dd9e53bcf8deaad566568f18cf2f8093d2ae6433f0"
+      },
+      "development_screening_opponent_rng_recurrent_05": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 250,
+            "end_exclusive": 4291054656,
+            "start_inclusive": 4291054406
+          },
+          "namespace": "development_screening_opponent_rng_recurrent_05",
+          "purpose": "independent audited-opponent RNG bank paired with one development bank",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "3f42c7934171f225361f18b83d0608f3610f65261ae1508878c56cb6962f637c"
+      },
+      "development_screening_opponent_rng_recurrent_06": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 250,
+            "end_exclusive": 4291055156,
+            "start_inclusive": 4291054906
+          },
+          "namespace": "development_screening_opponent_rng_recurrent_06",
+          "purpose": "independent audited-opponent RNG bank paired with one development bank",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "fa5a5b541b73fb0fbb10a0d33653136363cd2589a15a31f93d70b1604376a3c2"
+      },
+      "development_screening_opponent_rng_recurrent_07": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 250,
+            "end_exclusive": 4291055656,
+            "start_inclusive": 4291055406
+          },
+          "namespace": "development_screening_opponent_rng_recurrent_07",
+          "purpose": "independent audited-opponent RNG bank paired with one development bank",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "deb4aee4f2ba2dd8aad892b53ecc5130093ff1467338d5e7d6388c2ef5f705e0"
+      },
+      "development_screening_opponent_rng_recurrent_08": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 250,
+            "end_exclusive": 4291056156,
+            "start_inclusive": 4291055906
+          },
+          "namespace": "development_screening_opponent_rng_recurrent_08",
+          "purpose": "independent audited-opponent RNG bank paired with one development bank",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "85d813259058a49daf5142214e445e36882a64e64a55d849cf38211da48241aa"
+      },
+      "development_screening_opponent_rng_recurrent_09": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 250,
+            "end_exclusive": 4291056656,
+            "start_inclusive": 4291056406
+          },
+          "namespace": "development_screening_opponent_rng_recurrent_09",
+          "purpose": "independent audited-opponent RNG bank paired with one development bank",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "1f045d299192b924edc175b8ef92cb0351b941f8955ea7549dad1049b56d3a0d"
+      },
+      "development_screening_opponent_rng_recurrent_10": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 250,
+            "end_exclusive": 4291057156,
+            "start_inclusive": 4291056906
+          },
+          "namespace": "development_screening_opponent_rng_recurrent_10",
+          "purpose": "independent audited-opponent RNG bank paired with one development bank",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "c5e6ba946b93815804ae13d50ffefa9065ce5fdafed3d662bcf781d1ea533f95"
+      },
+      "development_screening_opponent_rng_recurrent_11": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 250,
+            "end_exclusive": 4291057656,
+            "start_inclusive": 4291057406
+          },
+          "namespace": "development_screening_opponent_rng_recurrent_11",
+          "purpose": "independent audited-opponent RNG bank paired with one development bank",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "8105f03dbc4580808173d4c61642276945ab7ecca8bd627471074c1d90300721"
+      },
+      "development_screening_opponent_rng_recurrent_12": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 250,
+            "end_exclusive": 4291058156,
+            "start_inclusive": 4291057906
+          },
+          "namespace": "development_screening_opponent_rng_recurrent_12",
+          "purpose": "independent audited-opponent RNG bank paired with one development bank",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "ac63c44cdc90a46e5ddbd54910602d61ce2ed9e3f5c6ccf5f614219710352e16"
+      },
+      "development_screening_recurrent_01": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 250,
+            "end_exclusive": 4291052406,
+            "start_inclusive": 4291052156
+          },
+          "namespace": "development_screening_recurrent_01",
+          "purpose": "one disjoint 250-pair development bank for one admitted recurrent checkpoint",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "0e8b250d08f5a159af6ebf65d574a7d77485cbddd681133d1905c109385b70ba"
+      },
+      "development_screening_recurrent_02": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 250,
+            "end_exclusive": 4291052906,
+            "start_inclusive": 4291052656
+          },
+          "namespace": "development_screening_recurrent_02",
+          "purpose": "one disjoint 250-pair development bank for one admitted recurrent checkpoint",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "6127b310f8ce892398710f809fe301a14472386902f3d6dbdf2b7d954c5fbcf7"
+      },
+      "development_screening_recurrent_03": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 250,
+            "end_exclusive": 4291053406,
+            "start_inclusive": 4291053156
+          },
+          "namespace": "development_screening_recurrent_03",
+          "purpose": "one disjoint 250-pair development bank for one admitted recurrent checkpoint",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "f88dd7fb4a537dbb1f7fe659a7827dcb851a47fe08bdc8f3ae41d27aa68937c0"
+      },
+      "development_screening_recurrent_04": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 250,
+            "end_exclusive": 4291053906,
+            "start_inclusive": 4291053656
+          },
+          "namespace": "development_screening_recurrent_04",
+          "purpose": "one disjoint 250-pair development bank for one admitted recurrent checkpoint",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "9cb394d6abec9c984cadfc37def50b2d31c8396e5c053c1bcb45712f986b5249"
+      },
+      "development_screening_recurrent_05": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 250,
+            "end_exclusive": 4291054406,
+            "start_inclusive": 4291054156
+          },
+          "namespace": "development_screening_recurrent_05",
+          "purpose": "one disjoint 250-pair development bank for one admitted recurrent checkpoint",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "0a977ba95f1ff1a6d16f265359dd17fa5fc8bcce5a5b91240869c2a43fc397f6"
+      },
+      "development_screening_recurrent_06": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 250,
+            "end_exclusive": 4291054906,
+            "start_inclusive": 4291054656
+          },
+          "namespace": "development_screening_recurrent_06",
+          "purpose": "one disjoint 250-pair development bank for one admitted recurrent checkpoint",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "37e9e32c76f29ca8f1dd16f4a7f2d1b7433cadc7e73f7fb4762bc46670d8893b"
+      },
+      "development_screening_recurrent_07": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 250,
+            "end_exclusive": 4291055406,
+            "start_inclusive": 4291055156
+          },
+          "namespace": "development_screening_recurrent_07",
+          "purpose": "one disjoint 250-pair development bank for one admitted recurrent checkpoint",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "e0d4c8bf0c4d3da2d055808eef1d1545c0face1b5ce07c1bdf6f665de13c12be"
+      },
+      "development_screening_recurrent_08": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 250,
+            "end_exclusive": 4291055906,
+            "start_inclusive": 4291055656
+          },
+          "namespace": "development_screening_recurrent_08",
+          "purpose": "one disjoint 250-pair development bank for one admitted recurrent checkpoint",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "5efe62f556ebf4de8223f94f9985c11dc0a56d8bed1381c7695edcb6ba16a2c3"
+      },
+      "development_screening_recurrent_09": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 250,
+            "end_exclusive": 4291056406,
+            "start_inclusive": 4291056156
+          },
+          "namespace": "development_screening_recurrent_09",
+          "purpose": "one disjoint 250-pair development bank for one admitted recurrent checkpoint",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "bd1e0f1febb98ebcd2f99aa383eaabc812854effa9362b92266ca6413697dfda"
+      },
+      "development_screening_recurrent_10": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 250,
+            "end_exclusive": 4291056906,
+            "start_inclusive": 4291056656
+          },
+          "namespace": "development_screening_recurrent_10",
+          "purpose": "one disjoint 250-pair development bank for one admitted recurrent checkpoint",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "6ed82a3bd8e39800d6aafbc04b9e1aa5f1ea2d12799b8066f065fc924376310a"
+      },
+      "development_screening_recurrent_11": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 250,
+            "end_exclusive": 4291057406,
+            "start_inclusive": 4291057156
+          },
+          "namespace": "development_screening_recurrent_11",
+          "purpose": "one disjoint 250-pair development bank for one admitted recurrent checkpoint",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "b30620e60fd349033ebbd16029b6a744e8463c3d0ff7ab9ebd5e96a3b66cd03f"
+      },
+      "development_screening_recurrent_12": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 250,
+            "end_exclusive": 4291057906,
+            "start_inclusive": 4291057656
+          },
+          "namespace": "development_screening_recurrent_12",
+          "purpose": "one disjoint 250-pair development bank for one admitted recurrent checkpoint",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "96f599cabb8cce0bbc91677f473458075bce8dc611a087a01e7bd89e4b7f7076"
+      },
+      "final_audit": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 5000,
+            "end_exclusive": 4291068159,
+            "start_inclusive": 4291063159
+          },
+          "namespace": "final_audit",
+          "purpose": "fresh one-use 5000-pair final-audit deal bank",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "fe9304f642dd1fe40d791a11696dbb88da0470d60e8671985851d943531d9c76"
+      },
+      "final_audit_opponent_rng": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 5000,
+            "end_exclusive": 4291078159,
+            "start_inclusive": 4291073159
+          },
+          "namespace": "final_audit_opponent_rng",
+          "purpose": "fresh one-use audited-opponent RNG bank for final audit",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "e40dd5f69561bbe956b086b83c0b4fe606d879178f81b6c34a666f9e43bd9ae6"
+      },
+      "training_recurrent_deals": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 26028,
+            "end_exclusive": 4291026127,
+            "start_inclusive": 4291000099
+          },
+          "namespace": "training_recurrent_deals",
+          "purpose": "frozen recurrent random-opponent training deal seeds",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "d480635eaebffe2fb4ce67a985ce207f76a7c0a1dcd87faebf913081f6a0a9d6"
+      },
+      "training_recurrent_initialization": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 1,
+            "end_exclusive": 4291052156,
+            "start_inclusive": 4291052155
+          },
+          "namespace": "training_recurrent_initialization",
+          "purpose": "future recurrent candidate random initialization seed",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "d842d63d881477cc30ddd20ee837c78afaa1ec7d39270a4f95fd1c5cd8767f37"
+      },
+      "training_recurrent_opponent_rng": {
+        "record": {
+          "append_only": true,
+          "created_at_utc": "2026-08-02T00:49:21.726621+00:00",
+          "interval": {
+            "count": 26028,
+            "end_exclusive": 4291052155,
+            "start_inclusive": 4291026127
+          },
+          "namespace": "training_recurrent_opponent_rng",
+          "purpose": "frozen independent audited-opponent RNG seeds for recurrent training",
+          "record_type": "seed_allocation",
+          "schema_version": 1
+        },
+        "record_sha256": "ed071ae3ac8ff8eaaa331ec7759fea664d61df361df754a1f5f103f31b2001ec"
+      }
+    },
+    "path": "benchmarks/random_specialist_20260802/seed_registry.jsonl",
+    "sha256": "47c12e8a3b8b78b79d69a802c7e4fa746ee1a6e60d39d855b48dfad30eaecb87"
+  },
+  "source_sha256": {
+    "batched_pesten.py": "b6c6f50034b15ef82f78a0722b11604bcb204b0a2df540d2e9520d67f93c7cb2",
+    "deck.py": "1a1374f09b824f72b8f7589613e94c593a4ce55d3afd50f21b1bf2891847d41b",
+    "game.py": "2e70ea75361170e0f87428f22649236ed8f8bdec8576b33d1148b2c3ed346a5b",
+    "randomAgent.py": "9bcb46d56d7108ef9bfb41ea01b68719087188564bc07c0f484d7f5214ed5a55",
+    "random_specialist_campaign.py": "266c97b78df9ba00ba97835edc20d2c355b13752baa40f494ab459a0750b924a",
+    "random_specialist_workflow.py": "934459625633571a81efd60e8e3edf36ef333797eb8df69e9a89bfa1e2c7b3e3",
+    "specialist_seed_registry.py": "71dd1c4738690d0ddd21ad7d827a8df9a39749f48ad7ac1c87f2b712f38e45c8",
+    "temporal_batched_speed.py": "fc8ec09bf5299b5c6c6c42fc749858844658489e8c0d419bba70deed342f674f",
+    "temporal_observation.py": "1a61572898833426eb6d511099dd1446fc09253b6d8d70d71ebcc0f81901fc34",
+    "temporal_puffer_agent.py": "0b53499a7bcb70c172354d8950bacfe2f89f4cf57cd5ab220c18de93fd799af6",
+    "temporal_puffer_v4.py": "f40629869fbdc47b43affa80c3c8f8d202669536aa107cd70ac7a8012b12b810",
+    "temporal_training.py": "eda6cc82658beeedd5a913ee965e1238dc6230b1f90b2d4d9dc37f1426bfc4c8"
+  },
+  "status": "pretraining_implementation_committed",
+  "supersedes": {
+    "commitment_sha256": "75a478e38dabe952a82803829b5db3d8621dc5d6683f24408b16de2510ce3e7a",
+    "executable": false,
+    "path": "benchmarks/random_specialist_20260802/implementation_commitment_v2.json",
+    "reason": "v2 omitted explicit checkpoint admission parity/privacy gates",
+    "sha256": "9762d01be3167fd33c41940f6a683adb1b33c2bb132a99674927645737a4506f"
+  }
+}

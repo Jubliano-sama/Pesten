@@ -1,0 +1,54 @@
+{
+  "benchmark": "ppo_final_full_stack",
+  "date": "2026-08-01",
+  "development_only": true,
+  "purpose": "Final launcher-level production-stack verification",
+  "sealed_seeds_or_outcomes_used": false,
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 3090",
+    "gpu_compute_processes_before_run": [
+      {
+        "process": "/usr/libexec/xdg-desktop-portal-cosmic",
+        "memory_mib": 36
+      },
+      {
+        "process": "cosmic-term",
+        "memory_mib": 68
+      }
+    ]
+  },
+  "launcher_environment": {
+    "LD_PRELOAD": "/usr/lib/x86_64-linux-gnu/libjemalloc.so.2",
+    "PYTHONPATH": "/home/tommie/Pesten"
+  },
+  "configuration": {
+    "warmup_games": 64,
+    "measured_iterations": 10,
+    "games_per_iteration": 1024,
+    "ppo_updates_per_iteration": 3,
+    "agent_set": [
+      "smart",
+      "rl"
+    ]
+  },
+  "measurement": {
+    "games": 10240,
+    "elapsed_seconds": 6.029952583001432,
+    "games_per_second": 1698.1891414646914,
+    "rollout_seconds_sum": 3.7852482220005186,
+    "preparation_seconds_sum": 0.26471049100291566,
+    "update_seconds_sum": 1.9766255480026302
+  },
+  "exactness": {
+    "warm_actor_sha256": "cb8accf8d11e1212af83a2cc9da16185b685d54fa9896564240826588cddcdd0",
+    "warm_critic_sha256": "fbae216c4a8c838d858afd78cfc8596a59f42bd5c7e01d9e2df5d48c4a53dc89",
+    "final_actor_sha256": "abb7933107ca097ad45166398d016489c84f542529b5101898ffb155a77532ab",
+    "final_critic_sha256": "dbcca236e9b759245bce0ecbfd115c23d0465a5c63c890b7d6f861741cef65aa",
+    "matches_direct_python_probe": true
+  },
+  "notes": [
+    "The measured interval excludes the 64-game warmup and construction/compilation startup.",
+    "The final launcher result is 1.0567x faster than the otherwise identical direct-Python production probe (6.371614219 seconds).",
+    "No other GPU training process was active immediately before this run."
+  ]
+}

@@ -14,6 +14,7 @@ from __future__ import annotations
 
 from collections import Counter
 from dataclasses import dataclass, field
+import hashlib
 import random
 import time
 from typing import Hashable, Sequence
@@ -24,7 +25,9 @@ import torch
 import game
 from batched_pesten import (
     BatchedPesten,
+    PHASE_DRAW_RETRY,
     PHASE_SUIT,
+    POLICY_RANDOM,
     POLICY_RL,
     POLICY_SMART,
     SUIT_NAMES,
@@ -34,7 +37,10 @@ from ppo2 import build_action_masks
 from temporal_observation import (
     DecisionInput,
     EventKind,
+    PASS_ACTION,
     PublicEventToken,
+    SUIT_ACTION_START,
+    build_draw_retry_legal_actions,
     build_legal_actions,
     build_private_observation,
     relative_index,
@@ -54,12 +60,41 @@ LEAGUE_SCHEDULE = (
     "bayesian_tree",
     "smart_rule",
 )
-VALID_OPPONENT_TYPES = frozenset(LEAGUE_SCHEDULE)
+# The fixed default mixture remains unchanged.  ``random`` is the existing
+# audited-uniform role with an independent opponent-RNG bank.  The explicit
+# ``canonical_random`` lane mirrors ``randomAgent.AgentRandom`` instead: its
+# game RNG is deliberately coupled to the deal and recycle stream.
+VALID_OPPONENT_TYPES = frozenset((*LEAGUE_SCHEDULE, "random", "canonical_random"))
 
 ROLE_CURRENT = "current"
 ROLE_HISTORICAL = "historical"
 ROLE_PPO = "ppo_champion"
 ROLE_SMART = "smart_rule"
+ROLE_AUDITED_UNIFORM_RANDOM = "audited_uniform_random"
+ROLE_CANONICAL_RANDOM = "canonical_random"
+
+# ``random`` is intentionally *not* the legacy ``randomAgent.AgentRandom``
+# role.  The campaign specialist needs an auditable fixed opponent whose RNG
+# is isolated from deck/deal randomness.  The scalar mirror lives in
+# ``random_specialist_workflow``; both implementations use the helpers below.
+AUDITED_UNIFORM_RANDOM_CONTRACT = {
+    "id": "pesten-audited-uniform-random-v1",
+    "rng_algorithm": "numpy.random.RandomState (MT19937)",
+    "rng_draw": "randint(0, len(ordered_legal_actions))",
+    "legal_action_order": "ascending integer action code",
+    "draw_retry": "only the drawn card, then pass action 54",
+    "suit_actions": "ascending action codes 50, 51, 52, 53",
+    "policy_visibility": "opponent RNG seed and action sampler never cross the DecisionInput boundary",
+}
+
+CANONICAL_RANDOM_AGENT_CONTRACT = {
+    "id": "randomAgent.AgentRandom-canonical-v1",
+    "scalar_source": "randomAgent.AgentRandom",
+    "game_rng": "per-game numpy.random.RandomState(deal_seed), shared by deal, hand shuffle, and recycle",
+    "suit_rng": "per-game random.Random(deal_seed).randint(0, 3)",
+    "opponent_rng_seed": None,
+    "policy_visibility": "canonical opponent RNG state never crosses the DecisionInput boundary",
+}
 
 
 @dataclass(slots=True)
@@ -105,6 +140,75 @@ class BatchRolloutStats:
     temporal_sampling_state_scatter_seconds: float = 0.0
     champion_inference_transfer_seconds: float = 0.0
     rules_stepping_seconds: float = 0.0
+
+
+def ordered_legal_actions(
+    legal_actions: Sequence[bool],
+) -> tuple[int, ...]:
+    """Return the contract's canonical ascending legal action order."""
+
+    actions = tuple(
+        index for index, is_legal in enumerate(legal_actions) if is_legal
+    )
+    if not actions:
+        raise ValueError("audited uniform opponent requires a legal action")
+    return actions
+
+
+def sample_audited_uniform_action(
+    legal_actions: Sequence[bool],
+    rng: np.random.RandomState,
+) -> int:
+    """Sample exactly uniformly from the contract's ordered legal actions."""
+
+    actions = ordered_legal_actions(legal_actions)
+    return actions[int(rng.randint(0, len(actions)))]
+
+
+def audited_uniform_legal_actions(
+    engine: BatchedPesten,
+    game_index: int,
+) -> tuple[bool, ...]:
+    """Build the contract mask at a batched-engine decision boundary.
+
+    This is deliberately environment-side code.  It reads the current
+    opponent's own cards only to choose its action and never hands that data
+    to the recurrent policy.
+    """
+
+    seat = int(engine.current_player[game_index])
+    phase = int(engine.phase[game_index])
+    if phase == PHASE_SUIT:
+        # ``build_legal_actions`` owns the public 55-action encoding.
+        return build_legal_actions(
+            own_cards=(),
+            current_suit=SUIT_NAMES[int(engine.current_sort[game_index])],
+            current_rank=int(engine.current_rank[game_index]),
+            penalty_amount=int(engine.penalty_amount[game_index]),
+            change_suit_mode=True,
+        )
+    if phase == PHASE_DRAW_RETRY:
+        return build_draw_retry_legal_actions(
+            int(engine.drawn_card[game_index])
+        )
+    return build_legal_actions(
+        own_cards=_own_cards(engine, game_index, seat),
+        current_suit=SUIT_NAMES[int(engine.current_sort[game_index])],
+        current_rank=int(engine.current_rank[game_index]),
+        penalty_amount=int(engine.penalty_amount[game_index]),
+    )
+
+
+def _state_sha256(state: Sequence[torch.Tensor]) -> str:
+    """Hash recurrent state for a diagnostic trace outside policy inputs."""
+
+    digest = hashlib.sha256()
+    for part in state:
+        value = part.detach().cpu().contiguous()
+        digest.update(str(tuple(value.shape)).encode("ascii"))
+        digest.update(str(value.dtype).encode("ascii"))
+        digest.update(value.numpy().tobytes())
+    return digest.hexdigest()
 
 
 def league_schedule() -> tuple[str, ...]:
@@ -222,6 +326,13 @@ def build_safe_decision(
         penalty_amount=penalty_amount,
         change_suit_mode=suit_mode,
     )
+    if int(engine.phase[game_index]) == PHASE_DRAW_RETRY:
+        # The legacy engine permits only the just-drawn card or pass during
+        # this immediate retry. The drawn card is the acting player's own
+        # card; keep it in the action mask without exposing it as a public
+        # event or observation feature.
+        drawn_card = int(engine.drawn_card[game_index])
+        legal = build_draw_retry_legal_actions(drawn_card)
     return DecisionInput(observation, legal, tuple(events))
 
 
@@ -458,6 +569,7 @@ def _make_vector_layout(
     schedule_offset: int,
     schedule: Sequence[str],
     historical: Sequence[torch.nn.Module],
+    random_opponent_seeds: Sequence[int] | None,
 ) -> tuple[
     list[int],
     np.ndarray,
@@ -477,6 +589,35 @@ def _make_vector_layout(
     roles: dict[
         tuple[int, int], tuple[str, torch.nn.Module | None, int]
     ] = {}
+
+    if "random" in schedule:
+        if random_opponent_seeds is None:
+            raise ValueError(
+                "random schedule entries require one independent "
+                "random_opponent_seed per requested game"
+            )
+        if len(random_opponent_seeds) != games:
+            raise ValueError(
+                "random_opponent_seeds must contain exactly `games` entries"
+            )
+        if any(
+            not 0 <= int(value) < 2**32
+            for value in random_opponent_seeds
+        ):
+            raise ValueError(
+                "random_opponent_seeds must be uint32-compatible"
+            )
+
+    # ``canonical_random`` deliberately has no independent opponent stream:
+    # its only NumPy generator is the per-game deck generator and its suit
+    # stream is derived directly from the deal seed.  Rejecting a supplied
+    # bank here avoids a superficially harmless parameter silently becoming
+    # part of the canonical contract later.
+    if "canonical_random" in schedule and random_opponent_seeds is not None:
+        raise ValueError(
+            "canonical_random schedule entries must not receive an "
+            "independent random_opponent_seed bank"
+        )
 
     for vector_index, absolute_index in enumerate(vector_absolute_indices):
         opponent_type = schedule[
@@ -505,6 +646,18 @@ def _make_vector_layout(
                 opponent_role = (ROLE_PPO, None, 0)
             elif opponent_type == "smart_rule":
                 opponent_role = (ROLE_SMART, None, 0)
+            elif opponent_type == "random":
+                assert random_opponent_seeds is not None
+                opponent_role = (
+                    ROLE_AUDITED_UNIFORM_RANDOM,
+                    None,
+                    int(random_opponent_seeds[absolute_index]),
+                )
+            elif opponent_type == "canonical_random":
+                # The integer is the deal seed, not an independent opponent
+                # namespace.  BatchedPesten owns the matching per-game NumPy
+                # stream and shares it with deal/recycle/random hand shuffles.
+                opponent_role = (ROLE_CANONICAL_RANDOM, None, deal_seed)
             else:
                 raise AssertionError(f"unexpected vector role {opponent_type}")
             current_role = (ROLE_CURRENT, None, deal_seed * 2)
@@ -523,6 +676,8 @@ def _make_vector_layout(
             )
             if role_name == ROLE_SMART:
                 policy_kinds[vector_index, seat] = POLICY_SMART
+            elif role_name == ROLE_CANONICAL_RANDOM:
+                policy_kinds[vector_index, seat] = POLICY_RANDOM
 
     seeds = np.asarray(
         [seed + index for index in vector_absolute_indices],
@@ -540,15 +695,21 @@ def collect_league_batch_batched(
     seed: int,
     schedule_offset: int = 0,
     schedule: Sequence[str] = LEAGUE_SCHEDULE,
+    random_opponent_seeds: Sequence[int] | None = None,
     max_turns: int = 1000,
     stats: BatchRolloutStats | None = None,
+    trace_sink: list[dict] | None = None,
 ) -> tuple[list[tuple[Sequence[TrajectoryStep], bool]], dict]:
     """Collect an explicit league schedule with batched neural decisions.
 
     The default retains the frozen 40/20/20/10/10 equivalence benchmark.
     Training recipes should pass ``schedule`` explicitly; omitted opponent
-    types are never constructed or evaluated.  The return value intentionally
-    matches ``temporal_league.collect_league_batch``.
+    types are never constructed or evaluated.  Opt-in ``random`` entries use
+    the separately seeded audited-uniform contract; opt-in
+    ``canonical_random`` is the separately named legacy ``AgentRandom``
+    contract with its coupled deal/opponent RNG.  ``trace_sink`` is an opt-in
+    phase-zero diagnostic: it remains environment-side and never changes the
+    return schema or policy inputs.
     """
 
     if games < 0:
@@ -575,6 +736,7 @@ def collect_league_batch_batched(
         schedule_offset=schedule_offset,
         schedule=schedule,
         historical=historical,
+        random_opponent_seeds=random_opponent_seeds,
     )
     absolute_to_vector = {
         absolute: vector
@@ -602,8 +764,58 @@ def collect_league_batch_batched(
         )
         stats.engine_bytes = engine.allocated_bytes
         runtimes: dict[tuple[int, int], TemporalSeatRuntime] = {}
+        random_generators: dict[int, np.random.RandomState] = {}
+        canonical_suit_generators: dict[int, random.Random] = {}
+        canonical_trace_vectors: set[int] = set()
+        trace_by_vector: dict[int, dict] = {}
+        if trace_sink is not None:
+            for vector_index, absolute_index in enumerate(
+                vector_absolute_indices
+            ):
+                opening_count = int(engine.discard_counts[vector_index])
+                trace_by_vector[vector_index] = {
+                    "absolute_game_index": absolute_index,
+                    "deal_seed": int(seed + absolute_index),
+                    "initial_deal": {
+                        "hands": [
+                            list(_own_cards(engine, vector_index, seat))
+                            for seat in range(2)
+                        ],
+                        "opening_card": int(
+                            engine.discards[vector_index, opening_count - 1]
+                        ),
+                    },
+                    "actions": [],
+                    "public_events": (),
+                    "recurrent": [],
+                }
         for (vector_index, seat), role in roles.items():
             role_name, opponent_policy, agent_seed = role
+            if role_name == ROLE_AUDITED_UNIFORM_RANDOM:
+                random_generators[vector_index] = np.random.RandomState(
+                    agent_seed
+                )
+                if trace_sink is not None:
+                    trace_by_vector[vector_index][
+                        "opponent_rng_seed"
+                    ] = int(agent_seed)
+                continue
+            if role_name == ROLE_CANONICAL_RANDOM:
+                # ``engine.rngs[vector_index]`` is already seeded with this
+                # deal seed and remains the sole NumPy stream for initial deal,
+                # AgentRandom hand shuffles, and draw-pile recycle.  Scalar
+                # AgentRandom uses Python's module RNG only for changeSort.
+                canonical_suit_generators[vector_index] = random.Random(
+                    agent_seed
+                )
+                canonical_trace_vectors.add(vector_index)
+                if trace_sink is not None:
+                    trace_by_vector[vector_index]["canonical_random_rng"] = {
+                        "deal_seed_shared_with_engine": int(agent_seed),
+                        "suit_rng": "random.Random(deal_seed).randint(0, 3)",
+                        "independent_opponent_rng": False,
+                    }
+                continue
             if role_name not in (ROLE_CURRENT, ROLE_HISTORICAL):
                 continue
             seat_policy = (
@@ -621,6 +833,16 @@ def collect_league_batch_batched(
                 state=seat_policy.initial_state(),
                 cursor=SafeEventCursor(),
             )
+            if trace_sink is not None:
+                trace_by_vector[vector_index]["recurrent"].append(
+                    {
+                        "seat": seat,
+                        "role": role_name,
+                        "initial_state_sha256": _state_sha256(
+                            runtimes[(vector_index, seat)].state
+                        ),
+                    }
+                )
 
         vector_started = time.perf_counter()
         while True:
@@ -636,6 +858,9 @@ def collect_league_batch_batched(
                 ],
             ] = {}
             champion_games: list[int] = []
+            pending_decisions: dict[int, DecisionInput] = {}
+            random_masks: dict[int, tuple[bool, ...]] = {}
+            canonical_hand_orders: dict[int, list[int]] = {}
 
             for vector_value in active:
                 vector_index = int(vector_value)
@@ -654,6 +879,7 @@ def collect_league_batch_batched(
                         id(runtime.policy), (runtime.policy, [])
                     )
                     group[1].append((runtime, decision))
+                    pending_decisions[vector_index] = decision
                 elif role_name == ROLE_PPO:
                     if (
                         int(engine.phase[vector_index]) != PHASE_SUIT
@@ -666,9 +892,45 @@ def collect_league_batch_batched(
                         champion_games.append(vector_index)
                 else:
                     rules_started = time.perf_counter()
-                    actions[vector_index] = engine.non_neural_action(
-                        vector_index
-                    )
+                    if role_name == ROLE_AUDITED_UNIFORM_RANDOM:
+                        legal = audited_uniform_legal_actions(
+                            engine, vector_index
+                        )
+                        random_masks[vector_index] = legal
+                        actions[vector_index] = sample_audited_uniform_action(
+                            legal, random_generators[vector_index]
+                        )
+                    elif role_name == ROLE_CANONICAL_RANDOM:
+                        if int(engine.phase[vector_index]) == PHASE_SUIT:
+                            legal = audited_uniform_legal_actions(
+                                engine, vector_index
+                            )
+                            random_masks[vector_index] = legal
+                            actions[vector_index] = (
+                                SUIT_ACTION_START
+                                + canonical_suit_generators[vector_index].randint(
+                                    0, 3
+                                )
+                            )
+                        else:
+                            # Reuse BatchedPesten.POLICY_RANDOM's exact
+                            # in-place hand shuffle.  The resulting hand order
+                            # is diagnostic evidence and catches accidental
+                            # use of an independent opponent RNG stream.
+                            actions[vector_index] = engine.random_action(
+                                vector_index
+                            )
+                            canonical_hand_orders[vector_index] = list(
+                                _own_cards(
+                                    engine,
+                                    vector_index,
+                                    int(engine.current_player[vector_index]),
+                                )
+                            )
+                    else:
+                        actions[vector_index] = engine.non_neural_action(
+                            vector_index
+                        )
                     stats.rules_stepping_seconds += (
                         time.perf_counter() - rules_started
                     )
@@ -689,6 +951,46 @@ def collect_league_batch_batched(
                 raise RuntimeError(
                     "each active game must produce exactly one action"
                 )
+            if trace_sink is not None:
+                for vector_value in active:
+                    vector_index = int(vector_value)
+                    seat = int(engine.current_player[vector_index])
+                    role_name, _, _ = roles[(vector_index, seat)]
+                    entry = {
+                        "seat": seat,
+                        "role": role_name,
+                        "phase": int(engine.phase[vector_index]),
+                        "action": int(actions[vector_index]),
+                    }
+                    if vector_index in canonical_trace_vectors:
+                        entry.update(
+                            {
+                                "penalty_amount": int(
+                                    engine.penalty_amount[vector_index]
+                                ),
+                                "current_sort": int(
+                                    engine.current_sort[vector_index]
+                                ),
+                                "current_rank": int(
+                                    engine.current_rank[vector_index]
+                                ),
+                            }
+                        )
+                    if vector_index in pending_decisions:
+                        entry["legal_actions"] = list(
+                            pending_decisions[
+                                vector_index
+                            ].legal_actions
+                        )
+                    if vector_index in random_masks:
+                        entry["legal_actions"] = list(
+                            random_masks[vector_index]
+                        )
+                    if vector_index in canonical_hand_orders:
+                        entry["opponent_hand_order"] = canonical_hand_orders[
+                            vector_index
+                        ]
+                    trace_by_vector[vector_index]["actions"].append(entry)
             rules_started = time.perf_counter()
             for vector_value in active:
                 vector_index = int(vector_value)
@@ -718,6 +1020,20 @@ def collect_league_batch_batched(
                 game_episodes.append((trajectory, winner == seat))
                 contributions[opponent_type] += len(trajectory)
             episodes_by_game[absolute_index] = game_episodes
+            if trace_sink is not None:
+                trace = trace_by_vector[vector_index]
+                trace["winner"] = winner
+                trace["turn_count"] = int(engine.turn_counts[vector_index])
+                trace["public_events"] = tuple(
+                    tuple(item) for item in engine.public_events[vector_index]
+                )
+                for record in trace["recurrent"]:
+                    runtime = runtimes[(vector_index, record["seat"])]
+                    record["final_state_sha256"] = _state_sha256(
+                        runtime.state
+                    )
+                    record["decision_count"] = len(runtime.trajectory)
+                trace_sink.append(trace)
 
     tree_started = time.perf_counter()
     for absolute_index in range(games):

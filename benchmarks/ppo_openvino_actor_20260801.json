@@ -1,0 +1,29 @@
+{
+  "benchmark": "ppo_openvino_actor",
+  "decision": "retain TorchScript CPU rollout actor",
+  "development_only": true,
+  "exact_control_flow_metrics": true,
+  "exact_rollout_tensors": false,
+  "grouped_speedup": 0.8039103497269565,
+  "max_logit_absolute_error": 6.258487701416016e-07,
+  "openvino_version": "2026.2.1",
+  "paired_speedup_median": 0.807776250189796,
+  "paired_speedups": [
+    0.7003183052485619,
+    0.7829104617570991,
+    0.7969666068603997,
+    1.0589959253096242,
+    0.838970060690292,
+    0.8787282963358994,
+    0.807776250189796,
+    1.1628147388135857,
+    0.13905026027395706
+  ],
+  "sealed_seeds_or_outcomes_used": false,
+  "workload": {
+    "games": 512,
+    "pairs": 9,
+    "rollout_device": "cpu",
+    "threads": 8
+  }
+}

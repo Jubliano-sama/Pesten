@@ -1,0 +1,69 @@
+{
+  "agent_sets": [
+    [
+      "smart",
+      "rl"
+    ],
+    [
+      "random",
+      "rl"
+    ],
+    [
+      "self",
+      "self",
+      "rl"
+    ]
+  ],
+  "elapsed_seconds": 9.947835123000004,
+  "episodes_per_iteration": 512,
+  "iterations": 4,
+  "kind": "warm_mlp_ppo_segment",
+  "latest": {
+    "actor": {
+      "path": "/home/tommie/Pesten/live_training/mlp/segment_0001/ppo_actor_4.pth",
+      "sha256": "cb34e33b44d195927e0e368f87940075cdd94dfc2ef50bef5941a7dd9371e8ef"
+    },
+    "actor_optimizer": {
+      "path": "/home/tommie/Pesten/live_training/mlp/segment_0001/ppo_actor_opt_4.pth",
+      "sha256": "9ab4db079df73ba5bdd4594431b808babf76713a1c4c40869a0fae5c8b701305"
+    },
+    "critic": {
+      "path": "/home/tommie/Pesten/live_training/mlp/segment_0001/ppo_critic_4.pth",
+      "sha256": "6288801c7fa449f6ca1451f809bb89ade93abb8a3e0964c02ba88cfb26372261"
+    },
+    "critic_optimizer": {
+      "path": "/home/tommie/Pesten/live_training/mlp/segment_0001/ppo_critic_opt_4.pth",
+      "sha256": "fd8cfad76492e9d40836194bbb3781b9fd767ca32249acb6b138ae56b2abd82b"
+    }
+  },
+  "runtime": {
+    "actor_device": "cuda",
+    "compile_updates": true,
+    "cuda": true,
+    "device": "cuda",
+    "python": "3.13.11 (main, Jan 28 2026, 00:01:45) [Clang 21.1.4 ]",
+    "rollout_device": "cpu",
+    "torch": "2.13.0+cu130",
+    "torch_threads": 8
+  },
+  "schema_version": 1,
+  "seed": 2026080102,
+  "warm_parent": {
+    "actor": {
+      "path": "/home/tommie/Pesten/ppo_actor_1.pth",
+      "sha256": "f934589c44d9556dd61819b998df00e734e39c641affc291d8b9484e4b997de0"
+    },
+    "actor_optimizer": {
+      "path": "/home/tommie/Pesten/ppo_actor_opt_1.pth",
+      "sha256": "9ab4db079df73ba5bdd4594431b808babf76713a1c4c40869a0fae5c8b701305"
+    },
+    "critic": {
+      "path": "/home/tommie/Pesten/ppo_critic_1.pth",
+      "sha256": "20f6d8f1277ba1b9590236c5a49a4d216102cb3e372062e878b4ec03929a4a22"
+    },
+    "critic_optimizer": {
+      "path": "/home/tommie/Pesten/ppo_critic_opt_1.pth",
+      "sha256": "fd8cfad76492e9d40836194bbb3781b9fd767ca32249acb6b138ae56b2abd82b"
+    }
+  }
+}

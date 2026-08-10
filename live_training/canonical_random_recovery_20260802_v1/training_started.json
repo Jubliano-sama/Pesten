@@ -1,0 +1,43 @@
+{
+  "budget": {
+    "adaptation_after_start": "forbidden",
+    "checkpoint_count": 6,
+    "games": 150000,
+    "last_microbatch_games": 40,
+    "microbatch_count": 1176,
+    "microbatch_games": 128,
+    "ppo_epochs": 4,
+    "scheduled_checkpoints_games": [
+      25000,
+      50000,
+      75000,
+      100000,
+      125000,
+      150000
+    ],
+    "wall_clock_cap_seconds": 18000,
+    "wall_clock_enforcement": "before and after each rollout/update/checkpoint"
+  },
+  "candidate_training_started": true,
+  "commitment_path": "benchmarks/canonical_random_recovery_20260802_v1/implementation_commitment.json",
+  "commitment_sha256": "5b73a8cf5c37efcec356c52f120bb8ddf08e23193467b272ac8ed293565da9bc",
+  "created_at_utc": "2026-08-02T03:08:10.683514+00:00",
+  "device": "cuda",
+  "final_audit_seed_bank_touched": false,
+  "format": "pesten-canonical-random-recovery-training-start-v1",
+  "manifest_sha256": "0f92966fdb205ec9539c89c17d39d83551af2b68deed66892154f98340a1d4b9",
+  "optimizer_reset": {
+    "class": "torch.optim.Adam",
+    "fresh_optimizer_state_entries_before_first_update": 0,
+    "learning_rate": 0.0003,
+    "parent_optimizer_state_loaded": false,
+    "reset_verified": true
+  },
+  "restart_policy": "fail closed; this directory makes the run non-retryable",
+  "warm_start": {
+    "checkpoint_sha256": "58fcc1705f6481adb6f7aff7b28959d9554640467635bd60a0a027d1b99e8948",
+    "model_weights_loaded": true,
+    "optimizer_reset_required": true,
+    "optimizer_state_loaded": false
+  }
+}

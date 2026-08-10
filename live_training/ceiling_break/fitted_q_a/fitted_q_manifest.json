@@ -1,0 +1,230 @@
+{
+  "checkpoint": {
+    "path": "/home/tommie/Pesten/live_training/ceiling_break/fitted_q_a/fitted_q.pt",
+    "sha256": "5ef6a7f25f303bc32b4b216b5d89f952977496117b14514b0f7cdf3ac4c83b16"
+  },
+  "config": {
+    "batch_size": 16384,
+    "blocks": 4,
+    "epochs": 12,
+    "games": 65536,
+    "gamma": 0.995,
+    "learning_rate": 0.0003,
+    "temperatures": [
+      0.8,
+      1.0,
+      1.25
+    ],
+    "validation_fraction": 0.1,
+    "weight_decay": 1e-05,
+    "width": 512
+  },
+  "dataset": {
+    "collection": [
+      {
+        "decisions": 458850,
+        "draws": 0,
+        "games": 21845,
+        "losses": 6783,
+        "rollout": {
+          "actor_key_counts": {
+            "current": 21845
+          },
+          "actor_key_layout_sha256": "756f751bbfc884c103da1d0e71527671e98ea0285178723bced54608b0d10156",
+          "completed_games": 21845,
+          "coordinate_rollout_engines": true,
+          "drain_non_neural_rollout": true,
+          "draws": 0,
+          "environment_turns": 1068493,
+          "inference_calls": 2349,
+          "past_policy_available_checkpoints": 1,
+          "past_policy_eligible_games": 0,
+          "past_policy_games": 0,
+          "past_policy_pool_checkpoints": 1,
+          "past_policy_probability": 0.0,
+          "peak_buffer_bytes": 33425408,
+          "policy_decisions": 458850,
+          "reuse_rollout_engines": true,
+          "torch_threads": 6,
+          "wins": 21845
+        },
+        "sampled_score": 0.6894941634241245,
+        "temperature": 0.8,
+        "wins": 15062
+      },
+      {
+        "decisions": 458193,
+        "draws": 0,
+        "games": 21844,
+        "losses": 6855,
+        "rollout": {
+          "actor_key_counts": {
+            "current": 21845
+          },
+          "actor_key_layout_sha256": "452c10444c7eeb651e3af6ac382515c9358343a8b0d849f0c6fe3a05a304f518",
+          "completed_games": 21845,
+          "coordinate_rollout_engines": true,
+          "drain_non_neural_rollout": true,
+          "draws": 0,
+          "environment_turns": 1067979,
+          "inference_calls": 2310,
+          "past_policy_available_checkpoints": 1,
+          "past_policy_eligible_games": 0,
+          "past_policy_games": 0,
+          "past_policy_pool_checkpoints": 1,
+          "past_policy_probability": 0.0,
+          "peak_buffer_bytes": 33425408,
+          "policy_decisions": 458193,
+          "reuse_rollout_engines": true,
+          "torch_threads": 6,
+          "wins": 21845
+        },
+        "sampled_score": 0.6861838491118842,
+        "temperature": 1.0,
+        "wins": 14989
+      },
+      {
+        "decisions": 461011,
+        "draws": 1,
+        "games": 21846,
+        "losses": 6806,
+        "rollout": {
+          "actor_key_counts": {
+            "current": 21846
+          },
+          "actor_key_layout_sha256": "4fc2eb176f576738f9ac6e6b09892a3128cb69c0ce7537bda111722797aab6c8",
+          "completed_games": 21846,
+          "coordinate_rollout_engines": true,
+          "drain_non_neural_rollout": true,
+          "draws": 1,
+          "environment_turns": 1074372,
+          "inference_calls": 2396,
+          "past_policy_available_checkpoints": 1,
+          "past_policy_eligible_games": 0,
+          "past_policy_games": 0,
+          "past_policy_pool_checkpoints": 1,
+          "past_policy_probability": 0.0,
+          "peak_buffer_bytes": 33425408,
+          "policy_decisions": 461011,
+          "reuse_rollout_engines": true,
+          "torch_threads": 6,
+          "wins": 21845
+        },
+        "sampled_score": 0.6884326650187678,
+        "temperature": 1.25,
+        "wins": 15039
+      }
+    ],
+    "decisions": 1378054,
+    "games": 65535,
+    "train_decisions": 1241767,
+    "validation_decisions": 136287
+  },
+  "kind": "monte_carlo_fitted_action_value",
+  "privacy": {
+    "draw_pile_order": false,
+    "observation": "121 public and own-hand features only",
+    "opponent_card_identities": false
+  },
+  "runtime": {
+    "device": "cuda",
+    "elapsed_seconds": 37.32506715600175,
+    "gpu": "NVIDIA GeForce RTX 3090",
+    "python": "3.13.11 (main, Jan 28 2026, 00:01:45) [Clang 21.1.4 ]",
+    "torch": "2.13.0+cu130"
+  },
+  "schema_version": 1,
+  "seed": 88500001,
+  "training_curve": [
+    {
+      "epoch": 1,
+      "train_loss": 0.4626012452338871,
+      "validation_correlation": 0.22275181114673615,
+      "validation_loss": 0.35623494452900356
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.43943683999149424,
+      "validation_correlation": 0.2334706336259842,
+      "validation_loss": 0.35496558083428276
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.43633850663900375,
+      "validation_correlation": 0.22899098694324493,
+      "validation_loss": 0.35550761553976273
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.4352149237927638,
+      "validation_correlation": 0.23019981384277344,
+      "validation_loss": 0.35380875402026707
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.4344504930471119,
+      "validation_correlation": 0.2274775356054306,
+      "validation_loss": 0.3566039535734389
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.43322085393102544,
+      "validation_correlation": 0.23273591697216034,
+      "validation_loss": 0.3517703347735935
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.4318301332624335,
+      "validation_correlation": 0.23017644882202148,
+      "validation_loss": 0.35538140601581997
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.4306131428793857,
+      "validation_correlation": 0.2279680222272873,
+      "validation_loss": 0.3527457382943895
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.42956336940589707,
+      "validation_correlation": 0.22865308821201324,
+      "validation_loss": 0.3504574928018782
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.42797622868889257,
+      "validation_correlation": 0.237997904419899,
+      "validation_loss": 0.3540414141284095
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.42631196191436366,
+      "validation_correlation": 0.2351827770471573,
+      "validation_loss": 0.35624773303667706
+    },
+    {
+      "epoch": 12,
+      "train_loss": 0.4237239862743177,
+      "validation_correlation": 0.23602207005023956,
+      "validation_loss": 0.35651636123657227
+    }
+  ],
+  "warm_parent": {
+    "actor": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0002/mlp/ppo_actor_58.pth",
+      "sha256": "5491f69feb8c72f60979eeb78a862365f7af3a8a70f6dda97cf98d6bcd8166ff"
+    },
+    "actor_optimizer": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0002/mlp/ppo_actor_opt_58.pth",
+      "sha256": "cfab766732d43463d9b2cca3157d71551c0503ee4fdc436046aa88974129c032"
+    },
+    "critic": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0002/mlp/ppo_critic_58.pth",
+      "sha256": "2671f3a98ba54e4d93eb0433774439d8f2689398c2ba1ed02eef51c4d44cdebd"
+    },
+    "critic_optimizer": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0002/mlp/ppo_critic_opt_58.pth",
+      "sha256": "5bca4cee084eca95f56c66963d9fbb5d0ceee7d2558c68282123408f1923226b"
+    }
+  }
+}

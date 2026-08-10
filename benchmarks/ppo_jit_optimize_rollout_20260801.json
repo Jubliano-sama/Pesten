@@ -1,0 +1,33 @@
+{
+  "benchmark": "ppo_jit_optimize_rollout",
+  "decision": "retain traced mutable CPU rollout actor",
+  "development_only": true,
+  "sealed_seeds_or_outcomes_used": false,
+  "workload": {
+    "games": 1024,
+    "pairs": 7,
+    "rollout_device": "cpu",
+    "threads": 8
+  },
+  "optimized_actor_build_seconds": 0.012306232998525957,
+  "paired_speedups": [
+    1.0883025504373063,
+    0.9286547180173689,
+    0.9518851331912395,
+    0.9543297205713912,
+    0.9530525771951488,
+    1.2084377919344127,
+    0.9735728197598464
+  ],
+  "median_speedup": 0.9543297205713912,
+  "median_seconds": {
+    "traced": 1.0353694629993697,
+    "jit_optimized": 1.0743039589979162
+  },
+  "parity": {
+    "environment_turns": true,
+    "collected_decisions": true,
+    "rollout_hash": false,
+    "note": "Actions and trajectories remained aligned, but optimized inference changed retained log probabilities and was slower."
+  }
+}

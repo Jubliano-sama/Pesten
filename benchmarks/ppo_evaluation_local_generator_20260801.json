@@ -1,0 +1,42 @@
+{
+  "benchmark": "ppo_evaluation_local_generator",
+  "decision": "retain global CPU Torch generator reseeding",
+  "development_only": true,
+  "exact_results": true,
+  "grouped_median_speedup": 0.9049938013656132,
+  "paired_median_speedup": 0.935457377261779,
+  "paired_speedups": [
+    0.8968459309991884,
+    0.9133417669395522,
+    0.9575729875840059,
+    0.97432419518364
+  ],
+  "raw_seconds": {
+    "global": [
+      6.108576680002443,
+      6.0718211050007085,
+      6.058990895999159,
+      7.1009662819997175
+    ],
+    "local": [
+      6.811177337000117,
+      6.647917925998627,
+      6.3274455050013785,
+      7.288093959999969
+    ]
+  },
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "workload": {
+    "agent_sets": [
+      [
+        "smart",
+        "rl"
+      ]
+    ],
+    "background_load": "concurrent CPU Puffer trainer",
+    "games": 256,
+    "repeats": 4,
+    "seed_start": 85330001
+  }
+}

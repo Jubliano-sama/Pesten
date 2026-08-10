@@ -1,0 +1,43 @@
+{
+  "benchmark": "ppo_evaluation_direct_sampling",
+  "decision": "sample no-collection evaluation actions with direct normalized multinomial operations",
+  "development_only": true,
+  "exact_results": true,
+  "grouped_median_speedup": 1.0997819257142016,
+  "paired_median_speedup": 1.1124750019769105,
+  "paired_speedups": [
+    1.1843769618977982,
+    1.0272688840662474,
+    1.0532332300727336,
+    1.1717167738810876
+  ],
+  "raw_seconds": {
+    "categorical": [
+      6.442252919001476,
+      4.9205945350004185,
+      4.829417676002777,
+      5.657608412999252
+    ],
+    "direct": [
+      5.439360208998551,
+      4.789977201999136,
+      4.58532596400255,
+      4.828477785002178
+    ]
+  },
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "semantic_contract": "normalization, softmax, multinomial RNG, sampled actions, per-game turns, and winners remain exact",
+  "workload": {
+    "agent_sets": [
+      [
+        "smart",
+        "rl"
+      ]
+    ],
+    "background_load": "concurrent CPU Puffer trainer",
+    "games": 256,
+    "repeats": 4,
+    "seed_start": 85310001
+  }
+}

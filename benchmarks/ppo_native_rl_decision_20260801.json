@@ -1,0 +1,69 @@
+{
+  "benchmark": "ppo_native_rl_decision_precheck",
+  "decision": "accept exact native RL card-decision precheck",
+  "development_only": true,
+  "exact_rollout_hashes": true,
+  "grouped_speedup": 1.056278854995565,
+  "paired_speedup_median": 1.0703554588883228,
+  "paired_speedups": [
+    1.0464363621913566,
+    0.8541175728504196,
+    1.3589312445354655,
+    1.1046753422562046,
+    1.1401637621062681,
+    1.0703554588883228,
+    1.0091371065766073
+  ],
+  "raw_seconds": [
+    {
+      "native": 1.926409967998552,
+      "seed": 85150011,
+      "vector": 2.0158654390015727
+    },
+    {
+      "native": 2.1866798299997754,
+      "seed": 85150012,
+      "vector": 1.8676816690003761
+    },
+    {
+      "native": 1.2893402150002657,
+      "seed": 85150013,
+      "vector": 1.7521247029999358
+    },
+    {
+      "native": 1.155806806000328,
+      "seed": 85150014,
+      "vector": 1.276791279000463
+    },
+    {
+      "native": 1.1944799960001546,
+      "seed": 85150015,
+      "vector": 1.3619028060002165
+    },
+    {
+      "native": 1.2710891580009047,
+      "seed": 85150016,
+      "vector": 1.3605172190000303
+    },
+    {
+      "native": 1.3462239820000832,
+      "seed": 85150017,
+      "vector": 1.3585245739996026
+    }
+  ],
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "semantic_note": "The native precheck deliberately preserves the current uint8 low-bit behavior for even duplicate counts; changing that behavior is outside this performance change.",
+  "timing_caveat": "A concurrent trainer caused visible pair-to-pair load variation; the alternating paired median is the selection statistic.",
+  "workload": {
+    "games": 2048,
+    "pairs": 7,
+    "players": 2,
+    "policies": [
+      "smart",
+      "rl"
+    ],
+    "rollout_device": "cpu",
+    "threads": 8
+  }
+}

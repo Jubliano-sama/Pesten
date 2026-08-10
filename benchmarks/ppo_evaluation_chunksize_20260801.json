@@ -1,0 +1,48 @@
+{
+  "benchmark": "ppo_evaluation_chunksize",
+  "decision": "schedule eight evaluation chunks per worker",
+  "development_only": true,
+  "exact_results": true,
+  "median_seconds": {
+    "16": 14.089382163499976,
+    "32": 14.07627415999923,
+    "4": 15.20921858049951,
+    "8": 13.08926292850083
+  },
+  "raw_seconds": {
+    "16": [
+      15.838322185001743,
+      12.34044214199821
+    ],
+    "32": [
+      12.851368954998179,
+      15.30117936500028
+    ],
+    "4": [
+      15.75996511899939,
+      14.65847204199963
+    ],
+    "8": [
+      13.269389563000004,
+      12.909136294001655
+    ]
+  },
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "selected_chunks_per_worker": 8,
+  "speedup_vs_four_chunks": 1.1619637252131526,
+  "workload": {
+    "agent_sets": [
+      [
+        "smart",
+        "rl"
+      ]
+    ],
+    "background_load": "concurrent CPU Puffer trainer",
+    "games": 4000,
+    "process_start_method": "forkserver",
+    "repeats": 2,
+    "seed_start": 85320001,
+    "workers": 8
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "benchmark": "ppo_deferred_metric_transfers",
+  "decision": "retain immediate per-update metric transfers",
+  "development_only": true,
+  "exact_final_model_states": true,
+  "grouped_speedup": 1.005826431173703,
+  "paired_speedup_median": 1.0122163290025508,
+  "paired_speedups": [
+    1.1492373090224774,
+    1.079466086510803,
+    1.0122163290025508,
+    1.0039157803081613,
+    1.0238166107273492,
+    0.9985013268381043,
+    1.0133619126191307,
+    1.025037801951858,
+    0.9175768094891957,
+    1.0003860946838379,
+    1.0003232640517699
+  ],
+  "sealed_seeds_or_outcomes_used": false,
+  "workload": {
+    "compiled_updates": true,
+    "pairs": 11,
+    "rollout_device": "cpu",
+    "training_device": "cuda",
+    "gpu": "NVIDIA GeForce RTX 3090"
+  }
+}

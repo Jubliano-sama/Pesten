@@ -1,0 +1,104 @@
+{
+  "agent_sets": [
+    [
+      "random",
+      "rl"
+    ],
+    [
+      "random",
+      "rl"
+    ],
+    [
+      "random",
+      "rl"
+    ],
+    [
+      "random",
+      "rl"
+    ],
+    [
+      "random",
+      "rl"
+    ],
+    [
+      "random",
+      "rl"
+    ],
+    [
+      "random",
+      "rl"
+    ],
+    [
+      "random",
+      "rl"
+    ],
+    [
+      "smart",
+      "rl"
+    ],
+    [
+      "self",
+      "self",
+      "rl"
+    ]
+  ],
+  "elapsed_seconds": 33.60706979800307,
+  "episodes_per_iteration": 1024,
+  "hyperparameters": {
+    "clip": 0.2,
+    "learning_rate": 0.0001,
+    "past_policy_probability": 0.0,
+    "temperature": 0.8,
+    "updates_per_iteration": 4
+  },
+  "iterations": 32,
+  "kind": "warm_mlp_ppo_segment",
+  "latest": {
+    "actor": {
+      "path": "/home/tommie/Pesten/live_training/ceiling_break/random_curriculum_b/ppo_actor_32.pth",
+      "sha256": "765deb24e8655e45b0fae1b00820ecfc99564490a17c2467b5ebe2cda57471fa"
+    },
+    "actor_optimizer": {
+      "path": "/home/tommie/Pesten/live_training/ceiling_break/random_curriculum_b/ppo_actor_opt_32.pth",
+      "sha256": "792fe8332e72e72fc2a804a730e501d9ebbda84e4faa8e35bdf307f34713b449"
+    },
+    "critic": {
+      "path": "/home/tommie/Pesten/live_training/ceiling_break/random_curriculum_b/ppo_critic_32.pth",
+      "sha256": "fc058dfa441911f4fef7b5fe8c252684dd68bf6a75fdc67f140531cdca2bc6a8"
+    },
+    "critic_optimizer": {
+      "path": "/home/tommie/Pesten/live_training/ceiling_break/random_curriculum_b/ppo_critic_opt_32.pth",
+      "sha256": "bb4fb04ff965532fdbf82a344192f78aad2ce23782617a31c27277f1012be87f"
+    }
+  },
+  "runtime": {
+    "actor_device": "cuda",
+    "compile_updates": true,
+    "cuda": true,
+    "device": "cuda",
+    "python": "3.13.11 (main, Jan 28 2026, 00:01:45) [Clang 21.1.4 ]",
+    "rollout_device": "cpu",
+    "torch": "2.13.0+cu130",
+    "torch_threads": 6
+  },
+  "schema_version": 1,
+  "seed": 2026080202,
+  "warm_parent": {
+    "actor": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0002/mlp/ppo_actor_58.pth",
+      "sha256": "c7b99156b1e1a29ecbe40556f9282f0cdd52c1d9074826de0e5eadf8e409783a"
+    },
+    "actor_optimizer": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0002/mlp/ppo_actor_opt_58.pth",
+      "sha256": "9ab4db079df73ba5bdd4594431b808babf76713a1c4c40869a0fae5c8b701305"
+    },
+    "critic": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0002/mlp/ppo_critic_58.pth",
+      "sha256": "8d8f205b37d757f77bf645e4ee72925e14cc9ba95cf5f64ece0279f5c43b1d6a"
+    },
+    "critic_optimizer": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0002/mlp/ppo_critic_opt_58.pth",
+      "sha256": "fd8cfad76492e9d40836194bbb3781b9fd767ca32249acb6b138ae56b2abd82b"
+    }
+  }
+}

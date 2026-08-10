@@ -1,0 +1,27 @@
+{
+  "benchmark": "ppo_exponential_race_sampling",
+  "decision": "retain torch.multinomial",
+  "development_only": true,
+  "sealed_seeds_or_outcomes_used": false,
+  "workload": {
+    "games": 1024,
+    "pairs": 7,
+    "rollout_device": "cpu",
+    "hybrid_cuda_actor_threshold": 64,
+    "torch_threads": 6
+  },
+  "paired_speedups": [
+    1.2234894021729443,
+    1.0025073014412018,
+    1.0160348516260722,
+    1.0292902996353916,
+    1.0184353900954426,
+    1.0171821246541655,
+    1.0077951825394726
+  ],
+  "median_paired_speedup": 1.0171821246541655,
+  "exact_rollout_hashes": true,
+  "exact_rng_state_unit_cases": true,
+  "material_speedup_threshold": 1.02,
+  "note": "The shortcut duplicates PyTorch's one-sample exponential-race implementation; the sub-threshold gain does not justify coupling production code to that internal behavior."
+}

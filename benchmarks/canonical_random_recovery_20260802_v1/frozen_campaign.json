@@ -1,0 +1,738 @@
+{
+  "bootstrap": {
+    "algorithm": {
+      "draw_score": 0,
+      "lower_quantile": 0.025,
+      "rng": "numpy.random.RandomState MT19937",
+      "samples": 100000,
+      "unit": "pair mean of two binary wins"
+    },
+    "audit_seed_interval": {
+      "count": 1,
+      "end_exclusive": 4028607051,
+      "start_inclusive": 4028607050
+    },
+    "confirmation_seed_interval": {
+      "count": 1,
+      "end_exclusive": 4028607050,
+      "start_inclusive": 4028607049
+    },
+    "development_seed_interval": {
+      "count": 1,
+      "end_exclusive": 4028607049,
+      "start_inclusive": 4028607048
+    }
+  },
+  "calibration": {
+    "gpu_smoke_deals": {
+      "count": 8,
+      "end_exclusive": 4028451547,
+      "start_inclusive": 4028451539
+    },
+    "initialization": {
+      "count": 1,
+      "end_exclusive": 4028451548,
+      "start_inclusive": 4028451547
+    },
+    "native_smoke_requires_cuda": true,
+    "only_permitted_phase_zero_rollouts": true,
+    "parity_deals": {
+      "count": 8,
+      "end_exclusive": 4028451539,
+      "start_inclusive": 4028451531
+    },
+    "parity_required_before_training": true
+  },
+  "campaign_id": "canonical_random_recovery_20260802_v1",
+  "candidate_training": {
+    "checkpoint_created": false,
+    "promotable": false,
+    "started": false
+  },
+  "canonical_random_opponent": {
+    "deal_rng_batched": "BatchedPesten.rngs[game_index] RandomState(deal_seed)",
+    "deal_rng_scalar": "np.random.seed(deal_seed)",
+    "game_rng": "per-game numpy.random.RandomState(deal_seed), shared by deal, hand shuffle, and recycle",
+    "id": "randomAgent.AgentRandom-canonical-v1",
+    "invalid_audited_uniform_substitution": true,
+    "name": "canonical randomAgent.AgentRandom",
+    "opponent_kind": "randomAgent.AgentRandom",
+    "opponent_rng_bank": false,
+    "opponent_rng_seed": null,
+    "policy_visibility": "canonical opponent RNG state never crosses the DecisionInput boundary",
+    "scalar_source": "randomAgent.AgentRandom",
+    "shared_numpy_stream": [
+      "initial deck shuffle and deal",
+      "AgentRandom hand shuffle before every playCard call",
+      "discard-pile recycle shuffle"
+    ],
+    "suit_rng": "per-game random.Random(deal_seed).randint(0, 3)",
+    "suit_rng_batched": "random.Random(deal_seed).randint(0, 3)",
+    "suit_rng_scalar": "random.seed(deal_seed); randomAgent.randint(0, 3)"
+  },
+  "collision_scan": {
+    "artifact_content_fingerprint_sha256": "f646ea8f324f7674ab981e60390b47f2909cbe905bccdc510e05f235a7dad0c8",
+    "candidate_gap": {
+      "count": 1431138,
+      "end_exclusive": 4029882669,
+      "namespace": "recovery_candidate_gap",
+      "source": "full historical artifact collision scan 2026-08-02",
+      "start_inclusive": 4028451531
+    },
+    "candidate_gap_is_clean": true,
+    "full_ordered_interval_fingerprint_sha256": "9428cb00332776fd1b0ac7855ba4a77cf7b04e61c8e7da7d9720d416ffded8af",
+    "path": "benchmarks/canonical_random_recovery_20260802_v1/collision_scan.json"
+  },
+  "confirmation": {
+    "bootstrap_samples": 100000,
+    "bootstrap_seed_interval": {
+      "count": 1,
+      "end_exclusive": 4028607050,
+      "start_inclusive": 4028607049
+    },
+    "draw_score": 0,
+    "games": 5000,
+    "on_failure": "exclusive confirmation_failed.json and no frozen_winner",
+    "one_use": true,
+    "pair_interval": {
+      "count": 2500,
+      "end_exclusive": 4028607048,
+      "start_inclusive": 4028604548
+    },
+    "pair_score": "mean of two binary candidate win indicators",
+    "pairs": 2500,
+    "required_lower_95_confidence_bound": 0.8,
+    "required_raw_win_rate": 0.8,
+    "seat_balanced": true
+  },
+  "created_at_utc": "2026-08-02T03:05:04.795345+00:00",
+  "development": {
+    "banks": {
+      "checkpoint_01": {
+        "games": 1000,
+        "one_use": true,
+        "pair_interval": {
+          "count": 500,
+          "end_exclusive": 4028602048,
+          "start_inclusive": 4028601548
+        },
+        "pairs": 500,
+        "seat_balanced": true
+      },
+      "checkpoint_02": {
+        "games": 1000,
+        "one_use": true,
+        "pair_interval": {
+          "count": 500,
+          "end_exclusive": 4028602548,
+          "start_inclusive": 4028602048
+        },
+        "pairs": 500,
+        "seat_balanced": true
+      },
+      "checkpoint_03": {
+        "games": 1000,
+        "one_use": true,
+        "pair_interval": {
+          "count": 500,
+          "end_exclusive": 4028603048,
+          "start_inclusive": 4028602548
+        },
+        "pairs": 500,
+        "seat_balanced": true
+      },
+      "checkpoint_04": {
+        "games": 1000,
+        "one_use": true,
+        "pair_interval": {
+          "count": 500,
+          "end_exclusive": 4028603548,
+          "start_inclusive": 4028603048
+        },
+        "pairs": 500,
+        "seat_balanced": true
+      },
+      "checkpoint_05": {
+        "games": 1000,
+        "one_use": true,
+        "pair_interval": {
+          "count": 500,
+          "end_exclusive": 4028604048,
+          "start_inclusive": 4028603548
+        },
+        "pairs": 500,
+        "seat_balanced": true
+      },
+      "checkpoint_06": {
+        "games": 1000,
+        "one_use": true,
+        "pair_interval": {
+          "count": 500,
+          "end_exclusive": 4028604548,
+          "start_inclusive": 4028604048
+        },
+        "pairs": 500,
+        "seat_balanced": true
+      }
+    },
+    "bootstrap_seed_interval": {
+      "count": 1,
+      "end_exclusive": 4028607049,
+      "start_inclusive": 4028607048
+    },
+    "freeze_exactly_one_development_winner": true,
+    "rank_one_raw_win": true,
+    "rank_tiebreakers": [
+      "higher pair-bootstrap lower 95% confidence bound",
+      "fewer training games",
+      "lexicographically smaller checkpoint SHA256"
+    ]
+  },
+  "final_audit": {
+    "bootstrap_samples": 100000,
+    "bootstrap_seed_interval": {
+      "count": 1,
+      "end_exclusive": 4028607051,
+      "start_inclusive": 4028607050
+    },
+    "claim_path": "benchmarks/canonical_random_recovery_20260802_v1/final_audit_claim.json",
+    "draw_score": 0,
+    "games": 10000,
+    "one_use": true,
+    "pair_interval": {
+      "count": 5000,
+      "end_exclusive": 4028612051,
+      "start_inclusive": 4028607051
+    },
+    "pair_score": "mean of two binary candidate win indicators",
+    "pairs": 5000,
+    "required_lower_95_confidence_bound": 0.8,
+    "required_raw_win_rate": 0.8,
+    "result_path": "benchmarks/canonical_random_recovery_20260802_v1/final_audit_result.json",
+    "seat_balanced": true
+  },
+  "format": "pesten-canonical-random-recovery-frozen-campaign-v1",
+  "invalid_run_attestation": {
+    "diagnostic_record": {
+      "interpretation": "existing old-random diagnostic only; not reused as a canonical development, confirmation, or audit result",
+      "path": "live_training/measurements/puffer_cycle_0005_vs_old_random.json",
+      "percentage": "63.2%",
+      "score": 0.632,
+      "sha256": "021b0f7e509b1193062eee4ec5a0bb7f6276d8de9487d9cd4ebddfd43666539e"
+    },
+    "old_random_specialist_development_score": 0.988,
+    "old_random_specialist_development_score_interpretation": "98.8 percent against noncanonical audited-uniform random; not canonical AgentRandom evidence and not promotion evidence"
+  },
+  "phase_zero_bootstrap": {
+    "parity": {
+      "cases": [
+        {
+          "absolute_game_index": 0,
+          "batched_trace_sha256": "b7cf70192387bb7059dc43a1c5cf2a3c075ba5e6f00fb1bc7f7fab86646497f8",
+          "deal_seed": 4028451531,
+          "initial_deal": {
+            "hands": [
+              [
+                23,
+                38,
+                14,
+                3,
+                34,
+                30,
+                48
+              ],
+              [
+                47,
+                29,
+                2,
+                10,
+                28,
+                41,
+                0
+              ]
+            ],
+            "opening_card": 32
+          },
+          "mismatches": [],
+          "passed": true,
+          "recurrent_reset_verified": true,
+          "scalar_trace_sha256": "b7cf70192387bb7059dc43a1c5cf2a3c075ba5e6f00fb1bc7f7fab86646497f8",
+          "turn_count": 19,
+          "winner": 1
+        },
+        {
+          "absolute_game_index": 1,
+          "batched_trace_sha256": "10c2d2a7553c681d673cd5cebd1e4e79b69d1c2bb27fbfd8bd6a5286fcf26004",
+          "deal_seed": 4028451532,
+          "initial_deal": {
+            "hands": [
+              [
+                20,
+                7,
+                36,
+                32,
+                46,
+                4,
+                15
+              ],
+              [
+                41,
+                49,
+                19,
+                23,
+                42,
+                31,
+                49
+              ]
+            ],
+            "opening_card": 47
+          },
+          "mismatches": [],
+          "passed": true,
+          "recurrent_reset_verified": true,
+          "scalar_trace_sha256": "10c2d2a7553c681d673cd5cebd1e4e79b69d1c2bb27fbfd8bd6a5286fcf26004",
+          "turn_count": 76,
+          "winner": 0
+        },
+        {
+          "absolute_game_index": 2,
+          "batched_trace_sha256": "5b51a9ba1ad32e4f8220d24e696810105b022ca5f27c6f0448ba69dcb63c8f9f",
+          "deal_seed": 4028451533,
+          "initial_deal": {
+            "hands": [
+              [
+                19,
+                12,
+                11,
+                20,
+                49,
+                37,
+                40
+              ],
+              [
+                41,
+                17,
+                0,
+                6,
+                7,
+                48,
+                10
+              ]
+            ],
+            "opening_card": 15
+          },
+          "mismatches": [],
+          "passed": true,
+          "recurrent_reset_verified": true,
+          "scalar_trace_sha256": "5b51a9ba1ad32e4f8220d24e696810105b022ca5f27c6f0448ba69dcb63c8f9f",
+          "turn_count": 113,
+          "winner": 1
+        },
+        {
+          "absolute_game_index": 3,
+          "batched_trace_sha256": "fe676b1616554848254bd9c54d78f4e62c0e992bf7105255ab8052bc4d40bbee",
+          "deal_seed": 4028451534,
+          "initial_deal": {
+            "hands": [
+              [
+                0,
+                33,
+                22,
+                27,
+                1,
+                23,
+                49
+              ],
+              [
+                36,
+                30,
+                49,
+                37,
+                10,
+                43,
+                5
+              ]
+            ],
+            "opening_card": 38
+          },
+          "mismatches": [],
+          "passed": true,
+          "recurrent_reset_verified": true,
+          "scalar_trace_sha256": "fe676b1616554848254bd9c54d78f4e62c0e992bf7105255ab8052bc4d40bbee",
+          "turn_count": 268,
+          "winner": 0
+        },
+        {
+          "absolute_game_index": 4,
+          "batched_trace_sha256": "a99a3a56ece72421f3c11e6ab6eecbc933e7a9c3d4a185fd5c7a90043b98bcb6",
+          "deal_seed": 4028451535,
+          "initial_deal": {
+            "hands": [
+              [
+                24,
+                48,
+                35,
+                40,
+                38,
+                8,
+                2
+              ],
+              [
+                42,
+                46,
+                22,
+                7,
+                32,
+                26,
+                21
+              ]
+            ],
+            "opening_card": 11
+          },
+          "mismatches": [],
+          "passed": true,
+          "recurrent_reset_verified": true,
+          "scalar_trace_sha256": "a99a3a56ece72421f3c11e6ab6eecbc933e7a9c3d4a185fd5c7a90043b98bcb6",
+          "turn_count": 36,
+          "winner": 1
+        },
+        {
+          "absolute_game_index": 5,
+          "batched_trace_sha256": "73f6c4a4747d0851a2246b2de30ab76e7550d6ecc15e1dbccba2345320911077",
+          "deal_seed": 4028451536,
+          "initial_deal": {
+            "hands": [
+              [
+                17,
+                16,
+                22,
+                48,
+                37,
+                31,
+                19
+              ],
+              [
+                10,
+                44,
+                18,
+                1,
+                48,
+                14,
+                5
+              ]
+            ],
+            "opening_card": 4
+          },
+          "mismatches": [],
+          "passed": true,
+          "recurrent_reset_verified": true,
+          "scalar_trace_sha256": "73f6c4a4747d0851a2246b2de30ab76e7550d6ecc15e1dbccba2345320911077",
+          "turn_count": 150,
+          "winner": 0
+        },
+        {
+          "absolute_game_index": 6,
+          "batched_trace_sha256": "82b96aae47bb6a49eab720b94d370e4e912f503129cb9ad1f825600f52dc5472",
+          "deal_seed": 4028451537,
+          "initial_deal": {
+            "hands": [
+              [
+                47,
+                20,
+                14,
+                7,
+                0,
+                29,
+                23
+              ],
+              [
+                2,
+                28,
+                17,
+                40,
+                36,
+                27,
+                26
+              ]
+            ],
+            "opening_card": 38
+          },
+          "mismatches": [],
+          "passed": true,
+          "recurrent_reset_verified": true,
+          "scalar_trace_sha256": "82b96aae47bb6a49eab720b94d370e4e912f503129cb9ad1f825600f52dc5472",
+          "turn_count": 183,
+          "winner": 1
+        },
+        {
+          "absolute_game_index": 7,
+          "batched_trace_sha256": "7f9808fca7074982fdea1cefcc82d872a79aef48e39e1bf10fabfb7baacab98e",
+          "deal_seed": 4028451538,
+          "initial_deal": {
+            "hands": [
+              [
+                33,
+                42,
+                43,
+                47,
+                31,
+                6,
+                44
+              ],
+              [
+                48,
+                20,
+                22,
+                4,
+                45,
+                49,
+                37
+              ]
+            ],
+            "opening_card": 38
+          },
+          "mismatches": [],
+          "passed": true,
+          "recurrent_reset_verified": true,
+          "scalar_trace_sha256": "7f9808fca7074982fdea1cefcc82d872a79aef48e39e1bf10fabfb7baacab98e",
+          "turn_count": 59,
+          "winner": 0
+        }
+      ],
+      "checked_fields": [
+        "initial_deal",
+        "actions",
+        "winner",
+        "turn_count",
+        "public_events",
+        "trajectory_actions",
+        "trajectory_legal_actions",
+        "trajectory_rewards",
+        "safe_history_sha256",
+        "recurrent_reset_or_state"
+      ],
+      "metadata": {
+        "decisions": {
+          "canonical_random": 544
+        },
+        "games": {
+          "canonical_random": 8
+        },
+        "total_turns": 904,
+        "trajectories": 8
+      },
+      "name": "canonical_AgentRandom_scalar_batched_exact_parity",
+      "opponent": {
+        "deal_rng_batched": "BatchedPesten.rngs[game_index] RandomState(deal_seed)",
+        "deal_rng_scalar": "np.random.seed(deal_seed)",
+        "game_rng": "per-game numpy.random.RandomState(deal_seed), shared by deal, hand shuffle, and recycle",
+        "id": "randomAgent.AgentRandom-canonical-v1",
+        "invalid_audited_uniform_substitution": true,
+        "name": "canonical randomAgent.AgentRandom",
+        "opponent_kind": "randomAgent.AgentRandom",
+        "opponent_rng_bank": false,
+        "opponent_rng_seed": null,
+        "policy_visibility": "canonical opponent RNG state never crosses the DecisionInput boundary",
+        "scalar_source": "randomAgent.AgentRandom",
+        "shared_numpy_stream": [
+          "initial deck shuffle and deal",
+          "AgentRandom hand shuffle before every playCard call",
+          "discard-pile recycle shuffle"
+        ],
+        "suit_rng": "per-game random.Random(deal_seed).randint(0, 3)",
+        "suit_rng_batched": "random.Random(deal_seed).randint(0, 3)",
+        "suit_rng_scalar": "random.seed(deal_seed); randomAgent.randint(0, 3)"
+      },
+      "passed": true
+    },
+    "passed": true,
+    "privacy": {
+      "allowed": [
+        "private observation",
+        "legal actions",
+        "public events"
+      ],
+      "forbidden": [
+        "opponent hand identity",
+        "draw pile order",
+        "opponent RNG state",
+        "privileged critic",
+        "teacher logits",
+        "imitation data"
+      ],
+      "passed": true,
+      "policy_input": "DecisionInput only",
+      "privacy_fingerprint_sha256": "3456b6427d0a745c11d740fcd82cbcbfc49cab7c3083c34540a060bbdb78ce5c"
+    }
+  },
+  "seed_registry": {
+    "allocation_order": [
+      "calibration_parity_deals",
+      "calibration_gpu_smoke_deals",
+      "calibration_initialization",
+      "training_canonical_deals",
+      "development_screening_canonical_01",
+      "development_screening_canonical_02",
+      "development_screening_canonical_03",
+      "development_screening_canonical_04",
+      "development_screening_canonical_05",
+      "development_screening_canonical_06",
+      "confirmation_canonical_deals",
+      "bootstrap_development",
+      "bootstrap_confirmation",
+      "bootstrap_final_audit",
+      "final_audit_canonical_deals"
+    ],
+    "intervals": {
+      "bootstrap_confirmation": {
+        "count": 1,
+        "end_exclusive": 4028607050,
+        "start_inclusive": 4028607049
+      },
+      "bootstrap_development": {
+        "count": 1,
+        "end_exclusive": 4028607049,
+        "start_inclusive": 4028607048
+      },
+      "bootstrap_final_audit": {
+        "count": 1,
+        "end_exclusive": 4028607051,
+        "start_inclusive": 4028607050
+      },
+      "calibration_gpu_smoke_deals": {
+        "count": 8,
+        "end_exclusive": 4028451547,
+        "start_inclusive": 4028451539
+      },
+      "calibration_initialization": {
+        "count": 1,
+        "end_exclusive": 4028451548,
+        "start_inclusive": 4028451547
+      },
+      "calibration_parity_deals": {
+        "count": 8,
+        "end_exclusive": 4028451539,
+        "start_inclusive": 4028451531
+      },
+      "confirmation_canonical_deals": {
+        "count": 2500,
+        "end_exclusive": 4028607048,
+        "start_inclusive": 4028604548
+      },
+      "development_screening_canonical_01": {
+        "count": 500,
+        "end_exclusive": 4028602048,
+        "start_inclusive": 4028601548
+      },
+      "development_screening_canonical_02": {
+        "count": 500,
+        "end_exclusive": 4028602548,
+        "start_inclusive": 4028602048
+      },
+      "development_screening_canonical_03": {
+        "count": 500,
+        "end_exclusive": 4028603048,
+        "start_inclusive": 4028602548
+      },
+      "development_screening_canonical_04": {
+        "count": 500,
+        "end_exclusive": 4028603548,
+        "start_inclusive": 4028603048
+      },
+      "development_screening_canonical_05": {
+        "count": 500,
+        "end_exclusive": 4028604048,
+        "start_inclusive": 4028603548
+      },
+      "development_screening_canonical_06": {
+        "count": 500,
+        "end_exclusive": 4028604548,
+        "start_inclusive": 4028604048
+      },
+      "final_audit_canonical_deals": {
+        "count": 5000,
+        "end_exclusive": 4028612051,
+        "start_inclusive": 4028607051
+      },
+      "training_canonical_deals": {
+        "count": 150000,
+        "end_exclusive": 4028601548,
+        "start_inclusive": 4028451548
+      }
+    },
+    "old_diagnostic_deal_interval": {
+      "count": 250,
+      "end_exclusive": 81000251,
+      "start_inclusive": 81000001
+    },
+    "opponent_rng_bank": "prohibited",
+    "path": "benchmarks/canonical_random_recovery_20260802_v1/seed_registry.jsonl",
+    "retired_invalid_campaign_ranges": "prohibited in registry"
+  },
+  "source_sha256": {
+    "batched_pesten.py": "b6c6f50034b15ef82f78a0722b11604bcb204b0a2df540d2e9520d67f93c7cb2",
+    "canonical_random_recovery.py": "5743b76ba5a4a8c8eac03c546934c03debd43340e05c665e6fbc414e5649621c",
+    "deck.py": "1a1374f09b824f72b8f7589613e94c593a4ce55d3afd50f21b1bf2891847d41b",
+    "game.py": "2e70ea75361170e0f87428f22649236ed8f8bdec8576b33d1148b2c3ed346a5b",
+    "randomAgent.py": "9bcb46d56d7108ef9bfb41ea01b68719087188564bc07c0f484d7f5214ed5a55",
+    "specialist_seed_registry.py": "71dd1c4738690d0ddd21ad7d827a8df9a39749f48ad7ac1c87f2b712f38e45c8",
+    "temporal_batched_speed.py": "d7c0e32a4b3af380875deab70d817b8fa3b8354aba1acb75b2ebc6d72ffc98ee",
+    "temporal_observation.py": "1a61572898833426eb6d511099dd1446fc09253b6d8d70d71ebcc0f81901fc34",
+    "temporal_puffer_agent.py": "0b53499a7bcb70c172354d8950bacfe2f89f4cf57cd5ab220c18de93fd799af6",
+    "temporal_puffer_v4.py": "f40629869fbdc47b43affa80c3c8f8d202669536aa107cd70ac7a8012b12b810"
+  },
+  "training": {
+    "adaptation_after_start": "forbidden",
+    "deal_interval": {
+      "count": 150000,
+      "end_exclusive": 4028601548,
+      "start_inclusive": 4028451548
+    },
+    "default_output_dir": "live_training/canonical_random_recovery_20260802_v1",
+    "games": 150000,
+    "lineage": {
+      "parent_is_not_promotable_for_canonical_random": true,
+      "random_initialized": false,
+      "reward_only_parent": true,
+      "source_opponent": "audited uniform random",
+      "source_opponent_invalid_for_canonical_selection": true
+    },
+    "microbatch_games": 128,
+    "model": {
+      "class": "NativePufferTemporalPolicy",
+      "hidden_size": 96,
+      "num_layers": 1
+    },
+    "opponent_rng_bank": false,
+    "opponent_schedule": [
+      "canonical_random"
+    ],
+    "optimizer": {
+      "class": "torch.optim.Adam",
+      "fresh_state_required": true,
+      "learning_rate": 0.0003,
+      "parent_optimizer_state": "prohibited"
+    },
+    "ppo_epochs": 4,
+    "restart_policy": "fail closed; exclusive output directory",
+    "reward_only": true,
+    "scheduled_checkpoints_games": [
+      25000,
+      50000,
+      75000,
+      100000,
+      125000,
+      150000
+    ],
+    "status": "precommitted_not_started",
+    "wall_clock_cap_seconds": 18000,
+    "warm_start": {
+      "checkpoint_path": "live_training/random_specialist_20260802/checkpoint_10845.pt",
+      "checkpoint_sha256": "58fcc1705f6481adb6f7aff7b28959d9554640467635bd60a0a027d1b99e8948",
+      "load": "model_state_dict only",
+      "optimizer": "fresh optimizer; parent optimizer_state_dict prohibited",
+      "parent_manifest_path": "live_training/random_specialist_20260802/checkpoint_10845.json",
+      "parent_manifest_sha256": "47b3f6d4d6e970555d5ae0b817ab42c9bd447f1da435f76cdf4efb5c6a30c8d0"
+    }
+  }
+}

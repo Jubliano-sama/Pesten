@@ -1,0 +1,259 @@
+{
+  "benchmark": "ppo_rollout_buffer_reuse",
+  "decision": "retain fresh rollout sample-buffer allocation",
+  "development_only": true,
+  "exact_rollout_hashes": true,
+  "grouped_speedup": 0.99616438407775,
+  "paired_speedup_median": 1.0064258520371663,
+  "paired_speedups": [
+    1.0064258520371663,
+    0.920005099934001,
+    0.9972784962135882,
+    0.9834687000206772,
+    0.9553514775759041,
+    1.00841242844622,
+    1.105810584236189,
+    1.1457189158112722,
+    1.1024976791702152
+  ],
+  "runs": {
+    "allocate": [
+      {
+        "environment_turns": 54468,
+        "inference_calls": 581,
+        "peak_buffer_bytes": 26764240,
+        "policy_decisions": 28927,
+        "rollout_sha256": "38fc509e414caeaf76bce1e82005cf7b02f955513377030b8538800d5a09828a",
+        "seconds": 1.6247807039999316,
+        "seed": 91610101
+      },
+      {
+        "environment_turns": 54280,
+        "inference_calls": 583,
+        "peak_buffer_bytes": 26764240,
+        "policy_decisions": 29023,
+        "rollout_sha256": "7cb20b563f7dc65f44dde9b0fe4b257c3b151e8f948af4441ebe0f2e678de47f",
+        "seconds": 1.3820963660000416,
+        "seed": 91610102
+      },
+      {
+        "environment_turns": 52748,
+        "inference_calls": 541,
+        "peak_buffer_bytes": 26764240,
+        "policy_decisions": 28289,
+        "rollout_sha256": "497c466a0adc798d6c019149edf9464a17878272d5efd700e691f6a3c4e487fa",
+        "seconds": 1.4599305040010222,
+        "seed": 91610103
+      },
+      {
+        "environment_turns": 52708,
+        "inference_calls": 587,
+        "peak_buffer_bytes": 26764240,
+        "policy_decisions": 27587,
+        "rollout_sha256": "3347c4877256444128287f76e4a49b58088941f3fc3a1420448dee0d361c334f",
+        "seconds": 1.496508198999436,
+        "seed": 91610104
+      },
+      {
+        "environment_turns": 54687,
+        "inference_calls": 571,
+        "peak_buffer_bytes": 26764240,
+        "policy_decisions": 28814,
+        "rollout_sha256": "e1c7af637a57c04bb52217a97c80daacb5e8c53da979abf9f32958fe888c24a3",
+        "seconds": 1.4930705160004436,
+        "seed": 91610105
+      },
+      {
+        "environment_turns": 53346,
+        "inference_calls": 570,
+        "peak_buffer_bytes": 26764240,
+        "policy_decisions": 27867,
+        "rollout_sha256": "b67297cc2f035b2b0e2959dc6ad1a3a58e05a4bdd76028201b004d625ef21f86",
+        "seconds": 1.5831574470012129,
+        "seed": 91610106
+      },
+      {
+        "environment_turns": 55950,
+        "inference_calls": 562,
+        "peak_buffer_bytes": 26764240,
+        "policy_decisions": 29782,
+        "rollout_sha256": "33bde07bc280fb39d6e27c3c326e2ca786f8cec49ab5dc6e19946581a8ab2665",
+        "seconds": 1.4506432979997044,
+        "seed": 91610107
+      },
+      {
+        "environment_turns": 53327,
+        "inference_calls": 586,
+        "peak_buffer_bytes": 26764240,
+        "policy_decisions": 28208,
+        "rollout_sha256": "dd631cfcc7f48e1669d25567f9221b2a6e4fa0cb9caae169131dda3ad6cfce63",
+        "seconds": 1.65642639699945,
+        "seed": 91610108
+      },
+      {
+        "environment_turns": 54612,
+        "inference_calls": 563,
+        "peak_buffer_bytes": 26764240,
+        "policy_decisions": 28995,
+        "rollout_sha256": "8d6069879cab10be61f9bb84f2170f5decb1d1892e0703470668a489c7b6668e",
+        "seconds": 1.5574764169996342,
+        "seed": 91610109
+      }
+    ],
+    "reuse": [
+      {
+        "environment_turns": 54468,
+        "inference_calls": 581,
+        "peak_buffer_bytes": 26764240,
+        "policy_decisions": 28927,
+        "rollout_sha256": "38fc509e414caeaf76bce1e82005cf7b02f955513377030b8538800d5a09828a",
+        "seconds": 1.6144067650002398,
+        "seed": 91610101
+      },
+      {
+        "environment_turns": 54280,
+        "inference_calls": 583,
+        "peak_buffer_bytes": 26764240,
+        "policy_decisions": 29023,
+        "rollout_sha256": "7cb20b563f7dc65f44dde9b0fe4b257c3b151e8f948af4441ebe0f2e678de47f",
+        "seconds": 1.5022703310005454,
+        "seed": 91610102
+      },
+      {
+        "environment_turns": 52748,
+        "inference_calls": 541,
+        "peak_buffer_bytes": 26764240,
+        "policy_decisions": 28289,
+        "rollout_sha256": "497c466a0adc798d6c019149edf9464a17878272d5efd700e691f6a3c4e487fa",
+        "seconds": 1.463914552999995,
+        "seed": 91610103
+      },
+      {
+        "environment_turns": 52708,
+        "inference_calls": 587,
+        "peak_buffer_bytes": 26764240,
+        "policy_decisions": 27587,
+        "rollout_sha256": "3347c4877256444128287f76e4a49b58088941f3fc3a1420448dee0d361c334f",
+        "seconds": 1.521663270999852,
+        "seed": 91610104
+      },
+      {
+        "environment_turns": 54687,
+        "inference_calls": 571,
+        "peak_buffer_bytes": 26764240,
+        "policy_decisions": 28814,
+        "rollout_sha256": "e1c7af637a57c04bb52217a97c80daacb5e8c53da979abf9f32958fe888c24a3",
+        "seconds": 1.5628494339998724,
+        "seed": 91610105
+      },
+      {
+        "environment_turns": 53346,
+        "inference_calls": 570,
+        "peak_buffer_bytes": 26764240,
+        "policy_decisions": 27867,
+        "rollout_sha256": "b67297cc2f035b2b0e2959dc6ad1a3a58e05a4bdd76028201b004d625ef21f86",
+        "seconds": 1.5699503520008875,
+        "seed": 91610106
+      },
+      {
+        "environment_turns": 55950,
+        "inference_calls": 562,
+        "peak_buffer_bytes": 26764240,
+        "policy_decisions": 29782,
+        "rollout_sha256": "33bde07bc280fb39d6e27c3c326e2ca786f8cec49ab5dc6e19946581a8ab2665",
+        "seconds": 1.3118370529991807,
+        "seed": 91610107
+      },
+      {
+        "environment_turns": 53327,
+        "inference_calls": 586,
+        "peak_buffer_bytes": 26764240,
+        "policy_decisions": 28208,
+        "rollout_sha256": "dd631cfcc7f48e1669d25567f9221b2a6e4fa0cb9caae169131dda3ad6cfce63",
+        "seconds": 1.44575285800056,
+        "seed": 91610108
+      },
+      {
+        "environment_turns": 54612,
+        "inference_calls": 563,
+        "peak_buffer_bytes": 26764240,
+        "policy_decisions": 28995,
+        "rollout_sha256": "8d6069879cab10be61f9bb84f2170f5decb1d1892e0703470668a489c7b6668e",
+        "seconds": 1.412679995999497,
+        "seed": 91610109
+      }
+    ]
+  },
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "workload": {
+    "agent_sets": [
+      [
+        "smart",
+        "rl"
+      ],
+      [
+        "smart",
+        "rl"
+      ],
+      [
+        "random",
+        "rl"
+      ],
+      [
+        "self",
+        "self",
+        "rl"
+      ],
+      [
+        "self",
+        "self",
+        "rl"
+      ],
+      [
+        "smart",
+        "smart",
+        "rl",
+        "random"
+      ],
+      [
+        "random",
+        "random",
+        "rl",
+        "smart"
+      ],
+      [
+        "smart",
+        "random",
+        "random",
+        "smart",
+        "rl",
+        "random"
+      ],
+      [
+        "random",
+        "smart",
+        "random",
+        "smart",
+        "random",
+        "rl",
+        "random"
+      ],
+      [
+        "random",
+        "smart",
+        "random",
+        "smart",
+        "random",
+        "random",
+        "rl",
+        "random"
+      ]
+    ],
+    "batch_size": 1024,
+    "games": 512,
+    "pairs": 9,
+    "rollout_device": "cpu",
+    "threads": 8
+  }
+}

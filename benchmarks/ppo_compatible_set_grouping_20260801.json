@@ -1,0 +1,145 @@
+{
+  "benchmark": "ppo_compatible_set_grouping",
+  "decision": "group compatible consecutive agent sets",
+  "development_only": true,
+  "material_speedup_threshold": 1.05,
+  "mean_metrics": {
+    "baseline": {
+      "environment_turns": 57966.333333333336,
+      "inference_calls": 2236.6666666666665,
+      "policy_decisions": 32526.666666666668
+    },
+    "coalesced": {
+      "environment_turns": 57447,
+      "inference_calls": 1817,
+      "policy_decisions": 32169
+    }
+  },
+  "median_seconds": {
+    "baseline": 2.0031414300001416,
+    "coalesced": 1.6607607070000086
+  },
+  "median_speedup": 1.2061589737504135,
+  "paired_median_speedup": 1.2576021856273314,
+  "paired_speedups": [
+    1.3555125180051246,
+    1.2576021856273314,
+    1.1837161222047183
+  ],
+  "raw": {
+    "baseline": [
+      {
+        "environment_turns": 57196,
+        "inference_calls": 2175,
+        "policy_decisions": 32800,
+        "seconds": 2.4631360949997543
+      },
+      {
+        "environment_turns": 56993,
+        "inference_calls": 2264,
+        "policy_decisions": 31828,
+        "seconds": 2.0031414300001416
+      },
+      {
+        "environment_turns": 59710,
+        "inference_calls": 2271,
+        "policy_decisions": 32952,
+        "seconds": 1.9658692240000164
+      }
+    ],
+    "coalesced": [
+      {
+        "environment_turns": 56978,
+        "inference_calls": 1892,
+        "policy_decisions": 32008,
+        "seconds": 1.8171253029995569
+      },
+      {
+        "environment_turns": 58670,
+        "inference_calls": 1767,
+        "policy_decisions": 32836,
+        "seconds": 1.5928259770007571
+      },
+      {
+        "environment_turns": 56693,
+        "inference_calls": 1792,
+        "policy_decisions": 31663,
+        "seconds": 1.6607607070000086
+      }
+    ]
+  },
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "selected_group_compatible_rollout_agent_sets": true,
+  "semantic_contract": "preserves episode weights and per-game policy configurations; vector grouping intentionally changes fixed-seed trajectories",
+  "workload": {
+    "agent_sets": [
+      [
+        "smart",
+        "rl"
+      ],
+      [
+        "smart",
+        "rl"
+      ],
+      [
+        "random",
+        "rl"
+      ],
+      [
+        "self",
+        "self",
+        "rl"
+      ],
+      [
+        "self",
+        "self",
+        "rl"
+      ],
+      [
+        "smart",
+        "smart",
+        "rl",
+        "random"
+      ],
+      [
+        "random",
+        "random",
+        "rl",
+        "smart"
+      ],
+      [
+        "smart",
+        "random",
+        "random",
+        "smart",
+        "rl",
+        "random"
+      ],
+      [
+        "random",
+        "smart",
+        "random",
+        "smart",
+        "random",
+        "rl",
+        "random"
+      ],
+      [
+        "random",
+        "smart",
+        "random",
+        "smart",
+        "random",
+        "random",
+        "rl",
+        "random"
+      ]
+    ],
+    "batch_size": 256,
+    "games": 512,
+    "repeats": 3,
+    "seed_start": 85129001,
+    "threads": 8
+  }
+}

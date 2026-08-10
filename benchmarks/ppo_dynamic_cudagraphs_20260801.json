@@ -1,0 +1,43 @@
+{
+  "benchmark": "ppo_dynamic_cudagraphs",
+  "decision": "skip CUDA Graph capture for dynamic PPO update shapes",
+  "development_only": true,
+  "sealed_seeds_or_outcomes_used": false,
+  "workload": {
+    "iterations": 10,
+    "games_per_iteration": 1024,
+    "updates_per_iteration": 3,
+    "rollout_device": "cpu",
+    "training_device": "cuda",
+    "gpu": "NVIDIA GeForce RTX 3090",
+    "pairs": 2
+  },
+  "elapsed_seconds": {
+    "dynamic_cudagraphs_enabled": [
+      14.496,
+      13.0057
+    ],
+    "dynamic_cudagraphs_skipped": [
+      12.368,
+      12.3841
+    ]
+  },
+  "paired_speedups": [
+    1.1720569210866754,
+    1.050193393141205
+  ],
+  "median_elapsed_speedup": 1.1110855240565447,
+  "numerical_comparison": {
+    "reference": "uncompiled eager update from identical initial state and development seed",
+    "default_graphs_relative_rms": {
+      "actor": 0.00005558174894996994,
+      "critic": 0.00013797392720137582
+    },
+    "skipped_graphs_relative_rms": {
+      "actor": 0.00005550596973708804,
+      "critic": 0.00013919549273250193
+    },
+    "default_repeat_bit_exact": true,
+    "note": "Both compiled modes differ from eager at the same numerical scale. Skipping dynamic capture also removes Inductor's repeated-shape CUDAGraph warning."
+  }
+}

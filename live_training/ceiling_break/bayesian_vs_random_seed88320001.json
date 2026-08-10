@@ -1,0 +1,28 @@
+{
+  "result": {
+    "agent": "bayesian_tree_search",
+    "opponent": "random",
+    "games": 1000,
+    "wins": 633,
+    "losses": 367,
+    "draws": 0,
+    "win_rate": 0.633,
+    "win_rate_ci95": [
+      0.6026706264751108,
+      0.6623114557677315
+    ],
+    "average_turns": 52.081,
+    "elapsed_seconds": 49.17522253099742,
+    "wins_as_seat_0": 308,
+    "games_as_seat_0": 500,
+    "wins_as_seat_1": 325,
+    "games_as_seat_1": 500,
+    "seed": 88320001
+  },
+  "tree_search": {
+    "belief_samples": 8,
+    "search_depth": 3,
+    "beam_width": 3,
+    "belief_model": "Dirichlet posterior over suits and ranks from public plays and announced suits"
+  }
+}

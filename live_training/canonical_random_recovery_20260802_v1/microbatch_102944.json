@@ -1,0 +1,85 @@
+{
+  "batch_index": 807,
+  "checkpoint_after": false,
+  "cumulative_games": 102944,
+  "deal_seed_interval": {
+    "end_exclusive": 4028554492,
+    "start_inclusive": 4028554364
+  },
+  "games": 128,
+  "legal_actions_verified": true,
+  "metrics": {
+    "approx_kl": 0.0013098516079019654,
+    "clip_fraction": 0.015816871545466984,
+    "entropy": 0.1373715094846086,
+    "epoch_diagnostics": [
+      {
+        "approx_kl": 0.0008140988647937775,
+        "clip_fraction": 0.008008542470633984,
+        "entropy": 0.137633815407753,
+        "epoch": 1,
+        "explained_variance": 0.08265501260757446,
+        "old_approx_kl": 0.00026227172929793596,
+        "samples": 3746,
+        "value_mse": 0.3725159168243408
+      },
+      {
+        "approx_kl": 0.0014907093718647957,
+        "clip_fraction": 0.018152697011828423,
+        "entropy": 0.13691061735153198,
+        "epoch": 2,
+        "explained_variance": 0.10720551013946533,
+        "old_approx_kl": 0.0003069375816266984,
+        "samples": 3746,
+        "value_mse": 0.36264798045158386
+      },
+      {
+        "approx_kl": 0.0019405083730816841,
+        "clip_fraction": 0.025627337396144867,
+        "entropy": 0.13766232132911682,
+        "epoch": 3,
+        "explained_variance": 0.11809194087982178,
+        "old_approx_kl": 0.0007738764979876578,
+        "samples": 3746,
+        "value_mse": 0.35811200737953186
+      },
+      {
+        "approx_kl": 0.0028360201977193356,
+        "clip_fraction": 0.034703683108091354,
+        "entropy": 0.13594955205917358,
+        "epoch": 4,
+        "explained_variance": 0.13654601573944092,
+        "old_approx_kl": 0.0012443671002984047,
+        "samples": 3746,
+        "value_mse": 0.3509941101074219
+      }
+    ],
+    "epochs_completed": 4,
+    "explained_variance": 0.21639811624293015,
+    "loss": 0.08677392113044882,
+    "old_approx_kl": 0.0004152709972124514,
+    "optimizer_steps": 32,
+    "policy_loss": -0.0031354190817989356,
+    "post_update_diagnostics": {
+      "approx_kl": 0.0028360201977193356,
+      "clip_fraction": 0.034703683108091354,
+      "entropy": 0.13594955205917358,
+      "epoch": 4,
+      "explained_variance": 0.13654601573944092,
+      "old_approx_kl": 0.0012443671002984047,
+      "samples": 3746,
+      "value_mse": 0.3509941101074219
+    },
+    "samples": 3746,
+    "stopped_early": false,
+    "target_kl": 0.02,
+    "value_loss": 0.18256611075576493
+  },
+  "opponent_rng_bank": false,
+  "opponent_schedule": [
+    "canonical_random"
+  ],
+  "rollout_seconds": 0.7548924799993983,
+  "training_wall_seconds": 1697.8055698389999,
+  "update_seconds": 1.1321004279998306
+}

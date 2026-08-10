@@ -1,0 +1,313 @@
+{
+  "champion": {
+    "actor_state_sha256": "517711e602e09629d969fcd80aaa7e968a3d5b2d91dfc12a76df22a3c5a12e16",
+    "path": "/home/tommie/Pesten/ppo_actor_100run3.pth",
+    "sha256": "aac589b3c7300895604e6c77755631ab4a31c8bf9810768448ab2f3ff5bbe186"
+  },
+  "decays": [
+    0.5,
+    0.9
+  ],
+  "description": "Champion-initialized sequential EMA over eight saved projected-PPO raw-base actor iterates.",
+  "evaluation_free_construction": true,
+  "method": "post_hoc_checkpoint_ema",
+  "outputs": [
+    {
+      "checkpoint": {
+        "actor_state_sha256": "5ec97558a495e3393a6cff5ad511bf446d502ebd8c16f7d6682dfd79bf74374c",
+        "path": "kl0p5_lr3em6_ent1em3_checkpoint_ema_0p5.pth",
+        "sha256": "29567f32b78bb57dc1949ed308b42f9403ff45300c1957f535139d940bd1c690"
+      },
+      "decay": 0.5,
+      "lane": "kl0p5_lr3em6_ent1em3",
+      "method": "post_hoc_checkpoint_ema",
+      "name": "kl0p5_lr3em6_ent1em3_checkpoint_ema_0p5",
+      "paper_exact_minibatch_ema": false,
+      "raw_base_requires_24_suit_projection": true,
+      "reconstruction": {
+        "floating_tensors_averaged": 50,
+        "formula": "average_t = decay*average_(t-1) + (1-decay)*iterate_t",
+        "initialization": "verified production champion",
+        "nonfloating_tensors_verified_constant": 8,
+        "ordered_iterate_count": 8
+      },
+      "sources": [
+        {
+          "actor_state_sha256": "33d7e776148ff93cc39f0fc786f7b437fa18adbc0e2245f8d72a90c12d4447e7",
+          "iteration": 1,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent1em3_01.pth",
+          "sha256": "4951eb9ce6cbb130c5368d66a15bed1c8272297866340ebfdbbd488ed3da9650"
+        },
+        {
+          "actor_state_sha256": "6214d4cb6fcd8b1e0cc9de0399be74c73d9a27a5f11e74f11a460684e566cbce",
+          "iteration": 2,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent1em3_02.pth",
+          "sha256": "d21cbe329f438b159ad68a75dc29e8d8cdcd7ad931105a8ae16bf0cab5169313"
+        },
+        {
+          "actor_state_sha256": "e66e97d1fa8b53368738f613bae09561f5694b460dfde7fec801c981af1a4cb7",
+          "iteration": 3,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent1em3_03.pth",
+          "sha256": "d1cad0d7748df1e0005b0ed44b152754c1cf32240829160e705a5a3ee6850c7b"
+        },
+        {
+          "actor_state_sha256": "bdeb13696872b9030fe91b93bc55a583219dabc13592b3de8ec65f34f46cad52",
+          "iteration": 4,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent1em3_04.pth",
+          "sha256": "0d53dce846a5799b606919e1c26fa338bacfff16fcc7f1ada5814f24a2e4cacc"
+        },
+        {
+          "actor_state_sha256": "2a126cbd83bb19dd366f3db9b5fe8180de6c0e09c8d29c83454831fad342ab02",
+          "iteration": 5,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent1em3_05.pth",
+          "sha256": "1e4b897ef8d818b1e940882c486ef45cb13c203f5654f28edfaf793f94f5be15"
+        },
+        {
+          "actor_state_sha256": "bdede2656bfa0a339e51f09c0b456aecf6d41042a6d07be750f20cb75fb03bff",
+          "iteration": 6,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent1em3_06.pth",
+          "sha256": "3063ad2f760df53f1c203d143e18f8054536531fcbe88c2b20a86807d80d65ec"
+        },
+        {
+          "actor_state_sha256": "9ddf9b102dc740a12f8ed887f902f9efb8345c1af919b2662c2e9c401ab2283b",
+          "iteration": 7,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent1em3_07.pth",
+          "sha256": "4ad48aacd6cc106d9a66492ce881597ad88c1e6b6d7991ab7debadb656b425cf"
+        },
+        {
+          "actor_state_sha256": "81f61ac0e152306408aca442330c3dcd912c5fcbae653fb268386442dfba6ad8",
+          "iteration": 8,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent1em3_08.pth",
+          "sha256": "35e2446109acf858df41ed77a52a43832730dd1d5245aaec4b02e82f4a255a3c"
+        }
+      ]
+    },
+    {
+      "checkpoint": {
+        "actor_state_sha256": "35b4c50b752e9acfecc1ead315ec4a8a1efac8a6a74c97a90f01b6b4f87bd0f8",
+        "path": "kl0p5_lr3em6_ent1em3_checkpoint_ema_0p9.pth",
+        "sha256": "a553a30b2a41fcad673f3b968ad3bd82cf23a997a83bf694c89a003a89b2c08b"
+      },
+      "decay": 0.9,
+      "lane": "kl0p5_lr3em6_ent1em3",
+      "method": "post_hoc_checkpoint_ema",
+      "name": "kl0p5_lr3em6_ent1em3_checkpoint_ema_0p9",
+      "paper_exact_minibatch_ema": false,
+      "raw_base_requires_24_suit_projection": true,
+      "reconstruction": {
+        "floating_tensors_averaged": 50,
+        "formula": "average_t = decay*average_(t-1) + (1-decay)*iterate_t",
+        "initialization": "verified production champion",
+        "nonfloating_tensors_verified_constant": 8,
+        "ordered_iterate_count": 8
+      },
+      "sources": [
+        {
+          "actor_state_sha256": "33d7e776148ff93cc39f0fc786f7b437fa18adbc0e2245f8d72a90c12d4447e7",
+          "iteration": 1,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent1em3_01.pth",
+          "sha256": "4951eb9ce6cbb130c5368d66a15bed1c8272297866340ebfdbbd488ed3da9650"
+        },
+        {
+          "actor_state_sha256": "6214d4cb6fcd8b1e0cc9de0399be74c73d9a27a5f11e74f11a460684e566cbce",
+          "iteration": 2,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent1em3_02.pth",
+          "sha256": "d21cbe329f438b159ad68a75dc29e8d8cdcd7ad931105a8ae16bf0cab5169313"
+        },
+        {
+          "actor_state_sha256": "e66e97d1fa8b53368738f613bae09561f5694b460dfde7fec801c981af1a4cb7",
+          "iteration": 3,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent1em3_03.pth",
+          "sha256": "d1cad0d7748df1e0005b0ed44b152754c1cf32240829160e705a5a3ee6850c7b"
+        },
+        {
+          "actor_state_sha256": "bdeb13696872b9030fe91b93bc55a583219dabc13592b3de8ec65f34f46cad52",
+          "iteration": 4,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent1em3_04.pth",
+          "sha256": "0d53dce846a5799b606919e1c26fa338bacfff16fcc7f1ada5814f24a2e4cacc"
+        },
+        {
+          "actor_state_sha256": "2a126cbd83bb19dd366f3db9b5fe8180de6c0e09c8d29c83454831fad342ab02",
+          "iteration": 5,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent1em3_05.pth",
+          "sha256": "1e4b897ef8d818b1e940882c486ef45cb13c203f5654f28edfaf793f94f5be15"
+        },
+        {
+          "actor_state_sha256": "bdede2656bfa0a339e51f09c0b456aecf6d41042a6d07be750f20cb75fb03bff",
+          "iteration": 6,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent1em3_06.pth",
+          "sha256": "3063ad2f760df53f1c203d143e18f8054536531fcbe88c2b20a86807d80d65ec"
+        },
+        {
+          "actor_state_sha256": "9ddf9b102dc740a12f8ed887f902f9efb8345c1af919b2662c2e9c401ab2283b",
+          "iteration": 7,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent1em3_07.pth",
+          "sha256": "4ad48aacd6cc106d9a66492ce881597ad88c1e6b6d7991ab7debadb656b425cf"
+        },
+        {
+          "actor_state_sha256": "81f61ac0e152306408aca442330c3dcd912c5fcbae653fb268386442dfba6ad8",
+          "iteration": 8,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent1em3_08.pth",
+          "sha256": "35e2446109acf858df41ed77a52a43832730dd1d5245aaec4b02e82f4a255a3c"
+        }
+      ]
+    },
+    {
+      "checkpoint": {
+        "actor_state_sha256": "fdff39d72e825e564b1cf856cfadea6ebf5ec9d3d70c4deb78322409dd46acba",
+        "path": "kl0p5_lr3em6_ent0_checkpoint_ema_0p5.pth",
+        "sha256": "31949cb368bace2b27992683e2b0799e95c5955c64a90a2b5006d6f81ab6a02a"
+      },
+      "decay": 0.5,
+      "lane": "kl0p5_lr3em6_ent0",
+      "method": "post_hoc_checkpoint_ema",
+      "name": "kl0p5_lr3em6_ent0_checkpoint_ema_0p5",
+      "paper_exact_minibatch_ema": false,
+      "raw_base_requires_24_suit_projection": true,
+      "reconstruction": {
+        "floating_tensors_averaged": 50,
+        "formula": "average_t = decay*average_(t-1) + (1-decay)*iterate_t",
+        "initialization": "verified production champion",
+        "nonfloating_tensors_verified_constant": 8,
+        "ordered_iterate_count": 8
+      },
+      "sources": [
+        {
+          "actor_state_sha256": "93282887be35a871e86164aec5830815a8cf3471664189e249975965bd0e6ebe",
+          "iteration": 1,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent0_01.pth",
+          "sha256": "19f663dc14284dffe893c2ed7559524b1e2fb93e17af8566875b7d41e71f7f19"
+        },
+        {
+          "actor_state_sha256": "853bd726aac2d0274b0582e53123065b341b270796fb7480973be8a17b8ce267",
+          "iteration": 2,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent0_02.pth",
+          "sha256": "31aa14eecb52de90841f032a06f173131d572217a57cde23be4dd55395db3f6b"
+        },
+        {
+          "actor_state_sha256": "2895e0f91979b5b23b0346c7b1ee9adb8f41bce8d93985e11cb25ab6099f2560",
+          "iteration": 3,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent0_03.pth",
+          "sha256": "e5752c6c47fb195d12dfcc55e653442e3bb7e099003446998dddc776f3264465"
+        },
+        {
+          "actor_state_sha256": "aec67f44a7711ed71b16e6c696d24f65ad52ac3ab778d9d6e56b2fb518d23342",
+          "iteration": 4,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent0_04.pth",
+          "sha256": "7a698648e81c9f3d61f4e5a9a90ee62de3cd26cbd44f4ef63229398349db15ad"
+        },
+        {
+          "actor_state_sha256": "392d46846e9efa8dd5725202b5fa24de85a6342ae2711645bf3e59291d1e2b66",
+          "iteration": 5,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent0_05.pth",
+          "sha256": "62cb50a68bccfef8aabdbd836c19ae231e3983d310fb8c2504ba7c010a3076ab"
+        },
+        {
+          "actor_state_sha256": "2b59a6c65263c41c408a0bb7d31946a37f147cfe8b622f65d3818f8c4dcf1d6e",
+          "iteration": 6,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent0_06.pth",
+          "sha256": "359035da986826fe1151c47f4ee7408ba518ee4aa23c2e82669f6979282dc624"
+        },
+        {
+          "actor_state_sha256": "746432e3cef3264e591b6be6e173b5efae34762834d905e77dbbdee7c15f6b9e",
+          "iteration": 7,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent0_07.pth",
+          "sha256": "5bd923b484a3c7f1ac6b56693994d2912d6de9700a7420981e5fb4f61c62e651"
+        },
+        {
+          "actor_state_sha256": "36aa6b29b8b5d4d608384c59f437237609c8cb1a2601673fc371c26c475e4e90",
+          "iteration": 8,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent0_08.pth",
+          "sha256": "b0e3741c27fc0bc85a8ccc1458535ccf674dce75ea06cc3ea7985383733d3ccf"
+        }
+      ]
+    },
+    {
+      "checkpoint": {
+        "actor_state_sha256": "26834f1fd9e6a54610a30fcc61157c4ee21529514552980e7ef563bf77444eb1",
+        "path": "kl0p5_lr3em6_ent0_checkpoint_ema_0p9.pth",
+        "sha256": "4748d0175c9e388ef291317a9c7596b06ad99582625de20321e13427d1b62b56"
+      },
+      "decay": 0.9,
+      "lane": "kl0p5_lr3em6_ent0",
+      "method": "post_hoc_checkpoint_ema",
+      "name": "kl0p5_lr3em6_ent0_checkpoint_ema_0p9",
+      "paper_exact_minibatch_ema": false,
+      "raw_base_requires_24_suit_projection": true,
+      "reconstruction": {
+        "floating_tensors_averaged": 50,
+        "formula": "average_t = decay*average_(t-1) + (1-decay)*iterate_t",
+        "initialization": "verified production champion",
+        "nonfloating_tensors_verified_constant": 8,
+        "ordered_iterate_count": 8
+      },
+      "sources": [
+        {
+          "actor_state_sha256": "93282887be35a871e86164aec5830815a8cf3471664189e249975965bd0e6ebe",
+          "iteration": 1,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent0_01.pth",
+          "sha256": "19f663dc14284dffe893c2ed7559524b1e2fb93e17af8566875b7d41e71f7f19"
+        },
+        {
+          "actor_state_sha256": "853bd726aac2d0274b0582e53123065b341b270796fb7480973be8a17b8ce267",
+          "iteration": 2,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent0_02.pth",
+          "sha256": "31aa14eecb52de90841f032a06f173131d572217a57cde23be4dd55395db3f6b"
+        },
+        {
+          "actor_state_sha256": "2895e0f91979b5b23b0346c7b1ee9adb8f41bce8d93985e11cb25ab6099f2560",
+          "iteration": 3,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent0_03.pth",
+          "sha256": "e5752c6c47fb195d12dfcc55e653442e3bb7e099003446998dddc776f3264465"
+        },
+        {
+          "actor_state_sha256": "aec67f44a7711ed71b16e6c696d24f65ad52ac3ab778d9d6e56b2fb518d23342",
+          "iteration": 4,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent0_04.pth",
+          "sha256": "7a698648e81c9f3d61f4e5a9a90ee62de3cd26cbd44f4ef63229398349db15ad"
+        },
+        {
+          "actor_state_sha256": "392d46846e9efa8dd5725202b5fa24de85a6342ae2711645bf3e59291d1e2b66",
+          "iteration": 5,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent0_05.pth",
+          "sha256": "62cb50a68bccfef8aabdbd836c19ae231e3983d310fb8c2504ba7c010a3076ab"
+        },
+        {
+          "actor_state_sha256": "2b59a6c65263c41c408a0bb7d31946a37f147cfe8b622f65d3818f8c4dcf1d6e",
+          "iteration": 6,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent0_06.pth",
+          "sha256": "359035da986826fe1151c47f4ee7408ba518ee4aa23c2e82669f6979282dc624"
+        },
+        {
+          "actor_state_sha256": "746432e3cef3264e591b6be6e173b5efae34762834d905e77dbbdee7c15f6b9e",
+          "iteration": 7,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent0_07.pth",
+          "sha256": "5bd923b484a3c7f1ac6b56693994d2912d6de9700a7420981e5fb4f61c62e651"
+        },
+        {
+          "actor_state_sha256": "36aa6b29b8b5d4d608384c59f437237609c8cb1a2601673fc371c26c475e4e90",
+          "iteration": 8,
+          "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_iter_kl0p5_lr3em6_ent0_08.pth",
+          "sha256": "b0e3741c27fc0bc85a8ccc1458535ccf674dce75ea06cc3ea7985383733d3ccf"
+        }
+      ]
+    }
+  ],
+  "paper_exact_minibatch_ema": false,
+  "privacy": {
+    "no_game_data_consumed": true,
+    "no_sealed_inputs_or_outcomes": true,
+    "raw_base_observation_features": 121
+  },
+  "promotion": {
+    "eligible": false,
+    "reason": "requires fresh direct and fixed-pool gates"
+  },
+  "recorded_at": "2026-07-31T11:13:11.225809+00:00",
+  "schema_version": 1,
+  "source_manifest": {
+    "path": "/home/tommie/Pesten/benchmarks/projected_ppo_iterative_dev/projected_ppo_iterative_metrics.json",
+    "sha256": "3ca2a5f749930384ceaf89a2b7de88696223824ad1cdced661f146a9e86a27e4"
+  },
+  "status": "complete"
+}

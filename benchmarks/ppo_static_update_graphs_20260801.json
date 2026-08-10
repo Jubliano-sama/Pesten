@@ -1,0 +1,17 @@
+{
+  "benchmark": "ppo_static_update_graphs",
+  "decision": "retain dynamic CUDA update graphs",
+  "development_only": true,
+  "grouped_upper_bound_speedup": 1.025191754519085,
+  "max_state_value_difference": 0.00017374008893966675,
+  "paired_upper_bound_speedup_median": 1.0238240180587346,
+  "sealed_seeds_or_outcomes_used": false,
+  "workload": {
+    "games": 512,
+    "pairs": 11,
+    "rollout_device": "cpu",
+    "training_device": "cuda",
+    "gpu": "NVIDIA GeForce RTX 3090",
+    "note": "Fixed-shape upper bound excludes required variable-batch bucketing and padding."
+  }
+}

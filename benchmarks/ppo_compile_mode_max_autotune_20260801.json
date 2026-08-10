@@ -1,0 +1,27 @@
+{
+  "benchmark": "ppo_cuda_compile_mode",
+  "decision": "retain reduce-overhead",
+  "development_only": true,
+  "max_autotune": {
+    "completed": false,
+    "observed_compile_seconds_lower_bound": 540,
+    "reason": "autotuning did not finish within the bounded probe and repeatedly discarded Triton matmul choices exceeding the RTX 3090 shared-memory limit"
+  },
+  "reduce_overhead": {
+    "completed": true,
+    "process_work_seconds": 23.16648971899849,
+    "steady_prep_seconds": 0.024750008000410162,
+    "steady_rollout_seconds": 0.6123730359995534,
+    "steady_total_seconds": 0.8295595540002978,
+    "steady_update_seconds": 0.19243651000033424
+  },
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "workload": {
+    "games": 512,
+    "gpu": "NVIDIA GeForce RTX 3090",
+    "rollout_device": "cpu",
+    "seed": 85170001,
+    "thermal_state": "warm"
+  }
+}

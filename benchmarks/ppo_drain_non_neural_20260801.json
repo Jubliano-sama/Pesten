@@ -1,0 +1,112 @@
+{
+  "benchmark": "ppo_drain_non_neural",
+  "decision": "drain a lone two-player engine to each policy boundary",
+  "development_only": true,
+  "material_speedup_threshold": 1.02,
+  "median_metrics": {
+    "drain_to_policy": {
+      "environment_turns": 38681,
+      "inference_calls": 227,
+      "policy_decisions": 20485,
+      "seconds": 0.6541286730007414
+    },
+    "one_step": {
+      "environment_turns": 37360,
+      "inference_calls": 519,
+      "policy_decisions": 19852,
+      "seconds": 0.7403139990001364
+    }
+  },
+  "median_speedup": 1.1317559213602877,
+  "paired_median_speedup": 1.1258760277562323,
+  "paired_speedups": [
+    1.1258760277562323,
+    1.2606578550363678,
+    1.2575482372343858,
+    1.0516390748622955,
+    1.0636417293734122
+  ],
+  "raw": {
+    "drain_to_policy": [
+      {
+        "environment_turns": 38846,
+        "inference_calls": 222,
+        "policy_decisions": 20681,
+        "seconds": 0.6541286730007414
+      },
+      {
+        "environment_turns": 36851,
+        "inference_calls": 227,
+        "policy_decisions": 19522,
+        "seconds": 0.6537690489985835
+      },
+      {
+        "environment_turns": 37863,
+        "inference_calls": 214,
+        "policy_decisions": 20078,
+        "seconds": 0.6340571450000425
+      },
+      {
+        "environment_turns": 38681,
+        "inference_calls": 262,
+        "policy_decisions": 20485,
+        "seconds": 0.7039620499999728
+      },
+      {
+        "environment_turns": 39472,
+        "inference_calls": 241,
+        "policy_decisions": 20958,
+        "seconds": 0.6666269979996287
+      }
+    ],
+    "one_step": [
+      {
+        "environment_turns": 37239,
+        "inference_calls": 537,
+        "policy_decisions": 19619,
+        "seconds": 0.7364677919995302
+      },
+      {
+        "environment_turns": 38013,
+        "inference_calls": 560,
+        "policy_decisions": 20115,
+        "seconds": 0.8241790869997203
+      },
+      {
+        "environment_turns": 39827,
+        "inference_calls": 503,
+        "policy_decisions": 21129,
+        "seconds": 0.7973574450006709
+      },
+      {
+        "environment_turns": 37155,
+        "inference_calls": 493,
+        "policy_decisions": 19565,
+        "seconds": 0.7403139990001364
+      },
+      {
+        "environment_turns": 37360,
+        "inference_calls": 519,
+        "policy_decisions": 19852,
+        "seconds": 0.7090522929993313
+      }
+    ]
+  },
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "selected_drain_non_neural_rollout": true,
+  "semantic_contract": "independent game rules and weights are unchanged; Smart turns advance to the next neural-policy boundary before actor batching, intentionally changing the fixed-seed sampling stream",
+  "workload": {
+    "agent_sets": [
+      [
+        "smart",
+        "rl"
+      ]
+    ],
+    "games": 512,
+    "repeats": 5,
+    "seed_start": 85145101,
+    "temperature": 0.8,
+    "threads": 8
+  }
+}

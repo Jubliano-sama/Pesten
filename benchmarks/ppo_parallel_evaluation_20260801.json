@@ -1,0 +1,72 @@
+{
+  "benchmark": "ppo_parallel_evaluation",
+  "decision": "spawn canonical evaluation games across CPU workers",
+  "development_only": true,
+  "exact_results": true,
+  "includes_process_startup": true,
+  "material_speedup_threshold": 1.25,
+  "median_seconds": {
+    "parallel": 4.68572683399907,
+    "sequential": 14.027661536001688
+  },
+  "median_speedup": 2.9937002375423734,
+  "paired_median_speedup": 3.051132031484199,
+  "paired_speedups": [
+    2.822962273091636,
+    3.0947055985444516,
+    3.051132031484199
+  ],
+  "runs": {
+    "parallel": [
+      {
+        "seconds": 4.860590863998368,
+        "turns": 40656,
+        "wins": 3
+      },
+      {
+        "seconds": 4.532793537000543,
+        "turns": 40656,
+        "wins": 3
+      },
+      {
+        "seconds": 4.68572683399907,
+        "turns": 40656,
+        "wins": 3
+      }
+    ],
+    "sequential": [
+      {
+        "seconds": 13.721264634001272,
+        "turns": 40656,
+        "wins": 3
+      },
+      {
+        "seconds": 14.027661536001688,
+        "turns": 40656,
+        "wins": 3
+      },
+      {
+        "seconds": 14.296771233999607,
+        "turns": 40656,
+        "wins": 3
+      }
+    ]
+  },
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "selected_parallel_evaluation": true,
+  "semantic_contract": "each independently seeded match uses the canonical Game and agent implementations; per-game turns and winner are exact",
+  "workload": {
+    "agent_sets": [
+      [
+        "smart",
+        "rl"
+      ]
+    ],
+    "games": 512,
+    "pairs": 3,
+    "process_start_method": "spawn",
+    "seed_start": 85220001,
+    "workers": 8
+  }
+}

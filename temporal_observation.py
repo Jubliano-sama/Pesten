@@ -197,6 +197,15 @@ def build_legal_actions(
     return tuple(mask)
 
 
+def build_draw_retry_legal_actions(drawn_card: int) -> tuple[bool, ...]:
+    """Return the legal mask for the immediate own-draw retry decision."""
+    mask = [False] * ACTION_COUNT
+    mask[PASS_ACTION] = True
+    if 0 <= drawn_card < 50:
+        mask[drawn_card] = True
+    return tuple(mask)
+
+
 def event_to_safe_dict(event: PublicEventToken) -> dict[str, int | str]:
     """Serialize one event while omitting inapplicable sensitive fields."""
     result: dict[str, int | str] = {

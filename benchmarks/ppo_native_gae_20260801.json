@@ -1,0 +1,77 @@
+{
+  "benchmark": "ppo_native_gae",
+  "decision": "accept exact native GAE",
+  "development_only": true,
+  "exact_state_contract": true,
+  "medians": {
+    "prep_seconds": {
+      "native": 0.021611946500343038,
+      "tensor": 0.04711627100004989
+    },
+    "total_seconds": {
+      "native": 0.8409848515002523,
+      "tensor": 1.0118355194999822
+    },
+    "update_seconds": {
+      "native": 0.17749281699980202,
+      "tensor": 0.17733174949989916
+    }
+  },
+  "paired_total_speedup_median": 1.0802907424476522,
+  "paired_total_speedups": [
+    1.34802298424939,
+    1.1197489611582396,
+    1.0408325237370648,
+    0.9651885077836537
+  ],
+  "preparation_speedup": 2.180210420357751,
+  "raw_timings": [
+    {
+      "native_prep_seconds": 0.02196104600079707,
+      "native_total_seconds": 0.7864674070006004,
+      "seed": 85120021,
+      "tensor_prep_seconds": 0.04916760699961742,
+      "tensor_total_seconds": 1.060176140999829
+    },
+    {
+      "native_prep_seconds": 0.021262846999889007,
+      "native_total_seconds": 0.8604561659994943,
+      "seed": 85120022,
+      "tensor_prep_seconds": 0.05074124699967797,
+      "tensor_total_seconds": 0.9634948980001354
+    },
+    {
+      "native_prep_seconds": 0.02097758300078567,
+      "native_total_seconds": 0.8215135370010103,
+      "seed": 85120023,
+      "tensor_prep_seconds": 0.045064935000482365,
+      "tensor_total_seconds": 0.855058008000924
+    },
+    {
+      "native_prep_seconds": 0.023241221999342088,
+      "native_total_seconds": 1.204957136997109,
+      "seed": 85120024,
+      "tensor_prep_seconds": 0.04350444600095216,
+      "tensor_total_seconds": 1.1630107810015033
+    }
+  ],
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "timing_caveat": "Rollout time was perturbed by a concurrent trainer; preparation and update components isolate the GAE change.",
+  "workload": {
+    "batch_size": 1024,
+    "compile_updates": false,
+    "games": 512,
+    "pairs": 4,
+    "rollout_device": "cpu",
+    "seeds": [
+      85120021,
+      85120022,
+      85120023,
+      85120024
+    ],
+    "threads": 8,
+    "training_device": "cuda",
+    "warmup_games": 64
+  }
+}

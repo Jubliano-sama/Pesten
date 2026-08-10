@@ -1,0 +1,92 @@
+{
+  "benchmark": "ppo_hybrid_rollout_inference",
+  "decision": "use strict-FP32 CUDA policy forwards for CPU rollout batches of at least 64 rows",
+  "development_only": true,
+  "sealed_seeds_or_outcomes_used": false,
+  "gpu": "NVIDIA GeForce RTX 3090",
+  "configuration": {
+    "rollout_state_device": "cpu",
+    "mask_and_sampling_device": "cpu",
+    "large_policy_forward_device": "cuda",
+    "threshold_rows": 64,
+    "cuda_matmul_tf32": false,
+    "training_matmul_precision_restored_after_forward": true,
+    "torch_threads": 6
+  },
+  "strict_fp32_threshold_sweep": {
+    "games": 1024,
+    "pairs": 5,
+    "median_seconds": {
+      "16": 0.5524694799969438,
+      "32": 0.5499836979979591,
+      "64": 0.5524104890027957,
+      "96": 0.5677392710022104,
+      "128": 0.560502849999466
+    },
+    "selected_threshold": 64,
+    "note": "Threshold 32 was only 0.4% faster by median elapsed and offloaded more calls to the shared GPU; the sub-2% difference was not material."
+  },
+  "rollout_pairs": {
+    "games": 1024,
+    "pairs": 5,
+    "median_seconds": {
+      "cpu": 0.8511720099995728,
+      "hybrid": 0.5469078120004269
+    },
+    "paired_speedups": [
+      1.7305631995581463,
+      1.5993829552960148,
+      1.5320832069630632,
+      1.4940292375360604,
+      1.560509279180208
+    ],
+    "median_paired_speedup": 1.560509279180208
+  },
+  "fixed_state_compiled_end_to_end_pairs": {
+    "games": 1024,
+    "updates": 3,
+    "pairs": 5,
+    "paired_total_speedups": [
+      1.4757325044547625,
+      1.3635017100700046,
+      1.493823568226112,
+      1.3904402116022616,
+      1.4087012568979826
+    ],
+    "paired_rollout_speedups": [
+      1.6867707797149258,
+      1.5350262331367106,
+      1.7366052572465485,
+      1.626966397689976,
+      1.6361253476250346
+    ],
+    "median_total_speedup": 1.4087012568979826,
+    "median_rollout_speedup": 1.6361253476250346,
+    "median_hybrid_total_seconds": 0.6779475580005965,
+    "median_hybrid_games_per_second": 1510.441373469033
+  },
+  "parity": {
+    "observations_exact": true,
+    "actions_exact": true,
+    "rewards_exact": true,
+    "episode_lengths_exact": true,
+    "turn_and_decision_counts_exact_for_all_five_seeds": true,
+    "log_probability_max_abs_difference": 9.5367431640625e-07,
+    "note": "TF32 GPU rollout inference changed trajectories and was rejected. Strict FP32 preserved every sampled action in the measured parity workloads."
+  },
+  "repeated_production_validation": {
+    "iterations": 10,
+    "games": 10240,
+    "elapsed_seconds": 6.693918845001463,
+    "average_games_per_second": 1529.7466726990406,
+    "dynamic_cudagraph_warning_observed": false
+  },
+  "weight_sync": {
+    "shared_cuda_storages": 58,
+    "total_cuda_storages": 58,
+    "median_seconds_with_redundant_cuda_load": 0.002883011000449187,
+    "median_seconds_with_shared_storage_guard": 0.002511691500330926,
+    "sync_speedup": 1.147836428187673,
+    "fallback_copy_retained_for_nonshared_storage": true
+  }
+}

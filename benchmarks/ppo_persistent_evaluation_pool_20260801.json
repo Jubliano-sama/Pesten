@@ -1,0 +1,30 @@
+{
+  "benchmark": "ppo_persistent_evaluation_pool",
+  "decision": "recreate evaluation workers per scheduled evaluation",
+  "development_only": true,
+  "exact_results": true,
+  "first_round_seconds": 2.723762795998482,
+  "raw_seconds": [
+    2.723762795998482,
+    2.644457987000351,
+    2.417655282999476,
+    2.0972088599992276
+  ],
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "warm_median_seconds": 2.417655282999476,
+  "warm_pool_speedup": 1.1266150436474353,
+  "workload": {
+    "agent_sets": [
+      [
+        "smart",
+        "rl"
+      ]
+    ],
+    "games_per_round": 512,
+    "process_start_method": "forkserver",
+    "rounds": 4,
+    "seed_start": 85360001,
+    "workers": 8
+  }
+}

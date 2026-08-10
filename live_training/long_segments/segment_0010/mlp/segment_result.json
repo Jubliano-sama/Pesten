@@ -1,0 +1,117 @@
+{
+  "agent_sets": [
+    [
+      "smart",
+      "rl"
+    ],
+    [
+      "smart",
+      "rl"
+    ],
+    [
+      "random",
+      "rl"
+    ],
+    [
+      "self",
+      "self",
+      "rl"
+    ],
+    [
+      "self",
+      "self",
+      "rl"
+    ],
+    [
+      "smart",
+      "smart",
+      "rl",
+      "random"
+    ],
+    [
+      "random",
+      "random",
+      "rl",
+      "smart"
+    ],
+    [
+      "smart",
+      "random",
+      "random",
+      "smart",
+      "rl",
+      "random"
+    ],
+    [
+      "random",
+      "smart",
+      "random",
+      "smart",
+      "random",
+      "rl",
+      "random"
+    ],
+    [
+      "random",
+      "smart",
+      "random",
+      "smart",
+      "random",
+      "random",
+      "rl",
+      "random"
+    ]
+  ],
+  "elapsed_seconds": 366.8655952019981,
+  "episodes_per_iteration": 512,
+  "iterations": 64,
+  "kind": "warm_mlp_ppo_segment",
+  "latest": {
+    "actor": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0010/mlp/ppo_actor_64.pth",
+      "sha256": "3b8a2f865ebe093d7c741fef23136e0aa71054b974ed4d76967f65aee23ede3c"
+    },
+    "actor_optimizer": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0010/mlp/ppo_actor_opt_64.pth",
+      "sha256": "9ab4db079df73ba5bdd4594431b808babf76713a1c4c40869a0fae5c8b701305"
+    },
+    "critic": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0010/mlp/ppo_critic_64.pth",
+      "sha256": "85596ed0ce2fb11bf04efaeb2f68f12f16229f43c0910697b1f581c6a4550afe"
+    },
+    "critic_optimizer": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0010/mlp/ppo_critic_opt_64.pth",
+      "sha256": "fd8cfad76492e9d40836194bbb3781b9fd767ca32249acb6b138ae56b2abd82b"
+    }
+  },
+  "runtime": {
+    "actor_device": "cpu",
+    "compile_updates": false,
+    "cuda": false,
+    "device": "cpu",
+    "python": "3.13.11 (main, Jan 28 2026, 00:01:45) [Clang 21.1.4 ]",
+    "rollout_device": "cpu",
+    "torch": "2.13.0+cu130",
+    "torch_threads": 8
+  },
+  "schema_version": 1,
+  "seed": 2026080111,
+  "warm_parent": {
+    "actor": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0009/mlp/ppo_actor_64.pth",
+      "sha256": "278619cfd40130f7ed7de254a0e2b0a2c85e992296965978bbae3d997dfbc917"
+    },
+    "actor_optimizer": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0009/mlp/ppo_actor_opt_64.pth",
+      "sha256": "9ab4db079df73ba5bdd4594431b808babf76713a1c4c40869a0fae5c8b701305"
+    },
+    "critic": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0009/mlp/ppo_critic_64.pth",
+      "sha256": "15c465e2454a5032f2bc02a90cfa28d233ab77b0d322726a25bbeae329a0b030"
+    },
+    "critic_optimizer": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0009/mlp/ppo_critic_opt_64.pth",
+      "sha256": "fd8cfad76492e9d40836194bbb3781b9fd767ca32249acb6b138ae56b2abd82b"
+    }
+  }
+}

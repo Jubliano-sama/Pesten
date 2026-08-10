@@ -1,0 +1,642 @@
+{
+  "config": {
+    "balance_episodes": true,
+    "batch_size": 8192,
+    "entropy_coefficient": 0.002,
+    "epochs": 4,
+    "games": 4096,
+    "gamma": 0.99,
+    "gradient_clip": 0.5,
+    "iterations": 12,
+    "kl_coefficient": 0.1,
+    "learning_rate": 0.0001,
+    "temperature": 1.0
+  },
+  "curve": [
+    {
+      "actor": {
+        "path": "/home/tommie/Pesten/live_training/ceiling_break/reinforce_aggressive/reinforce_actor_001.pth",
+        "sha256": "32c7660663bd72dd8b200f58d01df89b1ad22b08c1098fba6ca0709113546b0d"
+      },
+      "actor_optimizer": "/home/tommie/Pesten/live_training/ceiling_break/reinforce_aggressive/reinforce_actor_optimizer_001.pth",
+      "decisions": 85330,
+      "iteration": 1,
+      "outcomes": {
+        "draws": 0,
+        "games": 4096,
+        "losses": 1254,
+        "sampled_score": 0.69384765625,
+        "wins": 2842
+      },
+      "update": {
+        "epochs": [
+          {
+            "behavior_kl": 0.0007856820372596344,
+            "entropy": 0.07558329200202768,
+            "epoch": 1,
+            "gradient_norm": 0.1213866953145374,
+            "policy_loss": -0.01179495191370899
+          },
+          {
+            "behavior_kl": 0.009294096994298425,
+            "entropy": 0.07464646006172354,
+            "epoch": 2,
+            "gradient_norm": 0.16558167067441074,
+            "policy_loss": -0.01710467573932626
+          },
+          {
+            "behavior_kl": 0.1002281176095659,
+            "entropy": 0.07038544795729897,
+            "epoch": 3,
+            "gradient_norm": 0.3283613676374609,
+            "policy_loss": -0.0533389151096344
+          },
+          {
+            "behavior_kl": 0.5166482302275571,
+            "entropy": 0.06223214180632071,
+            "epoch": 4,
+            "gradient_norm": 0.5796518705107949,
+            "policy_loss": -0.2017532153563066
+          }
+        ]
+      },
+      "wall_seconds": 2.9735187779951957
+    },
+    {
+      "actor": {
+        "path": "/home/tommie/Pesten/live_training/ceiling_break/reinforce_aggressive/reinforce_actor_002.pth",
+        "sha256": "8a922389c36a2c6a8df2a479af9da45b0462e44d21291529290c102ea1ee9664"
+      },
+      "actor_optimizer": "/home/tommie/Pesten/live_training/ceiling_break/reinforce_aggressive/reinforce_actor_optimizer_002.pth",
+      "decisions": 89730,
+      "iteration": 2,
+      "outcomes": {
+        "draws": 0,
+        "games": 4096,
+        "losses": 1361,
+        "sampled_score": 0.667724609375,
+        "wins": 2735
+      },
+      "update": {
+        "epochs": [
+          {
+            "behavior_kl": 0.014589886319642692,
+            "entropy": 0.055001149462027984,
+            "epoch": 1,
+            "gradient_norm": 0.13786012882536108,
+            "policy_loss": -0.006349976211574606
+          },
+          {
+            "behavior_kl": 0.05944423479112712,
+            "entropy": 0.051192002201622185,
+            "epoch": 2,
+            "gradient_norm": 0.19034487686373971,
+            "policy_loss": -0.020087707449089397
+          },
+          {
+            "behavior_kl": 0.12456916543570432,
+            "entropy": 0.04824832894585349,
+            "epoch": 3,
+            "gradient_norm": 0.216432509097186,
+            "policy_loss": -0.042666514150120995
+          },
+          {
+            "behavior_kl": 0.25163495540618896,
+            "entropy": 0.04454036056995392,
+            "epoch": 4,
+            "gradient_norm": 0.2741673155264421,
+            "policy_loss": -0.08384851671077988
+          }
+        ]
+      },
+      "wall_seconds": 2.3401259800011758
+    },
+    {
+      "actor": {
+        "path": "/home/tommie/Pesten/live_training/ceiling_break/reinforce_aggressive/reinforce_actor_003.pth",
+        "sha256": "0925abb08331f41eef42c96847bbbc2dd53a337dc279d75e6d920b58fd9305f0"
+      },
+      "actor_optimizer": "/home/tommie/Pesten/live_training/ceiling_break/reinforce_aggressive/reinforce_actor_optimizer_003.pth",
+      "decisions": 88472,
+      "iteration": 3,
+      "outcomes": {
+        "draws": 0,
+        "games": 4096,
+        "losses": 1446,
+        "sampled_score": 0.64697265625,
+        "wins": 2650
+      },
+      "update": {
+        "epochs": [
+          {
+            "behavior_kl": 0.004599744432919228,
+            "entropy": 0.04218954863873395,
+            "epoch": 1,
+            "gradient_norm": 0.14009684256531976,
+            "policy_loss": -0.004555875890549611
+          },
+          {
+            "behavior_kl": 0.02254396075890823,
+            "entropy": 0.040435795756903564,
+            "epoch": 2,
+            "gradient_norm": 0.1509632800113071,
+            "policy_loss": -0.011451059698381207
+          },
+          {
+            "behavior_kl": 0.06260278685526414,
+            "entropy": 0.0392542454329404,
+            "epoch": 3,
+            "gradient_norm": 0.19791482388973236,
+            "policy_loss": -0.02488123049790209
+          },
+          {
+            "behavior_kl": 0.1358295970342376,
+            "entropy": 0.03719921985810453,
+            "epoch": 4,
+            "gradient_norm": 0.2513772520152005,
+            "policy_loss": -0.04925017871639945
+          }
+        ]
+      },
+      "wall_seconds": 2.2966697910014773
+    },
+    {
+      "actor": {
+        "path": "/home/tommie/Pesten/live_training/ceiling_break/reinforce_aggressive/reinforce_actor_004.pth",
+        "sha256": "a9cbe4f3313aecfa88c305c30d1c9aeac7d1a0779a92665753794e1349d43913"
+      },
+      "actor_optimizer": "/home/tommie/Pesten/live_training/ceiling_break/reinforce_aggressive/reinforce_actor_optimizer_004.pth",
+      "decisions": 87206,
+      "iteration": 4,
+      "outcomes": {
+        "draws": 0,
+        "games": 4096,
+        "losses": 1468,
+        "sampled_score": 0.6416015625,
+        "wins": 2628
+      },
+      "update": {
+        "epochs": [
+          {
+            "behavior_kl": 0.0038475311087964315,
+            "entropy": 0.03561793098395521,
+            "epoch": 1,
+            "gradient_norm": 0.15461196276274594,
+            "policy_loss": -0.0018628872401843016
+          },
+          {
+            "behavior_kl": 0.02014608181674372,
+            "entropy": 0.03419425169175321,
+            "epoch": 2,
+            "gradient_norm": 0.1851815554228696,
+            "policy_loss": -0.007527931413443928
+          },
+          {
+            "behavior_kl": 0.05271372300657359,
+            "entropy": 0.033648332580924034,
+            "epoch": 3,
+            "gradient_norm": 0.21313621713356537,
+            "policy_loss": -0.018185016826133837
+          },
+          {
+            "behavior_kl": 0.12896135584874588,
+            "entropy": 0.032773311165246094,
+            "epoch": 4,
+            "gradient_norm": 0.3168873001228679,
+            "policy_loss": -0.04127762449735945
+          }
+        ]
+      },
+      "wall_seconds": 2.292572044003464
+    },
+    {
+      "actor": {
+        "path": "/home/tommie/Pesten/live_training/ceiling_break/reinforce_aggressive/reinforce_actor_005.pth",
+        "sha256": "bbab21e29f9f00fa37d9d9388d75bd596c274bf7ade4a54bae9e94d7aaa5e84c"
+      },
+      "actor_optimizer": "/home/tommie/Pesten/live_training/ceiling_break/reinforce_aggressive/reinforce_actor_optimizer_005.pth",
+      "decisions": 86091,
+      "iteration": 5,
+      "outcomes": {
+        "draws": 0,
+        "games": 4096,
+        "losses": 1423,
+        "sampled_score": 0.652587890625,
+        "wins": 2673
+      },
+      "update": {
+        "epochs": [
+          {
+            "behavior_kl": 0.0037925211431787498,
+            "entropy": 0.03251354955136776,
+            "epoch": 1,
+            "gradient_norm": 0.14979474449699576,
+            "policy_loss": -0.0004757795250043273
+          },
+          {
+            "behavior_kl": 0.01410288041965528,
+            "entropy": 0.03256296552717686,
+            "epoch": 2,
+            "gradient_norm": 0.16306634653698315,
+            "policy_loss": -0.0039298859721219
+          },
+          {
+            "behavior_kl": 0.027948205443945797,
+            "entropy": 0.032892747866836464,
+            "epoch": 3,
+            "gradient_norm": 0.18826214427297766,
+            "policy_loss": -0.00966766490389339
+          },
+          {
+            "behavior_kl": 0.0723521120168946,
+            "entropy": 0.03384540433233434,
+            "epoch": 4,
+            "gradient_norm": 0.2748483649709008,
+            "policy_loss": -0.02129942568188364
+          }
+        ]
+      },
+      "wall_seconds": 2.162446488000569
+    },
+    {
+      "actor": {
+        "path": "/home/tommie/Pesten/live_training/ceiling_break/reinforce_aggressive/reinforce_actor_006.pth",
+        "sha256": "c1bf3523fb329f98a86de5847a63e76fdcad691abb0aa60fdff0807f7fb94aa6"
+      },
+      "actor_optimizer": "/home/tommie/Pesten/live_training/ceiling_break/reinforce_aggressive/reinforce_actor_optimizer_006.pth",
+      "decisions": 84415,
+      "iteration": 6,
+      "outcomes": {
+        "draws": 0,
+        "games": 4096,
+        "losses": 1464,
+        "sampled_score": 0.642578125,
+        "wins": 2632
+      },
+      "update": {
+        "epochs": [
+          {
+            "behavior_kl": 0.007874808153397694,
+            "entropy": 0.03559078310023655,
+            "epoch": 1,
+            "gradient_norm": 0.17695322835987265,
+            "policy_loss": -0.0029076022222976794
+          },
+          {
+            "behavior_kl": 0.07949143207886002,
+            "entropy": 0.03559604930606755,
+            "epoch": 2,
+            "gradient_norm": 0.23006907647306268,
+            "policy_loss": -0.02198159686205062
+          },
+          {
+            "behavior_kl": 0.44226372512904083,
+            "entropy": 0.033611186695369805,
+            "epoch": 3,
+            "gradient_norm": 0.5026803125034679,
+            "policy_loss": -0.12202233821153641
+          },
+          {
+            "behavior_kl": 1.3578584736043757,
+            "entropy": 0.030083194375038147,
+            "epoch": 4,
+            "gradient_norm": 0.7604549418796193,
+            "policy_loss": -0.38287774270231073
+          }
+        ]
+      },
+      "wall_seconds": 2.136326987994835
+    },
+    {
+      "actor": {
+        "path": "/home/tommie/Pesten/live_training/ceiling_break/reinforce_aggressive/reinforce_actor_007.pth",
+        "sha256": "b5d766c81898887663c65754e636f8af75507719f1f792fa864828075ad11085"
+      },
+      "actor_optimizer": "/home/tommie/Pesten/live_training/ceiling_break/reinforce_aggressive/reinforce_actor_optimizer_007.pth",
+      "decisions": 88898,
+      "iteration": 7,
+      "outcomes": {
+        "draws": 0,
+        "games": 4096,
+        "losses": 1508,
+        "sampled_score": 0.6318359375,
+        "wins": 2588
+      },
+      "update": {
+        "epochs": [
+          {
+            "behavior_kl": 0.005792808145981548,
+            "entropy": 0.027214510704983364,
+            "epoch": 1,
+            "gradient_norm": 0.17387478934092956,
+            "policy_loss": -0.002543370689223097
+          },
+          {
+            "behavior_kl": 0.030753171579404312,
+            "entropy": 0.026523916558785873,
+            "epoch": 2,
+            "gradient_norm": 0.2659428268671036,
+            "policy_loss": -0.010665861699222163
+          },
+          {
+            "behavior_kl": 0.07704095948826183,
+            "entropy": 0.02634748968888413,
+            "epoch": 3,
+            "gradient_norm": 0.2829345085404136,
+            "policy_loss": -0.025501961650496178
+          },
+          {
+            "behavior_kl": 0.17608446763320404,
+            "entropy": 0.026467181911522693,
+            "epoch": 4,
+            "gradient_norm": 0.35461426323110407,
+            "policy_loss": -0.06292997131293471
+          }
+        ]
+      },
+      "wall_seconds": 2.3422748950033565
+    },
+    {
+      "actor": {
+        "path": "/home/tommie/Pesten/live_training/ceiling_break/reinforce_aggressive/reinforce_actor_008.pth",
+        "sha256": "b5eafd2ecc12cea367d0e6b1695c0792ad7a4861463ba24535b5632aaf74038d"
+      },
+      "actor_optimizer": "/home/tommie/Pesten/live_training/ceiling_break/reinforce_aggressive/reinforce_actor_optimizer_008.pth",
+      "decisions": 88512,
+      "iteration": 8,
+      "outcomes": {
+        "draws": 0,
+        "games": 4096,
+        "losses": 1481,
+        "sampled_score": 0.638427734375,
+        "wins": 2615
+      },
+      "update": {
+        "epochs": [
+          {
+            "behavior_kl": 0.011121027731525922,
+            "entropy": 0.025765748017213562,
+            "epoch": 1,
+            "gradient_norm": 0.16963754865256223,
+            "policy_loss": -0.003948896012099629
+          },
+          {
+            "behavior_kl": 0.07712252133271912,
+            "entropy": 0.026328999210487713,
+            "epoch": 2,
+            "gradient_norm": 0.35906772992827674,
+            "policy_loss": -0.02325064358724789
+          },
+          {
+            "behavior_kl": 0.26983973383903503,
+            "entropy": 0.02666042389517481,
+            "epoch": 3,
+            "gradient_norm": 0.45487823540514166,
+            "policy_loss": -0.07863368568095294
+          },
+          {
+            "behavior_kl": 0.7232982407916676,
+            "entropy": 0.025765496052124283,
+            "epoch": 4,
+            "gradient_norm": 0.6381898874586279,
+            "policy_loss": -0.21550863778049295
+          }
+        ]
+      },
+      "wall_seconds": 2.31347504400037
+    },
+    {
+      "actor": {
+        "path": "/home/tommie/Pesten/live_training/ceiling_break/reinforce_aggressive/reinforce_actor_009.pth",
+        "sha256": "85f25f437d82a7a5e345e6a16cd618e517ecc5a372ec565639a81d7e85bdea13"
+      },
+      "actor_optimizer": "/home/tommie/Pesten/live_training/ceiling_break/reinforce_aggressive/reinforce_actor_optimizer_009.pth",
+      "decisions": 87445,
+      "iteration": 9,
+      "outcomes": {
+        "draws": 0,
+        "games": 4096,
+        "losses": 1442,
+        "sampled_score": 0.64794921875,
+        "wins": 2654
+      },
+      "update": {
+        "epochs": [
+          {
+            "behavior_kl": 0.023606589562691935,
+            "entropy": 0.025235691023143856,
+            "epoch": 1,
+            "gradient_norm": 0.2531502043659037,
+            "policy_loss": -0.004355172317115252
+          },
+          {
+            "behavior_kl": 0.12037996981631625,
+            "entropy": 0.02515144595368342,
+            "epoch": 2,
+            "gradient_norm": 0.3389326997778632,
+            "policy_loss": -0.034247922118414535
+          },
+          {
+            "behavior_kl": 0.3473797548900951,
+            "entropy": 0.025545230304652996,
+            "epoch": 3,
+            "gradient_norm": 0.45555455576289783,
+            "policy_loss": -0.10222661901604045
+          },
+          {
+            "behavior_kl": 0.820352706042203,
+            "entropy": 0.024938586083325474,
+            "epoch": 4,
+            "gradient_norm": 0.6571327664635398,
+            "policy_loss": -0.23365104604851117
+          }
+        ]
+      },
+      "wall_seconds": 2.19119769900135
+    },
+    {
+      "actor": {
+        "path": "/home/tommie/Pesten/live_training/ceiling_break/reinforce_aggressive/reinforce_actor_010.pth",
+        "sha256": "da6112cda294d62207e100fd7ab14713930591f0f6ce703c6886bbdd0f557454"
+      },
+      "actor_optimizer": "/home/tommie/Pesten/live_training/ceiling_break/reinforce_aggressive/reinforce_actor_optimizer_010.pth",
+      "decisions": 89738,
+      "iteration": 10,
+      "outcomes": {
+        "draws": 0,
+        "games": 4096,
+        "losses": 1519,
+        "sampled_score": 0.629150390625,
+        "wins": 2577
+      },
+      "update": {
+        "epochs": [
+          {
+            "behavior_kl": 0.026992094796107514,
+            "entropy": 0.025095494972033935,
+            "epoch": 1,
+            "gradient_norm": 0.28225997429002414,
+            "policy_loss": -0.007479021923658861
+          },
+          {
+            "behavior_kl": 0.1896173134446144,
+            "entropy": 0.024642553011124783,
+            "epoch": 2,
+            "gradient_norm": 0.6381541002880443,
+            "policy_loss": -0.04979024666615508
+          },
+          {
+            "behavior_kl": 0.5322360640222376,
+            "entropy": 0.024449977177110584,
+            "epoch": 3,
+            "gradient_norm": 0.8527455600825223,
+            "policy_loss": -0.13435910168019208
+          },
+          {
+            "behavior_kl": 1.1869862025434321,
+            "entropy": 0.023684689605777912,
+            "epoch": 4,
+            "gradient_norm": 1.191831881349737,
+            "policy_loss": -0.29428430037064984
+          }
+        ]
+      },
+      "wall_seconds": 2.3685947470003157
+    },
+    {
+      "actor": {
+        "path": "/home/tommie/Pesten/live_training/ceiling_break/reinforce_aggressive/reinforce_actor_011.pth",
+        "sha256": "85a7611f270177377fc4c0a737f9165c00e63f024eea87f57dffef836733561b"
+      },
+      "actor_optimizer": "/home/tommie/Pesten/live_training/ceiling_break/reinforce_aggressive/reinforce_actor_optimizer_011.pth",
+      "decisions": 88209,
+      "iteration": 11,
+      "outcomes": {
+        "draws": 0,
+        "games": 4096,
+        "losses": 1484,
+        "sampled_score": 0.6376953125,
+        "wins": 2612
+      },
+      "update": {
+        "epochs": [
+          {
+            "behavior_kl": 0.036556847648697044,
+            "entropy": 0.02434541555968198,
+            "epoch": 1,
+            "gradient_norm": 0.25699620693922043,
+            "policy_loss": -0.0063488893105055795
+          },
+          {
+            "behavior_kl": 0.23799178952520544,
+            "entropy": 0.023937076499516315,
+            "epoch": 2,
+            "gradient_norm": 0.5482809760353782,
+            "policy_loss": -0.05704964748160406
+          },
+          {
+            "behavior_kl": 0.7372115525332364,
+            "entropy": 0.023692228238690983,
+            "epoch": 3,
+            "gradient_norm": 0.8793129324913025,
+            "policy_loss": -0.18764096701687033
+          },
+          {
+            "behavior_kl": 1.7626545429229736,
+            "entropy": 0.02344948866150596,
+            "epoch": 4,
+            "gradient_norm": 1.3275912945920771,
+            "policy_loss": -0.46736600724133576
+          }
+        ]
+      },
+      "wall_seconds": 2.179075410000223
+    },
+    {
+      "actor": {
+        "path": "/home/tommie/Pesten/live_training/ceiling_break/reinforce_aggressive/reinforce_actor_012.pth",
+        "sha256": "027f298aad4eb6c4556d822e045c3e706bd2a3d1eb8b778694013a508e44306a"
+      },
+      "actor_optimizer": "/home/tommie/Pesten/live_training/ceiling_break/reinforce_aggressive/reinforce_actor_optimizer_012.pth",
+      "decisions": 93450,
+      "iteration": 12,
+      "outcomes": {
+        "draws": 0,
+        "games": 4096,
+        "losses": 1561,
+        "sampled_score": 0.618896484375,
+        "wins": 2535
+      },
+      "update": {
+        "epochs": [
+          {
+            "behavior_kl": 0.08219252776940422,
+            "entropy": 0.02333933999761939,
+            "epoch": 1,
+            "gradient_norm": 0.3257166917125384,
+            "policy_loss": -0.020499472583954532
+          },
+          {
+            "behavior_kl": 0.6842726171016693,
+            "entropy": 0.02175578971703847,
+            "epoch": 2,
+            "gradient_norm": 0.7608450998862585,
+            "policy_loss": -0.17743679446478686
+          },
+          {
+            "behavior_kl": 2.2511601050694785,
+            "entropy": 0.01882798255731662,
+            "epoch": 3,
+            "gradient_norm": 1.1986529926458995,
+            "policy_loss": -0.6194998025894165
+          },
+          {
+            "behavior_kl": 5.077428976694743,
+            "entropy": 0.015186598679671684,
+            "epoch": 4,
+            "gradient_norm": 1.5612865885098774,
+            "policy_loss": -1.286378746231397
+          }
+        ]
+      },
+      "wall_seconds": 2.058892019005725
+    }
+  ],
+  "elapsed_seconds": 27.752347390996874,
+  "kind": "kl_regularized_monte_carlo_policy_gradient",
+  "latest_actor": {
+    "path": "/home/tommie/Pesten/live_training/ceiling_break/reinforce_aggressive/reinforce_actor_012.pth",
+    "sha256": "027f298aad4eb6c4556d822e045c3e706bd2a3d1eb8b778694013a508e44306a"
+  },
+  "privacy": {
+    "draw_pile_order": false,
+    "observation": "121 public and own-hand features only",
+    "opponent_card_identities": false
+  },
+  "runtime": {
+    "device": "cuda",
+    "gpu": "NVIDIA GeForce RTX 3090",
+    "python": "3.13.11 (main, Jan 28 2026, 00:01:45) [Clang 21.1.4 ]",
+    "torch": "2.13.0+cu130"
+  },
+  "schema_version": 1,
+  "seed": 2026080302,
+  "warm_parent": {
+    "actor": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0002/mlp/ppo_actor_58.pth",
+      "sha256": "c7b99156b1e1a29ecbe40556f9282f0cdd52c1d9074826de0e5eadf8e409783a"
+    },
+    "actor_optimizer": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0002/mlp/ppo_actor_opt_58.pth",
+      "sha256": "0fed123c9f22466f9de60576cfbc65977a798d8e9385d27539569412faf53957"
+    },
+    "critic": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0002/mlp/ppo_critic_58.pth",
+      "sha256": "8d8f205b37d757f77bf645e4ee72925e14cc9ba95cf5f64ece0279f5c43b1d6a"
+    },
+    "critic_optimizer": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0002/mlp/ppo_critic_opt_58.pth",
+      "sha256": "59220e3fcf082fcaba90fd89b81ef3690898de72e6798b0b06d6b9f2b19ddd76"
+    }
+  }
+}

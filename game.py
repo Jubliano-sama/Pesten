@@ -50,6 +50,7 @@ class Game:
         # Decks used in the game
         self.grab_deck: Optional[deck.Deck] = None
         self.game_deck: Optional[deck.Deck] = None
+        self.deck_count: int = 1
 
     def reset(self) -> None:
         """
@@ -78,15 +79,43 @@ class Game:
             player.mydeck.cards.clear()
 
         # Create and shuffle the grab deck
-        self.grab_deck = deck.standardDeck()
+        # Keep seven cards per player at every supported league size.  One
+        # 54-card deck covers the normal table; eight players need two.
+        required_cards = self.num_players * 7 + 3
+        deck_count = max(
+            2 if self.num_players >= 7 else 1,
+            (required_cards + 53) // 54,
+        )
+        self.deck_count = deck_count
+        self.grab_deck = deck.standardDecks(deck_count)
         self.grab_deck.shuffle()
 
-        # Deal 7 cards to each player
+        hand_size = 7
         for player in self.players:
-            for _ in range(7):
+            for _ in range(hand_size):
                 card_drawn = self.grab_deck.topCard()
                 player.addCard(card_drawn)
                 self.grab_deck.removeTopCard()
+
+        valid_start_numbers = (13, 0, 1, 7, 8, 2)
+        if not any(
+            card.truenumber not in valid_start_numbers
+            for card in self.grab_deck.cards
+        ):
+            # A high-player deal can, rarely, leave only special cards in the
+            # short reserve.  Swap one valid dealt card back into the reserve
+            # so the normal opening-pile semantics remain total.
+            for player in self.players:
+                for card_index, card in enumerate(player.mydeck.cards):
+                    if card.truenumber not in valid_start_numbers:
+                        player.mydeck.cards[card_index], self.grab_deck.cards[-1] = (
+                            self.grab_deck.cards[-1],
+                            card,
+                        )
+                        break
+                else:
+                    continue
+                break
 
         # Initialize the game deck with a valid starting card
         self.game_deck = deck.Deck([self.grab_deck.topCard()])

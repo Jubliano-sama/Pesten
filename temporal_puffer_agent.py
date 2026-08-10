@@ -31,6 +31,7 @@ from temporal_observation import (
     SUIT_ACTION_START,
     build_legal_actions,
     build_private_observation,
+    build_draw_retry_legal_actions,
     relative_index,
 )
 
@@ -209,6 +210,9 @@ class TemporalPestenAgent:
         self._episode_marker: Optional[tuple[int, int]] = None
         self._public_cursor = 0
         self._last_hand_sizes: tuple[int, ...] = ()
+        self._last_pass_turn: Optional[int] = None
+        self._retry_card: Optional[int] = None
+        self._retry_turn: Optional[int] = None
 
     def reset_episode(self) -> None:
         self.state = self.policy.initial_state()
@@ -216,6 +220,15 @@ class TemporalPestenAgent:
         self.safe_history.clear()
         self._public_cursor = 0
         self._last_hand_sizes = ()
+        self._last_pass_turn = None
+        self._retry_card = None
+        self._retry_turn = None
+
+    def _retry_card_for_current_turn(self) -> Optional[int]:
+        if self._retry_turn != self.game.turn_count:
+            self._retry_card = None
+            self._retry_turn = None
+        return self._retry_card
 
     def _ensure_episode(self) -> None:
         marker = (id(self.game.grab_deck), id(self.game.game_deck))
@@ -317,6 +330,9 @@ class TemporalPestenAgent:
             penalty_amount=self.game.penalty_amount,
             change_suit_mode=change_suit_mode,
         )
+        retry_card = self._retry_card_for_current_turn()
+        if retry_card is not None and not change_suit_mode:
+            legal = build_draw_retry_legal_actions(retry_card)
         return DecisionInput(observation, legal, events)
 
     def _act(self, decision: DecisionInput) -> int:
@@ -354,10 +370,21 @@ class TemporalPestenAgent:
 
     def playCard(self, current_sort, current_true_number):
         del current_sort, current_true_number
+        retry_active = self._retry_card_for_current_turn() is not None
         decision = self._decision()
         action = self._act(decision)
         if action == PASS_ACTION:
+            self._last_pass_turn = (
+                None
+                if retry_active or self.game.penalty_amount > 0
+                else self.game.turn_count
+            )
+            self._retry_card = None
+            self._retry_turn = None
             return None
+        self._last_pass_turn = None
+        self._retry_card = None
+        self._retry_turn = None
         return card.Card(action)
 
     def changeSort(self):
@@ -383,6 +410,13 @@ class TemporalPestenAgent:
                 self._episode_marker = deal_marker
                 self.reset_episode()
         self.mydeck.cards.append(drawn_card)
+        if (
+            self._last_pass_turn == self.game.turn_count
+            and self.game.penalty_amount == 0
+        ):
+            self._retry_card = int(drawn_card.number)
+            self._retry_turn = self.game.turn_count
+            self._last_pass_turn = None
 
     def remove(self, played_card) -> None:
         for own_card in self.mydeck.cards:

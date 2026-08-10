@@ -1,0 +1,98 @@
+{
+  "bootstrap": {
+    "algorithm": {
+      "chunk_size": 64,
+      "draw_score": 0.5,
+      "dtype": "float64",
+      "pair_score": "mean of the two seat-rotated candidate game scores",
+      "quantile_method": "numpy.quantile(method='linear')",
+      "quantiles": [
+        0.025,
+        0.975
+      ],
+      "rng_algorithm": "MT19937",
+      "rng_class": "numpy.random.RandomState",
+      "samples": 100000,
+      "sampling": "rng.randint(0, pair_count, size=(chunk, pair_count))",
+      "unit": "pair score",
+      "with_replacement": true
+    },
+    "bootstrap_means_sha256": "8d08a230550dc6e0c912f89f3d7149bc5971374310b3dbdbf4f5679e36e23d31",
+    "ci95": {
+      "lower": 0.25,
+      "upper": 0.5
+    },
+    "pair_count": 2,
+    "point_estimate": 0.375,
+    "seed": 4291000096
+  },
+  "calibration_only": true,
+  "campaign_id": "random_specialist_20260802",
+  "candidate_checkpoint_created": false,
+  "candidate_training_started": false,
+  "created_at_utc": "2026-08-02T01:25:16.896110+00:00",
+  "evaluation_sha256": "acf4c26427e6ebd9e04824363a59eb132a261cd7553e8b8ea7650ec798ad5132",
+  "format": "pesten-random-specialist-runner-calibration-smoke-v1",
+  "frozen_manifest_sha256": "12328bb45e5409fc5bbcfa600526939f7fabeefd0121e364ba3bdb6df2e166ba",
+  "gates": {
+    "calibration_only": true,
+    "claim_before_model_and_final_seed_iteration": true,
+    "exact_repeat_digest": true,
+    "legal_actions": true,
+    "native_puffer_policy": true,
+    "opponent_resets": true,
+    "pair_mapping": true,
+    "recurrent_resets": true
+  },
+  "mapping_reset_repeat": {
+    "claim_not_created": true,
+    "claim_order": [
+      "validate commitment and winner hashes without checkpoint load",
+      "verify audit output and claim paths do not exist",
+      "exclusive-create one-use claim",
+      "load candidate checkpoint",
+      "construct final pair iterator and evaluate outcomes",
+      "exclusive-create final audit result"
+    ],
+    "legal_actions_verified": true,
+    "mapping_verified": true,
+    "opponent_resets_verified": true,
+    "recurrent_resets_verified": true,
+    "repeat_evaluation_sha256_equal": true
+  },
+  "native_policy": {
+    "class": "NativePufferTemporalPolicy",
+    "device": "cpu",
+    "native_pufferlib": true
+  },
+  "passed": true,
+  "registry_sha256": "47c12e8a3b8b78b79d69a802c7e4fa746ee1a6e60d39d855b48dfad30eaecb87",
+  "repeat_evaluation_sha256": "acf4c26427e6ebd9e04824363a59eb132a261cd7553e8b8ea7650ec798ad5132",
+  "seed_use": {
+    "bootstrap_seed": 4291000096,
+    "deal_seeds": [
+      4291000000,
+      4291000001
+    ],
+    "initialization_seed": 4291000097,
+    "no_future_campaign_seed_used": true,
+    "opponent_rng_seeds": [
+      4291000048,
+      4291000049
+    ]
+  },
+  "source_sha256": {
+    "batched_pesten.py": "b6c6f50034b15ef82f78a0722b11604bcb204b0a2df540d2e9520d67f93c7cb2",
+    "deck.py": "1a1374f09b824f72b8f7589613e94c593a4ce55d3afd50f21b1bf2891847d41b",
+    "game.py": "2e70ea75361170e0f87428f22649236ed8f8bdec8576b33d1148b2c3ed346a5b",
+    "randomAgent.py": "9bcb46d56d7108ef9bfb41ea01b68719087188564bc07c0f484d7f5214ed5a55",
+    "random_specialist_campaign.py": "7998d9d465e6101bcaf87a9f2805c42cefb797b0fd175b6a6daf77fa5b27493c",
+    "random_specialist_workflow.py": "934459625633571a81efd60e8e3edf36ef333797eb8df69e9a89bfa1e2c7b3e3",
+    "specialist_seed_registry.py": "71dd1c4738690d0ddd21ad7d827a8df9a39749f48ad7ac1c87f2b712f38e45c8",
+    "temporal_batched_speed.py": "fc8ec09bf5299b5c6c6c42fc749858844658489e8c0d419bba70deed342f674f",
+    "temporal_observation.py": "1a61572898833426eb6d511099dd1446fc09253b6d8d70d71ebcc0f81901fc34",
+    "temporal_puffer_agent.py": "0b53499a7bcb70c172354d8950bacfe2f89f4cf57cd5ab220c18de93fd799af6",
+    "temporal_puffer_v4.py": "f40629869fbdc47b43affa80c3c8f8d202669536aa107cd70ac7a8012b12b810",
+    "temporal_training.py": "eda6cc82658beeedd5a913ee965e1238dc6230b1f90b2d4d9dc37f1426bfc4c8"
+  }
+}

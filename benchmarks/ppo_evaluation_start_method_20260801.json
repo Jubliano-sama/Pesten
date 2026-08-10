@@ -1,0 +1,40 @@
+{
+  "benchmark": "ppo_evaluation_start_method",
+  "decision": "prefer forkserver with spawn fallback",
+  "development_only": true,
+  "exact_results": true,
+  "grouped_median_speedup": 1.206832628050131,
+  "median_seconds": {
+    "forkserver": 2.5673534510024183,
+    "spawn": 3.09836043100222
+  },
+  "raw_seconds": {
+    "forkserver": [
+      3.3970988170003693,
+      2.51176770299935,
+      2.5673534510024183
+    ],
+    "spawn": [
+      3.09836043100222,
+      3.4698117450025165,
+      2.8506154179995065
+    ]
+  },
+  "safety_contract": "forkserver launches workers from a clean server rather than forking the CUDA-owning training process; restricted environments fall back to spawn",
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "workload": {
+    "agent_sets": [
+      [
+        "smart",
+        "rl"
+      ]
+    ],
+    "background_load": "concurrent CPU Puffer trainer",
+    "games": 512,
+    "host_execution": true,
+    "repeats": 3,
+    "seed_start": 85320001,
+    "workers": 8
+  }
+}

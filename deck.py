@@ -41,3 +41,20 @@ def standardDeck():
     cards.append(card.Card(48))
     cards.append(card.Card(48))
     return Deck(cards)
+
+
+def standardDecks(number_of_decks=1):
+    """Return a shuffled-game-ready collection of standard decks.
+
+    Pesten keeps seven cards per player.  Larger league tables therefore use
+    multiple ordinary decks instead of silently shrinking players' hands.
+    Card numbers intentionally repeat across decks; the engine already uses
+    rank/suit semantics rather than a globally unique physical-card id.
+    """
+    number_of_decks = int(number_of_decks)
+    if number_of_decks < 1:
+        raise ValueError("number_of_decks must be positive")
+    cards = []
+    for _ in range(number_of_decks):
+        cards.extend(standardDeck().cards)
+    return Deck(cards)

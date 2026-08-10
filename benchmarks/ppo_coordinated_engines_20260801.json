@@ -1,0 +1,169 @@
+{
+  "benchmark": "ppo_coordinated_engines",
+  "decision": "coordinate independent rollout engines",
+  "development_only": true,
+  "material_speedup_threshold": 1.05,
+  "median_metrics": {
+    "coordinated_engines": {
+      "environment_turns": 51390,
+      "inference_calls": 419,
+      "policy_decisions": 28331,
+      "seconds": 1.230441083000187
+    },
+    "sequential_engines": {
+      "environment_turns": 50910,
+      "inference_calls": 1550,
+      "policy_decisions": 28176,
+      "seconds": 1.7129395499996463
+    }
+  },
+  "median_speedup": 1.392134555376664,
+  "paired_median_speedup": 1.5208966815253726,
+  "paired_speedups": [
+    1.895734938595222,
+    0.6515924130779313,
+    1.5208966815253726,
+    1.5460934707145921,
+    1.392134555376664
+  ],
+  "raw": {
+    "coordinated_engines": [
+      {
+        "environment_turns": 52495,
+        "inference_calls": 466,
+        "policy_decisions": 29013,
+        "seconds": 2.307402745998843
+      },
+      {
+        "environment_turns": 49952,
+        "inference_calls": 429,
+        "policy_decisions": 28143,
+        "seconds": 2.620356430999891
+      },
+      {
+        "environment_turns": 51390,
+        "inference_calls": 419,
+        "policy_decisions": 28331,
+        "seconds": 1.1381164980011818
+      },
+      {
+        "environment_turns": 48773,
+        "inference_calls": 368,
+        "policy_decisions": 27200,
+        "seconds": 1.0893755280012556
+      },
+      {
+        "environment_turns": 53509,
+        "inference_calls": 413,
+        "policy_decisions": 29733,
+        "seconds": 1.230441083000187
+      }
+    ],
+    "sequential_engines": [
+      {
+        "environment_turns": 50104,
+        "inference_calls": 1453,
+        "policy_decisions": 28176,
+        "seconds": 4.374224003000563
+      },
+      {
+        "environment_turns": 51501,
+        "inference_calls": 1550,
+        "policy_decisions": 28793,
+        "seconds": 1.7074043699994945
+      },
+      {
+        "environment_turns": 50183,
+        "inference_calls": 1671,
+        "policy_decisions": 27337,
+        "seconds": 1.7309576049992756
+      },
+      {
+        "environment_turns": 52336,
+        "inference_calls": 1587,
+        "policy_decisions": 28903,
+        "seconds": 1.6842763909990026
+      },
+      {
+        "environment_turns": 50910,
+        "inference_calls": 1534,
+        "policy_decisions": 28175,
+        "seconds": 1.7129395499996463
+      }
+    ]
+  },
+  "schema_version": 1,
+  "sealed_seeds_or_outcomes_used": false,
+  "selected_coordinate_rollout_engines": true,
+  "semantic_contract": "each game and agent-set weight is unchanged; actor requests from independent player-count engines share calls, intentionally changing the fixed-seed action-sampling stream",
+  "workload": {
+    "agent_sets": [
+      [
+        "smart",
+        "rl"
+      ],
+      [
+        "smart",
+        "rl"
+      ],
+      [
+        "random",
+        "rl"
+      ],
+      [
+        "self",
+        "self",
+        "rl"
+      ],
+      [
+        "self",
+        "self",
+        "rl"
+      ],
+      [
+        "smart",
+        "smart",
+        "rl",
+        "random"
+      ],
+      [
+        "random",
+        "random",
+        "rl",
+        "smart"
+      ],
+      [
+        "smart",
+        "random",
+        "random",
+        "smart",
+        "rl",
+        "random"
+      ],
+      [
+        "random",
+        "smart",
+        "random",
+        "smart",
+        "random",
+        "rl",
+        "random"
+      ],
+      [
+        "random",
+        "smart",
+        "random",
+        "smart",
+        "random",
+        "random",
+        "rl",
+        "random"
+      ]
+    ],
+    "games": 512,
+    "repeats": 5,
+    "seed_start": 85141101,
+    "temperature": 0.8,
+    "threads": 8
+  }
+}

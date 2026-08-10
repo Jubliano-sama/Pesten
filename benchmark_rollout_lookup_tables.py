@@ -23,17 +23,20 @@ from seed_integrity import DEVELOPMENT_SEED_LIMIT
 
 class _RecomputedRankMasks:
     def __getitem__(self, rank):
-        return batched.CARD_RANK == rank
+        rank = np.asarray(rank)
+        return batched.CARD_RANK == rank[..., None]
 
 
 class _RecomputedCompatibilityMasks:
     def __getitem__(self, key):
         suit, rank = key
+        suit = np.asarray(suit)
+        rank = np.asarray(rank)
         return (
-            (batched.CARD_RANK == rank)
+            (batched.CARD_RANK == rank[..., None])
             | (batched.CARD_RANK == 0)
             | (batched.CARD_RANK == 13)
-            | (batched.CARD_SORT == suit)
+            | (batched.CARD_SORT == suit[..., None])
         )
 
 

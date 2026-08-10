@@ -1004,7 +1004,11 @@ def normalize_file(path: Path, root: Path) -> tuple[list[dict[str, Any]], dict[s
         "training",
     }.issubset(payload):
         runs, warnings = _normalize_puffer_smoke(payload, path, root)
-    elif "results" in payload and isinstance(payload.get("workload"), dict):
+    elif (
+        "results" in payload
+        and isinstance(payload.get("workload"), dict)
+        and "players_per_game" in payload["workload"]
+    ):
         runs, warnings = _normalize_vectorized_training(payload, path, root)
     elif "result" in payload:
         runs, warnings = _normalize_tournament(payload, path, root)

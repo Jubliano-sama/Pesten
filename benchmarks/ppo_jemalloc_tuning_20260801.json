@@ -1,0 +1,33 @@
+{
+  "benchmark": "ppo_jemalloc_tuning",
+  "decision": "retain jemalloc defaults",
+  "development_only": true,
+  "sealed_seeds_or_outcomes_used": false,
+  "workload": {
+    "games": 1024,
+    "seeds": 5,
+    "rollout_device": "cpu",
+    "threads": 6,
+    "fresh_process_per_sample": true
+  },
+  "configurations": {
+    "default": null,
+    "arenas12_decay1s": "narenas:12,background_thread:true,dirty_decay_ms:1000,muzzy_decay_ms:1000",
+    "arenas6_decay1s": "narenas:6,background_thread:true,dirty_decay_ms:1000,muzzy_decay_ms:1000"
+  },
+  "median_rollout_seconds": {
+    "default": 1.374435645997437,
+    "arenas12_decay1s": 1.4191740169990226,
+    "arenas6_decay1s": 1.4173836549998668
+  },
+  "speedups_vs_default": {
+    "arenas12_decay1s": 0.9684757679708729,
+    "arenas6_decay1s": 0.9696990939249727
+  },
+  "median_peak_rss_mib": {
+    "default": 880.0625,
+    "arenas12_decay1s": 882.203125,
+    "arenas6_decay1s": 880.08984375
+  },
+  "exact_rollout_hashes_for_every_seed": true
+}

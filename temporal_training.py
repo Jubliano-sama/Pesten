@@ -21,6 +21,65 @@ from temporal_puffer_agent import (
 )
 
 
+def _pack_native_token_batch(
+    packed_rows: Sequence[Sequence[tuple[float, ...]]],
+    *,
+    device: torch.device,
+    dtype: torch.dtype,
+) -> torch.Tensor:
+    """Pad ragged safe-token rows with one host-to-device materialization."""
+    max_length = max(len(rows) for rows in packed_rows)
+    token_size = len(packed_rows[0][0])
+    token_batch = torch.zeros(
+        len(packed_rows),
+        max_length,
+        token_size,
+        device=device,
+        dtype=dtype,
+    )
+    flat_rows = [row for rows in packed_rows for row in rows]
+    flat_tokens = torch.tensor(
+        flat_rows,
+        device=device,
+        dtype=dtype,
+    )
+    offset = 0
+    for batch_index, rows in enumerate(packed_rows):
+        length = len(rows)
+        token_batch[batch_index, :length] = flat_tokens[
+            offset : offset + length
+        ]
+        offset += length
+    return token_batch
+
+
+def _gather_native_decisions(
+    all_logits: torch.Tensor,
+    all_values: torch.Tensor,
+    decision_indices: Sequence[Sequence[int]],
+    *,
+    max_length: int,
+    device: torch.device,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Gather ragged decision positions in trajectory order with one index."""
+    flat_indices = [
+        batch_index * max_length + time_index
+        for batch_index, indices in enumerate(decision_indices)
+        for time_index in indices
+    ]
+    index_tensor = torch.tensor(
+        flat_indices,
+        device=device,
+        dtype=torch.long,
+    )
+    flat_logits = all_logits.reshape(-1, all_logits.shape[-1])
+    flat_values = all_values.reshape(-1)
+    return (
+        flat_logits.index_select(0, index_tensor),
+        flat_values.index_select(0, index_tensor),
+    )
+
+
 def _discounted_returns(
     step_count: int,
     *,
@@ -256,20 +315,11 @@ def ppo_update_batched(
         raise ValueError("PPO update requires at least one decision")
 
     max_length = max(len(rows) for rows in packed_rows)
-    token_size = len(packed_rows[0][0])
-    token_batch = torch.zeros(
-        len(packed_rows),
-        max_length,
-        token_size,
+    token_batch = _pack_native_token_batch(
+        packed_rows,
         device=parameter.device,
         dtype=parameter.dtype,
     )
-    for batch_index, rows in enumerate(packed_rows):
-        token_batch[batch_index, : len(rows)] = torch.tensor(
-            rows,
-            device=parameter.device,
-            dtype=parameter.dtype,
-        )
 
     all_logits, all_values = policy.forward_native_sequence(token_batch)
     all_logits = all_logits.reshape(
@@ -277,25 +327,23 @@ def ppo_update_batched(
     )
     all_values = all_values.reshape(len(packed_rows), max_length)
 
-    gathered_logits = []
-    gathered_values = []
     gathered_masks = []
     gathered_actions = []
     gathered_old_log_probabilities = []
     for batch_index, indices in enumerate(decision_indices):
-        index_tensor = torch.tensor(
-            indices, device=parameter.device, dtype=torch.long
-        )
-        gathered_logits.append(all_logits[batch_index, index_tensor])
-        gathered_values.append(all_values[batch_index, index_tensor])
         gathered_masks.extend(legal_masks[batch_index])
         gathered_actions.extend(action_rows[batch_index])
         gathered_old_log_probabilities.extend(
             old_log_probability_rows[batch_index]
         )
 
-    logits = torch.cat(gathered_logits, dim=0)
-    values = torch.cat(gathered_values, dim=0)
+    logits, values = _gather_native_decisions(
+        all_logits,
+        all_values,
+        decision_indices,
+        max_length=max_length,
+        device=parameter.device,
+    )
     masks = torch.tensor(
         gathered_masks, device=parameter.device, dtype=torch.bool
     )
@@ -577,20 +625,11 @@ def evaluate_ppo_drift_batched(
         raise ValueError("drift evaluation requires at least one decision")
 
     max_length = max(len(rows) for rows in packed_rows)
-    token_size = len(packed_rows[0][0])
-    token_batch = torch.zeros(
-        len(packed_rows),
-        max_length,
-        token_size,
+    token_batch = _pack_native_token_batch(
+        packed_rows,
         device=parameter.device,
         dtype=parameter.dtype,
     )
-    for batch_index, rows in enumerate(packed_rows):
-        token_batch[batch_index, : len(rows)] = torch.tensor(
-            rows,
-            device=parameter.device,
-            dtype=parameter.dtype,
-        )
 
     with torch.no_grad():
         all_logits, all_values = policy.forward_native_sequence(token_batch)
@@ -598,16 +637,13 @@ def evaluate_ppo_drift_batched(
             len(packed_rows), max_length, -1
         )
         all_values = all_values.reshape(len(packed_rows), max_length)
-        logits = []
-        values = []
-        for batch_index, indices in enumerate(decision_indices):
-            index_tensor = torch.tensor(
-                indices, device=parameter.device, dtype=torch.long
-            )
-            logits.append(all_logits[batch_index, index_tensor])
-            values.append(all_values[batch_index, index_tensor])
-        logits = torch.cat(logits)
-        values = torch.cat(values)
+        logits, values = _gather_native_decisions(
+            all_logits,
+            all_values,
+            decision_indices,
+            max_length=max_length,
+            device=parameter.device,
+        )
         masks = torch.tensor(
             legal_masks, device=parameter.device, dtype=torch.bool
         )

@@ -19,18 +19,22 @@ All sealed entrypoints share the fixed atomic claim ledger
 candidate SHA-256, configuration, seed block, and output before model loading
 or play; its creation burns the holdout even if evaluation later crashes.
 
-A replacement must improve the matched, seat-rotated fixed-opponent pool
-without a material head-to-head regression against
-`ppo_actor_100run3.pth`. Screens choose candidates; only fresh deal ranges are
-used for confirmation. The final evaluation is protected by both the seed
-namespace and the atomic claim ledger, so changing the output path cannot
-reopen the holdout.
+A pre-selection replacement had to improve the matched, seat-rotated
+fixed-opponent pool without a material head-to-head regression against the raw
+`ppo_actor_100run3.pth` starting policy. After the exact suit-projected player
+was frozen, every later strength comparison used that projected production
+policy as the incumbent; raw-vs-raw probes are diagnostic only. Screens choose
+candidates and only fresh deal ranges are used for confirmation. The final
+evaluation is protected by both the seed namespace and the atomic claim
+ledger, so changing the output path cannot reopen the holdout.
 
-## Incumbent
+## Starting raw incumbent
 
 - Path: `ppo_actor_100run3.pth`
 - SHA-256: `aac589b3c7300895604e6c77755631ab4a31c8bf9810768448ab2f3ff5bbe186`
 - Architecture: 121-feature feed-forward PPO policy, 55 actions
+- Production form after selection: exact 24-suit mean-logit projection,
+  `alpha=1`, no player-label orbit
 
 ## Correctness repairs
 
@@ -110,7 +114,33 @@ Rejected after matched-deal evaluation:
   short (mean `42.35` turns, median `33`, p90 `84`, zero truncations). A safe DAGS pilot
   would require migrating every dense layer and collector from 121 to 122
   features and mixing root starts to avoid a biased equilibrium; its expected
-  gain is lower than the iterative-reference lane on this environment.
+  gain is lower than the iterative-reference lane on this environment;
+- a development-only learned PPO response probe against the frozen raw actor.
+  Its unanchored response appeared to gain `+0.160` directly in the 100-pair
+  screen while losing `0.010` pool score, but that apparent exploit vanished
+  on 300 fresh pairs: direct `+0.00333`, CI `[-0.0633,+0.0700]`, and pool
+  `+0.00556`, CI `[-0.01944,+0.02944]`. Applying exact suit projection to both
+  policies made the response weaker than production (`-0.040` direct,
+  `-0.025` pool). This finite response therefore establishes neither a
+  production exploit nor a stronger candidate;
+- an exact differentiable 24-suit projected-PPO pilot. Rollout and update used
+  the same projected actor, all initial ratios and KLs were exact, and
+  full-batch target-KL overshoots rolled back the complete actor/critic/
+  optimizer epoch. Its best two-update candidate screened at `+0.020` direct
+  and `+0.00167` pool, with both confidence intervals touching or crossing
+  zero. A deeper two-lane run then trained all 16 successive iterates on 4,608
+  unique deals. Its 18,700-game trajectory screen found no two-gate winner:
+  the best pool result was entropy iteration 3 at `+0.00667`, CI
+  `[-0.00667,+0.02000]`, with direct delta exactly zero;
+- top-advantage actor filtering and a minibatch parameter EMA. The broad
+  one-iteration screen produced a boundary-touching full-data online result
+  (`+0.010` direct and `+0.00667` pool), so fixed 25% and 100% recipes were
+  deepened for eight iterations without retuning. The vectorized raw path
+  processed 4,096 games in about 38 seconds. In the fresh exact-projected
+  screen, all four deep online/EMA candidates had direct deltas between
+  `-0.010` and zero and pool deltas between `-0.005` and `-0.00167`.
+  Four precommitted post-hoc checkpoint EMAs over the projected-PPO
+  trajectories also failed the pool gate. None was confirmed or promoted.
 
 ### Selected development candidate
 
@@ -228,6 +258,14 @@ compilation remains appropriate only on the already-supported CUDA path.
   counterexample and task-flag mitigation are why it was not wired into the
   frozen 121-feature player without a separate controlled study:
   <https://arxiv.org/abs/2605.14379>.
+- The learned-response diagnostic follows PPO's clipped policy objective and
+  the response-oracle framing used by PSRO, while deliberately making no exact
+  exploitability claim: <https://arxiv.org/abs/1707.06347> and
+  <https://arxiv.org/abs/1711.00832>.
+- The top-advantage/EMA lane transfers two ablated ingredients from the 2026
+  Generals.io self-play study—filtering actor updates to the highest-advantage
+  samples and evaluating an exponential moving average—without transferring
+  its privileged environment state: <https://arxiv.org/abs/2606.23348>.
 
 ## Final selection
 
