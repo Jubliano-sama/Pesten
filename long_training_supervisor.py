@@ -144,6 +144,20 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--base-puffer-epochs", type=int, default=4)
     parser.add_argument("--puffer-games-per-epoch", type=int, default=100)
     parser.add_argument("--pairs", type=int, default=250)
+    parser.add_argument(
+        "--benchmark-every",
+        type=int,
+        default=1,
+        help="run external measurements once every N segments; other "
+        "segments skip measurements entirely (default 1)",
+    )
+    parser.add_argument(
+        "--benchmark-pairs",
+        type=int,
+        default=0,
+        help="seat-balanced pairs per measurement run when one is scheduled; "
+        "0 falls back to --pairs",
+    )
     parser.add_argument("--mlp-seed", type=int, default=2026080101)
     parser.add_argument("--puffer-seed", type=int, default=54010001)
     parser.add_argument(
@@ -174,6 +188,11 @@ def main() -> None:
     args = _build_parser().parse_args()
     if args.restart_cycles < 1:
         raise ValueError("restart-cycles must be positive")
+    if args.benchmark_every < 1:
+        raise ValueError("benchmark-every must be positive")
+    if args.benchmark_pairs < 0:
+        raise ValueError("benchmark-pairs must be non-negative")
+    benchmark_pairs = args.benchmark_pairs or args.pairs
     training_device = "cuda" if torch.cuda.is_available() else "cpu"
     deadline = None if args.no_deadline else _deadline(args.deadline)
     old_state = _load_json(args.resume_state.resolve())
@@ -240,6 +259,10 @@ def main() -> None:
         "restart_cycles": args.restart_cycles,
         "mlp_iterations_per_segment": mlp_iterations,
         "puffer_epochs_per_segment": puffer_epochs,
+        "benchmark": {
+            "every_segments": args.benchmark_every,
+            "pairs": benchmark_pairs,
+        },
         "recipe": {
             "mlp_agent_sets": args.mlp_agent_sets,
             "mlp_temperature": args.mlp_temperature,
@@ -272,10 +295,14 @@ def main() -> None:
         or datetime.now().astimezone() < deadline
     ):
         segment_started = datetime.now().astimezone()
+        run_benchmarks = (
+            (segment - args.start_segment) % args.benchmark_every == 0
+        )
         record = {
             "segment": segment,
             "started_at": segment_started.isoformat(),
             "micro_cycles": args.restart_cycles,
+            "benchmark_scheduled": run_benchmarks,
             "source_fingerprint_before": source_fingerprint(),
         }
         segment_root = LONG_ROOT / f"segment_{segment:04d}"
@@ -314,29 +341,31 @@ def main() -> None:
             "critic_optimizer": (mlp_dir / f"ppo_critic_opt_{mlp_iterations}.pth").resolve(),
         }
         mlp_measurement = MEASURE_ROOT / f"mlp_long_segment_{segment:04d}_vs_old_random.json"
-        record["mlp_benchmark_returncode"] = _run(
-            [
-                str(mlp_python), str(REPO / "benchmark_checkpoint_batched.py"),
-                "--candidate", str(mlp_resume["actor"]),
-                "--parent", str(REPO / "ppo_actor_100run3.pth"),
-                "--pairs", str(args.pairs),
-                "--seed", str(82806001 + segment * 10_000),
-                "--pool", "random", "--device", training_device,
-                "--canonical-throughput-pairs", "0",
-                "--output", str(mlp_measurement),
-            ],
-            MEASURE_ROOT / f"mlp_long_segment_{segment:04d}_benchmark.log",
-        )
+        record["mlp_benchmark_returncode"] = None
         record["mlp_measurement"] = {"path": str(mlp_measurement)}
-        if record["mlp_benchmark_returncode"] == 0:
-            record["mlp_measurement"]["summary"] = _measurement_summary(
-                mlp_measurement
+        if run_benchmarks:
+            record["mlp_benchmark_returncode"] = _run(
+                [
+                    str(mlp_python), str(REPO / "benchmark_checkpoint_batched.py"),
+                    "--candidate", str(mlp_resume["actor"]),
+                    "--parent", str(REPO / "ppo_actor_100run3.pth"),
+                    "--pairs", str(benchmark_pairs),
+                    "--seed", str(82806001 + segment * 10_000),
+                    "--pool", "random", "--device", training_device,
+                    "--canonical-throughput-pairs", "0",
+                    "--output", str(mlp_measurement),
+                ],
+                MEASURE_ROOT / f"mlp_long_segment_{segment:04d}_benchmark.log",
             )
-        else:
-            record["mlp_measurement"]["error"] = (
-                "benchmark_returncode_"
-                + str(record["mlp_benchmark_returncode"])
-            )
+            if record["mlp_benchmark_returncode"] == 0:
+                record["mlp_measurement"]["summary"] = _measurement_summary(
+                    mlp_measurement
+                )
+            else:
+                record["mlp_measurement"]["error"] = (
+                    "benchmark_returncode_"
+                    + str(record["mlp_benchmark_returncode"])
+                )
 
         # Make the completed MLP side resumable even if the Puffer child or
         # its benchmark later fails.
@@ -384,26 +413,28 @@ def main() -> None:
         puffer_epoch += puffer_epochs
         puffer_resume = (puffer_dir / "latest.pt").resolve()
         puffer_measurement = MEASURE_ROOT / f"puffer_long_segment_{segment:04d}_vs_old_random.json"
-        record["puffer_benchmark_returncode"] = _run(
-            [
-                str(puffer_python), str(REPO / "live_puffer_benchmark.py"),
-                "--checkpoint", str(puffer_resume),
-                "--pairs", str(args.pairs),
-                "--seed", str(args.puffer_seed + segment * 10_000),
-                "--output", str(puffer_measurement),
-            ],
-            MEASURE_ROOT / f"puffer_long_segment_{segment:04d}_benchmark.log",
-        )
+        record["puffer_benchmark_returncode"] = None
         record["puffer_measurement"] = {"path": str(puffer_measurement)}
-        if record["puffer_benchmark_returncode"] == 0:
-            record["puffer_measurement"]["summary"] = _measurement_summary(
-                puffer_measurement
+        if run_benchmarks:
+            record["puffer_benchmark_returncode"] = _run(
+                [
+                    str(puffer_python), str(REPO / "live_puffer_benchmark.py"),
+                    "--checkpoint", str(puffer_resume),
+                    "--pairs", str(benchmark_pairs),
+                    "--seed", str(args.puffer_seed + segment * 10_000),
+                    "--output", str(puffer_measurement),
+                ],
+                MEASURE_ROOT / f"puffer_long_segment_{segment:04d}_benchmark.log",
             )
-        else:
-            record["puffer_measurement"]["error"] = (
-                "benchmark_returncode_"
-                + str(record["puffer_benchmark_returncode"])
-            )
+            if record["puffer_benchmark_returncode"] == 0:
+                record["puffer_measurement"]["summary"] = _measurement_summary(
+                    puffer_measurement
+                )
+            else:
+                record["puffer_measurement"]["error"] = (
+                    "benchmark_returncode_"
+                    + str(record["puffer_benchmark_returncode"])
+                )
         record["recipe"] = {"puffer_schedule": puffer_schedule}
         record["source_fingerprint_after"] = source_fingerprint()
         record["finished_at"] = datetime.now().astimezone().isoformat()
@@ -420,8 +451,9 @@ def main() -> None:
                 {
                     "segment": segment,
                     "micro_cycles": args.restart_cycles,
-                    "mlp": record["mlp_measurement"]["summary"],
-                    "puffer": record["puffer_measurement"]["summary"],
+                    "benchmark_scheduled": run_benchmarks,
+                    "mlp": record["mlp_measurement"].get("summary"),
+                    "puffer": record["puffer_measurement"].get("summary"),
                     "source_changed": (
                         record["source_fingerprint_before"]
                         != record["source_fingerprint_after"]
