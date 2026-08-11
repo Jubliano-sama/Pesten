@@ -484,8 +484,15 @@ class BatchedPesten:
             start = self._take_draw_top(game_index)
             self._append_discard(game_index, start)
             while int(CARD_RANK[start]) in INVALID_START_RANKS:
+                if self.draw_counts[game_index] == 0:
+                    self._recycle_discard_into_draw(game_index)
+                if self.draw_counts[game_index] == 0:
+                    self.game_over[game_index] = True
+                    break
                 start = self._take_draw_top(game_index)
                 self._append_discard(game_index, start)
+            if self.game_over[game_index]:
+                continue
             self.current_sort[game_index] = CARD_SORT[start]
             self.current_rank[game_index] = CARD_RANK[start]
             current = int(self.current_player[game_index])
@@ -532,22 +539,28 @@ class BatchedPesten:
         self.draw_counts[game_index] = count
         return number
 
+    def _recycle_discard_into_draw(self, game_index: int) -> bool:
+        """Rebuild the draw pile from the discard stack, preserving its top."""
+        discard_count = int(self.discard_counts[game_index])
+        if discard_count <= 1:
+            return False
+        recyclable = self.discards[game_index, : discard_count - 1].copy()
+        self.rngs[game_index].shuffle(recyclable)
+        recycle_count = len(recyclable)
+        self.draw_piles[game_index].fill(-1)
+        self.draw_piles[game_index, :recycle_count] = recyclable
+        self.draw_counts[game_index] = recycle_count
+        top = int(self.discards[game_index, discard_count - 1])
+        self.discards[game_index].fill(-1)
+        self.discards[game_index, 0] = top
+        self.discard_counts[game_index] = 1
+        return True
+
     def _draw_card(self, game_index: int, player_index: int) -> Optional[int]:
         if self.draw_counts[game_index] == 0:
-            discard_count = int(self.discard_counts[game_index])
-            if discard_count <= 1:
+            if not self._recycle_discard_into_draw(game_index):
                 self.game_over[game_index] = True
                 return None
-            recyclable = self.discards[game_index, : discard_count - 1].copy()
-            self.rngs[game_index].shuffle(recyclable)
-            recycle_count = len(recyclable)
-            self.draw_piles[game_index].fill(-1)
-            self.draw_piles[game_index, :recycle_count] = recyclable
-            self.draw_counts[game_index] = recycle_count
-            top = int(self.discards[game_index, discard_count - 1])
-            self.discards[game_index].fill(-1)
-            self.discards[game_index, 0] = top
-            self.discard_counts[game_index] = 1
         number = self._take_draw_top(game_index)
         self._append_hand(game_index, player_index, number)
         self.event_counts["draw"] += 1
