@@ -11,7 +11,7 @@ run, so changing the cadence does not reset learning.
 from __future__ import annotations
 
 import argparse
-from datetime import datetime
+from datetime import datetime, timedelta
 import hashlib
 import json
 from pathlib import Path
@@ -69,7 +69,10 @@ def source_fingerprint() -> dict[str, str]:
 def _deadline(value: str) -> datetime:
     hour, minute = (int(part) for part in value.split(":", 1))
     now = datetime.now().astimezone()
-    return now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+    deadline = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+    if deadline <= now:
+        deadline += timedelta(days=1)
+    return deadline
 
 
 def _run(command: list[str], log_path: Path) -> int:
@@ -130,6 +133,11 @@ def _measurement_summary(path: Path) -> dict:
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--deadline", default="16:00")
+    parser.add_argument(
+        "--no-deadline",
+        action="store_true",
+        help="train indefinitely until the supervisor process is stopped",
+    )
     parser.add_argument("--restart-cycles", type=int, default=16)
     parser.add_argument("--base-mlp-iterations", type=int, default=4)
     parser.add_argument("--mlp-episodes", type=int, default=512)
@@ -167,7 +175,7 @@ def main() -> None:
     if args.restart_cycles < 1:
         raise ValueError("restart-cycles must be positive")
     training_device = "cuda" if torch.cuda.is_available() else "cpu"
-    deadline = _deadline(args.deadline)
+    deadline = None if args.no_deadline else _deadline(args.deadline)
     old_state = _load_json(args.resume_state.resolve())
     warm = old_state.get("current_warm_resume")
     if not warm or not warm.get("mlp") or not warm.get("puffer"):
@@ -223,7 +231,7 @@ def main() -> None:
     prior_segments = list(old_state.get("segments", []))
     state = {
         "kind": "long_warm_training_supervisor",
-        "deadline": deadline.isoformat(),
+        "deadline": deadline.isoformat() if deadline is not None else None,
         "started_at": datetime.now().astimezone().isoformat(),
         "resumed_from": str(args.resume_state.resolve()),
         "previous_cycles": (
@@ -259,7 +267,10 @@ def main() -> None:
         )
 
     write_state()
-    while datetime.now().astimezone() < deadline:
+    while (
+        deadline is None
+        or datetime.now().astimezone() < deadline
+    ):
         segment_started = datetime.now().astimezone()
         record = {
             "segment": segment,
@@ -423,7 +434,11 @@ def main() -> None:
         segment += 1
 
     state["finished_at"] = datetime.now().astimezone().isoformat()
-    state["finished_reason"] = "deadline_or_child_failure"
+    state["finished_reason"] = (
+        "no_deadline_child_failure"
+        if deadline is None
+        else "deadline_or_child_failure"
+    )
     write_state()
     print(
         json.dumps(
