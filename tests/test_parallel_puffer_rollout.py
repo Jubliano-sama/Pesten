@@ -13,6 +13,7 @@ from temporal_puffer_agent import temporal_agent_factory
 from temporal_puffer_v4 import (
     HawkRGLRUTemporalPolicy,
     NativePufferTemporalPolicy,
+    policy_model_config,
 )
 from train_puffer_fast import _append_jsonl_idempotent
 from vector_puffer_rollout import (
@@ -20,6 +21,7 @@ from vector_puffer_rollout import (
     collect_league_batch_vector_parallel,
 )
 import torch
+import vector_puffer_rollout
 
 
 def test_parallel_rollout_is_exactly_equal_to_sequential_schedule():
@@ -162,6 +164,39 @@ def test_persistent_vector_pool_refreshes_shared_policy_exactly():
         "deck_count_by_player_count",
     ):
         assert actual_metadata[name] == expected_metadata[name]
+
+
+def test_vector_worker_loads_a_genuinely_frozen_historical_pool(tmp_path):
+    torch.manual_seed(81)
+    current = NativePufferTemporalPolicy(
+        hidden_size=8, mode_conditioned_heads=True
+    ).eval()
+    torch.manual_seed(82)
+    historical = NativePufferTemporalPolicy(
+        hidden_size=8, mode_conditioned_heads=True
+    ).eval()
+    historical_path = tmp_path / "historical.pt"
+    torch.save(
+        {
+            "model": policy_model_config(historical),
+            "state_dict": historical.state_dict(),
+        },
+        historical_path,
+    )
+
+    vector_puffer_rollout._initialize_worker(
+        current.state_dict(),
+        policy_model_config(current),
+        "ppo_actor_100run3.pth",
+        (str(historical_path),),
+    )
+
+    loaded = vector_puffer_rollout._WORKER_HISTORICAL
+    assert len(loaded) == 1
+    assert loaded[0] is not vector_puffer_rollout._WORKER_POLICY
+    for name, value in historical.state_dict().items():
+        assert torch.equal(loaded[0].state_dict()[name], value)
+    assert all(not parameter.requires_grad for parameter in loaded[0].parameters())
 
 
 def test_vector_pool_supports_hawk_rglru_policy_registry():

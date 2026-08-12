@@ -14,17 +14,22 @@ import torch
 
 _WORKER_POLICY = None
 _WORKER_CHAMPION = None
+_WORKER_HISTORICAL = None
 
 
 def _initialize_worker(
     state_dict: dict,
     model_config: dict,
     champion_path: str,
+    historical_paths: tuple[str, ...],
 ) -> None:
-    global _WORKER_POLICY, _WORKER_CHAMPION
+    global _WORKER_POLICY, _WORKER_CHAMPION, _WORKER_HISTORICAL
     torch.set_num_threads(1)
     from benchmark_agents import load_ppo_agent
-    from temporal_puffer_v4 import build_temporal_policy
+    from temporal_puffer_v4 import (
+        build_temporal_policy,
+        load_temporal_policy_checkpoint,
+    )
 
     policy = build_temporal_policy(model_config)
     policy.load_state_dict(state_dict)
@@ -33,17 +38,32 @@ def _initialize_worker(
         parameter.requires_grad_(False)
     _WORKER_POLICY = policy
     _WORKER_CHAMPION = load_ppo_agent(Path(champion_path), "cpu")
+    _WORKER_HISTORICAL = []
+    for raw_path in historical_paths:
+        historical, _ = load_temporal_policy_checkpoint(
+            Path(raw_path), device="cpu"
+        )
+        historical.eval()
+        for parameter in historical.parameters():
+            parameter.requires_grad_(False)
+        _WORKER_HISTORICAL.append(historical)
+    if not _WORKER_HISTORICAL:
+        _WORKER_HISTORICAL.append(_WORKER_POLICY)
 
 
 def _collect_chunk(task: dict):
-    if _WORKER_POLICY is None or _WORKER_CHAMPION is None:
+    if (
+        _WORKER_POLICY is None
+        or _WORKER_CHAMPION is None
+        or _WORKER_HISTORICAL is None
+    ):
         raise RuntimeError("parallel rollout worker was not initialized")
     from temporal_league import collect_league_batch
 
     return collect_league_batch(
         _WORKER_POLICY,
         _WORKER_CHAMPION,
-        [_WORKER_POLICY],
+        _WORKER_HISTORICAL,
         games=task["games"],
         seed=task["seed"],
         schedule_offset=task["schedule_offset"],
@@ -102,6 +122,7 @@ def collect_league_batch_parallel(
     workers: int,
     chunks_per_worker: int = 2,
     champion_path: Path = Path("ppo_actor_100run3.pth"),
+    historical_paths: Sequence[Path] = (),
 ):
     """Collect the same seeded games in ordered, load-balanced processes.
 
@@ -115,15 +136,27 @@ def collect_league_batch_parallel(
         raise ValueError("workers must be positive")
     if chunks_per_worker < 1:
         raise ValueError("chunks_per_worker must be positive")
+    historical_paths = tuple(Path(path).resolve() for path in historical_paths)
+    for path in historical_paths:
+        if not path.is_file():
+            raise FileNotFoundError(path)
     if workers == 1:
         from benchmark_agents import load_ppo_agent
         from temporal_league import collect_league_batch
+        from temporal_puffer_v4 import load_temporal_policy_checkpoint
 
         champion = load_ppo_agent(champion_path, "cpu")
+        historical = []
+        for path in historical_paths:
+            snapshot, _ = load_temporal_policy_checkpoint(path, device="cpu")
+            snapshot.eval()
+            historical.append(snapshot)
+        if not historical:
+            historical.append(policy)
         return collect_league_batch(
             policy,
             champion,
-            [policy],
+            historical,
             games=games,
             seed=seed,
             schedule_offset=schedule_offset,
@@ -162,6 +195,7 @@ def collect_league_batch_parallel(
             state_dict,
             policy_model_config(policy),
             str(champion_path.resolve()),
+            tuple(str(path) for path in historical_paths),
         ),
     ) as pool:
         results = pool.map(_collect_chunk, tasks)

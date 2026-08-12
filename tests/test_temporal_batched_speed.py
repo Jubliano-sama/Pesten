@@ -28,9 +28,31 @@ from temporal_batched_speed import (
     SafeEventCursor,
     TemporalSeatRuntime,
     _batch_temporal_actions,
+    _make_vector_layout,
     build_safe_decision,
     collect_league_batch_batched,
 )
+
+
+def test_historical_schedule_covers_every_retained_snapshot():
+    historical = [object() for _ in range(8)]
+    _, _, _, roles = _make_vector_layout(
+        game_indices=tuple(range(64)),
+        games=64,
+        seed=2099,
+        schedule_offset=0,
+        schedule=("historical_temporal",),
+        historical=historical,
+        random_opponent_seeds=None,
+        player_count=2,
+    )
+
+    selected = {
+        id(policy)
+        for role, policy, _ in roles.values()
+        if role == "historical"
+    }
+    assert selected == {id(policy) for policy in historical}
 
 
 def _decision(events=(), *, seat=0):

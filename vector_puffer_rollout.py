@@ -16,21 +16,26 @@ from batched_pesten import deck_count_for_players
 
 _WORKER_POLICY = None
 _WORKER_CHAMPION = None
+_WORKER_HISTORICAL = None
 
 
 def _initialize_worker(
     state_dict: dict,
     model_config: dict,
     champion_path: str,
+    historical_paths: tuple[str, ...],
 ) -> None:
-    global _WORKER_POLICY, _WORKER_CHAMPION
+    global _WORKER_POLICY, _WORKER_CHAMPION, _WORKER_HISTORICAL
     torch.set_num_threads(1)
     try:
         torch.set_num_interop_threads(1)
     except RuntimeError:
         pass
     from benchmark_agents import load_ppo_agent
-    from temporal_puffer_v4 import build_temporal_policy
+    from temporal_puffer_v4 import (
+        build_temporal_policy,
+        load_temporal_policy_checkpoint,
+    )
 
     policy = build_temporal_policy(model_config)
     policy.load_state_dict(state_dict, assign=True)
@@ -39,10 +44,27 @@ def _initialize_worker(
         parameter.requires_grad_(False)
     _WORKER_POLICY = policy
     _WORKER_CHAMPION = load_ppo_agent(Path(champion_path), "cpu")
+    _WORKER_HISTORICAL = []
+    for raw_path in historical_paths:
+        historical, _ = load_temporal_policy_checkpoint(
+            Path(raw_path), device="cpu"
+        )
+        historical.eval()
+        for parameter in historical.parameters():
+            parameter.requires_grad_(False)
+        _WORKER_HISTORICAL.append(historical)
+    # Preserve the original current-policy mirror when callers do not request
+    # a genuinely frozen historical pool.
+    if not _WORKER_HISTORICAL:
+        _WORKER_HISTORICAL.append(_WORKER_POLICY)
 
 
 def _collect_player_count(task: dict):
-    if _WORKER_POLICY is None or _WORKER_CHAMPION is None:
+    if (
+        _WORKER_POLICY is None
+        or _WORKER_CHAMPION is None
+        or _WORKER_HISTORICAL is None
+    ):
         raise RuntimeError("vector rollout worker was not initialized")
     from temporal_batched_speed import BatchRolloutStats, collect_league_batch_batched
 
@@ -51,7 +73,7 @@ def _collect_player_count(task: dict):
     episodes, metadata = collect_league_batch_batched(
         _WORKER_POLICY,
         _WORKER_CHAMPION,
-        [_WORKER_POLICY],
+        _WORKER_HISTORICAL,
         games=task["games"],
         seed=task["seed"],
         schedule_offset=task["schedule_offset"],
@@ -233,6 +255,7 @@ def collect_league_batch_vector_parallel(
     player_counts: Sequence[int],
     workers: int,
     champion_path: Path = Path("ppo_actor_100run3.pth"),
+    historical_paths: Sequence[Path] = (),
     prepack_training: bool = False,
 ):
     """Run one batch through a temporary vector worker pool."""
@@ -240,6 +263,7 @@ def collect_league_batch_vector_parallel(
         policy,
         workers=workers,
         champion_path=champion_path,
+        historical_paths=historical_paths,
     ) as pool:
         return pool.collect(
             policy,
@@ -261,11 +285,18 @@ class VectorPufferRolloutPool:
         *,
         workers: int,
         champion_path: Path = Path("ppo_actor_100run3.pth"),
+        historical_paths: Sequence[Path] = (),
     ) -> None:
         if workers < 1:
             raise ValueError("workers must be positive")
         self.workers = workers
         self.closed = False
+        self.historical_paths = tuple(
+            Path(path).resolve() for path in historical_paths
+        )
+        for path in self.historical_paths:
+            if not path.is_file():
+                raise FileNotFoundError(path)
         self.shared_state = {
             name: value.detach().cpu().clone().share_memory_()
             for name, value in policy.state_dict().items()
@@ -280,6 +311,7 @@ class VectorPufferRolloutPool:
                 self.shared_state,
                 policy_model_config(policy),
                 str(champion_path.resolve()),
+                tuple(str(path) for path in self.historical_paths),
             ),
         )
 

@@ -23,7 +23,14 @@ from benchmark_rlvr_pool import (
     _weighted_summary,
     file_sha256,
 )
-from batched_pesten import BatchedPesten, PHASE_SUIT, POLICY_RANDOM, POLICY_RL
+from batched_pesten import (
+    BatchedPesten,
+    PHASE_SUIT,
+    POLICY_RANDOM,
+    POLICY_RL,
+    POLICY_SMART,
+    POLICY_SMARTER,
+)
 
 
 _POLICIES = None
@@ -91,6 +98,10 @@ def _make_layout(task: dict):
                         row_roles.append(("mlp", None))
                     elif opponent == "canonical_random":
                         row_roles.append(("canonical_random", None))
+                    elif opponent == "smart_rule":
+                        row_roles.append(("smart_rule", None))
+                    elif opponent == "smarter_rule":
+                        row_roles.append(("smarter_rule", None))
                     else:
                         raise ValueError(f"unknown opponent: {opponent}")
                 records.append((block, variant, candidate_seat, deal_seed))
@@ -120,6 +131,10 @@ def _evaluate_task(task: dict) -> dict:
         for seat, (kind, policy_name) in enumerate(row_roles):
             if kind == "canonical_random":
                 policy_kinds[row, seat] = POLICY_RANDOM
+            elif kind == "smart_rule":
+                policy_kinds[row, seat] = POLICY_SMART
+            elif kind == "smarter_rule":
+                policy_kinds[row, seat] = POLICY_SMARTER
             actor_keys[row, seat] = (kind, policy_name or "")
     engine = BatchedPesten(
         policy_kinds,
@@ -202,6 +217,8 @@ def _evaluate_task(task: dict) -> dict:
                     actions[row] = 50 + suit_generators[row].randint(0, 3)
                 else:
                     actions[row] = engine.random_action(row)
+            elif kind in ("smart_rule", "smarter_rule"):
+                actions[row] = engine.non_neural_action(row)
             else:
                 raise AssertionError(f"unexpected role {kind}")
 

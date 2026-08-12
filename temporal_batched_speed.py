@@ -695,7 +695,14 @@ def _make_vector_layout(
                     raise ValueError(
                         "historical snapshots are required by the league mix"
                     )
-                opponent_policy = historical[absolute_index % len(historical)]
+                # Mix the deal namespace into historical selection so a short
+                # opponent schedule cannot lock onto only a residue subset of
+                # a bounded snapshot pool. This remains deterministic and
+                # covers every retained generation over long campaigns.
+                historical_index = (
+                    absolute_index * 0x9E3779B1 + seed
+                ) % len(historical)
+                opponent_policy = historical[historical_index]
                 opponent_role = (
                     ROLE_HISTORICAL,
                     opponent_policy,

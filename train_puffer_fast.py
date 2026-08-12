@@ -171,6 +171,15 @@ def parse_args() -> argparse.Namespace:
             "checkpoint recipe"
         ),
     )
+    parser.add_argument(
+        "--historical-checkpoint",
+        action="append",
+        type=Path,
+        help=(
+            "frozen temporal opponent checkpoint; repeat to form a bounded "
+            "historical pool"
+        ),
+    )
     parser.add_argument("--device", choices=("cuda", "cpu"), default="cuda")
     parser.add_argument(
         "--compile-updates",
@@ -285,6 +294,28 @@ def main() -> None:
     )
     if not player_counts or any(count < 2 or count > 8 for count in player_counts):
         raise ValueError("player-count schedule must contain values from 2 to 8")
+    requested_historical = args.historical_checkpoint
+    if requested_historical is None:
+        requested_historical = []
+        for entry in recipe.get("historical_checkpoints", ()):
+            requested_historical.append(
+                Path(entry["path"] if isinstance(entry, dict) else entry)
+            )
+    if "historical_temporal" in schedule and not requested_historical:
+        requested_historical = [resume]
+    historical_paths = []
+    historical_seen = set()
+    for raw_path in requested_historical:
+        path = Path(raw_path).resolve()
+        if not path.is_file():
+            raise FileNotFoundError(path)
+        if path not in historical_seen:
+            historical_paths.append(path)
+            historical_seen.add(path)
+    historical_records = [
+        {"path": str(path), "sha256": _file_sha256(path)}
+        for path in historical_paths
+    ]
     start_epoch = int(payload.get("epoch", 0)) + 1
     source_sha256 = _file_sha256(resume)
     champion_factory = load_ppo_agent(champion_path, "cpu")
@@ -301,6 +332,7 @@ def main() -> None:
             policy,
             workers=args.rollout_workers,
             champion_path=champion_path,
+            historical_paths=historical_paths,
         )
         if args.rollout_engine == "vector"
         else None
@@ -335,6 +367,7 @@ def main() -> None:
                 workers=args.rollout_workers,
                 chunks_per_worker=args.chunks_per_worker,
                 champion_path=champion_path,
+                historical_paths=historical_paths,
                 **rollout_arguments,
             )
         rollout_seconds = time.perf_counter() - rollout_started
@@ -433,6 +466,7 @@ def main() -> None:
                 **recipe,
                 "schedule": list(schedule),
                 "player_count_schedule": list(player_counts),
+                "historical_checkpoints": historical_records,
                 "games_per_epoch": args.games_per_epoch,
                 "rollout_workers": args.rollout_workers,
                 "chunks_per_worker": args.chunks_per_worker,

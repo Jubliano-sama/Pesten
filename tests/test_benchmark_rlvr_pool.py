@@ -58,6 +58,22 @@ def test_batched_pool_layout_matches_every_variant_seat_on_each_deal():
         assert roles[row][candidate_seat] == ("temporal", variant)
 
 
+@pytest.mark.parametrize("opponent", ("smart_rule", "smarter_rule"))
+def test_batched_pool_layout_supports_fixed_rule_opponents(opponent):
+    records, roles, seeds = _make_layout(
+        {"players": 4, "blocks": 2, "opponent": opponent, "seed": 900}
+    )
+
+    assert len(records) == 2 * 2 * 4
+    assert set(seeds) == {900, 901}
+    for row, (_, variant, candidate_seat, _) in enumerate(records):
+        assert roles[row][candidate_seat] == ("temporal", variant)
+        assert all(
+            role == ("temporal", variant) if seat == candidate_seat else role == (opponent, None)
+            for seat, role in enumerate(roles[row])
+        )
+
+
 def test_opponent_summaries_do_not_dilute_lanes_by_three():
     strata = []
     lane_deltas = {
