@@ -146,6 +146,29 @@ def test_variable_event_batch_matches_individual_native_steps():
         )
 
 
+def test_deterministic_temporal_batch_uses_masked_argmax():
+    torch.manual_seed(43)
+    policy = NativePufferTemporalPolicy(
+        hidden_size=16, num_layers=2
+    ).eval()
+    decisions = (_decision(seat=0), _decision(seat=1))
+    runtimes = (
+        _runtime(policy, seat=0, seed=201),
+        _runtime(policy, seat=1, seed=202),
+    )
+    expected = [
+        int(policy.step(item, policy.initial_state()).logits.argmax())
+        for item in decisions
+    ]
+    actual = _batch_temporal_actions(
+        policy,
+        list(zip(runtimes, decisions)),
+        None,
+        deterministic=True,
+    )
+    assert actual == expected
+
+
 def test_drawn_identity_and_opponent_cards_never_cross_safe_boundary():
     kinds = np.full((1, 2), POLICY_RL, dtype=np.int8)
     keys = np.full((1, 2), None, dtype=object)

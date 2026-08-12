@@ -1,0 +1,35 @@
+{
+  "batched": {
+    "delta": 0.05615289325606786,
+    "delta_normalized_win_share": 0.2244268077601408,
+    "elapsed_seconds": 4.451158005002071
+  },
+  "comparison": {
+    "all_21_strata_exact": true,
+    "elapsed_speedup": 2.2610391245821284,
+    "weighted_delta_exact": true,
+    "weighted_normalized_delta_exact": true
+  },
+  "kind": "rlvr_pool_scalar_batched_exact_parity",
+  "protocol": {
+    "blocks_per_stratum": 2,
+    "candidate": "teacher_after_119_rlvr_phases",
+    "fixed_self_anchor": "epoch_3978_teacher",
+    "matched_seeds": true,
+    "opponents": [
+      "self_anchor",
+      "mlp",
+      "canonical_random"
+    ],
+    "player_counts": [2, 3, 4, 5, 6, 7, 8],
+    "scalar_command": "benchmark_rlvr_pool.py",
+    "batched_command": "benchmark_rlvr_pool_batched.py",
+    "seed": 940260812
+  },
+  "scalar": {
+    "delta": 0.05615289325606786,
+    "delta_normalized_win_share": 0.2244268077601408,
+    "elapsed_seconds": 10.064242399006616
+  },
+  "schema_version": 1
+}

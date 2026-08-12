@@ -112,3 +112,27 @@ Pre/post evaluation uses identical deal seeds, rotates the candidate through
 every seat, and reports 99.9% paired normal and distribution-free Hoeffding
 intervals. Improvement is a result only when the matched interval supports it;
 training loss or an isolated development win rate is not a promotion claim.
+
+## Capacity-order correction
+
+The initial fixed-length three-model campaign was stopped after 119 completed
+small-teacher phases (243,712 games) and before either larger model began RLVR.
+The capacity order is now adaptive:
+
+1. continue the 192x2 teacher in 60-epoch blocks;
+2. compare every adjacent checkpoint on the same fixed-anchor, 21-stratum
+   2-8-player pool;
+3. call a monitor plateau only when the paired 99.9% upper confidence bound on
+   normalized win-share improvement is at most 0.02 for two consecutive blocks;
+4. confirm that window on a disjoint, twice-larger seed bank before stopping;
+5. keep the 512x2 model frozen until that small-model plateau is confirmed.
+
+The Hawk residual is the only capacity experiment allowed before then. It is
+trained over the same phase seeds as the teacher so improvement per RLVR game
+can be compared directly.
+
+The plateau evaluator uses the exact `BatchedPesten` semantics and deterministic
+batched recurrent inference. A cold two-block parity run matched the scalar
+evaluator in every stratum and in both weighted deltas, while reducing elapsed
+time from 10.064 seconds to 4.451 seconds (2.261x). This removes much of the CPU
+cost of repeated high-confidence plateau checks without changing outcomes.

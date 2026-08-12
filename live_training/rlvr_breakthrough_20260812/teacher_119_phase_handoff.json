@@ -1,0 +1,43 @@
+{
+  "checkpoint": {
+    "path": "live_training/rlvr_breakthrough_20260812/teacher/training/latest.pt",
+    "sha256": "e123f4f355e109c7a4b409d1df4eeea7a3526cd7ba106e5be245d9f80f73d27f"
+  },
+  "completion": {
+    "decisions": 10649407,
+    "elapsed_seconds_including_scheduled_screen": 1185.4524480819964,
+    "games": 243712,
+    "last_campaign_phase": 118,
+    "last_epoch": 4097,
+    "phases": 119
+  },
+  "decision": "stopped_before_large_model_rlvr_to_switch_to_small_teacher_plateau_order",
+  "kind": "small_teacher_rlvr_handoff",
+  "latest_update": {
+    "approx_kl": 0.0013071288963547552,
+    "clip_fraction": 0.01235902472092883
+  },
+  "opponent_games": {
+    "canonical_random": 81237,
+    "current_selfplay": 81238,
+    "ppo_champion": 81237
+  },
+  "player_distribution": {
+    "2": 54166,
+    "3": 54166,
+    "4": 54152,
+    "5": 23208,
+    "6": 19340,
+    "7": 19340,
+    "8": 19340,
+    "bulk_2_3_4_fraction": 0.6667049632352942,
+    "tail_5_8_fraction": 0.3332950367647059
+  },
+  "scheduled_1000_pair_screen": {
+    "canonical_random_score": 0.7855,
+    "latest_mlp_score": 0.592,
+    "smart_score": 0.651
+  },
+  "schema_version": 1,
+  "warm_rollout_games_per_second_mean_excluding_first_two_phases": 370.3494086911272
+}

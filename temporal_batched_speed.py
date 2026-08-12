@@ -375,6 +375,8 @@ def _batch_temporal_actions(
     policy: torch.nn.Module,
     entries: Sequence[tuple[TemporalSeatRuntime, DecisionInput]],
     stats: BatchRolloutStats | None,
+    *,
+    deterministic: bool = False,
 ) -> list[int]:
     """Advance variable-length event streams, then sample one action per seat."""
 
@@ -429,22 +431,30 @@ def _batch_temporal_actions(
         masked_logits = logits.masked_fill(
             ~legal, torch.finfo(logits.dtype).min
         )
-        probabilities = torch.softmax(masked_logits, dim=-1).cpu()
+        probabilities = (
+            None
+            if deterministic
+            else torch.softmax(masked_logits, dim=-1).cpu()
+        )
         if stats is not None:
             stats.temporal_recurrent_inference_transfer_seconds += (
                 time.perf_counter() - inference_started
             )
         scatter_started = time.perf_counter()
-        actions = [
-            int(
-                torch.multinomial(
-                    probabilities[index],
-                    1,
-                    generator=runtime.generator,
-                ).item()
-            )
-            for index, runtime in enumerate(runtimes)
-        ]
+        if deterministic:
+            actions = masked_logits.argmax(dim=-1).cpu().tolist()
+        else:
+            assert probabilities is not None
+            actions = [
+                int(
+                    torch.multinomial(
+                        probabilities[index],
+                        1,
+                        generator=runtime.generator,
+                    ).item()
+                )
+                for index, runtime in enumerate(runtimes)
+            ]
         log_probabilities = torch.log_softmax(masked_logits, dim=-1)
         _scatter_states(runtimes, next_states)
 

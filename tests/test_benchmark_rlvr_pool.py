@@ -1,6 +1,7 @@
 import pytest
 
 from benchmark_rlvr_pool import OPPONENTS, PLAYER_WEIGHTS, _weighted_summary
+from benchmark_rlvr_pool_batched import _make_layout
 
 
 def test_weighted_summary_reports_raw_and_player_normalized_change():
@@ -30,3 +31,23 @@ def test_weighted_summary_reports_raw_and_player_normalized_change():
     assert result["delta_normalized_hoeffding_margin99_9"] > (
         result["delta_hoeffding_margin99_9"]
     )
+
+
+def test_batched_pool_layout_matches_every_variant_seat_on_each_deal():
+    records, roles, seeds = _make_layout(
+        {
+            "opponent": "self_anchor",
+            "players": 4,
+            "blocks": 3,
+            "seed": 1000,
+        }
+    )
+    assert len(records) == 3 * 2 * 4
+    for block in range(3):
+        selected = records[block * 8 : (block + 1) * 8]
+        assert {record[1] for record in selected} == {"before", "after"}
+        assert sorted(record[2] for record in selected[:4]) == [0, 1, 2, 3]
+        assert sorted(record[2] for record in selected[4:]) == [0, 1, 2, 3]
+        assert set(seeds[block * 8 : (block + 1) * 8]) == {1000 + block}
+    for row, (_, variant, candidate_seat, _) in enumerate(records):
+        assert roles[row][candidate_seat] == ("temporal", variant)
