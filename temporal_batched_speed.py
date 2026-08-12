@@ -30,6 +30,7 @@ from batched_pesten import (
     POLICY_RANDOM,
     POLICY_RL,
     POLICY_SMART,
+    POLICY_SMARTER,
     SUIT_NAMES,
 )
 from hardcodedAgent import HardcodedStrategyAgent
@@ -64,12 +65,21 @@ LEAGUE_SCHEDULE = (
 # audited-uniform role with an independent opponent-RNG bank.  The explicit
 # ``canonical_random`` lane mirrors ``randomAgent.AgentRandom`` instead: its
 # game RNG is deliberately coupled to the deal and recycle stream.
-VALID_OPPONENT_TYPES = frozenset((*LEAGUE_SCHEDULE, "random", "canonical_random"))
+VALID_OPPONENT_TYPES = frozenset(
+    (
+        *LEAGUE_SCHEDULE,
+        "smarter_rule",
+        "random_rule",
+        "random",
+        "canonical_random",
+    )
+)
 
 ROLE_CURRENT = "current"
 ROLE_HISTORICAL = "historical"
 ROLE_PPO = "ppo_champion"
 ROLE_SMART = "smart_rule"
+ROLE_SMARTER = "smarter_rule"
 ROLE_AUDITED_UNIFORM_RANDOM = "audited_uniform_random"
 ROLE_CANONICAL_RANDOM = "canonical_random"
 
@@ -543,6 +553,7 @@ def _collect_scalar_tree_game(
     *,
     absolute_game_index: int,
     deal_seed: int,
+    player_count: int,
     max_turns: int,
 ) -> tuple[list[tuple[Sequence[TrajectoryStep], bool]], int]:
     np.random.seed(deal_seed)
@@ -550,12 +561,11 @@ def _collect_scalar_tree_game(
     current_factory = temporal_agent_factory(
         policy, deterministic=False, seed=deal_seed * 2
     )
-    current_seat = absolute_game_index % 2
-    factories = (
-        [current_factory, _tree_factory]
-        if current_seat == 0
-        else [_tree_factory, current_factory]
-    )
+    current_seat = absolute_game_index % player_count
+    factories = [
+        current_factory if seat == current_seat else _tree_factory
+        for seat in range(player_count)
+    ]
     match = game.Game(factories)
     turns, winner = match.auto_simulate(max_turns=max_turns)
     trajectory = tuple(match.players[current_seat].trajectory)
@@ -564,12 +574,14 @@ def _collect_scalar_tree_game(
 
 def _make_vector_layout(
     *,
+    game_indices: Sequence[int],
     games: int,
     seed: int,
     schedule_offset: int,
     schedule: Sequence[str],
     historical: Sequence[torch.nn.Module],
     random_opponent_seeds: Sequence[int] | None,
+    player_count: int,
 ) -> tuple[
     list[int],
     np.ndarray,
@@ -578,14 +590,19 @@ def _make_vector_layout(
 ]:
     vector_absolute_indices = [
         index
-        for index in range(games)
-        if schedule[
-            (schedule_offset + index) % len(schedule)
-        ]
-        != "bayesian_tree"
+        for index in game_indices
+        if not (
+            schedule[(schedule_offset + index) % len(schedule)]
+            == "bayesian_tree"
+            and player_count < 7
+        )
     ]
-    policy_kinds = np.full((len(vector_absolute_indices), 2), POLICY_RL, np.int8)
-    actor_keys = np.empty((len(vector_absolute_indices), 2), dtype=object)
+    policy_kinds = np.full(
+        (len(vector_absolute_indices), player_count), POLICY_RL, np.int8
+    )
+    actor_keys = np.empty(
+        (len(vector_absolute_indices), player_count), dtype=object
+    )
     roles: dict[
         tuple[int, int], tuple[str, torch.nn.Module | None, int]
     ] = {}
@@ -613,7 +630,10 @@ def _make_vector_layout(
     # stream is derived directly from the deal seed.  Rejecting a supplied
     # bank here avoids a superficially harmless parameter silently becoming
     # part of the canonical contract later.
-    if "canonical_random" in schedule and random_opponent_seeds is not None:
+    if (
+        {"canonical_random", "random_rule"}.intersection(schedule)
+        and random_opponent_seeds is not None
+    ):
         raise ValueError(
             "canonical_random schedule entries must not receive an "
             "independent random_opponent_seed bank"
@@ -623,14 +643,16 @@ def _make_vector_layout(
         opponent_type = schedule[
             (schedule_offset + absolute_index) % len(schedule)
         ]
+        if opponent_type == "bayesian_tree" and player_count >= 7:
+            opponent_type = "smarter_rule"
         deal_seed = seed + absolute_index
         if opponent_type == "current_selfplay":
-            seat_roles = (
-                (ROLE_CURRENT, None, deal_seed * 2),
-                (ROLE_CURRENT, None, deal_seed * 2 + 1),
+            seat_roles = tuple(
+                (ROLE_CURRENT, None, deal_seed * 2 + seat)
+                for seat in range(player_count)
             )
         else:
-            current_seat = absolute_index % 2
+            current_seat = absolute_index % player_count
             if opponent_type == "historical_temporal":
                 if not historical:
                     raise ValueError(
@@ -646,6 +668,8 @@ def _make_vector_layout(
                 opponent_role = (ROLE_PPO, None, 0)
             elif opponent_type == "smart_rule":
                 opponent_role = (ROLE_SMART, None, 0)
+            elif opponent_type == "smarter_rule":
+                opponent_role = (ROLE_SMARTER, None, 0)
             elif opponent_type == "random":
                 assert random_opponent_seeds is not None
                 opponent_role = (
@@ -653,7 +677,7 @@ def _make_vector_layout(
                     None,
                     int(random_opponent_seeds[absolute_index]),
                 )
-            elif opponent_type == "canonical_random":
+            elif opponent_type in ("canonical_random", "random_rule"):
                 # The integer is the deal seed, not an independent opponent
                 # namespace.  BatchedPesten owns the matching per-game NumPy
                 # stream and shares it with deal/recycle/random hand shuffles.
@@ -661,10 +685,9 @@ def _make_vector_layout(
             else:
                 raise AssertionError(f"unexpected vector role {opponent_type}")
             current_role = (ROLE_CURRENT, None, deal_seed * 2)
-            seat_roles = (
-                (current_role, opponent_role)
-                if current_seat == 0
-                else (opponent_role, current_role)
+            seat_roles = tuple(
+                current_role if seat == current_seat else opponent_role
+                for seat in range(player_count)
             )
 
         for seat, role in enumerate(seat_roles):
@@ -676,6 +699,8 @@ def _make_vector_layout(
             )
             if role_name == ROLE_SMART:
                 policy_kinds[vector_index, seat] = POLICY_SMART
+            elif role_name == ROLE_SMARTER:
+                policy_kinds[vector_index, seat] = POLICY_SMARTER
             elif role_name == ROLE_CANONICAL_RANDOM:
                 policy_kinds[vector_index, seat] = POLICY_RANDOM
 
@@ -699,6 +724,8 @@ def collect_league_batch_batched(
     max_turns: int = 1000,
     stats: BatchRolloutStats | None = None,
     trace_sink: list[dict] | None = None,
+    player_count: int = 2,
+    game_indices: Sequence[int] | None = None,
 ) -> tuple[list[tuple[Sequence[TrajectoryStep], bool]], dict]:
     """Collect an explicit league schedule with batched neural decisions.
 
@@ -714,6 +741,18 @@ def collect_league_batch_batched(
 
     if games < 0:
         raise ValueError("games must be non-negative")
+    if player_count < 2:
+        raise ValueError("player_count must be at least two")
+    selected_game_indices = tuple(
+        range(games) if game_indices is None else game_indices
+    )
+    if (
+        tuple(sorted(set(selected_game_indices))) != selected_game_indices
+        or any(index < 0 or index >= games for index in selected_game_indices)
+    ):
+        raise ValueError(
+            "game_indices must be unique, sorted, and inside the game range"
+        )
     schedule = tuple(schedule)
     if not schedule:
         raise ValueError("schedule must contain at least one opponent type")
@@ -731,12 +770,14 @@ def collect_league_batch_batched(
         actor_keys,
         roles,
     ) = _make_vector_layout(
+        game_indices=selected_game_indices,
         games=games,
         seed=seed,
         schedule_offset=schedule_offset,
         schedule=schedule,
         historical=historical,
         random_opponent_seeds=random_opponent_seeds,
+        player_count=player_count,
     )
     absolute_to_vector = {
         absolute: vector
@@ -750,7 +791,7 @@ def collect_league_batch_batched(
     total_turns = 0
 
     stats.vector_games = len(vector_absolute_indices)
-    stats.tree_games = games - len(vector_absolute_indices)
+    stats.tree_games = len(selected_game_indices) - len(vector_absolute_indices)
     if vector_absolute_indices:
         engine = BatchedPesten(
             policy_kinds,
@@ -779,7 +820,7 @@ def collect_league_batch_batched(
                     "initial_deal": {
                         "hands": [
                             list(_own_cards(engine, vector_index, seat))
-                            for seat in range(2)
+                            for seat in range(player_count)
                         ],
                         "opening_card": int(
                             engine.discards[vector_index, opening_count - 1]
@@ -1007,11 +1048,13 @@ def collect_league_batch_batched(
             opponent_type = schedule[
                 (schedule_offset + absolute_index) % len(schedule)
             ]
+            if opponent_type == "bayesian_tree" and player_count >= 7:
+                opponent_type = "smarter_rule"
             game_counts[opponent_type] += 1
             winner = int(engine.winners[vector_index])
             current_seats = [
                 seat
-                for seat in range(2)
+                for seat in range(player_count)
                 if roles[(vector_index, seat)][0] == ROLE_CURRENT
             ]
             game_episodes = []
@@ -1036,16 +1079,17 @@ def collect_league_batch_batched(
                 trace_sink.append(trace)
 
     tree_started = time.perf_counter()
-    for absolute_index in range(games):
+    for absolute_index in selected_game_indices:
         opponent_type = schedule[
             (schedule_offset + absolute_index) % len(schedule)
         ]
-        if opponent_type != "bayesian_tree":
+        if opponent_type != "bayesian_tree" or player_count >= 7:
             continue
         tree_episodes, turns = _collect_scalar_tree_game(
             policy,
             absolute_game_index=absolute_index,
             deal_seed=seed + absolute_index,
+            player_count=player_count,
             max_turns=max_turns,
         )
         episodes_by_game[absolute_index] = tree_episodes
@@ -1058,7 +1102,7 @@ def collect_league_batch_batched(
 
     episodes = [
         episode
-        for absolute_index in range(games)
+        for absolute_index in selected_game_indices
         for episode in episodes_by_game.get(absolute_index, ())
     ]
     return episodes, {

@@ -40,6 +40,17 @@ def _atomic_json(payload: dict, path: Path) -> None:
 def _strategic_pass_metrics(episodes, pass_action: int) -> dict:
     opportunities = passes = total_passes = decisions = 0
     for trajectory, _ in episodes:
+        if hasattr(trajectory, "legal_masks"):
+            masks = trajectory.legal_masks
+            actions = trajectory.actions
+            decisions += len(trajectory)
+            strategic = masks[:, pass_action] & masks[:, :pass_action].any(
+                axis=1
+            )
+            opportunities += int(strategic.sum())
+            passes += int(((actions == pass_action) & strategic).sum())
+            total_passes += int((actions == pass_action).sum())
+            continue
         for step in trajectory:
             decisions += 1
             if step.action == pass_action:
@@ -101,8 +112,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--epochs", type=int, default=1000)
     parser.add_argument("--games-per-epoch", type=int, default=2048)
-    parser.add_argument("--rollout-workers", type=int, default=8)
+    parser.add_argument("--rollout-workers", type=int, default=10)
     parser.add_argument("--chunks-per-worker", type=int, default=3)
+    parser.add_argument(
+        "--rollout-engine",
+        choices=("vector", "process"),
+        default="vector",
+    )
     parser.add_argument("--learning-rate", type=float, default=None)
     parser.add_argument("--update-epochs", type=int, default=4)
     parser.add_argument("--minibatch-trajectories", type=int, default=128)
@@ -113,6 +129,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--gae-lambda", type=float, default=0.95)
     parser.add_argument("--clip-ratio", type=float, default=0.2)
     parser.add_argument("--target-kl", type=float, default=0.02)
+    parser.add_argument(
+        "--early-stop-diagnostic-trajectories", type=int, default=512
+    )
     parser.add_argument("--entropy-coefficient", type=float, default=0.01)
     parser.add_argument("--value-coefficient", type=float, default=0.5)
     parser.add_argument("--checkpoint-every", type=int, default=10)
@@ -120,6 +139,21 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--evaluation-pairs", type=int, default=250)
     parser.add_argument("--seed", type=int, default=2026081202)
     parser.add_argument("--device", choices=("cuda", "cpu"), default="cuda")
+    parser.add_argument(
+        "--compile-updates",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+    parser.add_argument(
+        "--persistent-replay",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+    parser.add_argument(
+        "--matmul-precision",
+        choices=("highest", "high"),
+        default="high",
+    )
     return parser.parse_args()
 
 
@@ -136,6 +170,7 @@ def main() -> None:
         args.checkpoint_every,
         args.evaluate_every,
         args.evaluation_pairs,
+        args.early_stop_diagnostic_trajectories,
     )
     if any(value < 1 for value in positive):
         raise ValueError("count arguments must be positive")
@@ -157,6 +192,7 @@ def main() -> None:
     from temporal_puffer_agent import temporal_agent_factory
     from temporal_puffer_v4 import NativePufferTemporalPolicy
     from temporal_training import ppo_update_batched_epochs
+    from vector_puffer_rollout import VectorPufferRolloutPool
 
     payload, state, hidden_size, num_layers, heads = _load_policy_payload(resume)
     policy = NativePufferTemporalPolicy(
@@ -165,6 +201,14 @@ def main() -> None:
         mode_conditioned_heads=heads,
     ).to(args.device)
     policy.load_state_dict(state)
+    torch.set_float32_matmul_precision(args.matmul_precision)
+    if args.compile_updates:
+        torch._dynamo.config.recompile_limit = 32
+        policy.forward_native_sequence = torch.compile(
+            policy.forward_native_sequence,
+            dynamic=False,
+            mode="reduce-overhead",
+        )
     recipe = payload.get("recipe", {})
     learning_rate = (
         args.learning_rate
@@ -197,22 +241,42 @@ def main() -> None:
     curve = []
     result_path = output_dir / "training_result.json"
     jsonl_path = output_dir / "training_curve.jsonl"
+    vector_rollout_pool = (
+        VectorPufferRolloutPool(
+            policy,
+            workers=args.rollout_workers,
+            champion_path=champion_path,
+        )
+        if args.rollout_engine == "vector"
+        else None
+    )
     for offset in range(args.epochs):
         epoch = start_epoch + offset
         epoch_started = time.perf_counter()
         rollout_policy = _snapshot(policy)
         rollout_started = time.perf_counter()
-        episodes, contribution = collect_league_batch_parallel(
-            rollout_policy,
-            games=args.games_per_epoch,
-            seed=args.seed + epoch * args.games_per_epoch,
-            schedule_offset=epoch * args.games_per_epoch,
-            mixture=mixture,
-            player_counts=player_counts,
-            workers=args.rollout_workers,
-            chunks_per_worker=args.chunks_per_worker,
-            champion_path=champion_path,
-        )
+        rollout_arguments = {
+            "games": args.games_per_epoch,
+            "seed": args.seed + epoch * args.games_per_epoch,
+            "schedule_offset": epoch * args.games_per_epoch,
+            "player_counts": player_counts,
+        }
+        if args.rollout_engine == "vector":
+            episodes, contribution = vector_rollout_pool.collect(
+                rollout_policy,
+                schedule=schedule,
+                prepack_training=args.persistent_replay,
+                **rollout_arguments,
+            )
+        else:
+            episodes, contribution = collect_league_batch_parallel(
+                rollout_policy,
+                mixture=mixture,
+                workers=args.rollout_workers,
+                chunks_per_worker=args.chunks_per_worker,
+                champion_path=champion_path,
+                **rollout_arguments,
+            )
         rollout_seconds = time.perf_counter() - rollout_started
         pass_metrics = _strategic_pass_metrics(episodes, PASS_ACTION)
         if args.device == "cuda":
@@ -235,6 +299,12 @@ def main() -> None:
             diagnostic_minibatch_trajectories=(
                 args.diagnostic_minibatch_trajectories
             ),
+            early_stop_diagnostic_trajectories=(
+                args.early_stop_diagnostic_trajectories
+            ),
+            static_compile_padding=args.compile_updates,
+            length_bucketed_minibatches=args.persistent_replay,
+            persistent_prepared_batches=args.persistent_replay,
         )
         if args.device == "cuda":
             torch.cuda.synchronize()
@@ -296,6 +366,7 @@ def main() -> None:
                 "games_per_epoch": args.games_per_epoch,
                 "rollout_workers": args.rollout_workers,
                 "chunks_per_worker": args.chunks_per_worker,
+                "rollout_engine": args.rollout_engine,
                 "update_epochs": args.update_epochs,
                 "minibatch_trajectories": args.minibatch_trajectories,
                 "diagnostic_minibatch_trajectories": (
@@ -303,6 +374,12 @@ def main() -> None:
                 ),
                 "learning_rate": learning_rate,
                 "target_kl": args.target_kl,
+                "early_stop_diagnostic_trajectories": (
+                    args.early_stop_diagnostic_trajectories
+                ),
+                "compile_updates": args.compile_updates,
+                "persistent_replay": args.persistent_replay,
+                "matmul_precision": args.matmul_precision,
                 "gamma": args.gamma,
                 "gae_lambda": args.gae_lambda,
                 "strategic_pass": {
@@ -374,6 +451,8 @@ def main() -> None:
             ),
             flush=True,
         )
+    if vector_rollout_pool is not None:
+        vector_rollout_pool.close()
 
 
 if __name__ == "__main__":

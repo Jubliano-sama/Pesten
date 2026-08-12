@@ -266,6 +266,16 @@ class HardcodedStrategyAgent:
         opponent_indices = [
             index for index in range(len(hand_sizes)) if index != root_index
         ]
+        unique_unseen_cards = tuple(sorted(set(pool)))
+        posterior_weights = {
+            player_index: {
+                number: self._posterior_card_weight(
+                    number, clues[player_index]
+                )
+                for number in unique_unseen_cards
+            }
+            for player_index in opponent_indices
+        }
 
         for sample_index in range(self.belief_samples):
             rng = random.Random(seed + 1_000_003 * sample_index)
@@ -283,10 +293,7 @@ class HardcodedStrategyAgent:
                 chosen_cards = []
                 for _ in range(hand_sizes[player_index]):
                     weights = [
-                        self._posterior_card_weight(
-                            number,
-                            clues[player_index],
-                        )
+                        posterior_weights[player_index][number]
                         for number in available
                     ]
                     chosen_at = self._weighted_index(weights, rng)

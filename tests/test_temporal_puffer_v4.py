@@ -20,6 +20,7 @@ from temporal_observation import (
     serialize_safe_history,
 )
 from temporal_puffer_agent import temporal_agent_factory
+from packed_puffer_rollout import pack_puffer_episode
 from temporal_puffer_v4 import (
     NativePufferTemporalPolicy,
     PUFFERLIB_REVISION,
@@ -31,6 +32,7 @@ from temporal_training import (
     evaluate_ppo_drift_batched_minibatches,
     ppo_update,
     ppo_update_batched,
+    ppo_update_batched_epochs,
 )
 
 
@@ -202,15 +204,27 @@ def test_native_batched_ppo_matches_scalar_recurrent_update():
     batched = NativePufferTemporalPolicy(
         hidden_size=16, num_layers=2
     )
+    padded = NativePufferTemporalPolicy(
+        hidden_size=16, num_layers=2
+    )
     scalar.load_state_dict(behavior.state_dict())
     batched.load_state_dict(behavior.state_dict())
+    padded.load_state_dict(behavior.state_dict())
     scalar_optimizer = torch.optim.SGD(scalar.parameters(), lr=1e-4)
     batched_optimizer = torch.optim.SGD(batched.parameters(), lr=1e-4)
+    padded_optimizer = torch.optim.SGD(padded.parameters(), lr=1e-4)
     scalar_metrics = ppo_update(
         scalar, episodes, scalar_optimizer
     )
     batched_metrics = ppo_update_batched(
         batched, episodes, batched_optimizer
+    )
+    padded_metrics = ppo_update_batched(
+        padded,
+        episodes,
+        padded_optimizer,
+        padded_batch_size=4,
+        power_of_two_sequence_padding=True,
     )
 
     assert batched_metrics["samples"] == scalar_metrics["samples"]
@@ -227,16 +241,28 @@ def test_native_batched_ppo_matches_scalar_recurrent_update():
         assert batched_metrics[name] == pytest.approx(
             scalar_metrics[name], abs=2e-5
         )
-    for scalar_parameter, batched_parameter in zip(
-        scalar.parameters(), batched.parameters()
+        assert padded_metrics[name] == pytest.approx(
+            batched_metrics[name], abs=2e-5
+        )
+    for scalar_parameter, batched_parameter, padded_parameter in zip(
+        scalar.parameters(), batched.parameters(), padded.parameters()
     ):
         assert torch.allclose(
             scalar_parameter, batched_parameter, atol=2e-5, rtol=2e-5
+        )
+        assert torch.allclose(
+            batched_parameter, padded_parameter, atol=2e-5, rtol=2e-5
         )
     scalar_drift = evaluate_ppo_drift(scalar, episodes)
     batched_drift = evaluate_ppo_drift_batched(scalar, episodes)
     chunked_drift = evaluate_ppo_drift_batched_minibatches(
         scalar, episodes, minibatch_trajectories=1
+    )
+    padded_drift = evaluate_ppo_drift_batched(
+        scalar,
+        episodes,
+        padded_batch_size=4,
+        power_of_two_sequence_padding=True,
     )
     assert batched_drift["samples"] == scalar_drift["samples"]
     for name in (
@@ -252,6 +278,105 @@ def test_native_batched_ppo_matches_scalar_recurrent_update():
         )
         assert chunked_drift[name] == pytest.approx(
             batched_drift[name], abs=2e-5
+        )
+        assert padded_drift[name] == pytest.approx(
+            batched_drift[name], abs=2e-5
+        )
+
+
+def test_persistent_prepared_replay_matches_one_batched_epoch():
+    torch.manual_seed(29)
+    behavior = NativePufferTemporalPolicy(
+        hidden_size=16, num_layers=2, mode_conditioned_heads=True
+    )
+    episodes, collection = collect_smoke_episodes(
+        behavior, seed=29, episode_count=3, max_turns=80
+    )
+    assert collection["decisions"] > 0
+    ordinary = NativePufferTemporalPolicy(
+        hidden_size=16, num_layers=2, mode_conditioned_heads=True
+    )
+    persistent = NativePufferTemporalPolicy(
+        hidden_size=16, num_layers=2, mode_conditioned_heads=True
+    )
+    worker_packed = NativePufferTemporalPolicy(
+        hidden_size=16, num_layers=2, mode_conditioned_heads=True
+    )
+    ordinary.load_state_dict(behavior.state_dict())
+    persistent.load_state_dict(behavior.state_dict())
+    worker_packed.load_state_dict(behavior.state_dict())
+    ordinary_optimizer = torch.optim.SGD(ordinary.parameters(), lr=1e-4)
+    persistent_optimizer = torch.optim.SGD(
+        persistent.parameters(), lr=1e-4
+    )
+    worker_packed_optimizer = torch.optim.SGD(
+        worker_packed.parameters(), lr=1e-4
+    )
+    arguments = {
+        "update_epochs": 1,
+        "minibatch_trajectories": 4,
+        "seed": 8029,
+        "target_kl": None,
+        "gae_lambda": 0.95,
+        "normalize_advantages": True,
+        "static_compile_padding": True,
+        "length_bucketed_minibatches": True,
+    }
+    ordinary_metrics = ppo_update_batched_epochs(
+        ordinary, episodes, ordinary_optimizer, **arguments
+    )
+    persistent_metrics = ppo_update_batched_epochs(
+        persistent,
+        episodes,
+        persistent_optimizer,
+        persistent_prepared_batches=True,
+        **arguments,
+    )
+    packed_episodes = [
+        pack_puffer_episode(behavior, episode) for episode in episodes
+    ]
+    worker_packed_metrics = ppo_update_batched_epochs(
+        worker_packed,
+        packed_episodes,
+        worker_packed_optimizer,
+        persistent_prepared_batches=True,
+        **arguments,
+    )
+    assert persistent_metrics["persistent_prepared_batches"] is True
+    assert persistent_metrics["samples"] == ordinary_metrics["samples"]
+    assert persistent_metrics["optimizer_steps"] == ordinary_metrics[
+        "optimizer_steps"
+    ]
+    for name in (
+        "loss",
+        "policy_loss",
+        "value_loss",
+        "entropy",
+        "old_approx_kl",
+        "approx_kl",
+        "clip_fraction",
+        "explained_variance",
+    ):
+        assert persistent_metrics[name] == pytest.approx(
+            ordinary_metrics[name], abs=2e-5
+        )
+        assert worker_packed_metrics[name] == pytest.approx(
+            persistent_metrics[name], abs=2e-5
+        )
+    for ordinary_parameter, persistent_parameter, packed_parameter in zip(
+        ordinary.parameters(), persistent.parameters(), worker_packed.parameters()
+    ):
+        assert torch.allclose(
+            ordinary_parameter,
+            persistent_parameter,
+            atol=2e-5,
+            rtol=2e-5,
+        )
+        assert torch.allclose(
+            persistent_parameter,
+            packed_parameter,
+            atol=2e-5,
+            rtol=2e-5,
         )
 
 

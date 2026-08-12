@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 import json
+import math
 from pathlib import Path
 import random
 import time
@@ -26,22 +28,29 @@ def _pack_native_token_batch(
     *,
     device: torch.device,
     dtype: torch.dtype,
+    padded_batch_size: int | None = None,
+    padded_sequence_length: int | None = None,
 ) -> torch.Tensor:
     """Pad ragged safe-token rows with one host-to-device materialization."""
-    max_length = max(len(rows) for rows in packed_rows)
+    actual_max_length = max(len(rows) for rows in packed_rows)
+    batch_size = padded_batch_size or len(packed_rows)
+    max_length = padded_sequence_length or actual_max_length
+    if batch_size < len(packed_rows) or max_length < actual_max_length:
+        raise ValueError("requested token padding is smaller than the data")
     token_size = len(packed_rows[0][0])
     token_batch = torch.zeros(
-        len(packed_rows),
+        batch_size,
         max_length,
         token_size,
         device=device,
         dtype=dtype,
     )
-    flat_rows = [row for rows in packed_rows for row in rows]
-    flat_tokens = torch.tensor(
-        flat_rows,
-        device=device,
-        dtype=dtype,
+    flat_array = np.concatenate(
+        [np.asarray(rows, dtype=np.float32) for rows in packed_rows],
+        axis=0,
+    )
+    flat_tokens = torch.from_numpy(flat_array).to(
+        device=device, dtype=dtype
     )
     offset = 0
     for batch_index, rows in enumerate(packed_rows):
@@ -51,6 +60,23 @@ def _pack_native_token_batch(
         ]
         offset += length
     return token_batch
+
+
+def _next_power_of_two(value: int) -> int:
+    if value < 1:
+        raise ValueError("power-of-two padding requires a positive length")
+    return 1 << (value - 1).bit_length()
+
+
+def _trajectory_safe_token_length(episode) -> int:
+    """Count public-event and decision tokens without materializing features."""
+    trajectory, _ = episode
+    if hasattr(trajectory, "safe_token_count"):
+        return int(trajectory.safe_token_count)
+    return sum(
+        len(step.decision.public_events) + 1
+        for step in trajectory
+    )
 
 
 def _gather_native_decisions(
@@ -126,6 +152,316 @@ def _gae_targets(
         advantages[index] = running_advantage
         next_value = behavior_values[index]
     return advantages + behavior_values, advantages
+
+
+def _gae_targets_from_values(
+    behavior_values: torch.Tensor,
+    *,
+    won: bool,
+    gamma: float,
+    gae_lambda: float,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    step_count = int(behavior_values.numel())
+    rewards = torch.full((step_count,), -0.01, dtype=torch.float32)
+    rewards[-1] += 1.0 if won else -1.0
+    advantages = torch.empty_like(rewards)
+    next_value = torch.tensor(0.0)
+    running_advantage = torch.tensor(0.0)
+    for index in reversed(range(step_count)):
+        delta = rewards[index] + gamma * next_value - behavior_values[index]
+        running_advantage = (
+            delta + gamma * gae_lambda * running_advantage
+        )
+        advantages[index] = running_advantage
+        next_value = behavior_values[index]
+    return advantages + behavior_values, advantages
+
+
+@dataclass(frozen=True)
+class PreparedPPOBatch:
+    """GPU-resident recurrent inputs and fixed behavior targets."""
+
+    tokens: torch.Tensor
+    decision_index: torch.Tensor
+    legal_masks: torch.Tensor
+    actions: torch.Tensor
+    old_log_probabilities: torch.Tensor
+    returns: torch.Tensor
+    advantages: torch.Tensor | None
+    trajectory_count: int
+
+    @property
+    def samples(self) -> int:
+        return int(self.actions.numel())
+
+
+def _prepare_ppo_batch(
+    policy,
+    episodes: Sequence[tuple[Sequence[TrajectoryStep], bool]],
+    *,
+    gamma: float,
+    gae_lambda: float | None,
+    padded_batch_size: int | None,
+    power_of_two_sequence_padding: bool,
+) -> PreparedPPOBatch:
+    """Materialize immutable rollout data once for repeated PPO replay."""
+    parameter = next(policy.parameters())
+    packed_rows = []
+    decision_indices = []
+    masks = []
+    actions = []
+    old_log_probabilities = []
+    returns = []
+    advantages = []
+    for trajectory, won in episodes:
+        if not trajectory:
+            continue
+        if hasattr(trajectory, "tokens"):
+            packed_rows.append(trajectory.tokens)
+            decision_indices.append(trajectory.decision_indices.tolist())
+            masks.extend(trajectory.legal_masks.tolist())
+            actions.extend(trajectory.actions.tolist())
+            old_log_probabilities.extend(
+                trajectory.old_log_probabilities.tolist()
+            )
+            if gae_lambda is None:
+                targets = _discounted_returns(
+                    len(trajectory), won=won, gamma=gamma
+                )
+            else:
+                targets, fixed_advantages = _gae_targets_from_values(
+                    torch.from_numpy(trajectory.behavior_values),
+                    won=won,
+                    gamma=gamma,
+                    gae_lambda=gae_lambda,
+                )
+                advantages.append(fixed_advantages)
+            returns.append(targets)
+            continue
+        rows = []
+        indices = []
+        for old_step in trajectory:
+            rows.extend(policy._event_features(old_step.decision))
+            rows.append(policy._decision_features(old_step.decision))
+            indices.append(len(rows) - 1)
+            masks.append(old_step.decision.legal_actions)
+            actions.append(old_step.action)
+            old_log_probabilities.append(old_step.old_log_prob)
+        packed_rows.append(rows)
+        decision_indices.append(indices)
+        if gae_lambda is None:
+            targets = _discounted_returns(
+                len(trajectory), won=won, gamma=gamma
+            )
+        else:
+            targets, fixed_advantages = _gae_targets(
+                trajectory,
+                won=won,
+                gamma=gamma,
+                gae_lambda=gae_lambda,
+            )
+            advantages.append(fixed_advantages)
+        returns.append(targets)
+    if not actions:
+        raise ValueError("PPO batch requires at least one decision")
+
+    actual_batch_size = len(packed_rows)
+    actual_max_length = max(len(rows) for rows in packed_rows)
+    max_length = (
+        _next_power_of_two(actual_max_length)
+        if power_of_two_sequence_padding
+        else actual_max_length
+    )
+    model_batch_size = padded_batch_size or actual_batch_size
+    tokens = _pack_native_token_batch(
+        packed_rows,
+        device=parameter.device,
+        dtype=parameter.dtype,
+        padded_batch_size=model_batch_size,
+        padded_sequence_length=max_length,
+    )
+    flat_decision_indices = [
+        batch_index * max_length + time_index
+        for batch_index, indices in enumerate(decision_indices)
+        for time_index in indices
+    ]
+    return PreparedPPOBatch(
+        tokens=tokens,
+        decision_index=torch.tensor(
+            flat_decision_indices,
+            device=parameter.device,
+            dtype=torch.long,
+        ),
+        legal_masks=torch.tensor(
+            masks, device=parameter.device, dtype=torch.bool
+        ),
+        actions=torch.tensor(
+            actions, device=parameter.device, dtype=torch.long
+        ),
+        old_log_probabilities=torch.tensor(
+            old_log_probabilities,
+            device=parameter.device,
+            dtype=parameter.dtype,
+        ),
+        returns=torch.cat(returns).to(
+            device=parameter.device, dtype=parameter.dtype
+        ),
+        advantages=(
+            torch.cat(advantages).to(
+                device=parameter.device, dtype=parameter.dtype
+            )
+            if advantages
+            else None
+        ),
+        trajectory_count=actual_batch_size,
+    )
+
+
+def _forward_prepared_batch(policy, batch: PreparedPPOBatch):
+    all_logits, all_values = policy.forward_native_sequence(batch.tokens)
+    flat_logits = all_logits.reshape(-1, all_logits.shape[-1])
+    flat_values = all_values.reshape(-1)
+    logits = flat_logits.index_select(0, batch.decision_index)
+    values = flat_values.index_select(0, batch.decision_index)
+    logits = logits.masked_fill(
+        ~batch.legal_masks, torch.finfo(logits.dtype).min
+    )
+    return logits, values
+
+
+def _ppo_update_prepared(
+    policy,
+    batch: PreparedPPOBatch,
+    optimizer: torch.optim.Optimizer,
+    *,
+    clip_ratio: float,
+    value_coefficient: float,
+    entropy_coefficient: float,
+    normalize_advantages: bool,
+) -> dict[str, float]:
+    policy.train()
+    logits, values = _forward_prepared_batch(policy, batch)
+    distribution = Categorical(logits=logits)
+    new_log_probabilities = distribution.log_prob(batch.actions)
+    log_ratios = new_log_probabilities - batch.old_log_probabilities
+    ratios = log_ratios.exp()
+    advantages = (
+        batch.advantages
+        if batch.advantages is not None
+        else batch.returns - values.detach()
+    )
+    if normalize_advantages and advantages.numel() > 1:
+        advantages = (
+            advantages - advantages.mean()
+        ) / (advantages.std(unbiased=False) + 1e-8)
+    unclipped = ratios * advantages
+    clipped = torch.clamp(
+        ratios, 1.0 - clip_ratio, 1.0 + clip_ratio
+    ) * advantages
+    policy_loss = -torch.minimum(unclipped, clipped).mean()
+    value_loss = (values - batch.returns).square().mean()
+    entropy = distribution.entropy().mean()
+    old_approx_kl = (-log_ratios).mean()
+    approx_kl = ((ratios - 1.0) - log_ratios).mean()
+    clip_fraction = ((ratios - 1.0).abs() > clip_ratio).float().mean()
+    target_variance = batch.returns.var(unbiased=False)
+    explained_variance = (
+        torch.tensor(float("nan"), device=values.device)
+        if target_variance == 0
+        else 1.0
+        - (batch.returns - values).var(unbiased=False) / target_variance
+    )
+    loss = (
+        policy_loss
+        + value_coefficient * value_loss
+        - entropy_coefficient * entropy
+    )
+    optimizer.zero_grad(set_to_none=True)
+    loss.backward()
+    torch.nn.utils.clip_grad_norm_(policy.parameters(), 0.5)
+    optimizer.step()
+    return {
+        "loss": float(loss.detach()),
+        "policy_loss": float(policy_loss.detach()),
+        "value_loss": float(value_loss.detach()),
+        "entropy": float(entropy.detach()),
+        "old_approx_kl": float(old_approx_kl.detach()),
+        "approx_kl": float(approx_kl.detach()),
+        "clip_fraction": float(clip_fraction.detach()),
+        "explained_variance": float(explained_variance.detach()),
+        "samples": batch.samples,
+    }
+
+
+def _evaluate_prepared_batches(
+    policy,
+    batches: Sequence[PreparedPPOBatch],
+    *,
+    clip_ratio: float,
+) -> dict[str, float]:
+    rows = []
+    with torch.no_grad():
+        for batch in batches:
+            logits, values = _forward_prepared_batch(policy, batch)
+            distribution = Categorical(logits=logits)
+            logs = (
+                distribution.log_prob(batch.actions)
+                - batch.old_log_probabilities
+            )
+            ratios = logs.exp()
+            errors = batch.returns - values
+            rows.append(
+                {
+                    "samples": batch.samples,
+                    "approx_kl": float(
+                        ((ratios - 1.0) - logs).sum().detach()
+                    ),
+                    "old_approx_kl": float((-logs).sum().detach()),
+                    "clip_fraction": float(
+                        ((ratios - 1.0).abs() > clip_ratio)
+                        .float()
+                        .sum()
+                        .detach()
+                    ),
+                    "entropy": float(
+                        distribution.entropy().sum().detach()
+                    ),
+                    "value_mse": float(errors.square().sum().detach()),
+                    "target_sum": float(batch.returns.sum().detach()),
+                    "target_square_sum": float(
+                        batch.returns.square().sum().detach()
+                    ),
+                    "error_sum": float(errors.sum().detach()),
+                    "error_square_sum": float(
+                        errors.square().sum().detach()
+                    ),
+                }
+            )
+    samples = sum(row["samples"] for row in rows)
+    target_sum = sum(row["target_sum"] for row in rows)
+    target_square_sum = sum(row["target_square_sum"] for row in rows)
+    error_sum = sum(row["error_sum"] for row in rows)
+    error_square_sum = sum(row["error_square_sum"] for row in rows)
+    target_variance = target_square_sum / samples - (target_sum / samples) ** 2
+    error_variance = error_square_sum / samples - (error_sum / samples) ** 2
+    return {
+        **{
+            name: sum(row[name] for row in rows) / samples
+            for name in (
+                "approx_kl",
+                "old_approx_kl",
+                "clip_fraction",
+                "entropy",
+                "value_mse",
+            )
+        },
+        "explained_variance": (
+            math.nan
+            if target_variance <= 0.0
+            else 1.0 - error_variance / target_variance
+        ),
+        "samples": samples,
+    }
 
 
 def ppo_update(
@@ -237,6 +573,8 @@ def ppo_update_batched(
     gamma: float = 0.97,
     gae_lambda: float | None = None,
     normalize_advantages: bool = False,
+    padded_batch_size: int | None = None,
+    power_of_two_sequence_padding: bool = False,
 ) -> dict[str, float]:
     """Perform the same PPO update through native MinGRU sequence batches.
 
@@ -314,18 +652,27 @@ def ppo_update_batched(
     if not sample_count:
         raise ValueError("PPO update requires at least one decision")
 
-    max_length = max(len(rows) for rows in packed_rows)
+    actual_batch_size = len(packed_rows)
+    actual_max_length = max(len(rows) for rows in packed_rows)
+    max_length = (
+        _next_power_of_two(actual_max_length)
+        if power_of_two_sequence_padding
+        else actual_max_length
+    )
+    model_batch_size = padded_batch_size or actual_batch_size
     token_batch = _pack_native_token_batch(
         packed_rows,
         device=parameter.device,
         dtype=parameter.dtype,
+        padded_batch_size=model_batch_size,
+        padded_sequence_length=max_length,
     )
 
     all_logits, all_values = policy.forward_native_sequence(token_batch)
     all_logits = all_logits.reshape(
-        len(packed_rows), max_length, -1
+        model_batch_size, max_length, -1
     )
-    all_values = all_values.reshape(len(packed_rows), max_length)
+    all_values = all_values.reshape(model_batch_size, max_length)
 
     gathered_masks = []
     gathered_actions = []
@@ -430,6 +777,10 @@ def ppo_update_batched_epochs(
     gae_lambda: float | None = 0.95,
     normalize_advantages: bool = True,
     diagnostic_minibatch_trajectories: int | None = None,
+    early_stop_diagnostic_trajectories: int | None = None,
+    static_compile_padding: bool = False,
+    length_bucketed_minibatches: bool = False,
+    persistent_prepared_batches: bool = False,
 ) -> dict:
     """Run reproducible PPO epochs/minibatches with a rollout-level KL stop."""
     if update_epochs < 1:
@@ -441,22 +792,60 @@ def ppo_update_batched_epochs(
         and diagnostic_minibatch_trajectories < 1
     ):
         raise ValueError("diagnostic minibatch size must be positive")
+    if (
+        early_stop_diagnostic_trajectories is not None
+        and early_stop_diagnostic_trajectories < 1
+    ):
+        raise ValueError("early-stop diagnostic size must be positive")
     usable = [episode for episode in episodes if episode[0]]
     if not usable:
         raise ValueError("PPO update requires at least one decision")
+    if persistent_prepared_batches:
+        return _ppo_update_prepared_epochs(
+            policy,
+            usable,
+            optimizer,
+            update_epochs=update_epochs,
+            minibatch_trajectories=minibatch_trajectories,
+            seed=seed,
+            target_kl=target_kl,
+            clip_ratio=clip_ratio,
+            value_coefficient=value_coefficient,
+            entropy_coefficient=entropy_coefficient,
+            gamma=gamma,
+            gae_lambda=gae_lambda,
+            normalize_advantages=normalize_advantages,
+            early_stop_diagnostic_trajectories=(
+                early_stop_diagnostic_trajectories
+            ),
+            static_compile_padding=static_compile_padding,
+            length_bucketed_minibatches=length_bucketed_minibatches,
+        )
     rng = random.Random(seed)
+    diagnostic_rng = random.Random(seed ^ 0x5EED5EED)
+    safe_token_lengths = (
+        tuple(_trajectory_safe_token_length(episode) for episode in usable)
+        if length_bucketed_minibatches
+        else ()
+    )
     update_logs = []
     epoch_diagnostics = []
     stopped_early = False
     for epoch in range(update_epochs):
         order = list(range(len(usable)))
         rng.shuffle(order)
-        for start in range(0, len(order), minibatch_trajectories):
+        if length_bucketed_minibatches:
+            order.sort(key=safe_token_lengths.__getitem__)
+        minibatch_indices = [
+            order[start : start + minibatch_trajectories]
+            for start in range(0, len(order), minibatch_trajectories)
+        ]
+        if length_bucketed_minibatches:
+            rng.shuffle(minibatch_indices)
+        for indices in minibatch_indices:
             minibatch = [
                 usable[index]
-                for index in order[
-                    start : start + minibatch_trajectories
-                ]
+                for index in indices
             ]
             update_logs.append(
                 ppo_update_batched(
@@ -469,14 +858,63 @@ def ppo_update_batched_epochs(
                     gamma=gamma,
                     gae_lambda=gae_lambda,
                     normalize_advantages=normalize_advantages,
+                    padded_batch_size=(
+                        minibatch_trajectories
+                        if static_compile_padding
+                        else None
+                    ),
+                    power_of_two_sequence_padding=static_compile_padding,
                 )
             )
+        use_full_diagnostic = (
+            early_stop_diagnostic_trajectories is None
+            or len(usable) <= early_stop_diagnostic_trajectories
+            or epoch == update_epochs - 1
+        )
+        diagnostic_episodes = usable
+        if not use_full_diagnostic:
+            diagnostic_episodes = [
+                usable[index]
+                for index in diagnostic_rng.sample(
+                    range(len(usable)),
+                    early_stop_diagnostic_trajectories,
+                )
+            ]
         diagnostics = evaluate_ppo_drift_batched_minibatches(
             policy,
-            usable,
+            diagnostic_episodes,
             clip_ratio=clip_ratio,
             minibatch_trajectories=diagnostic_minibatch_trajectories,
+            static_compile_padding=static_compile_padding,
         )
+        diagnostics.update(
+            {
+                "trajectories": len(diagnostic_episodes),
+                "full_rollout": use_full_diagnostic,
+            }
+        )
+        if (
+            not use_full_diagnostic
+            and target_kl is not None
+            and diagnostics["approx_kl"] > 0.75 * target_kl
+        ):
+            probe_approx_kl = diagnostics["approx_kl"]
+            diagnostics = evaluate_ppo_drift_batched_minibatches(
+                policy,
+                usable,
+                clip_ratio=clip_ratio,
+                minibatch_trajectories=(
+                    diagnostic_minibatch_trajectories
+                ),
+                static_compile_padding=static_compile_padding,
+            )
+            diagnostics.update(
+                {
+                    "trajectories": len(usable),
+                    "full_rollout": True,
+                    "early_stop_probe_approx_kl": probe_approx_kl,
+                }
+            )
         epoch_diagnostics.append(
             {"epoch": epoch + 1, **diagnostics}
         )
@@ -519,17 +957,185 @@ def ppo_update_batched_epochs(
     return aggregate
 
 
+def _ppo_update_prepared_epochs(
+    policy,
+    usable,
+    optimizer,
+    *,
+    update_epochs: int,
+    minibatch_trajectories: int,
+    seed: int,
+    target_kl: float | None,
+    clip_ratio: float,
+    value_coefficient: float,
+    entropy_coefficient: float,
+    gamma: float,
+    gae_lambda: float | None,
+    normalize_advantages: bool,
+    early_stop_diagnostic_trajectories: int | None,
+    static_compile_padding: bool,
+    length_bucketed_minibatches: bool,
+) -> dict:
+    """Replay one GPU-resident packed rollout for every PPO epoch."""
+    preparation_started = time.perf_counter()
+    rng = random.Random(seed)
+    diagnostic_rng = random.Random(seed ^ 0x5EED5EED)
+    order = list(range(len(usable)))
+    rng.shuffle(order)
+    if length_bucketed_minibatches:
+        lengths = tuple(
+            _trajectory_safe_token_length(episode) for episode in usable
+        )
+        order.sort(key=lengths.__getitem__)
+    episode_batches = [
+        [usable[index] for index in order[start : start + minibatch_trajectories]]
+        for start in range(0, len(order), minibatch_trajectories)
+    ]
+    prepared = [
+        _prepare_ppo_batch(
+            policy,
+            episode_batch,
+            gamma=gamma,
+            gae_lambda=gae_lambda,
+            padded_batch_size=(
+                minibatch_trajectories if static_compile_padding else None
+            ),
+            power_of_two_sequence_padding=static_compile_padding,
+        )
+        for episode_batch in episode_batches
+    ]
+    preparation_seconds = time.perf_counter() - preparation_started
+    resident_bytes = sum(
+        tensor.numel() * tensor.element_size()
+        for batch in prepared
+        for tensor in (
+            batch.tokens,
+            batch.decision_index,
+            batch.legal_masks,
+            batch.actions,
+            batch.old_log_probabilities,
+            batch.returns,
+            *(() if batch.advantages is None else (batch.advantages,)),
+        )
+    )
+    update_logs = []
+    epoch_diagnostics = []
+    stopped_early = False
+    for epoch in range(update_epochs):
+        batch_order = list(range(len(prepared)))
+        rng.shuffle(batch_order)
+        for batch_index in batch_order:
+            update_logs.append(
+                _ppo_update_prepared(
+                    policy,
+                    prepared[batch_index],
+                    optimizer,
+                    clip_ratio=clip_ratio,
+                    value_coefficient=value_coefficient,
+                    entropy_coefficient=entropy_coefficient,
+                    normalize_advantages=normalize_advantages,
+                )
+            )
+        use_full_diagnostic = (
+            early_stop_diagnostic_trajectories is None
+            or len(usable) <= early_stop_diagnostic_trajectories
+            or epoch == update_epochs - 1
+        )
+        diagnostic_batches = prepared
+        if not use_full_diagnostic:
+            batch_count = min(
+                len(prepared),
+                math.ceil(
+                    early_stop_diagnostic_trajectories
+                    / minibatch_trajectories
+                ),
+            )
+            indices = diagnostic_rng.sample(range(len(prepared)), batch_count)
+            diagnostic_batches = [prepared[index] for index in indices]
+        diagnostics = _evaluate_prepared_batches(
+            policy, diagnostic_batches, clip_ratio=clip_ratio
+        )
+        diagnostics.update(
+            {
+                "trajectories": sum(
+                    batch.trajectory_count for batch in diagnostic_batches
+                ),
+                "full_rollout": use_full_diagnostic,
+            }
+        )
+        if (
+            not use_full_diagnostic
+            and target_kl is not None
+            and diagnostics["approx_kl"] > 0.75 * target_kl
+        ):
+            probe_approx_kl = diagnostics["approx_kl"]
+            diagnostics = _evaluate_prepared_batches(
+                policy, prepared, clip_ratio=clip_ratio
+            )
+            diagnostics.update(
+                {
+                    "trajectories": len(usable),
+                    "full_rollout": True,
+                    "early_stop_probe_approx_kl": probe_approx_kl,
+                }
+            )
+        epoch_diagnostics.append({"epoch": epoch + 1, **diagnostics})
+        if target_kl is not None and diagnostics["approx_kl"] > target_kl:
+            stopped_early = True
+            break
+
+    weighted_names = (
+        "loss",
+        "policy_loss",
+        "value_loss",
+        "entropy",
+        "old_approx_kl",
+        "approx_kl",
+        "clip_fraction",
+        "explained_variance",
+    )
+    weight = sum(item["samples"] for item in update_logs)
+    aggregate = {
+        name: sum(item[name] * item["samples"] for item in update_logs) / weight
+        for name in weighted_names
+    }
+    aggregate.update(
+        {
+            "samples": sum(len(trajectory) for trajectory, _ in usable),
+            "optimizer_steps": len(update_logs),
+            "epochs_completed": len(epoch_diagnostics),
+            "target_kl": target_kl,
+            "stopped_early": stopped_early,
+            "post_update_diagnostics": epoch_diagnostics[-1],
+            "epoch_diagnostics": epoch_diagnostics,
+            "persistent_prepared_batches": True,
+            "preparation_seconds": preparation_seconds,
+            "resident_mebibytes": resident_bytes / 2**20,
+        }
+    )
+    return aggregate
+
+
 def evaluate_ppo_drift_batched_minibatches(
     policy,
     episodes: Sequence[tuple[Sequence[TrajectoryStep], bool]],
     *,
     clip_ratio: float = 0.2,
     minibatch_trajectories: int | None = None,
+    static_compile_padding: bool = False,
 ) -> dict[str, float]:
     """Bound diagnostic memory while preserving aggregate metrics."""
     if minibatch_trajectories is None or len(episodes) <= minibatch_trajectories:
         return evaluate_ppo_drift_batched(
-            policy, episodes, clip_ratio=clip_ratio
+            policy,
+            episodes,
+            clip_ratio=clip_ratio,
+            padded_batch_size=(
+                minibatch_trajectories
+                if static_compile_padding
+                else None
+            ),
+            power_of_two_sequence_padding=static_compile_padding,
         )
     if minibatch_trajectories < 1:
         raise ValueError("diagnostic minibatch size must be positive")
@@ -539,6 +1145,10 @@ def evaluate_ppo_drift_batched_minibatches(
             episodes[start : start + minibatch_trajectories],
             clip_ratio=clip_ratio,
             _include_moments=True,
+            padded_batch_size=(
+                minibatch_trajectories if static_compile_padding else None
+            ),
+            power_of_two_sequence_padding=static_compile_padding,
         )
         for start in range(0, len(episodes), minibatch_trajectories)
     ]
@@ -640,6 +1250,8 @@ def evaluate_ppo_drift_batched(
     *,
     clip_ratio: float = 0.2,
     _include_moments: bool = False,
+    padded_batch_size: int | None = None,
+    power_of_two_sequence_padding: bool = False,
 ) -> dict[str, float]:
     """Evaluate post-update drift through one native MinGRU sequence batch."""
     required = (
@@ -685,19 +1297,28 @@ def evaluate_ppo_drift_batched(
     if not sample_count:
         raise ValueError("drift evaluation requires at least one decision")
 
-    max_length = max(len(rows) for rows in packed_rows)
+    actual_batch_size = len(packed_rows)
+    actual_max_length = max(len(rows) for rows in packed_rows)
+    max_length = (
+        _next_power_of_two(actual_max_length)
+        if power_of_two_sequence_padding
+        else actual_max_length
+    )
+    model_batch_size = padded_batch_size or actual_batch_size
     token_batch = _pack_native_token_batch(
         packed_rows,
         device=parameter.device,
         dtype=parameter.dtype,
+        padded_batch_size=model_batch_size,
+        padded_sequence_length=max_length,
     )
 
     with torch.no_grad():
         all_logits, all_values = policy.forward_native_sequence(token_batch)
         all_logits = all_logits.reshape(
-            len(packed_rows), max_length, -1
+            model_batch_size, max_length, -1
         )
-        all_values = all_values.reshape(len(packed_rows), max_length)
+        all_values = all_values.reshape(model_batch_size, max_length)
         logits, values = _gather_native_decisions(
             all_logits,
             all_values,

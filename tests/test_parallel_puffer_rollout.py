@@ -12,6 +12,10 @@ from temporal_league import collect_league_batch, evaluate_paired
 from temporal_puffer_agent import temporal_agent_factory
 from temporal_puffer_v4 import NativePufferTemporalPolicy
 from train_puffer_fast import _append_jsonl_idempotent
+from vector_puffer_rollout import (
+    VectorPufferRolloutPool,
+    collect_league_batch_vector_parallel,
+)
 import torch
 
 
@@ -124,3 +128,34 @@ def test_training_curve_append_is_idempotent_by_epoch_and_state(tmp_path):
     conflicting = {"epoch": 7, "checkpoint": {"state_sha256": "def"}}
     with pytest.raises(RuntimeError, match="conflicting"):
         _append_jsonl_idempotent(path, conflicting)
+
+
+def test_persistent_vector_pool_refreshes_shared_policy_exactly():
+    torch.manual_seed(47)
+    policy = NativePufferTemporalPolicy(
+        hidden_size=8, mode_conditioned_heads=True
+    ).eval()
+    arguments = {
+        "games": 12,
+        "seed": 2047,
+        "schedule_offset": 5,
+        "schedule": ("current_selfplay", "random_rule"),
+        "player_counts": (2, 3),
+    }
+    with VectorPufferRolloutPool(policy, workers=2) as pool:
+        with torch.no_grad():
+            policy.puffer_policy.decoder.card_and_pass.bias.add_(0.5)
+        actual_episodes, actual_metadata = pool.collect(policy, **arguments)
+    expected_episodes, expected_metadata = collect_league_batch_vector_parallel(
+        policy, workers=2, **arguments
+    )
+    assert actual_episodes == expected_episodes
+    for name in (
+        "games",
+        "decisions",
+        "total_turns",
+        "trajectories",
+        "player_counts",
+        "deck_count_by_player_count",
+    ):
+        assert actual_metadata[name] == expected_metadata[name]
