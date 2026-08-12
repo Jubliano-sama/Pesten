@@ -110,6 +110,12 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--resume", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument(
+        "--champion",
+        type=Path,
+        default=Path("ppo_actor_100run3.pth"),
+        help="frozen feed-forward MLP opponent checkpoint",
+    )
     parser.add_argument("--epochs", type=int, default=1000)
     parser.add_argument("--games-per-epoch", type=int, default=2048)
     parser.add_argument("--rollout-workers", type=int, default=10)
@@ -138,6 +144,20 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--evaluate-every", type=int, default=10)
     parser.add_argument("--evaluation-pairs", type=int, default=250)
     parser.add_argument("--seed", type=int, default=2026081202)
+    parser.add_argument(
+        "--schedule",
+        help=(
+            "optional comma-separated opponent cycle overriding the "
+            "checkpoint recipe"
+        ),
+    )
+    parser.add_argument(
+        "--player-count-schedule",
+        help=(
+            "optional comma-separated 2-8 player cycle overriding the "
+            "checkpoint recipe"
+        ),
+    )
     parser.add_argument("--device", choices=("cuda", "cpu"), default="cuda")
     parser.add_argument(
         "--compile-updates",
@@ -179,28 +199,31 @@ def main() -> None:
     resume = args.resume.resolve()
     if not resume.is_file():
         raise FileNotFoundError(resume)
+    champion_path = args.champion.resolve()
+    if not champion_path.is_file():
+        raise FileNotFoundError(champion_path)
     output_dir = args.output_dir.resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
 
     from benchmark_agents import load_ppo_agent
-    from live_puffer_segment import _load_policy_payload, _state_hash
+    from live_puffer_segment import _state_hash
     from parallel_puffer_rollout import collect_league_batch_parallel
     from randomAgent import AgentRandom
     from smartAgent import Agent as SmartAgent
     from temporal_league import _snapshot, evaluate_paired
     from temporal_observation import PASS_ACTION
     from temporal_puffer_agent import temporal_agent_factory
-    from temporal_puffer_v4 import NativePufferTemporalPolicy
+    from temporal_puffer_v4 import (
+        load_temporal_policy_checkpoint,
+        policy_model_config,
+    )
     from temporal_training import ppo_update_batched_epochs
     from vector_puffer_rollout import VectorPufferRolloutPool
 
-    payload, state, hidden_size, num_layers, heads = _load_policy_payload(resume)
-    policy = NativePufferTemporalPolicy(
-        hidden_size=hidden_size,
-        num_layers=num_layers,
-        mode_conditioned_heads=heads,
-    ).to(args.device)
-    policy.load_state_dict(state)
+    policy, payload = load_temporal_policy_checkpoint(
+        resume, device=args.device
+    )
+    model_config = policy_model_config(policy)
     torch.set_float32_matmul_precision(args.matmul_precision)
     if args.compile_updates:
         torch._dynamo.config.recompile_limit = 32
@@ -222,16 +245,33 @@ def main() -> None:
         for group in optimizer.param_groups:
             group["lr"] = learning_rate
 
-    schedule = tuple(recipe.get("schedule", ("current_selfplay",)))
+    schedule = tuple(
+        value.strip()
+        for value in (
+            args.schedule.split(",")
+            if args.schedule is not None
+            else recipe.get("schedule", ("current_selfplay",))
+        )
+        if value.strip()
+    )
     if not schedule:
-        raise ValueError("checkpoint has an empty league schedule")
+        raise ValueError("league schedule cannot be empty")
     mixture = tuple(
         (name, schedule.count(name)) for name in dict.fromkeys(schedule)
     )
-    player_counts = tuple(recipe.get("player_count_schedule", (2,)))
+    player_counts = tuple(
+        int(str(value).strip())
+        for value in (
+            args.player_count_schedule.split(",")
+            if args.player_count_schedule is not None
+            else recipe.get("player_count_schedule", (2,))
+        )
+        if str(value).strip()
+    )
+    if not player_counts or any(count < 2 or count > 8 for count in player_counts):
+        raise ValueError("player-count schedule must contain values from 2 to 8")
     start_epoch = int(payload.get("epoch", 0)) + 1
     source_sha256 = _file_sha256(resume)
-    champion_path = Path("ppo_actor_100run3.pth").resolve()
     champion_factory = load_ppo_agent(champion_path, "cpu")
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
@@ -350,11 +390,7 @@ def main() -> None:
         checkpoint_payload = {
             "format": "pesten-fast-native-puffer-v1",
             "epoch": epoch,
-            "model": {
-                "hidden_size": hidden_size,
-                "num_layers": num_layers,
-                "mode_conditioned_heads": heads,
-            },
+            "model": model_config,
             "parent_checkpoint": str(resume),
             "source_checkpoint_sha256": source_sha256,
             "state_dict": cpu_state,
@@ -380,6 +416,8 @@ def main() -> None:
                 "compile_updates": args.compile_updates,
                 "persistent_replay": args.persistent_replay,
                 "matmul_precision": args.matmul_precision,
+                "champion_checkpoint": str(champion_path),
+                "champion_checkpoint_sha256": _file_sha256(champion_path),
                 "gamma": args.gamma,
                 "gae_lambda": args.gae_lambda,
                 "strategic_pass": {

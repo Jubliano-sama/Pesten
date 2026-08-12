@@ -28,16 +28,9 @@ def _sha256(path: Path) -> str:
 
 
 def _load(path: Path):
-    from live_puffer_segment import _load_policy_payload
-    from temporal_puffer_v4 import NativePufferTemporalPolicy
+    from temporal_puffer_v4 import load_temporal_policy_checkpoint
 
-    payload, state, hidden, layers, heads = _load_policy_payload(path)
-    policy = NativePufferTemporalPolicy(
-        hidden_size=hidden,
-        num_layers=layers,
-        mode_conditioned_heads=heads,
-    )
-    policy.load_state_dict(state)
+    policy, payload = load_temporal_policy_checkpoint(path)
     policy.eval()
     return policy, payload
 

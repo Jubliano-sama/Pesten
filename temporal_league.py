@@ -517,13 +517,12 @@ def _batched_imitation_logits(
 
 
 def _snapshot(policy: NativePufferTemporalPolicy):
-    snapshot = NativePufferTemporalPolicy(
-        hidden_size=policy.hidden_size,
-        num_layers=policy.num_layers,
-        mode_conditioned_heads=getattr(
-            policy, "mode_conditioned_heads", False
-        ),
+    from temporal_puffer_v4 import (
+        build_temporal_policy,
+        policy_model_config,
     )
+
+    snapshot = build_temporal_policy(policy_model_config(policy))
     snapshot.load_state_dict(copy.deepcopy(policy.state_dict()))
     snapshot.eval()
     for parameter in snapshot.parameters():

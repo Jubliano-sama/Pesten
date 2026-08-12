@@ -22,8 +22,11 @@ from temporal_observation import (
 from temporal_puffer_agent import temporal_agent_factory
 from packed_puffer_rollout import pack_puffer_episode
 from temporal_puffer_v4 import (
+    HawkRGLRUTemporalPolicy,
     NativePufferTemporalPolicy,
     PUFFERLIB_REVISION,
+    build_temporal_policy,
+    policy_model_config,
 )
 from temporal_training import (
     collect_smoke_episodes,
@@ -85,6 +88,60 @@ def test_mode_conditioned_heads_preserve_native_55_action_contract():
     assert values.shape == (2, 3)
     assert hasattr(policy.puffer_policy.decoder, "card_and_pass")
     assert hasattr(policy.puffer_policy.decoder, "suit")
+
+
+def test_hawk_rglru_parallel_training_matches_recurrent_evaluation():
+    torch.manual_seed(29)
+    policy = HawkRGLRUTemporalPolicy(
+        hidden_size=20,
+        num_layers=2,
+        recurrent_size=24,
+        mlp_expansion=2,
+    )
+    safe_tokens = torch.randn(3, 41, 100)
+    parallel_logits, parallel_values = policy.forward_native_sequence(
+        safe_tokens
+    )
+    state = policy.initial_state(batch_size=3)
+    recurrent_logits = []
+    recurrent_values = []
+    for index in range(safe_tokens.shape[1]):
+        logits, values, state = policy.puffer_policy.forward_eval(
+            safe_tokens[:, index], state
+        )
+        recurrent_logits.append(logits)
+        recurrent_values.append(values.reshape(-1))
+
+    assert torch.allclose(
+        parallel_logits.reshape(3, 41, 55),
+        torch.stack(recurrent_logits, dim=1),
+        atol=2e-6,
+        rtol=2e-6,
+    )
+    assert torch.allclose(
+        parallel_values,
+        torch.stack(recurrent_values, dim=1),
+        atol=2e-6,
+        rtol=2e-6,
+    )
+    loss = parallel_logits.square().mean() + parallel_values.square().mean()
+    loss.backward()
+    assert all(
+        parameter.grad is None or torch.isfinite(parameter.grad).all()
+        for parameter in policy.parameters()
+    )
+
+
+def test_hawk_rglru_model_config_round_trip():
+    policy = HawkRGLRUTemporalPolicy(
+        hidden_size=24,
+        num_layers=3,
+        recurrent_size=28,
+        mlp_expansion=3,
+    )
+    clone = build_temporal_policy(policy_model_config(policy))
+    assert isinstance(clone, HawkRGLRUTemporalPolicy)
+    assert policy_model_config(clone) == policy_model_config(policy)
 
 
 def test_native_hidden_world_invariance_is_byte_exact():

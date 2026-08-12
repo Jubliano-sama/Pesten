@@ -20,9 +20,7 @@ _WORKER_CHAMPION = None
 
 def _initialize_worker(
     state_dict: dict,
-    hidden_size: int,
-    num_layers: int,
-    mode_conditioned_heads: bool,
+    model_config: dict,
     champion_path: str,
 ) -> None:
     global _WORKER_POLICY, _WORKER_CHAMPION
@@ -32,13 +30,9 @@ def _initialize_worker(
     except RuntimeError:
         pass
     from benchmark_agents import load_ppo_agent
-    from temporal_puffer_v4 import NativePufferTemporalPolicy
+    from temporal_puffer_v4 import build_temporal_policy
 
-    policy = NativePufferTemporalPolicy(
-        hidden_size=hidden_size,
-        num_layers=num_layers,
-        mode_conditioned_heads=mode_conditioned_heads,
-    )
+    policy = build_temporal_policy(model_config)
     policy.load_state_dict(state_dict, assign=True)
     policy.eval()
     for parameter in policy.parameters():
@@ -277,14 +271,14 @@ class VectorPufferRolloutPool:
             for name, value in policy.state_dict().items()
         }
         context = multiprocessing.get_context("spawn")
+        from temporal_puffer_v4 import policy_model_config
+
         self.pool = context.Pool(
             processes=workers,
             initializer=_initialize_worker,
             initargs=(
                 self.shared_state,
-                int(policy.hidden_size),
-                int(policy.num_layers),
-                bool(getattr(policy, "mode_conditioned_heads", False)),
+                policy_model_config(policy),
                 str(champion_path.resolve()),
             ),
         )

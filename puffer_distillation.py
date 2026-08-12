@@ -6,6 +6,7 @@ import random
 from typing import Sequence
 
 import torch
+import torch.nn.functional as F
 
 from temporal_observation import PASS_ACTION
 from temporal_training import _gather_native_decisions, _pack_native_token_batch
@@ -51,6 +52,167 @@ def _forward_decisions(policy, episodes):
     return logits, values, masks
 
 
+def initialize_widened_min_gru(student, teacher) -> dict:
+    """Embed a narrower MinGRU teacher as an exact student subnetwork.
+
+    The layer count must remain unchanged.  Teacher channels occupy the first
+    part of every wider tensor, cross-channel weights start at zero, and the
+    decoder initially ignores new channels.  Batched sequence outputs are
+    therefore mathematically identical (up to GEMM roundoff), while the
+    dormant capacity can wake up during RL.
+    """
+    teacher_hidden = int(teacher.hidden_size)
+    student_hidden = int(student.hidden_size)
+    teacher_layers = int(teacher.num_layers)
+    student_layers = int(student.num_layers)
+    if student_hidden <= teacher_hidden:
+        raise ValueError("widened student must be wider than its teacher")
+    if student_layers != teacher_layers:
+        raise ValueError(
+            "function-preserving MinGRU widening requires equal layer counts"
+        )
+    if bool(student.mode_conditioned_heads) != bool(
+        teacher.mode_conditioned_heads
+    ):
+        raise ValueError("teacher and student decoder modes must match")
+
+    teacher_state = teacher.state_dict()
+    student_state = student.state_dict()
+    with torch.no_grad():
+        for value in student_state.values():
+            value.zero_()
+        encoder = "puffer_policy.encoder.encoder"
+        student_state[f"{encoder}.weight"][:teacher_hidden].copy_(
+            teacher_state[f"{encoder}.weight"]
+        )
+        student_state[f"{encoder}.bias"][:teacher_hidden].copy_(
+            teacher_state[f"{encoder}.bias"]
+        )
+        decoder_names = (
+            ("card_and_pass", "suit", "value_function")
+            if student.mode_conditioned_heads
+            else ("decoder", "value_function")
+        )
+        for name in decoder_names:
+            prefix = f"puffer_policy.decoder.{name}"
+            student_state[f"{prefix}.weight"][:, :teacher_hidden].copy_(
+                teacher_state[f"{prefix}.weight"]
+            )
+            student_state[f"{prefix}.bias"].copy_(
+                teacher_state[f"{prefix}.bias"]
+            )
+
+        for layer in range(teacher_layers):
+            key = f"puffer_policy.network.layers.{layer}.weight"
+            teacher_weight = teacher_state[key]
+            student_weight = student_state[key]
+            for chunk in range(3):
+                student_weight[
+                    chunk * student_hidden : chunk * student_hidden
+                    + teacher_hidden,
+                    :teacher_hidden,
+                ].copy_(
+                    teacher_weight[
+                        chunk * teacher_hidden : (chunk + 1) * teacher_hidden
+                    ]
+                )
+        student.load_state_dict(student_state, strict=True)
+    return {
+        "kind": "function_preserving_min_gru_widening",
+        "teacher_hidden_size": teacher_hidden,
+        "student_hidden_size": student_hidden,
+        "num_layers": teacher_layers,
+        "new_channels": student_hidden - teacher_hidden,
+    }
+
+
+@torch.no_grad()
+def evaluate_puffer_distillation(
+    student,
+    teacher,
+    episodes,
+    *,
+    minibatch_trajectories: int = 128,
+) -> dict:
+    """Measure distribution, action, value, and strategic-pass fidelity."""
+    if minibatch_trajectories < 1:
+        raise ValueError("evaluation minibatch size must be positive")
+    student.eval()
+    teacher.eval()
+    totals = {
+        "samples": 0,
+        "agreement": 0,
+        "forward_kl": 0.0,
+        "value_squared_error": 0.0,
+        "max_legal_logit_error": 0.0,
+        "strategic_opportunities": 0,
+        "teacher_strategic_passes": 0,
+        "student_strategic_passes": 0,
+    }
+    usable = [episode for episode in episodes if episode[0]]
+    for start in range(0, len(usable), minibatch_trajectories):
+        batch = usable[start : start + minibatch_trajectories]
+        teacher_logits, teacher_values, masks = _forward_decisions(
+            teacher, batch
+        )
+        student_logits, student_values, _ = _forward_decisions(student, batch)
+        teacher_log = torch.log_softmax(teacher_logits, dim=-1)
+        student_log = torch.log_softmax(student_logits, dim=-1)
+        teacher_probabilities = teacher_log.exp()
+        forward_kl = (
+            teacher_probabilities * (teacher_log - student_log)
+        ).sum(dim=-1)
+        teacher_actions = teacher_logits.argmax(dim=-1)
+        student_actions = student_logits.argmax(dim=-1)
+        strategic = masks[:, PASS_ACTION] & masks[:, :PASS_ACTION].any(dim=-1)
+        sample_count = int(teacher_actions.numel())
+        opportunities = int(strategic.sum().item())
+        finite_error = (student_logits - teacher_logits).abs().masked_select(
+            masks
+        )
+        totals["samples"] += sample_count
+        totals["agreement"] += int(
+            (teacher_actions == student_actions).sum().item()
+        )
+        totals["forward_kl"] += float(forward_kl.sum().item())
+        totals["value_squared_error"] += float(
+            (student_values - teacher_values).square().sum().item()
+        )
+        totals["max_legal_logit_error"] = max(
+            totals["max_legal_logit_error"],
+            float(finite_error.max().item()),
+        )
+        totals["strategic_opportunities"] += opportunities
+        totals["teacher_strategic_passes"] += int(
+            ((teacher_actions == PASS_ACTION) & strategic).sum().item()
+        )
+        totals["student_strategic_passes"] += int(
+            ((student_actions == PASS_ACTION) & strategic).sum().item()
+        )
+    samples = totals["samples"]
+    if not samples:
+        raise ValueError("distillation evaluation requires decisions")
+    opportunities = totals["strategic_opportunities"]
+    return {
+        "samples": samples,
+        "action_agreement": totals["agreement"] / samples,
+        "forward_kl": totals["forward_kl"] / samples,
+        "value_mse": totals["value_squared_error"] / samples,
+        "max_legal_logit_error": totals["max_legal_logit_error"],
+        "strategic_pass_opportunities": opportunities,
+        "teacher_strategic_pass_rate": (
+            totals["teacher_strategic_passes"] / opportunities
+            if opportunities
+            else None
+        ),
+        "student_strategic_pass_rate": (
+            totals["student_strategic_passes"] / opportunities
+            if opportunities
+            else None
+        ),
+    }
+
+
 def distill_puffer_policy(
     student,
     teacher,
@@ -63,11 +225,19 @@ def distill_puffer_policy(
     temperature: float = 1.5,
     value_coefficient: float = 0.25,
     strategic_pass_weight: float = 2.0,
+    reverse_kl_coefficient: float = 0.25,
+    hard_target_coefficient: float = 0.1,
+    length_bucketed: bool = True,
 ) -> list[dict]:
     """Match the teacher's masked distribution, value, and strategic passes."""
     if epochs < 1 or minibatch_trajectories < 1:
         raise ValueError("epochs and minibatch size must be positive")
-    if temperature <= 0 or strategic_pass_weight < 1:
+    if (
+        temperature <= 0
+        or strategic_pass_weight < 1
+        or reverse_kl_coefficient < 0
+        or hard_target_coefficient < 0
+    ):
         raise ValueError("invalid distillation temperature/pass weight")
     device = next(student.parameters()).device
     teacher.to(device).eval()
@@ -77,8 +247,28 @@ def distill_puffer_policy(
     rng = random.Random(seed)
     logs = []
     for epoch in range(epochs):
-        order = list(range(len(usable)))
-        rng.shuffle(order)
+        if length_bucketed:
+            order = sorted(
+                range(len(usable)),
+                key=lambda index: sum(
+                    len(step.decision.public_events) + 1
+                    for step in usable[index][0]
+                ),
+            )
+            minibatches = [
+                order[start : start + minibatch_trajectories]
+                for start in range(0, len(order), minibatch_trajectories)
+            ]
+            for indices in minibatches:
+                rng.shuffle(indices)
+            rng.shuffle(minibatches)
+        else:
+            order = list(range(len(usable)))
+            rng.shuffle(order)
+            minibatches = [
+                order[start : start + minibatch_trajectories]
+                for start in range(0, len(order), minibatch_trajectories)
+            ]
         totals = {
             "loss": 0.0,
             "kl": 0.0,
@@ -90,11 +280,8 @@ def distill_puffer_policy(
             "student_strategic_passes": 0,
         }
         student.train()
-        for start in range(0, len(order), minibatch_trajectories):
-            batch = [
-                usable[index]
-                for index in order[start : start + minibatch_trajectories]
-            ]
+        for indices in minibatches:
+            batch = [usable[index] for index in indices]
             with torch.no_grad():
                 teacher_logits, teacher_values, masks = _forward_decisions(
                     teacher, batch
@@ -111,14 +298,32 @@ def distill_puffer_policy(
             student_log_probabilities = torch.log_softmax(
                 student_logits / temperature, dim=-1
             )
+            student_probabilities = student_log_probabilities.exp()
             per_sample_kl = (
                 teacher_probabilities
                 * (teacher_log_probabilities - student_log_probabilities)
             ).sum(dim=-1) * (temperature * temperature)
+            reverse_kl = (
+                student_probabilities
+                * (student_log_probabilities - teacher_log_probabilities)
+            ).sum(dim=-1) * (temperature * temperature)
+            teacher_actions = teacher_logits.argmax(dim=-1)
+            hard_target = F.cross_entropy(
+                student_logits,
+                teacher_actions,
+                reduction="none",
+            )
             strategic = masks[:, PASS_ACTION] & masks[:, :PASS_ACTION].any(dim=-1)
             weights = torch.ones_like(per_sample_kl)
             weights[strategic] = strategic_pass_weight
-            kl = (per_sample_kl * weights).sum() / weights.sum()
+            kl = (
+                (
+                    per_sample_kl
+                    + reverse_kl_coefficient * reverse_kl
+                    + hard_target_coefficient * hard_target
+                )
+                * weights
+            ).sum() / weights.sum()
             value_mse = (student_values - teacher_values).square().mean()
             loss = kl + value_coefficient * value_mse
             optimizer.zero_grad(set_to_none=True)
@@ -127,7 +332,6 @@ def distill_puffer_policy(
             optimizer.step()
 
             with torch.no_grad():
-                teacher_actions = teacher_logits.argmax(dim=-1)
                 student_actions = student_logits.argmax(dim=-1)
                 samples = int(teacher_actions.numel())
                 strategic_samples = int(strategic.sum().item())

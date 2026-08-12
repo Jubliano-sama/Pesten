@@ -10,7 +10,10 @@ from benchmark_puffer_vs_puffer import run_parallel_benchmark
 from parallel_puffer_rollout import collect_league_batch_parallel
 from temporal_league import collect_league_batch, evaluate_paired
 from temporal_puffer_agent import temporal_agent_factory
-from temporal_puffer_v4 import NativePufferTemporalPolicy
+from temporal_puffer_v4 import (
+    HawkRGLRUTemporalPolicy,
+    NativePufferTemporalPolicy,
+)
 from train_puffer_fast import _append_jsonl_idempotent
 from vector_puffer_rollout import (
     VectorPufferRolloutPool,
@@ -159,3 +162,28 @@ def test_persistent_vector_pool_refreshes_shared_policy_exactly():
         "deck_count_by_player_count",
     ):
         assert actual_metadata[name] == expected_metadata[name]
+
+
+def test_vector_pool_supports_hawk_rglru_policy_registry():
+    torch.manual_seed(71)
+    policy = HawkRGLRUTemporalPolicy(
+        hidden_size=16,
+        num_layers=2,
+        recurrent_size=20,
+        mlp_expansion=2,
+    ).eval()
+    with VectorPufferRolloutPool(policy, workers=2) as pool:
+        episodes, metadata = pool.collect(
+            policy,
+            games=6,
+            seed=2071,
+            schedule_offset=0,
+            schedule=("current_selfplay", "ppo_champion", "random_rule"),
+            player_counts=(2, 3, 4, 5, 6, 7, 8),
+        )
+    assert episodes
+    assert metadata["trajectories"] == len(episodes)
+    assert sum(metadata["games"].values()) == 6
+    assert set(metadata["player_counts"]) <= {
+        str(players) for players in range(2, 9)
+    }

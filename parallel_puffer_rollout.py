@@ -18,21 +18,15 @@ _WORKER_CHAMPION = None
 
 def _initialize_worker(
     state_dict: dict,
-    hidden_size: int,
-    num_layers: int,
-    mode_conditioned_heads: bool,
+    model_config: dict,
     champion_path: str,
 ) -> None:
     global _WORKER_POLICY, _WORKER_CHAMPION
     torch.set_num_threads(1)
     from benchmark_agents import load_ppo_agent
-    from temporal_puffer_v4 import NativePufferTemporalPolicy
+    from temporal_puffer_v4 import build_temporal_policy
 
-    policy = NativePufferTemporalPolicy(
-        hidden_size=hidden_size,
-        num_layers=num_layers,
-        mode_conditioned_heads=mode_conditioned_heads,
-    )
+    policy = build_temporal_policy(model_config)
     policy.load_state_dict(state_dict)
     policy.eval()
     for parameter in policy.parameters():
@@ -158,15 +152,15 @@ def collect_league_batch_parallel(
         name: value.detach().cpu().clone()
         for name, value in policy.state_dict().items()
     }
+    from temporal_puffer_v4 import policy_model_config
+
     context = multiprocessing.get_context("spawn")
     with context.Pool(
         processes=worker_count,
         initializer=_initialize_worker,
         initargs=(
             state_dict,
-            int(policy.hidden_size),
-            int(policy.num_layers),
-            bool(getattr(policy, "mode_conditioned_heads", False)),
+            policy_model_config(policy),
             str(champion_path.resolve()),
         ),
     ) as pool:
