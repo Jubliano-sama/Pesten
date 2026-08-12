@@ -156,6 +156,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--learning-rate", type=float, default=3e-4)
     parser.add_argument("--temperature", type=float, default=1.5)
     parser.add_argument("--strategic-pass-weight", type=float, default=2.5)
+    parser.add_argument("--reverse-kl-coefficient", type=float, default=0.35)
+    parser.add_argument("--hard-target-coefficient", type=float, default=0.15)
+    parser.add_argument("--disagreement-weight", type=float, default=1.0)
+    parser.add_argument("--value-coefficient", type=float, default=0.35)
     parser.add_argument("--workers", type=int, default=10)
     parser.add_argument("--seed", type=int, default=20_260_812)
     parser.add_argument("--target-agreement", type=float, default=0.985)
@@ -327,10 +331,11 @@ def main() -> None:
             minibatch_trajectories=args.minibatch_trajectories,
             seed=args.seed + 1_000_000 * round_index,
             temperature=args.temperature,
-            value_coefficient=0.35,
+            value_coefficient=args.value_coefficient,
             strategic_pass_weight=args.strategic_pass_weight,
-            reverse_kl_coefficient=0.35,
-            hard_target_coefficient=0.15,
+            reverse_kl_coefficient=args.reverse_kl_coefficient,
+            hard_target_coefficient=args.hard_target_coefficient,
+            disagreement_weight=args.disagreement_weight,
         )
         teacher_validation = evaluate_puffer_distillation(
             hawk,
@@ -371,6 +376,14 @@ def main() -> None:
         distillation = {
             "method": "dagger_bidirectional_kl_hard_target_value",
             "rounds": rounds,
+            "loss": {
+                "temperature": args.temperature,
+                "strategic_pass_weight": args.strategic_pass_weight,
+                "reverse_kl_coefficient": args.reverse_kl_coefficient,
+                "hard_target_coefficient": args.hard_target_coefficient,
+                "disagreement_weight": args.disagreement_weight,
+                "value_coefficient": args.value_coefficient,
+            },
             "target_action_agreement": args.target_agreement,
             "target_forward_kl": args.target_forward_kl,
             "match_gate_passed": hawk_match,

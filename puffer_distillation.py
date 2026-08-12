@@ -227,6 +227,7 @@ def distill_puffer_policy(
     strategic_pass_weight: float = 2.0,
     reverse_kl_coefficient: float = 0.25,
     hard_target_coefficient: float = 0.1,
+    disagreement_weight: float = 1.0,
     length_bucketed: bool = True,
 ) -> list[dict]:
     """Match the teacher's masked distribution, value, and strategic passes."""
@@ -237,6 +238,7 @@ def distill_puffer_policy(
         or strategic_pass_weight < 1
         or reverse_kl_coefficient < 0
         or hard_target_coefficient < 0
+        or disagreement_weight < 1
     ):
         raise ValueError("invalid distillation temperature/pass weight")
     device = next(student.parameters()).device
@@ -316,6 +318,10 @@ def distill_puffer_policy(
             strategic = masks[:, PASS_ACTION] & masks[:, :PASS_ACTION].any(dim=-1)
             weights = torch.ones_like(per_sample_kl)
             weights[strategic] = strategic_pass_weight
+            disagreement = (
+                student_logits.detach().argmax(dim=-1) != teacher_actions
+            )
+            weights[disagreement] *= disagreement_weight
             kl = (
                 (
                     per_sample_kl
