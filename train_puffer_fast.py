@@ -145,6 +145,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--evaluation-pairs", type=int, default=250)
     parser.add_argument("--seed", type=int, default=2026081202)
     parser.add_argument(
+        "--campaign-offset",
+        type=int,
+        help=(
+            "optional zero-based phase offset for common rollout, update, "
+            "and evaluation randomness across differently aged checkpoints"
+        ),
+    )
+    parser.add_argument(
         "--schedule",
         help=(
             "optional comma-separated opponent cycle overriding the "
@@ -194,6 +202,8 @@ def main() -> None:
     )
     if any(value < 1 for value in positive):
         raise ValueError("count arguments must be positive")
+    if args.campaign_offset is not None and args.campaign_offset < 0:
+        raise ValueError("campaign offset must be nonnegative")
     if args.device == "cuda" and not torch.cuda.is_available():
         raise RuntimeError("fast Puffer training requested unavailable CUDA")
     resume = args.resume.resolve()
@@ -292,13 +302,18 @@ def main() -> None:
     )
     for offset in range(args.epochs):
         epoch = start_epoch + offset
+        campaign_phase = (
+            args.campaign_offset + offset
+            if args.campaign_offset is not None
+            else epoch
+        )
         epoch_started = time.perf_counter()
         rollout_policy = _snapshot(policy)
         rollout_started = time.perf_counter()
         rollout_arguments = {
             "games": args.games_per_epoch,
-            "seed": args.seed + epoch * args.games_per_epoch,
-            "schedule_offset": epoch * args.games_per_epoch,
+            "seed": args.seed + campaign_phase * args.games_per_epoch,
+            "schedule_offset": campaign_phase * args.games_per_epoch,
             "player_counts": player_counts,
         }
         if args.rollout_engine == "vector":
@@ -328,7 +343,7 @@ def main() -> None:
             optimizer,
             update_epochs=args.update_epochs,
             minibatch_trajectories=args.minibatch_trajectories,
-            seed=args.seed + 1_000_000 + epoch,
+            seed=args.seed + 1_000_000 + campaign_phase,
             target_kl=args.target_kl,
             clip_ratio=args.clip_ratio,
             value_coefficient=args.value_coefficient,
@@ -354,14 +369,20 @@ def main() -> None:
         if epoch % args.evaluate_every == 0 or offset == args.epochs - 1:
             evaluation_policy = _snapshot(policy)
             candidate = temporal_agent_factory(
-                evaluation_policy, deterministic=True, seed=args.seed + epoch
+                evaluation_policy,
+                deterministic=True,
+                seed=args.seed + campaign_phase,
             )
             evaluations = {
                 "ppo_champion": evaluate_paired(
                     candidate,
                     champion_factory,
                     pairs=args.evaluation_pairs,
-                    seed=args.seed + 2_000_000 + epoch * 10_000,
+                    seed=(
+                        args.seed
+                        + 2_000_000
+                        + campaign_phase * 10_000
+                    ),
                     candidate_name=f"puffer_epoch_{epoch}",
                     opponent_name="ppo_champion",
                 ),
@@ -369,7 +390,11 @@ def main() -> None:
                     candidate,
                     AgentRandom,
                     pairs=args.evaluation_pairs,
-                    seed=args.seed + 3_000_000 + epoch * 10_000,
+                    seed=(
+                        args.seed
+                        + 3_000_000
+                        + campaign_phase * 10_000
+                    ),
                     candidate_name=f"puffer_epoch_{epoch}",
                     opponent_name="random",
                 ),
@@ -377,7 +402,11 @@ def main() -> None:
                     candidate,
                     SmartAgent,
                     pairs=args.evaluation_pairs,
-                    seed=args.seed + 4_000_000 + epoch * 10_000,
+                    seed=(
+                        args.seed
+                        + 4_000_000
+                        + campaign_phase * 10_000
+                    ),
                     candidate_name=f"puffer_epoch_{epoch}",
                     opponent_name="smart",
                 ),
@@ -418,6 +447,7 @@ def main() -> None:
                 "matmul_precision": args.matmul_precision,
                 "champion_checkpoint": str(champion_path),
                 "champion_checkpoint_sha256": _file_sha256(champion_path),
+                "campaign_offset": args.campaign_offset,
                 "gamma": args.gamma,
                 "gae_lambda": args.gae_lambda,
                 "strategic_pass": {
@@ -435,6 +465,7 @@ def main() -> None:
 
         row = {
             "epoch": epoch,
+            "campaign_phase": campaign_phase,
             "wall_seconds": time.perf_counter() - epoch_started,
             "rollout_seconds": rollout_seconds,
             "update_seconds": update_seconds,

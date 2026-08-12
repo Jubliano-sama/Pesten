@@ -145,6 +145,8 @@ def main() -> None:
                 player_counts,
                 "--seed",
                 str(args.seed),
+                "--campaign-offset",
+                "0",
                 "--persistent-replay",
                 "--device",
                 "cuda",
