@@ -9,6 +9,7 @@ if not str(getattr(pufferlib, "__version__", "")).startswith("4"):
 from puffer_distillation import (
     distill_puffer_policy,
     evaluate_puffer_distillation,
+    initialize_factorized_min_gru,
     initialize_hawk_residual,
     initialize_widened_min_gru,
 )
@@ -21,6 +22,7 @@ from temporal_observation import (
 )
 from temporal_puffer_agent import TrajectoryStep
 from temporal_puffer_v4 import (
+    FACTORIZED_ACTION_HEAD,
     HawkResidualTemporalPolicy,
     NativePufferTemporalPolicy,
 )
@@ -112,6 +114,41 @@ def test_function_preserving_widening_is_exact_on_batched_sequences():
     decoder_weight = student.puffer_policy.decoder.card_and_pass.weight
     assert decoder_weight.grad is not None
     assert decoder_weight.grad[:, 12:].abs().sum() > 0
+
+
+def test_factorized_initialization_copies_body_and_projects_card_rows():
+    torch.manual_seed(60)
+    teacher = NativePufferTemporalPolicy(
+        hidden_size=12,
+        num_layers=2,
+        mode_conditioned_heads=True,
+    )
+    student = NativePufferTemporalPolicy(
+        hidden_size=12,
+        num_layers=2,
+        mode_conditioned_heads=True,
+        action_head=FACTORIZED_ACTION_HEAD,
+    )
+
+    report = initialize_factorized_min_gru(student, teacher)
+    teacher_state = teacher.state_dict()
+    student_state = student.state_dict()
+
+    assert report["learned_scores"] == 23
+    for name, value in student_state.items():
+        if name.startswith("puffer_policy.encoder.") or name.startswith(
+            "puffer_policy.network."
+        ):
+            assert torch.equal(value, teacher_state[name])
+    assert torch.equal(
+        student.puffer_policy.decoder.value_function.weight,
+        teacher.puffer_policy.decoder.value_function.weight,
+    )
+    hidden = torch.randn(7, 12)
+    teacher_logits, teacher_values = teacher.puffer_policy.decoder(hidden)
+    student_logits, student_values = student.puffer_policy.decoder(hidden)
+    assert torch.equal(student_values, teacher_values)
+    assert torch.allclose(student_logits[:, 48:], teacher_logits[:, 48:])
 
 
 def test_distillation_evaluation_reports_exact_widened_match():

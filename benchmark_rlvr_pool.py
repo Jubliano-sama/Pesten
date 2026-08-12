@@ -171,8 +171,15 @@ def _stratum_summary(row: dict) -> dict:
     return summary
 
 
-def _weighted_summary(strata: list[dict]) -> dict:
-    opponent_weight = 1 / len(OPPONENTS)
+def _weighted_summary(
+    strata: list[dict],
+    *,
+    opponent_weight: float | None = None,
+) -> dict:
+    if opponent_weight is None:
+        opponent_weight = 1 / len(OPPONENTS)
+    if opponent_weight <= 0:
+        raise ValueError("opponent_weight must be positive")
     weighted = []
     variances = []
     normalized_variances = []
@@ -256,6 +263,27 @@ def _weighted_summary(strata: list[dict]) -> dict:
         "positive_distribution_free_99_9": delta - hoeffding_margin > 0,
         "weights": weighted,
     }
+
+
+def _opponent_summaries(strata: list[dict]) -> dict[str, dict]:
+    """Report each opponent lane at its full player-count mixture weight."""
+
+    results = {}
+    for opponent in OPPONENTS:
+        selected = [row for row in strata if row["opponent"] == opponent]
+        if len(selected) != len(PLAYER_WEIGHTS):
+            raise ValueError(
+                f"opponent {opponent!r} needs exactly one row per player count"
+            )
+        if {int(row["players"]) for row in selected} != set(PLAYER_WEIGHTS):
+            raise ValueError(
+                f"opponent {opponent!r} has an incomplete player-count mixture"
+            )
+        results[opponent] = _weighted_summary(
+            selected,
+            opponent_weight=1.0,
+        )
+    return results
 
 
 def parse_args() -> argparse.Namespace:
@@ -364,6 +392,7 @@ def main() -> None:
         },
         "strata": rows,
         "weighted_result": weighted,
+        "opponent_results": _opponent_summaries(raw_strata),
         "elapsed_seconds": time.perf_counter() - started,
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)

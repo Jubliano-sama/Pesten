@@ -1,6 +1,11 @@
 import pytest
 
-from benchmark_rlvr_pool import OPPONENTS, PLAYER_WEIGHTS, _weighted_summary
+from benchmark_rlvr_pool import (
+    OPPONENTS,
+    PLAYER_WEIGHTS,
+    _opponent_summaries,
+    _weighted_summary,
+)
 from benchmark_rlvr_pool_batched import _make_layout
 
 
@@ -51,3 +56,34 @@ def test_batched_pool_layout_matches_every_variant_seat_on_each_deal():
         assert set(seeds[block * 8 : (block + 1) * 8]) == {1000 + block}
     for row, (_, variant, candidate_seat, _) in enumerate(records):
         assert roles[row][candidate_seat] == ("temporal", variant)
+
+
+def test_opponent_summaries_do_not_dilute_lanes_by_three():
+    strata = []
+    lane_deltas = {
+        "self_anchor": 0.01,
+        "mlp": 0.02,
+        "canonical_random": 0.03,
+    }
+    for opponent, delta in lane_deltas.items():
+        for players in range(2, 9):
+            baseline = 1.0 / players
+            strata.append(
+                {
+                    "opponent": opponent,
+                    "players": players,
+                    "before_scores": [baseline, baseline],
+                    "after_scores": [baseline + delta, baseline + delta],
+                }
+            )
+
+    results = _opponent_summaries(strata)
+
+    for opponent, delta in lane_deltas.items():
+        assert results[opponent]["delta"] == pytest.approx(delta)
+        expected_normalized = delta * sum(
+            PLAYER_WEIGHTS[players] * players for players in range(2, 9)
+        )
+        assert results[opponent][
+            "delta_normalized_win_share"
+        ] == pytest.approx(expected_normalized)

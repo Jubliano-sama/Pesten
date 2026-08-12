@@ -18,6 +18,7 @@ import torch
 from benchmark_rlvr_pool import (
     OPPONENTS,
     PLAYER_WEIGHTS,
+    _opponent_summaries,
     _stratum_summary,
     _weighted_summary,
     file_sha256,
@@ -349,6 +350,7 @@ def run_batched_pool_benchmark(
     return {
         "strata": strata,
         "weighted_result": _weighted_summary(raw),
+        "opponent_results": _opponent_summaries(raw),
         "elapsed_seconds": time.perf_counter() - started,
     }
 

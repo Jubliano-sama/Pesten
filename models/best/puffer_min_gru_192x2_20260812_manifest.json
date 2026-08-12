@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "kind": "pesten_best_model_promotion",
+  "promoted_at": "2026-08-12",
+  "models": {
+    "performance_champion": {
+      "path": "models/best/puffer_min_gru_192x2_plateau_teacher_epoch4387.pt",
+      "sha256": "f8f0aece2d759eadc60b3cbccca30c321c01da13322f7cae511a73c8da3a9f93",
+      "parameters": 251384,
+      "epoch": 4387,
+      "architecture": "min_gru",
+      "hidden_size": 192,
+      "num_layers": 2,
+      "action_head": "mode_conditioned_55",
+      "selection_reason": "Small teacher reached the confirmed RLVR plateau and remains the performance champion."
+    },
+    "opex_efficient_variant": {
+      "path": "models/best/puffer_min_gru_192x2_factorized23_distilled_epoch4387.pt",
+      "sha256": "9debaeabf20990d0d87329f7a210f58471890f1fbf1ae983c919858ff82b8924",
+      "parameters": 245208,
+      "epoch": 4387,
+      "architecture": "min_gru",
+      "hidden_size": 192,
+      "num_layers": 2,
+      "action_head": "factorized_23",
+      "selection_reason": "Outcome-matched distilled variant with 2.4568% fewer parameters and 1.4189% lower recurring phase wall time in the matched RLVR fork."
+    }
+  },
+  "factorized_output_layout": [
+    {
+      "indices": "0-3",
+      "meaning": "playing-card suit scores: harten, ruiten, schoppen, klaveren"
+    },
+    {
+      "indices": "4-15",
+      "meaning": "ordinary rank scores: ace, 2 through 10, king, queen"
+    },
+    {
+      "indices": "16",
+      "meaning": "jack/boer score"
+    },
+    {
+      "indices": "17",
+      "meaning": "joker score"
+    },
+    {
+      "indices": "18",
+      "meaning": "pass score"
+    },
+    {
+      "indices": "19-22",
+      "meaning": "announced-suit scores after a jack"
+    }
+  ],
+  "outcome_match_gate": {
+    "evidence": "live_training/factorized_23_distillation_20260812/round002_vs_teacher_50000blocks_batched.json",
+    "seed_start_inclusive": 1920260900,
+    "matched_deals": 50000,
+    "games": 100000,
+    "candidate_score": 0.504655,
+    "paired_normal_ci99_9": [
+      0.5001114155335502,
+      0.5091985844664497
+    ],
+    "paired_hoeffding_ci99_9": [
+      0.4959366845322378,
+      0.5133733154677621
+    ],
+    "noninferiority_floor": 0.48,
+    "normal_noninferiority_passed": true,
+    "distribution_free_noninferiority_passed": true
+  },
+  "matched_rlvr_slope_experiment": {
+    "evidence": "live_training/action_head_slope_20260812/paired_slope_300blocks.json",
+    "seed": 2026123456,
+    "phases": [
+      0,
+      13,
+      33,
+      53,
+      60
+    ],
+    "games_per_phase_per_arm": 2048,
+    "blocks_per_opponent_player_stratum": 300,
+    "opponents": [
+      "self_anchor",
+      "mlp",
+      "canonical_random"
+    ],
+    "bulk_2_3_4_fraction": 0.6666666666666666,
+    "tail_5_8_fraction": 0.3333333333333333,
+    "full_normalized_win_share_slope_per_phase": 0.0001674825709601266,
+    "factorized_normalized_win_share_slope_per_phase": 0.00016090655062562818,
+    "factorized_minus_full_slope_per_phase": -0.000006576020334498579,
+    "factorized_minus_full_slope_normal_ci99_9": [
+      -0.000790856871601046,
+      0.0007777048309320488
+    ],
+    "factorized_minus_full_endpoint_improvement": 0.010189174435206175,
+    "factorized_minus_full_endpoint_improvement_normal_ci99_9": [
+      -0.039171770796450525,
+      0.05955011966686288
+    ],
+    "confirmed_factorized_slope_improvement": false
+  },
+  "final_head_to_head": {
+    "evidence": "live_training/action_head_slope_20260812/factorized_vs_full_final_50000blocks.json",
+    "seed_start_inclusive": 2026129876,
+    "matched_deals": 50000,
+    "games": 100000,
+    "factorized_score": 0.50188,
+    "paired_normal_ci99_9": [
+      0.4972258301784351,
+      0.5065341698215649
+    ],
+    "paired_hoeffding_ci99_9": [
+      0.49316168453223785,
+      0.5105983154677621
+    ],
+    "one_point_noninferiority_passed": true
+  },
+  "opex": {
+    "protocol": "Same GPU, seed, 60 phases, 2048 games per phase, player/opponent schedule, fresh optimizer, and PPO settings; recurring values exclude each arm's first compile phase.",
+    "full_steady_phase_seconds": 8.134326373778928,
+    "factorized_steady_phase_seconds": 8.01890946817027,
+    "recurring_wall_time_reduction_fraction": 0.014188870756490106,
+    "full_games_per_second": 379.96044899885703,
+    "factorized_games_per_second": 383.66576329920366,
+    "games_per_second_increase_fraction": 0.009751842093327356,
+    "full_update_seconds": 2.6778884767628695,
+    "factorized_update_seconds": 2.61657674672966,
+    "update_time_reduction_fraction": 0.02289555019383228,
+    "full_first_phase_seconds": 13.313748972999747,
+    "factorized_first_phase_seconds": 73.46994886398898,
+    "estimated_compile_break_even_phases": 521.2078730906177
+  },
+  "decision": {
+    "continue_factorized_rlvr": false,
+    "reason": "The distilled head matches outcome performance and modestly lowers recurring OPEX, but no aggregate or opponent-specific improvement-slope advantage was established."
+  }
+}

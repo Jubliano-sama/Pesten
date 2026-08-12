@@ -28,6 +28,10 @@ from temporal_puffer_agent import PolicyStep
 
 PUFFERLIB_REVISION = "c5d3c637446047a6efbcaa74c039c5295d201ab0"
 NATIVE_INPUT_SIZE = OBSERVATION_SIZE + EVENT_TOKEN_SIZE + 1
+FLAT_ACTION_HEAD = "flat_55"
+MODE_CONDITIONED_ACTION_HEAD = "mode_conditioned_55"
+FACTORIZED_ACTION_HEAD = "factorized_23"
+FACTORIZED_SCORE_COUNT = 23
 
 
 def require_pufferlib_v4() -> None:
@@ -54,19 +58,25 @@ class NativePufferTemporalPolicy(nn.Module):
         num_layers: int = 1,
         *,
         mode_conditioned_heads: bool = False,
+        action_head: str | None = None,
     ) -> None:
         super().__init__()
         require_pufferlib_v4()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.mode_conditioned_heads = mode_conditioned_heads
+        self.action_head = action_head or (
+            MODE_CONDITIONED_ACTION_HEAD
+            if mode_conditioned_heads
+            else FLAT_ACTION_HEAD
+        )
         encoder = pufferlib.models.DefaultEncoder(
             NATIVE_INPUT_SIZE, hidden_size
         )
-        decoder = (
-            ModeConditionedDecoder(hidden_size)
-            if mode_conditioned_heads
-            else pufferlib.models.DefaultDecoder((55,), hidden_size)
+        decoder = build_action_decoder(
+            hidden_size,
+            mode_conditioned_heads=mode_conditioned_heads,
+            action_head=self.action_head,
         )
         network = pufferlib.models.MinGRU(
             hidden_size=hidden_size, num_layers=num_layers
@@ -170,6 +180,7 @@ class NativePufferTemporalPolicy(nn.Module):
             "hidden_size": self.hidden_size,
             "num_layers": self.num_layers,
             "mode_conditioned_heads": self.mode_conditioned_heads,
+            "action_head": self.action_head,
         }
 
 
@@ -198,6 +209,86 @@ class ModeConditionedDecoder(nn.Module):
             dim=-1,
         )
         return logits, self.value_function(hidden)
+
+
+class FactorizedActionDecoder(nn.Module):
+    """Twenty-three learned scores expanded into 55 concrete actions.
+
+    The learned output contract is:
+
+    * 0-3: playing-card suit scores (harten, ruiten, schoppen, klaveren)
+    * 4-15: ordinary rank scores (ace, 2 through 10, king, queen)
+    * 16: jack/boer score
+    * 17: joker score
+    * 18: pass score
+    * 19-22: announced-suit scores after a jack
+
+    An ordinary card logit is its suit score plus its rank score. The fixed
+    expansion preserves the environment's established 55-action API while
+    reducing the learned policy output from 55 arbitrary logits to 23 scores.
+    """
+
+    nvec = (55,)
+    is_continuous = False
+    score_count = FACTORIZED_SCORE_COUNT
+
+    def __init__(self, hidden_size: int) -> None:
+        super().__init__()
+        self.scores = nn.Linear(hidden_size, self.score_count)
+        self.value_function = nn.Linear(hidden_size, 1)
+
+    @staticmethod
+    def expand_scores(scores: torch.Tensor) -> torch.Tensor:
+        if scores.shape[-1] != FACTORIZED_SCORE_COUNT:
+            raise ValueError(
+                "factorized action scores must have a final dimension of 23"
+            )
+        ordinary_cards = (
+            scores[..., 0:4].unsqueeze(-1)
+            + scores[..., 4:16].unsqueeze(-2)
+        ).flatten(start_dim=-2)
+        return torch.cat(
+            (
+                ordinary_cards,
+                scores[..., 16:18],
+                scores[..., 19:23],
+                scores[..., 18:19],
+            ),
+            dim=-1,
+        )
+
+    def forward(
+        self, hidden: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        scores = self.scores(hidden)
+        return self.expand_scores(scores), self.value_function(hidden)
+
+
+def build_action_decoder(
+    hidden_size: int,
+    *,
+    mode_conditioned_heads: bool,
+    action_head: str,
+) -> nn.Module:
+    if action_head == FACTORIZED_ACTION_HEAD:
+        if not mode_conditioned_heads:
+            raise ValueError(
+                "the factorized 23-score head requires mode-conditioned heads"
+            )
+        return FactorizedActionDecoder(hidden_size)
+    if action_head == MODE_CONDITIONED_ACTION_HEAD:
+        if not mode_conditioned_heads:
+            raise ValueError(
+                "the mode-conditioned action head requires mode-conditioned heads"
+            )
+        return ModeConditionedDecoder(hidden_size)
+    if action_head == FLAT_ACTION_HEAD:
+        if mode_conditioned_heads:
+            raise ValueError(
+                "the flat action head is incompatible with mode-conditioned heads"
+            )
+        return pufferlib.models.DefaultDecoder((55,), hidden_size)
+    raise ValueError(f"unsupported temporal action head: {action_head}")
 
 
 class RealGatedLinearRecurrentUnit(nn.Module):
@@ -628,7 +719,17 @@ def build_temporal_policy(model: Mapping[str, object]) -> nn.Module:
         ),
     }
     if architecture in {"min_gru", "native_min_gru"}:
-        return NativePufferTemporalPolicy(**common)
+        return NativePufferTemporalPolicy(
+            **common,
+            action_head=str(
+                model.get(
+                    "action_head",
+                    MODE_CONDITIONED_ACTION_HEAD
+                    if common["mode_conditioned_heads"]
+                    else FLAT_ACTION_HEAD,
+                )
+            ),
+        )
     if architecture == "hawk_rglru":
         return HawkRGLRUTemporalPolicy(
             **common,
@@ -701,8 +802,16 @@ def load_temporal_policy_checkpoint(
         )
     if "mode_conditioned_heads" not in model:
         model["mode_conditioned_heads"] = any(
-            "card_and_pass" in key for key in state
+            "card_and_pass" in key or ".decoder.scores." in key
+            for key in state
         )
+    if "action_head" not in model:
+        if any(".decoder.scores." in key for key in state):
+            model["action_head"] = FACTORIZED_ACTION_HEAD
+        elif model["mode_conditioned_heads"]:
+            model["action_head"] = MODE_CONDITIONED_ACTION_HEAD
+        else:
+            model["action_head"] = FLAT_ACTION_HEAD
     model.setdefault("architecture", "min_gru")
     policy = build_temporal_policy(model).to(device)
     policy.load_state_dict(state, strict=True)

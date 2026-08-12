@@ -22,6 +22,8 @@ from temporal_observation import (
 from temporal_puffer_agent import temporal_agent_factory
 from packed_puffer_rollout import pack_puffer_episode
 from temporal_puffer_v4 import (
+    FACTORIZED_ACTION_HEAD,
+    FactorizedActionDecoder,
     HawkRGLRUTemporalPolicy,
     HawkResidualTemporalPolicy,
     NativePufferTemporalPolicy,
@@ -89,6 +91,41 @@ def test_mode_conditioned_heads_preserve_native_55_action_contract():
     assert values.shape == (2, 3)
     assert hasattr(policy.puffer_policy.decoder, "card_and_pass")
     assert hasattr(policy.puffer_policy.decoder, "suit")
+
+
+def test_factorized_head_expands_the_documented_23_scores_to_55_actions():
+    scores = torch.arange(23, dtype=torch.float32).reshape(1, 23)
+
+    logits = FactorizedActionDecoder.expand_scores(scores)
+
+    assert logits.shape == (1, 55)
+    for suit in range(4):
+        for rank in range(12):
+            card_id = suit * 12 + rank
+            assert logits[0, card_id] == scores[0, suit] + scores[0, 4 + rank]
+    assert logits[0, 48] == scores[0, 16]  # jack/boer
+    assert logits[0, 49] == scores[0, 17]  # joker
+    assert torch.equal(logits[0, 50:54], scores[0, 19:23])
+    assert logits[0, 54] == scores[0, 18]  # pass
+
+
+def test_factorized_head_keeps_native_action_api_and_round_trips():
+    policy = NativePufferTemporalPolicy(
+        hidden_size=16,
+        num_layers=1,
+        mode_conditioned_heads=True,
+        action_head=FACTORIZED_ACTION_HEAD,
+    )
+    safe_tokens = torch.zeros(2, 3, 100)
+
+    logits, values = policy.forward_native_sequence(safe_tokens)
+    clone = build_temporal_policy(policy_model_config(policy))
+
+    assert logits.shape == (6, 55)
+    assert values.shape == (2, 3)
+    assert policy.puffer_policy.decoder.scores.out_features == 23
+    assert policy_model_config(clone) == policy_model_config(policy)
+    assert isinstance(clone.puffer_policy.decoder, FactorizedActionDecoder)
 
 
 def test_hawk_rglru_parallel_training_matches_recurrent_evaluation():

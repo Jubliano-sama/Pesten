@@ -130,6 +130,110 @@ def initialize_widened_min_gru(student, teacher) -> dict:
     }
 
 
+def initialize_factorized_min_gru(student, teacher) -> dict:
+    """Copy a MinGRU teacher and project its 48 card rows into suit + rank.
+
+    The recurrent body and value function remain exact. The 4-by-12 ordinary
+    card tensor is projected onto the additive two-way model
+    ``card_logit[suit, rank] = suit_score + rank_score``. Jack, joker, pass,
+    and announced-suit rows copy exactly into their dedicated learned scores.
+    """
+    from temporal_puffer_v4 import (
+        FACTORIZED_ACTION_HEAD,
+        MODE_CONDITIONED_ACTION_HEAD,
+    )
+
+    if getattr(student, "action_head", None) != FACTORIZED_ACTION_HEAD:
+        raise ValueError("student must use the factorized_23 action head")
+    if getattr(teacher, "action_head", None) not in (
+        None,
+        MODE_CONDITIONED_ACTION_HEAD,
+    ):
+        raise ValueError("teacher must use the 55-way mode-conditioned head")
+    if not bool(getattr(teacher, "mode_conditioned_heads", False)):
+        raise ValueError("teacher must use mode-conditioned heads")
+    dimensions = (
+        int(student.hidden_size),
+        int(student.num_layers),
+        int(teacher.hidden_size),
+        int(teacher.num_layers),
+    )
+    if dimensions[:2] != dimensions[2:]:
+        raise ValueError(
+            "factorized distillation initialization requires the same "
+            "MinGRU width and layer count"
+        )
+
+    teacher_state = teacher.state_dict()
+    student_state = student.state_dict()
+    copied_tensors = 0
+    with torch.no_grad():
+        for name in student_state:
+            if name.startswith("puffer_policy.encoder.") or name.startswith(
+                "puffer_policy.network."
+            ):
+                student_state[name].copy_(teacher_state[name])
+                copied_tensors += 1
+
+        teacher_value = "puffer_policy.decoder.value_function"
+        for suffix in ("weight", "bias"):
+            student_state[f"{teacher_value}.{suffix}"].copy_(
+                teacher_state[f"{teacher_value}.{suffix}"]
+            )
+            copied_tensors += 1
+
+        score_prefix = "puffer_policy.decoder.scores"
+        card_prefix = "puffer_policy.decoder.card_and_pass"
+        suit_prefix = "puffer_policy.decoder.suit"
+        projection_errors = {}
+        for suffix in ("weight", "bias"):
+            teacher_cards = teacher_state[f"{card_prefix}.{suffix}"]
+            teacher_suits = teacher_state[f"{suit_prefix}.{suffix}"]
+            student_scores = student_state[f"{score_prefix}.{suffix}"]
+            ordinary = teacher_cards[:48].reshape(
+                4, 12, *teacher_cards.shape[1:]
+            )
+            suit_means = ordinary.mean(dim=1)
+            rank_means = ordinary.mean(dim=0)
+            grand_mean = ordinary.mean(dim=(0, 1))
+
+            # This gauge is the minimum-L2-norm decomposition among all
+            # equivalent suit/rank offsets.
+            student_scores[0:4].copy_(suit_means - 0.25 * grand_mean)
+            student_scores[4:16].copy_(rank_means - 0.75 * grand_mean)
+            student_scores[16:19].copy_(teacher_cards[48:51])
+            student_scores[19:23].copy_(teacher_suits)
+
+            reconstructed = (
+                student_scores[0:4].unsqueeze(1)
+                + student_scores[4:16].unsqueeze(0)
+            )
+            error = reconstructed - ordinary
+            projection_errors[suffix] = {
+                "mean_squared_error": float(error.square().mean().item()),
+                "max_absolute_error": float(error.abs().max().item()),
+            }
+        student.load_state_dict(student_state, strict=True)
+
+    return {
+        "kind": "same_body_additive_suit_rank_projection",
+        "teacher_action_head": MODE_CONDITIONED_ACTION_HEAD,
+        "student_action_head": FACTORIZED_ACTION_HEAD,
+        "learned_scores": 23,
+        "concrete_actions": 55,
+        "hidden_size": int(student.hidden_size),
+        "num_layers": int(student.num_layers),
+        "copied_body_and_value_tensors": copied_tensors,
+        "ordinary_card_projection": projection_errors,
+        "special_rows_copied_exactly": {
+            "jack": [48, 16],
+            "joker": [49, 17],
+            "pass": [54, 18],
+            "announced_suits": [[50, 53], [19, 22]],
+        },
+    }
+
+
 def initialize_hawk_residual(student, teacher) -> dict:
     """Copy a MinGRU teacher into the base and zero the Hawk output heads."""
     from temporal_puffer_v4 import HawkResidualTemporalPolicy

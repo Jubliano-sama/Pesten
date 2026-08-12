@@ -126,6 +126,11 @@ def parse_args() -> argparse.Namespace:
         default="vector",
     )
     parser.add_argument("--learning-rate", type=float, default=None)
+    parser.add_argument(
+        "--fresh-optimizer",
+        action="store_true",
+        help="ignore any checkpoint optimizer state and start a fresh Adam",
+    )
     parser.add_argument("--update-epochs", type=int, default=4)
     parser.add_argument("--minibatch-trajectories", type=int, default=128)
     parser.add_argument(
@@ -249,7 +254,7 @@ def main() -> None:
         else float(recipe.get("learning_rate", 3e-4))
     )
     optimizer = torch.optim.Adam(policy.parameters(), lr=learning_rate)
-    if "optimizer_state_dict" in payload:
+    if "optimizer_state_dict" in payload and not args.fresh_optimizer:
         optimizer.load_state_dict(payload["optimizer_state_dict"])
         _move_optimizer(optimizer, next(policy.parameters()).device)
         for group in optimizer.param_groups:
@@ -438,6 +443,7 @@ def main() -> None:
                     args.diagnostic_minibatch_trajectories
                 ),
                 "learning_rate": learning_rate,
+                "fresh_optimizer": args.fresh_optimizer,
                 "target_kl": args.target_kl,
                 "early_stop_diagnostic_trajectories": (
                     args.early_stop_diagnostic_trajectories
