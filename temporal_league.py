@@ -577,6 +577,7 @@ def collect_league_batch(
     schedule_offset: int = 0,
     mixture: Sequence[tuple[str, int]] = LEAGUE_MIXTURE,
     player_counts: Sequence[int] | None = None,
+    game_index_offset: int = 0,
 ) -> tuple[list[tuple[Sequence[TrajectoryStep], bool]], dict]:
     schedule = league_schedule(mixture)
     player_count_schedule = tuple(player_counts or (2,))
@@ -585,6 +586,8 @@ def collect_league_batch(
         for count in player_count_schedule
     ):
         raise ValueError("player_counts must contain integers >= 2")
+    if game_index_offset < 0:
+        raise ValueError("game_index_offset must be non-negative")
     episodes = []
     contributions = Counter()
     game_counts = Counter()
@@ -593,6 +596,7 @@ def collect_league_batch(
     league_fallbacks = Counter()
     total_turns = 0
     for index in range(games):
+        game_index = game_index_offset + index
         requested_opponent_type = schedule[
             (schedule_offset + index) % len(schedule)
         ]
@@ -612,7 +616,7 @@ def collect_league_batch(
         current_zero = temporal_agent_factory(
             policy, deterministic=False, seed=deal_seed * 2
         )
-        current_seat = index % player_count
+        current_seat = game_index % player_count
         if opponent_type == "current_selfplay":
             factories = [
                 (
@@ -629,7 +633,7 @@ def collect_league_batch(
             current_seats = tuple(range(player_count))
         else:
             if opponent_type == "historical_temporal":
-                frozen = historical[index % len(historical)]
+                frozen = historical[game_index % len(historical)]
                 opponent = temporal_agent_factory(
                     frozen, deterministic=False, seed=deal_seed + 99
                 )

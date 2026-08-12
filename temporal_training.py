@@ -429,12 +429,18 @@ def ppo_update_batched_epochs(
     gamma: float = 0.97,
     gae_lambda: float | None = 0.95,
     normalize_advantages: bool = True,
+    diagnostic_minibatch_trajectories: int | None = None,
 ) -> dict:
     """Run reproducible PPO epochs/minibatches with a rollout-level KL stop."""
     if update_epochs < 1:
         raise ValueError("update_epochs must be positive")
     if minibatch_trajectories < 1:
         raise ValueError("minibatch_trajectories must be positive")
+    if (
+        diagnostic_minibatch_trajectories is not None
+        and diagnostic_minibatch_trajectories < 1
+    ):
+        raise ValueError("diagnostic minibatch size must be positive")
     usable = [episode for episode in episodes if episode[0]]
     if not usable:
         raise ValueError("PPO update requires at least one decision")
@@ -465,8 +471,11 @@ def ppo_update_batched_epochs(
                     normalize_advantages=normalize_advantages,
                 )
             )
-        diagnostics = evaluate_ppo_drift_batched(
-            policy, usable, clip_ratio=clip_ratio
+        diagnostics = evaluate_ppo_drift_batched_minibatches(
+            policy,
+            usable,
+            clip_ratio=clip_ratio,
+            minibatch_trajectories=diagnostic_minibatch_trajectories,
         )
         epoch_diagnostics.append(
             {"epoch": epoch + 1, **diagnostics}
@@ -508,6 +517,57 @@ def ppo_update_batched_epochs(
         }
     )
     return aggregate
+
+
+def evaluate_ppo_drift_batched_minibatches(
+    policy,
+    episodes: Sequence[tuple[Sequence[TrajectoryStep], bool]],
+    *,
+    clip_ratio: float = 0.2,
+    minibatch_trajectories: int | None = None,
+) -> dict[str, float]:
+    """Bound diagnostic memory while preserving aggregate metrics."""
+    if minibatch_trajectories is None or len(episodes) <= minibatch_trajectories:
+        return evaluate_ppo_drift_batched(
+            policy, episodes, clip_ratio=clip_ratio
+        )
+    if minibatch_trajectories < 1:
+        raise ValueError("diagnostic minibatch size must be positive")
+    rows = [
+        evaluate_ppo_drift_batched(
+            policy,
+            episodes[start : start + minibatch_trajectories],
+            clip_ratio=clip_ratio,
+            _include_moments=True,
+        )
+        for start in range(0, len(episodes), minibatch_trajectories)
+    ]
+    samples = sum(row["samples"] for row in rows)
+    names = (
+        "approx_kl",
+        "old_approx_kl",
+        "clip_fraction",
+        "entropy",
+        "value_mse",
+    )
+    target_sum = sum(row["_target_sum"] for row in rows)
+    target_square_sum = sum(row["_target_square_sum"] for row in rows)
+    error_sum = sum(row["_error_sum"] for row in rows)
+    error_square_sum = sum(row["_error_square_sum"] for row in rows)
+    target_variance = target_square_sum / samples - (target_sum / samples) ** 2
+    error_variance = error_square_sum / samples - (error_sum / samples) ** 2
+    return {
+        **{
+            name: sum(row[name] * row["samples"] for row in rows) / samples
+            for name in names
+        },
+        "explained_variance": (
+            math.nan
+            if target_variance <= 0.0
+            else 1.0 - error_variance / target_variance
+        ),
+        "samples": samples,
+    }
 
 
 def evaluate_ppo_drift(
@@ -579,6 +639,7 @@ def evaluate_ppo_drift_batched(
     episodes: Sequence[tuple[Sequence[TrajectoryStep], bool]],
     *,
     clip_ratio: float = 0.2,
+    _include_moments: bool = False,
 ) -> dict[str, float]:
     """Evaluate post-update drift through one native MinGRU sequence batch."""
     required = (
@@ -672,7 +733,7 @@ def evaluate_ppo_drift_batched(
             else 1
             - (target - values).var(unbiased=False) / variance
         )
-        return {
+        result = {
             "approx_kl": float(
                 ((ratios - 1.0) - logs).mean().detach()
             ),
@@ -689,6 +750,21 @@ def evaluate_ppo_drift_batched(
             "explained_variance": float(explained.detach()),
             "samples": sample_count,
         }
+        if _include_moments:
+            errors = target - values
+            result.update(
+                {
+                    "_target_sum": float(target.sum().detach()),
+                    "_target_square_sum": float(
+                        target.square().sum().detach()
+                    ),
+                    "_error_sum": float(errors.sum().detach()),
+                    "_error_square_sum": float(
+                        errors.square().sum().detach()
+                    ),
+                }
+            )
+        return result
 
 
 def collect_smoke_episodes(

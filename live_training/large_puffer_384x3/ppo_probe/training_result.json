@@ -1,0 +1,866 @@
+{
+  "curve": [
+    {
+      "checkpoint": {
+        "path": "/home/tommie/Pesten/live_training/large_puffer_384x3/ppo_probe/latest.pt",
+        "state_sha256": "a736ab172ea1714efc2fa3e2f3437faed1b9eb6ec8331cce350eb11846815e61"
+      },
+      "contribution": {
+        "decisions": {
+          "bayesian_tree": 1967,
+          "current_selfplay": 30317,
+          "historical_temporal": 5416,
+          "ppo_champion": 3521,
+          "random_rule": 4410,
+          "smart_rule": 2006,
+          "smarter_rule": 2970
+        },
+        "deck_count_by_player_count": {
+          "2": 1,
+          "3": 1,
+          "4": 1,
+          "5": 1,
+          "6": 1,
+          "7": 2,
+          "8": 2
+        },
+        "games": {
+          "bayesian_tree": 67,
+          "current_selfplay": 316,
+          "historical_temporal": 157,
+          "ppo_champion": 156,
+          "random_rule": 158,
+          "smart_rule": 79,
+          "smarter_rule": 91
+        },
+        "league_fallbacks": {
+          "bayesian_tree_multideck_to_smarter_rule": 12
+        },
+        "player_counts": {
+          "2": 440,
+          "3": 146,
+          "4": 146,
+          "5": 73,
+          "6": 73,
+          "7": 73,
+          "8": 73
+        },
+        "total_turns": 79607,
+        "trajectories": 1866
+      },
+      "decisions_per_second": 2332.423242004804,
+      "epoch": 3607,
+      "evaluation": null,
+      "games_per_second": 47.195079728356134,
+      "rollout_seconds": 21.69717703400238,
+      "strategic_pass": {
+        "action": 54,
+        "all_pass_actions": 16814,
+        "decisions": 50607,
+        "opportunities": 35290,
+        "passes": 5428,
+        "rate": 0.15381127798243127
+      },
+      "update": {
+        "approx_kl": 0.0045433119720278735,
+        "clip_fraction": 0.046174442316231246,
+        "entropy": 0.2544978934083622,
+        "epoch_diagnostics": [
+          {
+            "approx_kl": 0.0027395420311029533,
+            "clip_fraction": 0.033809552138294494,
+            "entropy": 0.25490703311364493,
+            "epoch": 1,
+            "explained_variance": 0.19494963807043209,
+            "old_approx_kl": 0.0025130652595266806,
+            "samples": 50607,
+            "value_mse": 0.2929573204106809
+          },
+          {
+            "approx_kl": 0.00438699169726751,
+            "clip_fraction": 0.04957812142161424,
+            "entropy": 0.253218054286172,
+            "epoch": 2,
+            "explained_variance": 0.1923175627240163,
+            "old_approx_kl": 0.004503362326428399,
+            "samples": 50607,
+            "value_mse": 0.2921733755502689
+          },
+          {
+            "approx_kl": 0.0047903077738109985,
+            "clip_fraction": 0.05167269357885436,
+            "entropy": 0.25319722504660963,
+            "epoch": 3,
+            "explained_variance": 0.20166137154662436,
+            "old_approx_kl": 0.00467422875361335,
+            "samples": 50607,
+            "value_mse": 0.2929247505124406
+          },
+          {
+            "approx_kl": 0.005447397217997031,
+            "clip_fraction": 0.05343134326249585,
+            "entropy": 0.2595595685561941,
+            "epoch": 4,
+            "explained_variance": 0.20077649444541296,
+            "old_approx_kl": 0.005554556111969351,
+            "samples": 50607,
+            "value_mse": 0.29433118373636724
+          }
+        ],
+        "epochs_completed": 4,
+        "explained_variance": 0.2954890142933312,
+        "loss": 0.07727773564637987,
+        "old_approx_kl": 0.004669832289393521,
+        "optimizer_steps": 60,
+        "policy_loss": -0.0006544334210607328,
+        "post_update_diagnostics": {
+          "approx_kl": 0.005447397217997031,
+          "clip_fraction": 0.05343134326249585,
+          "entropy": 0.2595595685561941,
+          "epoch": 4,
+          "explained_variance": 0.20077649444541296,
+          "old_approx_kl": 0.005554556111969351,
+          "samples": 50607,
+          "value_mse": 0.29433118373636724
+        },
+        "samples": 50607,
+        "stopped_early": false,
+        "target_kl": 0.02,
+        "value_loss": 0.1609542955144179
+      },
+      "update_seconds": 23.484607268997934,
+      "wall_seconds": 45.22326709500339
+    },
+    {
+      "checkpoint": {
+        "path": "/home/tommie/Pesten/live_training/large_puffer_384x3/ppo_probe/puffer_epoch_003608.pt",
+        "state_sha256": "e12843c7988f545cac0ae747e8ab09432ce541d30099586a2d090e382eea2431"
+      },
+      "contribution": {
+        "decisions": {
+          "bayesian_tree": 1783,
+          "current_selfplay": 33153,
+          "historical_temporal": 5559,
+          "ppo_champion": 4072,
+          "random_rule": 4417,
+          "smart_rule": 1927,
+          "smarter_rule": 3478
+        },
+        "deck_count_by_player_count": {
+          "2": 1,
+          "3": 1,
+          "4": 1,
+          "5": 1,
+          "6": 1,
+          "7": 2,
+          "8": 2
+        },
+        "games": {
+          "bayesian_tree": 69,
+          "current_selfplay": 314,
+          "historical_temporal": 157,
+          "ppo_champion": 158,
+          "random_rule": 158,
+          "smart_rule": 79,
+          "smarter_rule": 89
+        },
+        "league_fallbacks": {
+          "bayesian_tree_multideck_to_smarter_rule": 10
+        },
+        "player_counts": {
+          "2": 438,
+          "3": 148,
+          "4": 146,
+          "5": 73,
+          "6": 73,
+          "7": 73,
+          "8": 73
+        },
+        "total_turns": 80637,
+        "trajectories": 1903
+      },
+      "decisions_per_second": 2547.2698725814216,
+      "epoch": 3608,
+      "evaluation": null,
+      "games_per_second": 47.958306817984806,
+      "rollout_seconds": 21.351879746012855,
+      "strategic_pass": {
+        "action": 54,
+        "all_pass_actions": 18510,
+        "decisions": 54389,
+        "opportunities": 38417,
+        "passes": 6587,
+        "rate": 0.17146055131842675
+      },
+      "update": {
+        "approx_kl": 0.002428385384592053,
+        "clip_fraction": 0.029233852379044765,
+        "entropy": 0.2666562375206374,
+        "epoch_diagnostics": [
+          {
+            "approx_kl": 0.0027952177392838846,
+            "clip_fraction": 0.0324146426791815,
+            "entropy": 0.2656970740454492,
+            "epoch": 1,
+            "explained_variance": 0.13253277082232298,
+            "old_approx_kl": 0.0033824300953014612,
+            "samples": 54389,
+            "value_mse": 0.2978531085985565
+          },
+          {
+            "approx_kl": 0.002223952046354451,
+            "clip_fraction": 0.02671496065159478,
+            "entropy": 0.2667760210188005,
+            "epoch": 2,
+            "explained_variance": 0.16067461375553338,
+            "old_approx_kl": 0.003010522826857846,
+            "samples": 54389,
+            "value_mse": 0.29655566832493185
+          },
+          {
+            "approx_kl": 0.002974435179040638,
+            "clip_fraction": 0.035154167387482664,
+            "entropy": 0.2680010371396882,
+            "epoch": 3,
+            "explained_variance": 0.15664322709644463,
+            "old_approx_kl": 0.003707580217205576,
+            "samples": 54389,
+            "value_mse": 0.29097725086963594
+          },
+          {
+            "approx_kl": 0.0037730385822449864,
+            "clip_fraction": 0.04640644254208901,
+            "entropy": 0.2666927784811184,
+            "epoch": 4,
+            "explained_variance": 0.16910362372200852,
+            "old_approx_kl": 0.005116407483095151,
+            "samples": 54389,
+            "value_mse": 0.2822147828450887
+          }
+        ],
+        "epochs_completed": 4,
+        "explained_variance": 0.2674831800206217,
+        "loss": 0.07445574587680501,
+        "old_approx_kl": 0.003011558309011945,
+        "optimizer_steps": 60,
+        "policy_loss": -0.0014180628118902684,
+        "post_update_diagnostics": {
+          "approx_kl": 0.0037730385822449864,
+          "clip_fraction": 0.04640644254208901,
+          "entropy": 0.2666927784811184,
+          "epoch": 4,
+          "explained_variance": 0.16910362372200852,
+          "old_approx_kl": 0.005116407483095151,
+          "samples": 54389,
+          "value_mse": 0.2822147828450887
+        },
+        "samples": 54389,
+        "stopped_early": false,
+        "target_kl": 0.02,
+        "value_loss": 0.15708074087731544
+      },
+      "update_seconds": 23.593480452007498,
+      "wall_seconds": 44.996392651999486
+    },
+    {
+      "checkpoint": {
+        "path": "/home/tommie/Pesten/live_training/large_puffer_384x3/ppo_probe/latest.pt",
+        "state_sha256": "4cc912ab609a5396ad06f37d5dd5876d8226636e93c0b2088ddf51eaff6cf15f"
+      },
+      "contribution": {
+        "decisions": {
+          "bayesian_tree": 1731,
+          "current_selfplay": 32903,
+          "historical_temporal": 4503,
+          "ppo_champion": 3619,
+          "random_rule": 4062,
+          "smart_rule": 2090,
+          "smarter_rule": 3125
+        },
+        "deck_count_by_player_count": {
+          "2": 1,
+          "3": 1,
+          "4": 1,
+          "5": 1,
+          "6": 1,
+          "7": 2,
+          "8": 2
+        },
+        "games": {
+          "bayesian_tree": 67,
+          "current_selfplay": 314,
+          "historical_temporal": 158,
+          "ppo_champion": 158,
+          "random_rule": 157,
+          "smart_rule": 79,
+          "smarter_rule": 91
+        },
+        "league_fallbacks": {
+          "bayesian_tree_multideck_to_smarter_rule": 12
+        },
+        "player_counts": {
+          "2": 438,
+          "3": 146,
+          "4": 148,
+          "5": 73,
+          "6": 73,
+          "7": 73,
+          "8": 73
+        },
+        "total_turns": 78749,
+        "trajectories": 1846
+      },
+      "decisions_per_second": 2475.5527873524197,
+      "epoch": 3609,
+      "evaluation": null,
+      "games_per_second": 48.71842973207153,
+      "rollout_seconds": 21.018739840990747,
+      "strategic_pass": {
+        "action": 54,
+        "all_pass_actions": 17548,
+        "decisions": 52033,
+        "opportunities": 36513,
+        "passes": 5994,
+        "rate": 0.16416070988415085
+      },
+      "update": {
+        "approx_kl": 0.004482606594986363,
+        "clip_fraction": 0.03814406296291695,
+        "entropy": 0.26450469262119447,
+        "epoch_diagnostics": [
+          {
+            "approx_kl": 0.004577820077141766,
+            "clip_fraction": 0.032364076172395916,
+            "entropy": 0.264857494214282,
+            "epoch": 1,
+            "explained_variance": 0.149053125381653,
+            "old_approx_kl": 0.005511994313372392,
+            "samples": 52033,
+            "value_mse": 0.2897846552913863
+          },
+          {
+            "approx_kl": 0.0060974595379664626,
+            "clip_fraction": 0.0517363974977152,
+            "entropy": 0.26231874329377375,
+            "epoch": 2,
+            "explained_variance": 0.12572219978896335,
+            "old_approx_kl": 0.007599215345805451,
+            "samples": 52033,
+            "value_mse": 0.2972730711662929
+          },
+          {
+            "approx_kl": 0.004721201691624322,
+            "clip_fraction": 0.03689965941626189,
+            "entropy": 0.26658751507342027,
+            "epoch": 3,
+            "explained_variance": 0.16044311463595734,
+            "old_approx_kl": 0.00629801823721957,
+            "samples": 52033,
+            "value_mse": 0.3011185964480851
+          },
+          {
+            "approx_kl": 0.004665709996211229,
+            "clip_fraction": 0.040474314139791315,
+            "entropy": 0.2651279814265127,
+            "epoch": 4,
+            "explained_variance": 0.17468732630954728,
+            "old_approx_kl": 0.005902691846345292,
+            "samples": 52033,
+            "value_mse": 0.3273142840041489
+          }
+        ],
+        "epochs_completed": 4,
+        "explained_variance": 0.2593701178117032,
+        "loss": 0.07784423256449409,
+        "old_approx_kl": 0.005635060443013357,
+        "optimizer_steps": 60,
+        "policy_loss": -0.0019132119009015577,
+        "post_update_diagnostics": {
+          "approx_kl": 0.004665709996211229,
+          "clip_fraction": 0.040474314139791315,
+          "entropy": 0.2651279814265127,
+          "epoch": 4,
+          "explained_variance": 0.17468732630954728,
+          "old_approx_kl": 0.005902691846345292,
+          "samples": 52033,
+          "value_mse": 0.3273142840041489
+        },
+        "samples": 52033,
+        "stopped_early": false,
+        "target_kl": 0.02,
+        "value_loss": 0.16480498201941055
+      },
+      "update_seconds": 23.321696091996273,
+      "wall_seconds": 44.38115218799794
+    },
+    {
+      "checkpoint": {
+        "path": "/home/tommie/Pesten/live_training/large_puffer_384x3/ppo_probe/puffer_epoch_003610.pt",
+        "state_sha256": "745f9d911537be99900dad410dc5237d8c1518be6d7ce278e93e90e37745d262"
+      },
+      "contribution": {
+        "decisions": {
+          "bayesian_tree": 1957,
+          "current_selfplay": 30810,
+          "historical_temporal": 4724,
+          "ppo_champion": 4062,
+          "random_rule": 4461,
+          "smart_rule": 1648,
+          "smarter_rule": 3730
+        },
+        "deck_count_by_player_count": {
+          "2": 1,
+          "3": 1,
+          "4": 1,
+          "5": 1,
+          "6": 1,
+          "7": 2,
+          "8": 2
+        },
+        "games": {
+          "bayesian_tree": 67,
+          "current_selfplay": 316,
+          "historical_temporal": 158,
+          "ppo_champion": 158,
+          "random_rule": 157,
+          "smart_rule": 78,
+          "smarter_rule": 90
+        },
+        "league_fallbacks": {
+          "bayesian_tree_multideck_to_smarter_rule": 12
+        },
+        "player_counts": {
+          "2": 438,
+          "3": 146,
+          "4": 146,
+          "5": 74,
+          "6": 74,
+          "7": 73,
+          "8": 73
+        },
+        "total_turns": 79232,
+        "trajectories": 1899
+      },
+      "decisions_per_second": 2333.6983636815344,
+      "epoch": 3610,
+      "evaluation": null,
+      "games_per_second": 46.49959379689234,
+      "rollout_seconds": 22.021697748001316,
+      "strategic_pass": {
+        "action": 54,
+        "all_pass_actions": 16938,
+        "decisions": 51392,
+        "opportunities": 35318,
+        "passes": 4950,
+        "rate": 0.14015516167393396
+      },
+      "update": {
+        "approx_kl": 0.002569208285536706,
+        "clip_fraction": 0.03168294685323868,
+        "entropy": 0.26125052997771103,
+        "epoch_diagnostics": [
+          {
+            "approx_kl": 0.002476737380379717,
+            "clip_fraction": 0.032067248465161034,
+            "entropy": 0.2597938089821126,
+            "epoch": 1,
+            "explained_variance": 0.17750292810684495,
+            "old_approx_kl": 0.002409709279720474,
+            "samples": 51392,
+            "value_mse": 0.294297363476278
+          },
+          {
+            "approx_kl": 0.002607282492041702,
+            "clip_fraction": 0.03263153828465806,
+            "entropy": 0.2612512522701239,
+            "epoch": 2,
+            "explained_variance": 0.18803013842390529,
+            "old_approx_kl": 0.0030004476561151187,
+            "samples": 51392,
+            "value_mse": 0.2902464192794986
+          },
+          {
+            "approx_kl": 0.002984062461714535,
+            "clip_fraction": 0.036036737819981055,
+            "entropy": 0.26378459357778317,
+            "epoch": 3,
+            "explained_variance": 0.182160864660695,
+            "old_approx_kl": 0.003710772166080121,
+            "samples": 51392,
+            "value_mse": 0.2944717012481488
+          },
+          {
+            "approx_kl": 0.003914768860320313,
+            "clip_fraction": 0.046719334023933023,
+            "entropy": 0.26223626169973374,
+            "epoch": 4,
+            "explained_variance": 0.18574121781505393,
+            "old_approx_kl": 0.004712464569262766,
+            "samples": 51392,
+            "value_mse": 0.29755306325459696
+          }
+        ],
+        "epochs_completed": 4,
+        "explained_variance": 0.2788383000498988,
+        "loss": 0.07708278340404574,
+        "old_approx_kl": 0.0027214776306423104,
+        "optimizer_steps": 60,
+        "policy_loss": -0.0013274153882846535,
+        "post_update_diagnostics": {
+          "approx_kl": 0.003914768860320313,
+          "clip_fraction": 0.046719334023933023,
+          "entropy": 0.26223626169973374,
+          "epoch": 4,
+          "explained_variance": 0.18574121781505393,
+          "old_approx_kl": 0.004712464569262766,
+          "samples": 51392,
+          "value_mse": 0.29755306325459696
+        },
+        "samples": 51392,
+        "stopped_early": false,
+        "target_kl": 0.02,
+        "value_loss": 0.16204540939435622
+      },
+      "update_seconds": 22.90325991199643,
+      "wall_seconds": 44.97462244798953
+    },
+    {
+      "checkpoint": {
+        "path": "/home/tommie/Pesten/live_training/large_puffer_384x3/ppo_probe/latest.pt",
+        "state_sha256": "bbbd6e5ee3da09ced5abd8d95ec15050171facc7b27b7043beae2b26b27bcda1"
+      },
+      "contribution": {
+        "decisions": {
+          "bayesian_tree": 1787,
+          "current_selfplay": 31737,
+          "historical_temporal": 4792,
+          "ppo_champion": 3659,
+          "random_rule": 4253,
+          "smart_rule": 1626,
+          "smarter_rule": 3363
+        },
+        "deck_count_by_player_count": {
+          "2": 1,
+          "3": 1,
+          "4": 1,
+          "5": 1,
+          "6": 1,
+          "7": 2,
+          "8": 2
+        },
+        "games": {
+          "bayesian_tree": 68,
+          "current_selfplay": 316,
+          "historical_temporal": 158,
+          "ppo_champion": 156,
+          "random_rule": 158,
+          "smart_rule": 79,
+          "smarter_rule": 89
+        },
+        "league_fallbacks": {
+          "bayesian_tree_multideck_to_smarter_rule": 10
+        },
+        "player_counts": {
+          "2": 438,
+          "3": 146,
+          "4": 146,
+          "5": 73,
+          "6": 73,
+          "7": 74,
+          "8": 74
+        },
+        "total_turns": 76461,
+        "trajectories": 1895
+      },
+      "decisions_per_second": 2349.7647835162797,
+      "epoch": 3611,
+      "evaluation": null,
+      "games_per_second": 46.97969694282505,
+      "rollout_seconds": 21.796649758005515,
+      "strategic_pass": {
+        "action": 54,
+        "all_pass_actions": 16928,
+        "decisions": 51217,
+        "opportunities": 35569,
+        "passes": 5221,
+        "rate": 0.1467851218757907
+      },
+      "update": {
+        "approx_kl": 0.003062201640040121,
+        "clip_fraction": 0.036691918903349253,
+        "entropy": 0.26390580874933833,
+        "epoch_diagnostics": [
+          {
+            "approx_kl": 0.002301907436498418,
+            "clip_fraction": 0.028642833479852775,
+            "entropy": 0.26593522068942926,
+            "epoch": 1,
+            "explained_variance": 0.15510587724543634,
+            "old_approx_kl": 0.0023206621148843224,
+            "samples": 51217,
+            "value_mse": 0.30871169384356034
+          },
+          {
+            "approx_kl": 0.002289765780244997,
+            "clip_fraction": 0.029580022337225242,
+            "entropy": 0.2655537365152837,
+            "epoch": 2,
+            "explained_variance": 0.1598973283727294,
+            "old_approx_kl": 0.0030189130083767917,
+            "samples": 51217,
+            "value_mse": 0.30824343932855713
+          },
+          {
+            "approx_kl": 0.0038985304631237033,
+            "clip_fraction": 0.04969053281011482,
+            "entropy": 0.2655806342296185,
+            "epoch": 3,
+            "explained_variance": 0.16601299192521987,
+            "old_approx_kl": 0.004382349709556038,
+            "samples": 51217,
+            "value_mse": 0.30492826014629726
+          },
+          {
+            "approx_kl": 0.003568231814260364,
+            "clip_fraction": 0.04199777449345119,
+            "entropy": 0.2662149979402439,
+            "epoch": 4,
+            "explained_variance": 0.17920887416362957,
+            "old_approx_kl": 0.004256018081643634,
+            "samples": 51217,
+            "value_mse": 0.297196044042847
+          }
+        ],
+        "epochs_completed": 4,
+        "explained_variance": 0.24468473578594727,
+        "loss": 0.08001416526456762,
+        "old_approx_kl": 0.003416919180481719,
+        "optimizer_steps": 60,
+        "policy_loss": -0.0011369888687326373,
+        "post_update_diagnostics": {
+          "approx_kl": 0.003568231814260364,
+          "clip_fraction": 0.04199777449345119,
+          "entropy": 0.2662149979402439,
+          "epoch": 4,
+          "explained_variance": 0.17920887416362957,
+          "old_approx_kl": 0.004256018081643634,
+          "samples": 51217,
+          "value_mse": 0.297196044042847
+        },
+        "samples": 51217,
+        "stopped_early": false,
+        "target_kl": 0.02,
+        "value_loss": 0.16758042497251147
+      },
+      "update_seconds": 23.57686274200387,
+      "wall_seconds": 45.41276669499348
+    },
+    {
+      "checkpoint": {
+        "path": "/home/tommie/Pesten/live_training/large_puffer_384x3/ppo_probe/puffer_epoch_003612.pt",
+        "state_sha256": "289beaa4b4821a8a1489a0eb39f70c420c999efee94916c87e924f3b7d707e90"
+      },
+      "contribution": {
+        "decisions": {
+          "bayesian_tree": 1935,
+          "current_selfplay": 30967,
+          "historical_temporal": 5144,
+          "ppo_champion": 4221,
+          "random_rule": 4670,
+          "smart_rule": 1769,
+          "smarter_rule": 3102
+        },
+        "deck_count_by_player_count": {
+          "2": 1,
+          "3": 1,
+          "4": 1,
+          "5": 1,
+          "6": 1,
+          "7": 2,
+          "8": 2
+        },
+        "games": {
+          "bayesian_tree": 67,
+          "current_selfplay": 315,
+          "historical_temporal": 156,
+          "ppo_champion": 158,
+          "random_rule": 158,
+          "smart_rule": 79,
+          "smarter_rule": 91
+        },
+        "league_fallbacks": {
+          "bayesian_tree_multideck_to_smarter_rule": 12
+        },
+        "player_counts": {
+          "2": 440,
+          "3": 146,
+          "4": 146,
+          "5": 73,
+          "6": 73,
+          "7": 73,
+          "8": 73
+        },
+        "total_turns": 79178,
+        "trajectories": 1846
+      },
+      "decisions_per_second": 2446.884027061484,
+      "epoch": 3612,
+      "evaluation": {
+        "ppo_champion": {
+          "average_turns": 54.85,
+          "candidate": "puffer_epoch_3612",
+          "draws": 19,
+          "elapsed_seconds": 27.129947847002768,
+          "games": 500,
+          "gate_passed": false,
+          "losses": 263,
+          "opponent": "ppo_champion",
+          "paired_bootstrap_ci95": [
+            0.414975,
+            0.496
+          ],
+          "pairs": 250,
+          "score": 0.455,
+          "seed": 2064201202,
+          "wins": 218,
+          "wins_as_seat_0": 122,
+          "wins_as_seat_1": 96
+        },
+        "random": {
+          "average_turns": 61.776,
+          "candidate": "puffer_epoch_3612",
+          "draws": 19,
+          "elapsed_seconds": 24.19585093499336,
+          "games": 500,
+          "gate_passed": true,
+          "losses": 172,
+          "opponent": "random",
+          "paired_bootstrap_ci95": [
+            0.595,
+            0.678
+          ],
+          "pairs": 250,
+          "score": 0.637,
+          "seed": 2065201202,
+          "wins": 309,
+          "wins_as_seat_0": 153,
+          "wins_as_seat_1": 156
+        },
+        "smart": {
+          "average_turns": 51.548,
+          "candidate": "puffer_epoch_3612",
+          "draws": 15,
+          "elapsed_seconds": 20.188082781998673,
+          "games": 500,
+          "gate_passed": false,
+          "losses": 243,
+          "opponent": "smart",
+          "paired_bootstrap_ci95": [
+            0.458,
+            0.54
+          ],
+          "pairs": 250,
+          "score": 0.499,
+          "seed": 2066201202,
+          "wins": 242,
+          "wins_as_seat_0": 126,
+          "wins_as_seat_1": 116
+        }
+      },
+      "games_per_second": 48.36336557502625,
+      "rollout_seconds": 21.17305087900604,
+      "strategic_pass": {
+        "action": 54,
+        "all_pass_actions": 17269,
+        "decisions": 51808,
+        "opportunities": 35558,
+        "passes": 5045,
+        "rate": 0.14188087069014005
+      },
+      "update": {
+        "approx_kl": 0.003644611219108627,
+        "clip_fraction": 0.041706879112721806,
+        "entropy": 0.26183045588271525,
+        "epoch_diagnostics": [
+          {
+            "approx_kl": 0.0038156785353881013,
+            "clip_fraction": 0.046788141035766485,
+            "entropy": 0.25902258293815944,
+            "epoch": 1,
+            "explained_variance": 0.16917685173691202,
+            "old_approx_kl": 0.004208657707580155,
+            "samples": 51808,
+            "value_mse": 0.2985857221656873
+          },
+          {
+            "approx_kl": 0.004956901421241192,
+            "clip_fraction": 0.05533894416292263,
+            "entropy": 0.2628115921432568,
+            "epoch": 2,
+            "explained_variance": 0.17334232412375294,
+            "old_approx_kl": 0.005212769837110254,
+            "samples": 51808,
+            "value_mse": 0.2971254060530392
+          },
+          {
+            "approx_kl": 0.004771072088852651,
+            "clip_fraction": 0.049123687615417924,
+            "entropy": 0.26303828156388115,
+            "epoch": 3,
+            "explained_variance": 0.17643174824521746,
+            "old_approx_kl": 0.004375509315029251,
+            "samples": 51808,
+            "value_mse": 0.2982049470372185
+          },
+          {
+            "approx_kl": 0.0036753971970359257,
+            "clip_fraction": 0.04290843119108768,
+            "entropy": 0.2618302382975172,
+            "epoch": 4,
+            "explained_variance": 0.17618463617082802,
+            "old_approx_kl": 0.0044918592628264324,
+            "samples": 51808,
+            "value_mse": 0.29852426563084145
+          }
+        ],
+        "epochs_completed": 4,
+        "explained_variance": 0.27659393451075914,
+        "loss": 0.07738868093816707,
+        "old_approx_kl": 0.003613598168767526,
+        "optimizer_steps": 60,
+        "policy_loss": -0.0013025368277013768,
+        "post_update_diagnostics": {
+          "approx_kl": 0.0036753971970359257,
+          "clip_fraction": 0.04290843119108768,
+          "entropy": 0.2618302382975172,
+          "epoch": 4,
+          "explained_variance": 0.17618463617082802,
+          "old_approx_kl": 0.0044918592628264324,
+          "samples": 51808,
+          "value_mse": 0.29852426563084145
+        },
+        "samples": 51808,
+        "stopped_early": false,
+        "target_kl": 0.02,
+        "value_loss": 0.16261904395241208
+      },
+      "update_seconds": 23.58824446500512,
+      "wall_seconds": 116.35604325600434
+    }
+  ],
+  "elapsed_seconds": 341.3644451209984,
+  "kind": "fast_native_pufferlib_v4_training",
+  "last_completed_epoch": 3612,
+  "latest_checkpoint": "/home/tommie/Pesten/live_training/large_puffer_384x3/ppo_probe/latest.pt",
+  "planned_epochs": 6,
+  "runtime": {
+    "cuda": true,
+    "device": "cuda:0",
+    "pufferlib": 4.0,
+    "torch": "2.13.0+cu130"
+  },
+  "schema_version": 1,
+  "source_checkpoint": "/home/tommie/Pesten/live_training/large_puffer_384x3/ppo_probe/latest.pt",
+  "source_checkpoint_sha256": "ac957893c10eb0c026cdb2c13600fb7645edec554ed82e4a5fa5be8181407278",
+  "start_epoch": 3607
+}

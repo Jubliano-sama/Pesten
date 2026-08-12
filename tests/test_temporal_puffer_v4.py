@@ -28,6 +28,7 @@ from temporal_training import (
     collect_smoke_episodes,
     evaluate_ppo_drift,
     evaluate_ppo_drift_batched,
+    evaluate_ppo_drift_batched_minibatches,
     ppo_update,
     ppo_update_batched,
 )
@@ -234,6 +235,9 @@ def test_native_batched_ppo_matches_scalar_recurrent_update():
         )
     scalar_drift = evaluate_ppo_drift(scalar, episodes)
     batched_drift = evaluate_ppo_drift_batched(scalar, episodes)
+    chunked_drift = evaluate_ppo_drift_batched_minibatches(
+        scalar, episodes, minibatch_trajectories=1
+    )
     assert batched_drift["samples"] == scalar_drift["samples"]
     for name in (
         "approx_kl",
@@ -245,6 +249,9 @@ def test_native_batched_ppo_matches_scalar_recurrent_update():
     ):
         assert batched_drift[name] == pytest.approx(
             scalar_drift[name], abs=2e-5
+        )
+        assert chunked_drift[name] == pytest.approx(
+            batched_drift[name], abs=2e-5
         )
 
 

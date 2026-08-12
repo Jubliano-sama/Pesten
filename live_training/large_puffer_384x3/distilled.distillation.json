@@ -1,0 +1,182 @@
+{
+  "contribution": {
+    "decisions": {
+      "bayesian_tree": 6653,
+      "current_selfplay": 106710,
+      "historical_temporal": 15643,
+      "ppo_champion": 13789,
+      "random_rule": 16028,
+      "smart_rule": 6716,
+      "smarter_rule": 10558
+    },
+    "deck_count_by_player_count": {
+      "2": 1,
+      "3": 1,
+      "4": 1,
+      "5": 1,
+      "6": 1,
+      "7": 2,
+      "8": 2
+    },
+    "games": {
+      "bayesian_tree": 271,
+      "current_selfplay": 1261,
+      "historical_temporal": 630,
+      "ppo_champion": 630,
+      "random_rule": 630,
+      "smart_rule": 315,
+      "smarter_rule": 359
+    },
+    "league_fallbacks": {
+      "bayesian_tree_multideck_to_smarter_rule": 44
+    },
+    "player_counts": {
+      "2": 1758,
+      "3": 586,
+      "4": 584,
+      "5": 292,
+      "6": 292,
+      "7": 292,
+      "8": 292
+    },
+    "total_turns": 278169,
+    "trajectories": 7545
+  },
+  "curve": [
+    {
+      "action_agreement": 0.76805964894348,
+      "epoch": 1,
+      "kl": 0.8138179894946987,
+      "loss": 0.8347395904954493,
+      "samples": 176097,
+      "strategic_pass_opportunities": 125095,
+      "student_strategic_pass_rate": 0.10944482193532915,
+      "teacher_strategic_pass_rate": 0.15510611934929452,
+      "value_mse": 0.08368639377158542
+    },
+    {
+      "action_agreement": 0.8310703759859622,
+      "epoch": 2,
+      "kl": 0.5163733975216385,
+      "loss": 0.53451089546338,
+      "samples": 176097,
+      "strategic_pass_opportunities": 125095,
+      "student_strategic_pass_rate": 0.13830288980374916,
+      "teacher_strategic_pass_rate": 0.15510611934929452,
+      "value_mse": 0.07254998434739875
+    },
+    {
+      "action_agreement": 0.8483790183819145,
+      "epoch": 3,
+      "kl": 0.4307183289535746,
+      "loss": 0.4448228977932888,
+      "samples": 176097,
+      "strategic_pass_opportunities": 125095,
+      "student_strategic_pass_rate": 0.1363443782725129,
+      "teacher_strategic_pass_rate": 0.15510611934929452,
+      "value_mse": 0.056418269492514314
+    },
+    {
+      "action_agreement": 0.8617352936165863,
+      "epoch": 4,
+      "kl": 0.359075217153908,
+      "loss": 0.37220142445196036,
+      "samples": 176097,
+      "strategic_pass_opportunities": 125095,
+      "student_strategic_pass_rate": 0.14051720692273872,
+      "teacher_strategic_pass_rate": 0.15510611934929452,
+      "value_mse": 0.052504821438269456
+    },
+    {
+      "action_agreement": 0.8749496016400052,
+      "epoch": 5,
+      "kl": 0.30703297058196305,
+      "loss": 0.31811620724497913,
+      "samples": 176097,
+      "strategic_pass_opportunities": 125095,
+      "student_strategic_pass_rate": 0.1448019505176066,
+      "teacher_strategic_pass_rate": 0.15510611934929452,
+      "value_mse": 0.04433294504948516
+    },
+    {
+      "action_agreement": 0.884961129377559,
+      "epoch": 6,
+      "kl": 0.27282723793619423,
+      "loss": 0.2840967086516978,
+      "samples": 176097,
+      "strategic_pass_opportunities": 125095,
+      "student_strategic_pass_rate": 0.14686438306886765,
+      "teacher_strategic_pass_rate": 0.15510611934929452,
+      "value_mse": 0.04507788589487734
+    },
+    {
+      "action_agreement": 0.8891633588306445,
+      "epoch": 7,
+      "kl": 0.2599844549170075,
+      "loss": 0.270396316296523,
+      "samples": 176097,
+      "strategic_pass_opportunities": 125095,
+      "student_strategic_pass_rate": 0.14843918621847396,
+      "teacher_strategic_pass_rate": 0.15510611934929452,
+      "value_mse": 0.04164744619458075
+    },
+    {
+      "action_agreement": 0.8941151751591453,
+      "epoch": 8,
+      "kl": 0.2437894741958144,
+      "loss": 0.25179013529058053,
+      "samples": 176097,
+      "strategic_pass_opportunities": 125095,
+      "student_strategic_pass_rate": 0.149622287061833,
+      "teacher_strategic_pass_rate": 0.15510611934929452,
+      "value_mse": 0.032002641552544855
+    },
+    {
+      "action_agreement": 0.8975394242945649,
+      "epoch": 9,
+      "kl": 0.23076635687673266,
+      "loss": 0.24008971608327448,
+      "samples": 176097,
+      "strategic_pass_opportunities": 125095,
+      "student_strategic_pass_rate": 0.1499020744234382,
+      "teacher_strategic_pass_rate": 0.15510611934929452,
+      "value_mse": 0.03729343601234358
+    },
+    {
+      "action_agreement": 0.9010204603144858,
+      "epoch": 10,
+      "kl": 0.21967072021645279,
+      "loss": 0.22844423336240502,
+      "samples": 176097,
+      "strategic_pass_opportunities": 125095,
+      "student_strategic_pass_rate": 0.15026979495583356,
+      "teacher_strategic_pass_rate": 0.15510611934929452,
+      "value_mse": 0.03509405631373217
+    }
+  ],
+  "decisions": 176097,
+  "distillation_seconds": 144.45074026500515,
+  "elapsed_seconds": 191.22348047701234,
+  "games": 4096,
+  "games_per_second": 89.53403239038624,
+  "kind": "large_puffer_teacher_distillation",
+  "output": "/home/tommie/Pesten/live_training/large_puffer_384x3/distilled.pt",
+  "rollout_seconds": 45.74796745600179,
+  "runtime": {
+    "cuda": true,
+    "device": "cuda:0",
+    "torch": "2.13.0+cu130"
+  },
+  "student": {
+    "hidden_size": 384,
+    "mode_conditioned_heads": true,
+    "num_layers": 3
+  },
+  "teacher": {
+    "hidden_size": 192,
+    "num_layers": 2,
+    "path": "/home/tommie/Pesten/live_training/long_segments/segment_0058/puffer/latest.pt",
+    "sha256": "786ecfc44523d6b81fa3cd9f056cb2453554073f40fed3ea26652e331b99d4d2"
+  },
+  "trajectories": 7545
+}
