@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "kind": "warm_mlp_vs_warm_puffer_high_confidence_aggregate",
+  "conclusion": {
+    "winner": "warm_puffer_gru",
+    "puffer_score": 0.52907,
+    "puffer_advantage": 0.02907,
+    "confidence_gate_passed": true,
+    "confidence_gate": "puffer 99.9% distribution-free lower bound exceeds 0.5"
+  },
+  "models": {
+    "mlp": {
+      "path": "live_training/long_segments/segment_0058/mlp/ppo_actor_64.pth",
+      "sha256": "e67b9c26aeaf16508925c9109510d4dd5da0416fda11604a5b234d2d6d07fe43"
+    },
+    "puffer_gru": {
+      "path": "live_training/long_segments/segment_0058/puffer/latest.pt",
+      "sha256": "786ecfc44523d6b81fa3cd9f056cb2453554073f40fed3ea26652e331b99d4d2",
+      "epoch": 3604
+    }
+  },
+  "protocol": {
+    "shards": 8,
+    "directions_per_shard": 2,
+    "pairs_per_direction_per_shard": 3125,
+    "games_per_pair": 2,
+    "total_independent_pairs": 50000,
+    "total_games": 100000,
+    "seat_balanced": true,
+    "fresh_development_seeds": true,
+    "seed_namespaces": [
+      120826001,
+      130826001,
+      140826001,
+      150826001,
+      160826001,
+      170826001,
+      180826001,
+      190826001
+    ],
+    "opposite_direction_seed_offset": 1000000,
+    "shard_seed_spacing": 10000000,
+    "seed_banks_disjoint": true
+  },
+  "pooled_result": {
+    "candidate": "warm_puffer_gru",
+    "opponent": "warm_mlp_ppo",
+    "pairs": 50000,
+    "games": 100000,
+    "wins": 51469,
+    "losses": 45655,
+    "draws": 2876,
+    "score": 0.52907,
+    "advantage_over_even": 0.02907,
+    "hoeffding_bounds": {
+      "95%": [
+        0.522996385380917,
+        0.5351436146190831
+      ],
+      "99%": [
+        0.5217910458398558,
+        0.5363489541601443
+      ],
+      "99.9%": [
+        0.5203516845322379,
+        0.5377883154677622
+      ]
+    },
+    "bound_method": "Two-sided Hoeffding inequality over independent seat-pair scores in [0,1]",
+    "directional_replication_score_range": [
+      0.51816,
+      0.53872
+    ],
+    "directional_replication_score_standard_deviation": 0.006457070543210745
+  },
+  "direction_totals": {
+    "puffer_named_candidate": {
+      "pairs": 25000,
+      "games": 50000,
+      "wins": 25637,
+      "losses": 22947,
+      "draws": 1416,
+      "score": 0.5269
+    },
+    "puffer_mirrored_from_mlp_named_candidate": {
+      "pairs": 25000,
+      "games": 50000,
+      "wins": 25832,
+      "losses": 22708,
+      "draws": 1460,
+      "score": 0.53124
+    }
+  },
+  "shards": [
+    {
+      "path": "live_training/measurements/mlp_vs_puffer_segment0058_high_confidence_shard01.json",
+      "seed": 120826001,
+      "puffer_score_when_named": 0.52664,
+      "puffer_score_when_mirrored": 0.52712
+    },
+    {
+      "path": "live_training/measurements/mlp_vs_puffer_segment0058_high_confidence_shard02.json",
+      "seed": 130826001,
+      "puffer_score_when_named": 0.52648,
+      "puffer_score_when_mirrored": 0.53816
+    },
+    {
+      "path": "live_training/measurements/mlp_vs_puffer_segment0058_high_confidence_shard03.json",
+      "seed": 140826001,
+      "puffer_score_when_named": 0.53032,
+      "puffer_score_when_mirrored": 0.5368
+    },
+    {
+      "path": "live_training/measurements/mlp_vs_puffer_segment0058_high_confidence_shard04.json",
+      "seed": 150826001,
+      "puffer_score_when_named": 0.52504,
+      "puffer_score_when_mirrored": 0.52648
+    },
+    {
+      "path": "live_training/measurements/mlp_vs_puffer_segment0058_high_confidence_shard05.json",
+      "seed": 160826001,
+      "puffer_score_when_named": 0.53872,
+      "puffer_score_when_mirrored": 0.53376
+    },
+    {
+      "path": "live_training/measurements/mlp_vs_puffer_segment0058_high_confidence_shard06.json",
+      "seed": 170826001,
+      "puffer_score_when_named": 0.51816,
+      "puffer_score_when_mirrored": 0.52832
+    },
+    {
+      "path": "live_training/measurements/mlp_vs_puffer_segment0058_high_confidence_shard07.json",
+      "seed": 180826001,
+      "puffer_score_when_named": 0.53128,
+      "puffer_score_when_mirrored": 0.5364
+    },
+    {
+      "path": "live_training/measurements/mlp_vs_puffer_segment0058_high_confidence_shard08.json",
+      "seed": 190826001,
+      "puffer_score_when_named": 0.51856,
+      "puffer_score_when_mirrored": 0.52288
+    }
+  ]
+}
