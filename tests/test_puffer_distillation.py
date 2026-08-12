@@ -9,6 +9,7 @@ if not str(getattr(pufferlib, "__version__", "")).startswith("4"):
 from puffer_distillation import (
     distill_puffer_policy,
     evaluate_puffer_distillation,
+    initialize_hawk_residual,
     initialize_widened_min_gru,
 )
 from temporal_observation import (
@@ -19,7 +20,10 @@ from temporal_observation import (
     PlayerPrivateObservation,
 )
 from temporal_puffer_agent import TrajectoryStep
-from temporal_puffer_v4 import NativePufferTemporalPolicy
+from temporal_puffer_v4 import (
+    HawkResidualTemporalPolicy,
+    NativePufferTemporalPolicy,
+)
 
 
 def _strategic_decision() -> DecisionInput:
@@ -102,6 +106,12 @@ def test_function_preserving_widening_is_exact_on_batched_sequences():
     assert report["new_channels"] == 16
     assert torch.allclose(student_logits, teacher_logits, atol=1e-6, rtol=0)
     assert torch.allclose(student_values, teacher_values, atol=1e-6, rtol=0)
+    assert student.puffer_policy.encoder.encoder.weight[12:].abs().sum() > 0
+    loss = student_logits.square().mean() + student_values.square().mean()
+    loss.backward()
+    decoder_weight = student.puffer_policy.decoder.card_and_pass.weight
+    assert decoder_weight.grad is not None
+    assert decoder_weight.grad[:, 12:].abs().sum() > 0
 
 
 def test_distillation_evaluation_reports_exact_widened_match():
@@ -130,3 +140,35 @@ def test_distillation_evaluation_reports_exact_widened_match():
     assert metrics["forward_kl"] == pytest.approx(0.0, abs=1e-7)
     assert metrics["value_mse"] == 0.0
     assert metrics["max_legal_logit_error"] <= 1e-7
+
+
+def test_hawk_residual_initialization_is_an_exact_teacher_function():
+    torch.manual_seed(67)
+    teacher = NativePufferTemporalPolicy(
+        hidden_size=12,
+        num_layers=2,
+        mode_conditioned_heads=True,
+    )
+    student = HawkResidualTemporalPolicy(
+        base_hidden_size=12,
+        base_num_layers=2,
+        adapter_hidden_size=10,
+        adapter_num_layers=2,
+        adapter_recurrent_size=14,
+        mode_conditioned_heads=True,
+    )
+    report = initialize_hawk_residual(student, teacher)
+    tokens = torch.randn(4, 29, 100)
+    teacher_logits, teacher_values = teacher.forward_native_sequence(tokens)
+    student_logits, student_values = student.forward_native_sequence(tokens)
+
+    assert report["kind"] == "function_preserving_hawk_residual"
+    assert report["zeroed_adapter_decoder_parameters"] > 0
+    assert torch.equal(student_logits, teacher_logits)
+    assert torch.equal(student_values, teacher_values)
+
+    loss = student_logits.square().mean() + student_values.square().mean()
+    loss.backward()
+    decoder_weight = student.puffer_policy.adapter.decoder.card_and_pass.weight
+    assert decoder_weight.grad is not None
+    assert decoder_weight.grad.abs().sum() > 0

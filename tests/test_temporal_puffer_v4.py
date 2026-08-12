@@ -23,6 +23,7 @@ from temporal_puffer_agent import temporal_agent_factory
 from packed_puffer_rollout import pack_puffer_episode
 from temporal_puffer_v4 import (
     HawkRGLRUTemporalPolicy,
+    HawkResidualTemporalPolicy,
     NativePufferTemporalPolicy,
     PUFFERLIB_REVISION,
     build_temporal_policy,
@@ -142,6 +143,49 @@ def test_hawk_rglru_model_config_round_trip():
     clone = build_temporal_policy(policy_model_config(policy))
     assert isinstance(clone, HawkRGLRUTemporalPolicy)
     assert policy_model_config(clone) == policy_model_config(policy)
+
+
+def test_hawk_residual_model_config_and_state_shapes_round_trip():
+    policy = HawkResidualTemporalPolicy(
+        base_hidden_size=18,
+        base_num_layers=2,
+        adapter_hidden_size=12,
+        adapter_num_layers=3,
+        adapter_recurrent_size=16,
+        adapter_mlp_expansion=3,
+    )
+    clone = build_temporal_policy(policy_model_config(policy))
+    assert isinstance(clone, HawkResidualTemporalPolicy)
+    assert policy_model_config(clone) == policy_model_config(policy)
+    state = clone.initial_state(batch_size=5)
+    assert len(state) == 2
+    assert state[0].shape == (2, 5, 18)
+    assert state[1].shape == (3, 5, 16)
+
+
+def test_hawk_residual_checkpoint_loader_round_trip(tmp_path):
+    from temporal_puffer_v4 import load_temporal_policy_checkpoint
+
+    policy = HawkResidualTemporalPolicy(
+        base_hidden_size=14,
+        base_num_layers=2,
+        adapter_hidden_size=10,
+        adapter_num_layers=2,
+        adapter_recurrent_size=12,
+    )
+    path = tmp_path / "residual.pt"
+    torch.save(
+        {
+            "model": policy_model_config(policy),
+            "state_dict": policy.state_dict(),
+        },
+        path,
+    )
+    loaded, payload = load_temporal_policy_checkpoint(path)
+    assert isinstance(loaded, HawkResidualTemporalPolicy)
+    assert payload["model"] == policy_model_config(policy)
+    for expected, actual in zip(policy.parameters(), loaded.parameters()):
+        assert torch.equal(expected, actual)
 
 
 def test_native_hidden_world_invariance_is_byte_exact():

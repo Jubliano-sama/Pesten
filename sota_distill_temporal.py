@@ -142,6 +142,11 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         help="continue the alternative student from a prior campaign checkpoint",
     )
+    parser.add_argument(
+        "--large-only",
+        action="store_true",
+        help="build and validate only the function-preserving wider MinGRU",
+    )
     parser.add_argument("--large-hidden-size", type=int, default=512)
     parser.add_argument("--hawk-hidden-size", type=int, default=256)
     parser.add_argument("--hawk-layers", type=int, default=4)
@@ -219,12 +224,16 @@ def main() -> None:
         parameter.requires_grad_(False)
 
     started = time.perf_counter()
-    teacher_episodes, teacher_contribution, teacher_rollout_seconds = collect(
-        teacher_rollout,
-        games=args.teacher_games,
-        seed=args.seed,
-        workers=args.workers,
-    )
+    teacher_episodes = None
+    teacher_contribution = None
+    teacher_rollout_seconds = None
+    if not args.large_only:
+        teacher_episodes, teacher_contribution, teacher_rollout_seconds = collect(
+            teacher_rollout,
+            games=args.teacher_games,
+            seed=args.seed,
+            workers=args.workers,
+        )
     validation_episodes, validation_contribution, validation_rollout_seconds = collect(
         teacher_rollout,
         games=args.validation_games,
@@ -282,6 +291,41 @@ def main() -> None:
         ),
         large_path,
     )
+    if args.large_only:
+        result = {
+            "schema_version": 1,
+            "kind": "function_preserving_large_min_gru_distillation",
+            "teacher": {
+                "path": str(teacher_path),
+                "sha256": teacher_sha256,
+                "model": teacher_model,
+                "parameters": sum(p.numel() for p in teacher.parameters()),
+            },
+            "student": {
+                "path": str(large_path),
+                "sha256": file_sha256(large_path),
+                "model": policy_model_config(large),
+                "parameters": sum(p.numel() for p in large.parameters()),
+                "recurrent_state_elements": sum(
+                    state.numel() for state in large.initial_state(1)
+                ),
+            },
+            "initialization": widening,
+            "validation": {
+                "games": args.validation_games,
+                "metrics": large_metrics,
+                "contribution": validation_contribution,
+                "rollout_seconds": validation_rollout_seconds,
+                "match_gate_passed": large_match,
+            },
+            "player_distribution": player_distribution(),
+            "elapsed_seconds": time.perf_counter() - started,
+        }
+        atomic_json_save(
+            result, output_dir / "large_min_gru_result.json"
+        )
+        print(json.dumps(result, indent=2, sort_keys=True), flush=True)
+        return
 
     hawk_resume_payload = None
     if args.hawk_resume is not None:

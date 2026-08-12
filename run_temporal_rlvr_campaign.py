@@ -63,7 +63,7 @@ def main() -> None:
     inputs = {
         "teacher": args.teacher.resolve(),
         "large_min_gru": args.large.resolve(),
-        "hawk_rglru": args.alternative.resolve(),
+        "hawk_residual": args.alternative.resolve(),
     }
     mlp = args.mlp.resolve()
     for path in (*inputs.values(), mlp):
@@ -96,7 +96,7 @@ def main() -> None:
     learning_rates = {
         "teacher": 5e-5,
         "large_min_gru": 7.5e-5,
-        "hawk_rglru": 7.5e-5,
+        "hawk_residual": 7.5e-5,
     }
 
     try:
@@ -149,7 +149,7 @@ def main() -> None:
                 "--device",
                 "cuda",
             ]
-            if name == "hawk_rglru":
+            if name == "hawk_residual":
                 command.append("--no-compile-updates")
             training_log = model_dir / "training.log"
             model_row = {
@@ -225,10 +225,10 @@ def main() -> None:
             }
             for name, row in manifest["models"].items()
         ),
-        key=lambda row: row["delta"],
+        key=lambda row: row["delta_normalized_win_share"],
         reverse=True,
     )
-    manifest["ranking_by_matched_delta"] = ranked
+    manifest["ranking_by_matched_normalized_delta"] = ranked
     manifest["status"] = "complete"
     manifest["finished_at_unix"] = time.time()
     manifest["elapsed_seconds"] = (

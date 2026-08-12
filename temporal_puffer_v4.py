@@ -472,6 +472,151 @@ class HawkRGLRUTemporalPolicy(NativePufferTemporalPolicy):
         }
 
 
+class ResidualTemporalPolicyCore(nn.Module):
+    """Add a trainable policy branch to a complete recurrent base policy."""
+
+    def __init__(self, base: nn.Module, adapter: nn.Module) -> None:
+        super().__init__()
+        self.base = base
+        self.adapter = adapter
+        # Both current PufferLib recurrent networks return one tensor, but keep
+        # the split explicit so a future network can expose structured state.
+        self.base_state_parts = len(self.base.initial_state(1, "cpu"))
+        self.adapter_state_parts = len(self.adapter.initial_state(1, "cpu"))
+
+    def initial_state(
+        self, batch_size: int, device: torch.device | str
+    ) -> tuple[torch.Tensor, ...]:
+        return (
+            *self.base.initial_state(batch_size, device),
+            *self.adapter.initial_state(batch_size, device),
+        )
+
+    def forward(
+        self, hidden: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        base_logits, base_values = self.base(hidden)
+        adapter_logits, adapter_values = self.adapter(hidden)
+        return base_logits + adapter_logits, base_values + adapter_values
+
+    def forward_eval(
+        self,
+        hidden: torch.Tensor,
+        state: tuple[torch.Tensor, ...],
+    ) -> tuple[torch.Tensor, torch.Tensor, tuple[torch.Tensor, ...]]:
+        expected = self.base_state_parts + self.adapter_state_parts
+        if len(state) != expected:
+            raise ValueError(
+                f"residual policy expects {expected} recurrent-state parts"
+            )
+        base_state = state[: self.base_state_parts]
+        adapter_state = state[self.base_state_parts :]
+        base_logits, base_values, next_base = self.base.forward_eval(
+            hidden, base_state
+        )
+        adapter_logits, adapter_values, next_adapter = (
+            self.adapter.forward_eval(hidden, adapter_state)
+        )
+        return (
+            base_logits + adapter_logits,
+            base_values + adapter_values,
+            (*next_base, *next_adapter),
+        )
+
+
+class HawkResidualTemporalPolicy(NativePufferTemporalPolicy):
+    """Exact MinGRU teacher plus a zero-output Hawk recurrent adapter.
+
+    This is a Net2Net-style function-preserving student: before RLVR, the
+    complete base branch is identical to its teacher and the independently
+    initialized Hawk branch contributes exactly zero logits and value.  RLVR
+    can then use the adapter's different recurrence without first relearning
+    the teacher's policy over the combinatorial game-state distribution.
+    """
+
+    integration_status = (
+        "Function-preserving MinGRU plus Hawk RG-LRU residual policy"
+    )
+
+    def __init__(
+        self,
+        base_hidden_size: int = 192,
+        base_num_layers: int = 2,
+        *,
+        adapter_hidden_size: int = 128,
+        adapter_num_layers: int = 2,
+        adapter_recurrent_size: int | None = None,
+        adapter_mlp_expansion: int = 2,
+        mode_conditioned_heads: bool = True,
+    ) -> None:
+        nn.Module.__init__(self)
+        require_pufferlib_v4()
+        dimensions = (
+            base_hidden_size,
+            base_num_layers,
+            adapter_hidden_size,
+            adapter_num_layers,
+            adapter_mlp_expansion,
+        )
+        if any(value < 1 for value in dimensions):
+            raise ValueError("residual policy dimensions must be positive")
+        adapter_recurrent_size = adapter_recurrent_size or math.ceil(
+            4 * adapter_hidden_size / 3
+        )
+        self.hidden_size = base_hidden_size
+        self.num_layers = base_num_layers
+        self.base_hidden_size = base_hidden_size
+        self.base_num_layers = base_num_layers
+        self.adapter_hidden_size = adapter_hidden_size
+        self.adapter_num_layers = adapter_num_layers
+        self.adapter_recurrent_size = adapter_recurrent_size
+        self.adapter_mlp_expansion = adapter_mlp_expansion
+        self.mode_conditioned_heads = mode_conditioned_heads
+
+        def decoder(width: int) -> nn.Module:
+            return (
+                ModeConditionedDecoder(width)
+                if mode_conditioned_heads
+                else pufferlib.models.DefaultDecoder((55,), width)
+            )
+
+        base = pufferlib.models.Policy(
+            pufferlib.models.DefaultEncoder(
+                NATIVE_INPUT_SIZE, base_hidden_size
+            ),
+            decoder(base_hidden_size),
+            pufferlib.models.MinGRU(
+                hidden_size=base_hidden_size,
+                num_layers=base_num_layers,
+            ),
+        )
+        adapter = pufferlib.models.Policy(
+            pufferlib.models.DefaultEncoder(
+                NATIVE_INPUT_SIZE, adapter_hidden_size
+            ),
+            decoder(adapter_hidden_size),
+            HawkRGLRUNetwork(
+                adapter_hidden_size,
+                adapter_num_layers,
+                recurrent_size=adapter_recurrent_size,
+                mlp_expansion=adapter_mlp_expansion,
+            ),
+        )
+        self.puffer_policy = ResidualTemporalPolicyCore(base, adapter)
+
+    def model_config(self) -> dict[str, object]:
+        return {
+            "architecture": "hawk_residual",
+            "base_hidden_size": self.base_hidden_size,
+            "base_num_layers": self.base_num_layers,
+            "adapter_hidden_size": self.adapter_hidden_size,
+            "adapter_num_layers": self.adapter_num_layers,
+            "adapter_recurrent_size": self.adapter_recurrent_size,
+            "adapter_mlp_expansion": self.adapter_mlp_expansion,
+            "mode_conditioned_heads": self.mode_conditioned_heads,
+        }
+
+
 def build_temporal_policy(model: Mapping[str, object]) -> nn.Module:
     """Construct a supported native safe-temporal policy from metadata."""
     architecture = str(model.get("architecture", "min_gru"))
@@ -494,6 +639,23 @@ def build_temporal_policy(model: Mapping[str, object]) -> nn.Module:
                 )
             ),
             mlp_expansion=int(model.get("mlp_expansion", 2)),
+        )
+    if architecture == "hawk_residual":
+        return HawkResidualTemporalPolicy(
+            base_hidden_size=int(model.get("base_hidden_size", 192)),
+            base_num_layers=int(model.get("base_num_layers", 2)),
+            adapter_hidden_size=int(model.get("adapter_hidden_size", 128)),
+            adapter_num_layers=int(model.get("adapter_num_layers", 2)),
+            adapter_recurrent_size=int(
+                model.get(
+                    "adapter_recurrent_size",
+                    math.ceil(4 * int(model.get("adapter_hidden_size", 128)) / 3),
+                )
+            ),
+            adapter_mlp_expansion=int(
+                model.get("adapter_mlp_expansion", 2)
+            ),
+            mode_conditioned_heads=common["mode_conditioned_heads"],
         )
     raise ValueError(f"unsupported temporal architecture: {architecture}")
 
@@ -519,6 +681,14 @@ def load_temporal_policy_checkpoint(
     if not isinstance(state, Mapping):
         raise TypeError("temporal checkpoint state_dict must be a mapping")
     model = dict(payload.get("model", {}))
+    architecture = str(model.get("architecture", "min_gru"))
+    if architecture == "hawk_residual":
+        model.setdefault(
+            "hidden_size", int(model.get("base_hidden_size", 192))
+        )
+        model.setdefault(
+            "num_layers", int(model.get("base_num_layers", 2))
+        )
     if "hidden_size" not in model:
         model["hidden_size"] = int(
             state["puffer_policy.encoder.encoder.weight"].shape[0]

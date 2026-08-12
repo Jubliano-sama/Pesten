@@ -1,0 +1,43 @@
+{
+  "architecture": {
+    "hidden_size": 256,
+    "kind": "hawk_rglru",
+    "mlp_expansion": 2,
+    "num_layers": 4,
+    "parameters": 3421496,
+    "recurrent_size": 320,
+    "recurrent_state_elements": 1280
+  },
+  "decision": "rejected_before_rlvr",
+  "evidence": {
+    "hard_example_round_2": {
+      "replay_action_agreement": 0.9776221135678108,
+      "replay_decisions": 672673,
+      "student_policy_validation": {
+        "action_agreement": 0.8971940916965833,
+        "forward_kl": 0.16503581603176498
+      },
+      "teacher_policy_validation": {
+        "action_agreement": 0.8971255543451222,
+        "forward_kl": 0.16824928834533442
+      },
+      "wall_seconds": 472.7387776060059
+    },
+    "kl_focused_round_3": {
+      "replay_action_agreement": 0.9550828841764624,
+      "replay_decisions": 466615,
+      "student_policy_validation": {
+        "action_agreement": 0.9010669253152279,
+        "forward_kl": 0.14704949124877081
+      },
+      "teacher_policy_validation": {
+        "action_agreement": 0.9021741104673339,
+        "forward_kl": 0.14936114167327882
+      },
+      "wall_seconds": 310.1206606610067
+    }
+  },
+  "reason": "Held-out fidelity plateaued near 90 percent while replay fit kept rising, demonstrating sequential-distribution overfit rather than teacher matching.",
+  "replacement": "function_preserving_hawk_residual",
+  "schema_version": 1
+}

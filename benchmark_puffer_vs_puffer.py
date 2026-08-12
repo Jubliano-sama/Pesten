@@ -92,7 +92,12 @@ def _evaluate_task(task: tuple[int, int]):
     }
 
 
-def _summarize(rows: list[dict], elapsed_seconds: float) -> dict:
+def _summarize(
+    rows: list[dict],
+    elapsed_seconds: float,
+    *,
+    noninferiority_margin: float,
+) -> dict:
     wins = sum(row["wins"] for row in rows)
     losses = sum(row["losses"] for row in rows)
     draws = sum(row["draws"] for row in rows)
@@ -110,6 +115,8 @@ def _summarize(rows: list[dict], elapsed_seconds: float) -> dict:
     standard_error = float(pair_scores.std(ddof=1) / math.sqrt(pairs))
     alpha = 0.001
     hoeffding_margin = math.sqrt(math.log(2.0 / alpha) / (2.0 * pairs))
+    lower_bound = score - hoeffding_margin
+    noninferiority_floor = 0.5 - noninferiority_margin
     return {
         "pairs": pairs,
         "games": games,
@@ -131,7 +138,10 @@ def _summarize(rows: list[dict], elapsed_seconds: float) -> dict:
         "candidate_wins_as_seat_1": seat_wins[1],
         "average_turns": turns / games,
         "elapsed_seconds": elapsed_seconds,
-        "gate_passed_99_9": score - hoeffding_margin > 0.5,
+        "superiority_gate_passed_99_9": lower_bound > 0.5,
+        "noninferiority_margin": noninferiority_margin,
+        "noninferiority_floor": noninferiority_floor,
+        "noninferiority_gate_passed_99_9": lower_bound >= noninferiority_floor,
     }
 
 
@@ -143,9 +153,12 @@ def run_parallel_benchmark(
     seed: int,
     workers: int,
     chunks_per_worker: int,
+    noninferiority_margin: float = 0.02,
 ) -> dict:
     if pairs < 1 or workers < 1 or chunks_per_worker < 1:
         raise ValueError("pairs, workers, and chunks per worker must be positive")
+    if not 0.0 < noninferiority_margin < 0.5:
+        raise ValueError("noninferiority margin must be between zero and 0.5")
     if seed < 0 or seed + pairs - 1 >= 2**32:
         raise ValueError("seed range must fit NumPy's unsigned 32-bit seed")
     worker_count = min(workers, pairs)
@@ -163,7 +176,11 @@ def run_parallel_benchmark(
         initargs=(str(candidate_path), str(opponent_path)),
     ) as pool:
         rows = pool.map(_evaluate_task, tasks)
-    return _summarize(rows, time.perf_counter() - started)
+    return _summarize(
+        rows,
+        time.perf_counter() - started,
+        noninferiority_margin=noninferiority_margin,
+    )
 
 
 def main() -> None:
@@ -175,6 +192,12 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--workers", type=int, default=12)
     parser.add_argument("--chunks-per-worker", type=int, default=3)
+    parser.add_argument(
+        "--noninferiority-margin",
+        type=float,
+        default=0.02,
+        help="maximum tolerated score deficit for the 99.9%% match gate",
+    )
     args = parser.parse_args()
     candidate_path = args.candidate.resolve()
     opponent_path = args.opponent.resolve()
@@ -187,6 +210,7 @@ def main() -> None:
         seed=args.seed,
         workers=args.workers,
         chunks_per_worker=args.chunks_per_worker,
+        noninferiority_margin=args.noninferiority_margin,
     )
     output = {
         "schema_version": 2,
@@ -209,6 +233,7 @@ def main() -> None:
             "seed": args.seed,
             "workers": args.workers,
             "confidence": "distribution-free Hoeffding bound over paired scores",
+            "noninferiority_margin": args.noninferiority_margin,
         },
         "result": result,
     }

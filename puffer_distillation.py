@@ -55,11 +55,12 @@ def _forward_decisions(policy, episodes):
 def initialize_widened_min_gru(student, teacher) -> dict:
     """Embed a narrower MinGRU teacher as an exact student subnetwork.
 
-    The layer count must remain unchanged.  Teacher channels occupy the first
-    part of every wider tensor, cross-channel weights start at zero, and the
-    decoder initially ignores new channels.  Batched sequence outputs are
-    therefore mathematically identical (up to GEMM roundoff), while the
-    dormant capacity can wake up during RL.
+    The layer count must remain unchanged. Teacher channels occupy the first
+    part of every wider tensor and cannot read from new channels. New channels
+    retain their random encoder and recurrent features, while the decoder
+    initially ignores them. Batched outputs are therefore mathematically
+    identical (up to GEMM roundoff), but decoder gradients can activate the
+    new features on the first RL update.
     """
     teacher_hidden = int(teacher.hidden_size)
     student_hidden = int(student.hidden_size)
@@ -79,8 +80,6 @@ def initialize_widened_min_gru(student, teacher) -> dict:
     teacher_state = teacher.state_dict()
     student_state = student.state_dict()
     with torch.no_grad():
-        for value in student_state.values():
-            value.zero_()
         encoder = "puffer_policy.encoder.encoder"
         student_state[f"{encoder}.weight"][:teacher_hidden].copy_(
             teacher_state[f"{encoder}.weight"]
@@ -95,6 +94,7 @@ def initialize_widened_min_gru(student, teacher) -> dict:
         )
         for name in decoder_names:
             prefix = f"puffer_policy.decoder.{name}"
+            student_state[f"{prefix}.weight"][:, teacher_hidden:].zero_()
             student_state[f"{prefix}.weight"][:, :teacher_hidden].copy_(
                 teacher_state[f"{prefix}.weight"]
             )
@@ -107,11 +107,13 @@ def initialize_widened_min_gru(student, teacher) -> dict:
             teacher_weight = teacher_state[key]
             student_weight = student_state[key]
             for chunk in range(3):
-                student_weight[
-                    chunk * student_hidden : chunk * student_hidden
-                    + teacher_hidden,
-                    :teacher_hidden,
-                ].copy_(
+                teacher_rows = student_weight[
+                    chunk * student_hidden : (
+                        chunk * student_hidden + teacher_hidden
+                    )
+                ]
+                teacher_rows.zero_()
+                teacher_rows[:, :teacher_hidden].copy_(
                     teacher_weight[
                         chunk * teacher_hidden : (chunk + 1) * teacher_hidden
                     ]
@@ -123,6 +125,55 @@ def initialize_widened_min_gru(student, teacher) -> dict:
         "student_hidden_size": student_hidden,
         "num_layers": teacher_layers,
         "new_channels": student_hidden - teacher_hidden,
+        "new_channels_randomly_featured": True,
+        "new_channels_decoder_zero_initialized": True,
+    }
+
+
+def initialize_hawk_residual(student, teacher) -> dict:
+    """Copy a MinGRU teacher into the base and zero the Hawk output heads."""
+    from temporal_puffer_v4 import HawkResidualTemporalPolicy
+
+    if not isinstance(student, HawkResidualTemporalPolicy):
+        raise TypeError("student must be a HawkResidualTemporalPolicy")
+    if int(teacher.hidden_size) != student.base_hidden_size:
+        raise ValueError("residual base hidden size must match the teacher")
+    if int(teacher.num_layers) != student.base_num_layers:
+        raise ValueError("residual base layer count must match the teacher")
+    if bool(teacher.mode_conditioned_heads) != bool(
+        student.mode_conditioned_heads
+    ):
+        raise ValueError("teacher and residual decoder modes must match")
+
+    teacher_state = teacher.state_dict()
+    student_state = student.state_dict()
+    base_prefix = "puffer_policy.base."
+    teacher_prefix = "puffer_policy."
+    with torch.no_grad():
+        for name, value in teacher_state.items():
+            target = base_prefix + name[len(teacher_prefix) :]
+            if target not in student_state:
+                raise KeyError(f"residual base is missing teacher tensor {target}")
+            student_state[target].copy_(value)
+
+        adapter_decoder = "puffer_policy.adapter.decoder."
+        zeroed = 0
+        for name, value in student_state.items():
+            if name.startswith(adapter_decoder):
+                value.zero_()
+                zeroed += value.numel()
+        if not zeroed:
+            raise RuntimeError("residual adapter has no decoder parameters")
+        student.load_state_dict(student_state, strict=True)
+    return {
+        "kind": "function_preserving_hawk_residual",
+        "teacher_hidden_size": int(teacher.hidden_size),
+        "teacher_num_layers": int(teacher.num_layers),
+        "adapter_hidden_size": student.adapter_hidden_size,
+        "adapter_num_layers": student.adapter_num_layers,
+        "adapter_recurrent_size": student.adapter_recurrent_size,
+        "adapter_mlp_expansion": student.adapter_mlp_expansion,
+        "zeroed_adapter_decoder_parameters": zeroed,
     }
 
 

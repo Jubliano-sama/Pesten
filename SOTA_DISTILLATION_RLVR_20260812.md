@@ -34,29 +34,53 @@ per-decision compute matter.
 ### 512x2 MinGRU
 
 The teacher's 192 channels are embedded into the first 192 channels of a
-512-wide MinGRU. Cross-channel and new decoder weights start at zero. This is a
-function-preserving widening: it avoids paying a large supervised relearning
-bill merely to recover teacher behavior, while leaving 320 new channels per
-layer available for RLVR.
+512-wide MinGRU. Teacher channels cannot read from the new channels. The new
+encoder and recurrent features retain random initial values, while their
+decoder columns start at zero. This function-preserving widening avoids paying
+a large supervised relearning bill merely to recover teacher behavior, and it
+also lets decoder gradients activate the 320 new channels on the first RLVR
+update.
 
 The match gate is evaluated on held-out safe trajectories. It requires at
 least 99.99% action agreement, absolute forward KL no greater than 1e-6, value
 MSE no greater than 1e-8, and strategic-pass-rate difference no greater than
 1e-4. A direct seat-balanced game non-inferiority test follows.
 
-### Hawk RG-LRU
+### Hawk RG-LRU residual
 
-The alternative is a standalone 4-layer, 256-wide Hawk-style network with
-320-channel RG-LRU state and gated MLP blocks. Its diagonal recurrent state is
-linear in width and independent of context length. Training uses a parallel
-signed log-cumulative scan; online decisions use the equivalent one-step
-recurrence.
+The accepted alternative retains the complete 192x2 teacher as a base branch
+and adds a 2-layer, 128-wide Hawk-style residual branch with 160-channel RG-LRU
+state and gated MLP blocks. Its diagonal recurrent state is linear in width and
+independent of context length. The residual output heads start at zero, making
+the complete student exactly teacher-equivalent while exposing nonzero adapter
+features to the first RLVR update.
 
-Distillation combines forward KL, reverse KL, hard teacher actions, value
-matching, strategic-pass upweighting, and length-bucketed replay. DAgger rounds
-aggregate fresh student-induced trajectories. Both a fixed teacher-policy
-validation set and fresh student-policy validation set must reach 98.5% action
-agreement and forward KL no greater than 0.04.
+The first attempted alternative was a standalone 4-layer, 256-wide Hawk RG-LRU
+trained with forward KL, reverse KL, hard teacher actions, value matching,
+strategic-pass upweighting, length-bucketed replay, hard-example weighting, and
+DAgger state aggregation. Replay agreement rose as high as 97.76%, but held-out
+teacher-policy agreement plateaued around 89.7% and held-out KL worsened to
+0.168. That branch was rejected as overfit instead of being promoted from its
+training fit.
+
+The residual design is a stronger distillation strategy for this setting: it
+preserves the teacher function by construction and uses the different Hawk
+recurrence only as learnable residual capacity. This meets the startup-cost-is-
+acceptable and sustained-OPEX-first constraint without a Transformer cache or
+a matrix-valued recurrent state.
+
+## Pre-RLVR gate results
+
+- Frozen teacher: MinGRU 192x2, 251,384 parameters, 384 recurrent-state
+  elements.
+- Trainable widened MinGRU: 512x2, 1,653,304 parameters, 1,024 state elements.
+  On 224,445 held-out decisions it reached 100% action agreement, forward KL
+  `3.16e-9`, and value MSE `1.66e-10`.
+- Hawk residual: 695,024 parameters and 704 state elements. On 229,262 held-out
+  decisions it had 100% agreement, zero KL, and zero value error.
+- Each candidate then scored exactly 50.0% over 10,000 fresh, seat-balanced
+  pairs against the teacher. The distribution-free 99.9% interval was
+  [48.05%, 51.95%], clearing the declared 48% non-inferiority floor.
 
 ## Approaches not selected for this serving experiment
 

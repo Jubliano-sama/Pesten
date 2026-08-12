@@ -1,0 +1,59 @@
+{
+  "candidate": {
+    "model": {
+      "architecture": "min_gru",
+      "hidden_size": 512,
+      "mode_conditioned_heads": true,
+      "num_layers": 2
+    },
+    "path": "/home/tommie/Pesten/live_training/sota_distillation_20260812_active_large/large_min_gru_512x2.pt",
+    "sha256": "3c88b8b667e84a2fdc7860df8ce53bb4550915ebc3fe6d1ae4c9f54e42c149fc"
+  },
+  "kind": "puffer_vs_puffer_parallel_benchmark",
+  "opponent": {
+    "model": {
+      "hidden_size": 192,
+      "mode_conditioned_heads": true,
+      "num_layers": 2
+    },
+    "path": "/home/tommie/Pesten/live_training/ludicrous_puffer_192x2/latest.pt",
+    "sha256": "7e989ce9a22a2e6228b42ca59069976e0301df35356c79720b3c789c94ff408d"
+  },
+  "protocol": {
+    "confidence": "distribution-free Hoeffding bound over paired scores",
+    "fresh_development_seeds": true,
+    "games_per_pair": 2,
+    "noninferiority_margin": 0.02,
+    "pairs": 10000,
+    "seat_balanced": true,
+    "seed": 70260812,
+    "workers": 12
+  },
+  "result": {
+    "average_turns": 49.474,
+    "candidate_wins_as_seat_0": 5155,
+    "candidate_wins_as_seat_1": 4838,
+    "draws": 14,
+    "elapsed_seconds": 223.57398032299534,
+    "games": 20000,
+    "hoeffding_ci99_9": [
+      0.48050525396479593,
+      0.5194947460352041
+    ],
+    "hoeffding_margin99_9": 0.019494746035204052,
+    "losses": 9993,
+    "noninferiority_floor": 0.48,
+    "noninferiority_gate_passed_99_9": true,
+    "noninferiority_margin": 0.02,
+    "paired_normal_ci95": [
+      0.5,
+      0.5
+    ],
+    "paired_standard_error": 0.0,
+    "pairs": 10000,
+    "score": 0.5,
+    "superiority_gate_passed_99_9": false,
+    "wins": 9993
+  },
+  "schema_version": 2
+}

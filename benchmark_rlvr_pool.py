@@ -175,7 +175,9 @@ def _weighted_summary(strata: list[dict]) -> dict:
     opponent_weight = 1 / len(OPPONENTS)
     weighted = []
     variances = []
+    normalized_variances = []
     hoeffding_variance_proxy = 0.0
+    normalized_hoeffding_variance_proxy = 0.0
     before = after = delta = normalized_before = normalized_after = 0.0
     for row in strata:
         players = int(row["players"])
@@ -192,7 +194,18 @@ def _weighted_summary(strata: list[dict]) -> dict:
             float(differences.var(ddof=1)) if len(differences) > 1 else 0.0
         )
         variances.append(weight * weight * sample_variance / len(differences))
+        normalized_variances.append(
+            weight
+            * weight
+            * players
+            * players
+            * sample_variance
+            / len(differences)
+        )
         hoeffding_variance_proxy += weight * weight / len(differences)
+        normalized_hoeffding_variance_proxy += (
+            weight * weight * players * players / len(differences)
+        )
         weighted.append(
             {
                 "opponent": row["opponent"],
@@ -202,17 +215,36 @@ def _weighted_summary(strata: list[dict]) -> dict:
             }
         )
     standard_error = math.sqrt(sum(variances))
+    normalized_standard_error = math.sqrt(sum(normalized_variances))
     alpha = 0.001
     # The paired delta is in [-1, 1], hence range width two.
     hoeffding_margin = 2.0 * math.sqrt(
         math.log(2.0 / alpha) * hoeffding_variance_proxy / 2.0
     )
+    normalized_hoeffding_margin = 2.0 * math.sqrt(
+        math.log(2.0 / alpha)
+        * normalized_hoeffding_variance_proxy
+        / 2.0
+    )
+    normalized_delta = normalized_after - normalized_before
     return {
         "before_score": before,
         "after_score": after,
         "delta": delta,
         "before_normalized_win_share": normalized_before,
         "after_normalized_win_share": normalized_after,
+        "delta_normalized_win_share": normalized_delta,
+        "delta_normalized_standard_error": normalized_standard_error,
+        "delta_normalized_ci99_9": _normal_interval(
+            normalized_delta, normalized_standard_error
+        ),
+        "delta_normalized_hoeffding_ci99_9": [
+            normalized_delta - normalized_hoeffding_margin,
+            normalized_delta + normalized_hoeffding_margin,
+        ],
+        "delta_normalized_hoeffding_margin99_9": (
+            normalized_hoeffding_margin
+        ),
         "delta_standard_error": standard_error,
         "delta_normal_ci99_9": _normal_interval(delta, standard_error),
         "delta_hoeffding_ci99_9": [
