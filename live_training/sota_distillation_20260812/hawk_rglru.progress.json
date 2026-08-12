@@ -1,0 +1,1241 @@
+{
+  "kind": "sota_temporal_distillation_progress",
+  "latest_checkpoint": "/home/tommie/Pesten/live_training/sota_distillation_20260812/hawk_rglru.pt",
+  "match_gate_passed": false,
+  "rounds": [
+    {
+      "curve": [
+        {
+          "action_agreement": 0.8001084788615699,
+          "epoch": 1,
+          "kl": 1.2707418661369834,
+          "loss": 1.2913187926578562,
+          "samples": 234147,
+          "strategic_pass_opportunities": 160860,
+          "student_strategic_pass_rate": 0.06948899664304364,
+          "teacher_strategic_pass_rate": 0.11560984707198807,
+          "value_mse": 0.058791217260397474
+        },
+        {
+          "action_agreement": 0.8453834556923642,
+          "epoch": 2,
+          "kl": 0.8275553990454202,
+          "loss": 0.8409022325216666,
+          "samples": 234147,
+          "strategic_pass_opportunities": 160860,
+          "student_strategic_pass_rate": 0.09349745119980107,
+          "teacher_strategic_pass_rate": 0.11560984707198807,
+          "value_mse": 0.03813381143571667
+        },
+        {
+          "action_agreement": 0.8679248506280243,
+          "epoch": 3,
+          "kl": 0.6460136918978443,
+          "loss": 0.6563762715078824,
+          "samples": 234147,
+          "strategic_pass_opportunities": 160860,
+          "student_strategic_pass_rate": 0.10233121969414398,
+          "teacher_strategic_pass_rate": 0.11560984707198807,
+          "value_mse": 0.029607364579600642
+        },
+        {
+          "action_agreement": 0.879951483469786,
+          "epoch": 4,
+          "kl": 0.5501320326177629,
+          "loss": 0.5590855936535962,
+          "samples": 234147,
+          "strategic_pass_opportunities": 160860,
+          "student_strategic_pass_rate": 0.10640930001243318,
+          "teacher_strategic_pass_rate": 0.11560984707198807,
+          "value_mse": 0.02558159761506621
+        },
+        {
+          "action_agreement": 0.8897487475816475,
+          "epoch": 5,
+          "kl": 0.4916953848813796,
+          "loss": 0.499777975957608,
+          "samples": 234147,
+          "strategic_pass_opportunities": 160860,
+          "student_strategic_pass_rate": 0.10824940942434415,
+          "teacher_strategic_pass_rate": 0.11560984707198807,
+          "value_mse": 0.023093117950449434
+        },
+        {
+          "action_agreement": 0.897867578914101,
+          "epoch": 6,
+          "kl": 0.4456238058036407,
+          "loss": 0.4530646043112677,
+          "samples": 234147,
+          "strategic_pass_opportunities": 160860,
+          "student_strategic_pass_rate": 0.10857267188859879,
+          "teacher_strategic_pass_rate": 0.11560984707198807,
+          "value_mse": 0.021259425342901678
+        },
+        {
+          "action_agreement": 0.9055892238636413,
+          "epoch": 7,
+          "kl": 0.3971400203995955,
+          "loss": 0.4038276783287508,
+          "samples": 234147,
+          "strategic_pass_opportunities": 160860,
+          "student_strategic_pass_rate": 0.10988437150317046,
+          "teacher_strategic_pass_rate": 0.11560984707198807,
+          "value_mse": 0.019107592839678316
+        },
+        {
+          "action_agreement": 0.9128197243611919,
+          "epoch": 8,
+          "kl": 0.3681118878901249,
+          "loss": 0.37482111935101897,
+          "samples": 234147,
+          "strategic_pass_opportunities": 160860,
+          "student_strategic_pass_rate": 0.11118985453189109,
+          "teacher_strategic_pass_rate": 0.11560984707198807,
+          "value_mse": 0.019169235546117283
+        }
+      ],
+      "dagger_added_trajectories": 5242,
+      "dagger_contribution": {
+        "decisions": {
+          "current_selfplay": 94648,
+          "ppo_champion": 10486,
+          "random_rule": 11148
+        },
+        "deck_count_by_player_count": {
+          "2": 1,
+          "3": 1,
+          "4": 1,
+          "5": 1,
+          "6": 1,
+          "7": 2,
+          "8": 2
+        },
+        "games": {
+          "current_selfplay": 1024,
+          "ppo_champion": 512,
+          "random_rule": 512
+        },
+        "player_counts": {
+          "2": 462,
+          "3": 462,
+          "4": 452,
+          "5": 192,
+          "6": 160,
+          "7": 160,
+          "8": 160
+        },
+        "total_turns": 145247,
+        "trajectories": 5242,
+        "tree_chunk_seconds": [],
+        "vector_cohort_stats": {
+          "2": [
+            {
+              "champion_decisions": 2228,
+              "champion_forward_calls": 187,
+              "champion_inference_transfer_seconds": 0.3914975599909667,
+              "engine_bytes": 167244,
+              "rules_stepping_seconds": 0.1813002888520714,
+              "safe_observation_event_seconds": 0.4811683653970249,
+              "task_seconds": 8.723863000006531,
+              "temporal_decisions": 21376,
+              "temporal_feature_encoding_seconds": 0.09616173079120927,
+              "temporal_forward_calls": 1349,
+              "temporal_recurrent_inference_transfer_seconds": 6.726683846238302,
+              "temporal_sampling_state_scatter_seconds": 0.5586302680458175,
+              "tree_games": 0,
+              "tree_seconds": 1.990000600926578e-05,
+              "vector_games": 462,
+              "vector_seconds": 8.658629568002652
+            }
+          ],
+          "3": [
+            {
+              "champion_decisions": 3507,
+              "champion_forward_calls": 178,
+              "champion_inference_transfer_seconds": 0.4908454650285421,
+              "engine_bytes": 216216,
+              "rules_stepping_seconds": 0.19858826692507137,
+              "safe_observation_event_seconds": 0.4947429903259035,
+              "task_seconds": 10.935353952998412,
+              "temporal_decisions": 20700,
+              "temporal_feature_encoding_seconds": 0.08302537897543516,
+              "temporal_forward_calls": 1745,
+              "temporal_recurrent_inference_transfer_seconds": 8.763022809769609,
+              "temporal_sampling_state_scatter_seconds": 0.5221546151733492,
+              "tree_games": 0,
+              "tree_seconds": 3.269000444561243e-05,
+              "vector_games": 462,
+              "vector_seconds": 10.861363199001062
+            }
+          ],
+          "4": [
+            {
+              "champion_decisions": 4415,
+              "champion_forward_calls": 212,
+              "champion_inference_transfer_seconds": 0.6328545380820287,
+              "engine_bytes": 259448,
+              "rules_stepping_seconds": 0.2871013052354101,
+              "safe_observation_event_seconds": 0.6632691129925661,
+              "task_seconds": 18.33672804199159,
+              "temporal_decisions": 23505,
+              "temporal_feature_encoding_seconds": 0.2749820859753527,
+              "temporal_forward_calls": 4503,
+              "temporal_recurrent_inference_transfer_seconds": 15.1947144119913,
+              "temporal_sampling_state_scatter_seconds": 0.7077577518793987,
+              "tree_games": 0,
+              "tree_seconds": 1.8880004063248634e-05,
+              "vector_games": 452,
+              "vector_seconds": 18.194245245002094
+            }
+          ],
+          "5": [
+            {
+              "champion_decisions": 2945,
+              "champion_forward_calls": 266,
+              "champion_inference_transfer_seconds": 0.5514575589913875,
+              "engine_bytes": 130560,
+              "rules_stepping_seconds": 0.15801614354131743,
+              "safe_observation_event_seconds": 0.3175600100948941,
+              "task_seconds": 11.60225144099968,
+              "temporal_decisions": 11126,
+              "temporal_feature_encoding_seconds": 0.1156283781019738,
+              "temporal_forward_calls": 3575,
+              "temporal_recurrent_inference_transfer_seconds": 9.847139347184566,
+              "temporal_sampling_state_scatter_seconds": 0.2968069811031455,
+              "tree_games": 0,
+              "tree_seconds": 9.370007319375873e-06,
+              "vector_games": 192,
+              "vector_seconds": 11.541432147001615
+            }
+          ],
+          "6": [
+            {
+              "champion_decisions": 2970,
+              "champion_forward_calls": 415,
+              "champion_inference_transfer_seconds": 0.7269782000075793,
+              "engine_bytes": 125760,
+              "rules_stepping_seconds": 0.14613755705067888,
+              "safe_observation_event_seconds": 0.3857907644851366,
+              "task_seconds": 18.225566388995503,
+              "temporal_decisions": 11129,
+              "temporal_feature_encoding_seconds": 0.09048382686160039,
+              "temporal_forward_calls": 6890,
+              "temporal_recurrent_inference_transfer_seconds": 16.18815059796907,
+              "temporal_sampling_state_scatter_seconds": 0.3394279468775494,
+              "tree_games": 0,
+              "tree_seconds": 8.319999324157834e-06,
+              "vector_games": 160,
+              "vector_seconds": 18.165806727993186
+            }
+          ],
+          "7": [
+            {
+              "champion_decisions": 2530,
+              "champion_forward_calls": 294,
+              "champion_inference_transfer_seconds": 0.543410573998699,
+              "engine_bytes": 220480,
+              "rules_stepping_seconds": 0.1611138142325217,
+              "safe_observation_event_seconds": 0.39011275352095254,
+              "task_seconds": 23.44681436799874,
+              "temporal_decisions": 13309,
+              "temporal_feature_encoding_seconds": 0.16430310806026682,
+              "temporal_forward_calls": 9152,
+              "temporal_recurrent_inference_transfer_seconds": 21.463656423147768,
+              "temporal_sampling_state_scatter_seconds": 0.4222577309265034,
+              "tree_games": 0,
+              "tree_seconds": 7.700000423938036e-06,
+              "vector_games": 160,
+              "vector_seconds": 23.41178133599169
+            }
+          ],
+          "8": [
+            {
+              "champion_decisions": 2738,
+              "champion_forward_calls": 276,
+              "champion_inference_transfer_seconds": 0.5755395550804678,
+              "engine_bytes": 246080,
+              "rules_stepping_seconds": 0.217102142618387,
+              "safe_observation_event_seconds": 0.5368418685975485,
+              "task_seconds": 27.496204798997496,
+              "temporal_decisions": 15137,
+              "temporal_feature_encoding_seconds": 0.2024478979728883,
+              "temporal_forward_calls": 11467,
+              "temporal_recurrent_inference_transfer_seconds": 25.160446008012514,
+              "temporal_sampling_state_scatter_seconds": 0.4655533999612089,
+              "tree_games": 0,
+              "tree_seconds": 7.68998870626092e-06,
+              "vector_games": 160,
+              "vector_seconds": 27.452484326000558
+            }
+          ]
+        }
+      },
+      "dagger_rollout_seconds": 30.01057834799576,
+      "match_gate_passed": false,
+      "replay_decisions": 234147,
+      "replay_trajectories": 10531,
+      "round": 1,
+      "student_policy_validation": {
+        "action_agreement": 0.888258417364553,
+        "forward_kl": 0.170304314472027,
+        "max_legal_logit_error": 34.69461441040039,
+        "samples": 29255,
+        "strategic_pass_opportunities": 20174,
+        "student_strategic_pass_rate": 0.11985724199464658,
+        "teacher_strategic_pass_rate": 0.10959651035986914,
+        "value_mse": 0.016715458726662892
+      },
+      "student_validation_contribution": {
+        "decisions": {
+          "current_selfplay": 23780,
+          "ppo_champion": 2712,
+          "random_rule": 2763
+        },
+        "deck_count_by_player_count": {
+          "2": 1,
+          "3": 1,
+          "4": 1,
+          "5": 1,
+          "6": 1,
+          "7": 2,
+          "8": 2
+        },
+        "games": {
+          "current_selfplay": 256,
+          "ppo_champion": 128,
+          "random_rule": 128
+        },
+        "player_counts": {
+          "2": 120,
+          "3": 112,
+          "4": 112,
+          "5": 48,
+          "6": 40,
+          "7": 40,
+          "8": 40
+        },
+        "total_turns": 36471,
+        "trajectories": 1308,
+        "tree_chunk_seconds": [],
+        "vector_cohort_stats": {
+          "2": [
+            {
+              "champion_decisions": 628,
+              "champion_forward_calls": 137,
+              "champion_inference_transfer_seconds": 0.19058650090300944,
+              "engine_bytes": 43440,
+              "rules_stepping_seconds": 0.049660288830637,
+              "safe_observation_event_seconds": 0.13688067918701563,
+              "task_seconds": 3.3204887330066413,
+              "temporal_decisions": 5435,
+              "temporal_feature_encoding_seconds": 0.013300093996804208,
+              "temporal_forward_calls": 1063,
+              "temporal_recurrent_inference_transfer_seconds": 2.6868695842276793,
+              "temporal_sampling_state_scatter_seconds": 0.15215366399206687,
+              "tree_games": 0,
+              "tree_seconds": 6.06999674346298e-06,
+              "vector_games": 120,
+              "vector_seconds": 3.3010588319884846
+            }
+          ],
+          "3": [
+            {
+              "champion_decisions": 728,
+              "champion_forward_calls": 110,
+              "champion_inference_transfer_seconds": 0.18632897909265012,
+              "engine_bytes": 52416,
+              "rules_stepping_seconds": 0.05522607685998082,
+              "safe_observation_event_seconds": 0.15665802234434523,
+              "task_seconds": 4.342230266003753,
+              "temporal_decisions": 4933,
+              "temporal_feature_encoding_seconds": 0.016700300766387954,
+              "temporal_forward_calls": 1764,
+              "temporal_recurrent_inference_transfer_seconds": 3.6923974490346154,
+              "temporal_sampling_state_scatter_seconds": 0.13623931496113073,
+              "tree_games": 0,
+              "tree_seconds": 5.660011083818972e-06,
+              "vector_games": 112,
+              "vector_seconds": 4.323806947999401
+            }
+          ],
+          "4": [
+            {
+              "champion_decisions": 1285,
+              "champion_forward_calls": 197,
+              "champion_inference_transfer_seconds": 0.3197386680112686,
+              "engine_bytes": 64288,
+              "rules_stepping_seconds": 0.06671829622064251,
+              "safe_observation_event_seconds": 0.19125313170661684,
+              "task_seconds": 5.5324491820065305,
+              "temporal_decisions": 5849,
+              "temporal_feature_encoding_seconds": 0.027746559993829578,
+              "temporal_forward_calls": 1733,
+              "temporal_recurrent_inference_transfer_seconds": 4.619531849035411,
+              "temporal_sampling_state_scatter_seconds": 0.16314135208085645,
+              "tree_games": 0,
+              "tree_seconds": 5.480003892444074e-06,
+              "vector_games": 112,
+              "vector_seconds": 5.513094583002385
+            }
+          ],
+          "5": [
+            {
+              "champion_decisions": 695,
+              "champion_forward_calls": 220,
+              "champion_inference_transfer_seconds": 0.26625173300271854,
+              "engine_bytes": 32640,
+              "rules_stepping_seconds": 0.0420535629382357,
+              "safe_observation_event_seconds": 0.1399453536432702,
+              "task_seconds": 6.674322684993967,
+              "temporal_decisions": 3113,
+              "temporal_feature_encoding_seconds": 0.016728386777685955,
+              "temporal_forward_calls": 3873,
+              "temporal_recurrent_inference_transfer_seconds": 6.017283855006099,
+              "temporal_sampling_state_scatter_seconds": 0.1004894830257399,
+              "tree_games": 0,
+              "tree_seconds": 3.740002284757793e-06,
+              "vector_games": 48,
+              "vector_seconds": 6.665078336009174
+            }
+          ],
+          "6": [
+            {
+              "champion_decisions": 802,
+              "champion_forward_calls": 246,
+              "champion_inference_transfer_seconds": 0.30824542095069773,
+              "engine_bytes": 31440,
+              "rules_stepping_seconds": 0.04271565093949903,
+              "safe_observation_event_seconds": 0.1071662421891233,
+              "task_seconds": 5.961406623013318,
+              "temporal_decisions": 2623,
+              "temporal_feature_encoding_seconds": 0.01713216087955516,
+              "temporal_forward_calls": 3149,
+              "temporal_recurrent_inference_transfer_seconds": 5.308606320890249,
+              "temporal_sampling_state_scatter_seconds": 0.08400654389697593,
+              "tree_games": 0,
+              "tree_seconds": 3.4900003811344504e-06,
+              "vector_games": 40,
+              "vector_seconds": 5.953214766996098
+            }
+          ],
+          "7": [
+            {
+              "champion_decisions": 709,
+              "champion_forward_calls": 192,
+              "champion_inference_transfer_seconds": 0.25989973297691904,
+              "engine_bytes": 55120,
+              "rules_stepping_seconds": 0.04830308895907365,
+              "safe_observation_event_seconds": 0.10077321184508037,
+              "task_seconds": 9.773451422996004,
+              "temporal_decisions": 3423,
+              "temporal_feature_encoding_seconds": 0.0593089919857448,
+              "temporal_forward_calls": 6423,
+              "temporal_recurrent_inference_transfer_seconds": 9.080561760085402,
+              "temporal_sampling_state_scatter_seconds": 0.11394134494184982,
+              "tree_games": 0,
+              "tree_seconds": 2.969987690448761e-06,
+              "vector_games": 40,
+              "vector_seconds": 9.756316232000245
+            }
+          ],
+          "8": [
+            {
+              "champion_decisions": 650,
+              "champion_forward_calls": 147,
+              "champion_inference_transfer_seconds": 0.23575277104100678,
+              "engine_bytes": 61520,
+              "rules_stepping_seconds": 0.05290548580524046,
+              "safe_observation_event_seconds": 0.11827111768070608,
+              "task_seconds": 12.27493537600094,
+              "temporal_decisions": 3879,
+              "temporal_feature_encoding_seconds": 0.06978385213005822,
+              "temporal_forward_calls": 7435,
+              "temporal_recurrent_inference_transfer_seconds": 11.566063745965948,
+              "temporal_sampling_state_scatter_seconds": 0.13019132910994813,
+              "tree_games": 0,
+              "tree_seconds": 2.900007530115545e-06,
+              "vector_games": 40,
+              "vector_seconds": 12.262121560997912
+            }
+          ]
+        }
+      },
+      "student_validation_rollout_seconds": 14.386270738003077,
+      "teacher_policy_validation": {
+        "action_agreement": 0.8896598071089962,
+        "forward_kl": 0.16462937120559254,
+        "max_legal_logit_error": 37.36369323730469,
+        "samples": 55057,
+        "strategic_pass_opportunities": 38036,
+        "student_strategic_pass_rate": 0.1125249763382059,
+        "teacher_strategic_pass_rate": 0.1137080660426964,
+        "value_mse": 0.016692051472746935
+      },
+      "wall_seconds": 164.2508841939998
+    },
+    {
+      "curve": [
+        {
+          "action_agreement": 0.9057612240996036,
+          "epoch": 1,
+          "kl": 0.3990344550321199,
+          "loss": 0.40479536813577777,
+          "samples": 350429,
+          "strategic_pass_opportunities": 241063,
+          "student_strategic_pass_rate": 0.10934486005732941,
+          "teacher_strategic_pass_rate": 0.11424399430854175,
+          "value_mse": 0.01645975293165845
+        },
+        {
+          "action_agreement": 0.9138313324525082,
+          "epoch": 2,
+          "kl": 0.35636263924426054,
+          "loss": 0.3616254905851493,
+          "samples": 350429,
+          "strategic_pass_opportunities": 241063,
+          "student_strategic_pass_rate": 0.10936974981643803,
+          "teacher_strategic_pass_rate": 0.11424399430854175,
+          "value_mse": 0.015036720909417862
+        },
+        {
+          "action_agreement": 0.9200751079391261,
+          "epoch": 3,
+          "kl": 0.3248996492630957,
+          "loss": 0.32996443399851355,
+          "samples": 350429,
+          "strategic_pass_opportunities": 241063,
+          "student_strategic_pass_rate": 0.10951908837108972,
+          "teacher_strategic_pass_rate": 0.11424399430854175,
+          "value_mse": 0.01447081597485794
+        },
+        {
+          "action_agreement": 0.9253429368003219,
+          "epoch": 4,
+          "kl": 0.296441964514399,
+          "loss": 0.3010974105055015,
+          "samples": 350429,
+          "strategic_pass_opportunities": 241063,
+          "student_strategic_pass_rate": 0.11070550022193369,
+          "teacher_strategic_pass_rate": 0.11424399430854175,
+          "value_mse": 0.013301275102592236
+        },
+        {
+          "action_agreement": 0.9313127623569967,
+          "epoch": 5,
+          "kl": 0.2722134955067469,
+          "loss": 0.27670830731479024,
+          "samples": 350429,
+          "strategic_pass_opportunities": 241063,
+          "student_strategic_pass_rate": 0.1116430144816915,
+          "teacher_strategic_pass_rate": 0.11424399430854175,
+          "value_mse": 0.012842319195652645
+        },
+        {
+          "action_agreement": 0.935467669627799,
+          "epoch": 6,
+          "kl": 0.25447877592431123,
+          "loss": 0.2586149099359357,
+          "samples": 350429,
+          "strategic_pass_opportunities": 241063,
+          "student_strategic_pass_rate": 0.11182553938182135,
+          "teacher_strategic_pass_rate": 0.11424399430854175,
+          "value_mse": 0.011817526858488463
+        },
+        {
+          "action_agreement": 0.9393001150018977,
+          "epoch": 7,
+          "kl": 0.2373506910937052,
+          "loss": 0.24142289885495885,
+          "samples": 350429,
+          "strategic_pass_opportunities": 241063,
+          "student_strategic_pass_rate": 0.11173012863857167,
+          "teacher_strategic_pass_rate": 0.11424399430854175,
+          "value_mse": 0.011634878874343434
+        },
+        {
+          "action_agreement": 0.9422821741351315,
+          "epoch": 8,
+          "kl": 0.2227164664448248,
+          "loss": 0.22668237311934947,
+          "samples": 350429,
+          "strategic_pass_opportunities": 241063,
+          "student_strategic_pass_rate": 0.11196243305691873,
+          "teacher_strategic_pass_rate": 0.11424399430854175,
+          "value_mse": 0.011331162960545047
+        }
+      ],
+      "dagger_added_trajectories": 5242,
+      "dagger_contribution": {
+        "decisions": {
+          "current_selfplay": 94647,
+          "ppo_champion": 10484,
+          "random_rule": 11055
+        },
+        "deck_count_by_player_count": {
+          "2": 1,
+          "3": 1,
+          "4": 1,
+          "5": 1,
+          "6": 1,
+          "7": 2,
+          "8": 2
+        },
+        "games": {
+          "current_selfplay": 1024,
+          "ppo_champion": 512,
+          "random_rule": 512
+        },
+        "player_counts": {
+          "2": 462,
+          "3": 462,
+          "4": 452,
+          "5": 192,
+          "6": 160,
+          "7": 160,
+          "8": 160
+        },
+        "total_turns": 145750,
+        "trajectories": 5242,
+        "tree_chunk_seconds": [],
+        "vector_cohort_stats": {
+          "2": [
+            {
+              "champion_decisions": 2140,
+              "champion_forward_calls": 148,
+              "champion_inference_transfer_seconds": 0.3337540110806003,
+              "engine_bytes": 167244,
+              "rules_stepping_seconds": 0.16965160502877552,
+              "safe_observation_event_seconds": 0.44988269529130775,
+              "task_seconds": 8.183817985001951,
+              "temporal_decisions": 20992,
+              "temporal_feature_encoding_seconds": 0.09379660084960051,
+              "temporal_forward_calls": 1223,
+              "temporal_recurrent_inference_transfer_seconds": 6.351352525220136,
+              "temporal_sampling_state_scatter_seconds": 0.5154206969746156,
+              "tree_games": 0,
+              "tree_seconds": 2.0580002455972135e-05,
+              "vector_games": 462,
+              "vector_seconds": 8.119057910007541
+            }
+          ],
+          "3": [
+            {
+              "champion_decisions": 3474,
+              "champion_forward_calls": 251,
+              "champion_inference_transfer_seconds": 0.5025255889777327,
+              "engine_bytes": 216216,
+              "rules_stepping_seconds": 0.21621832021628506,
+              "safe_observation_event_seconds": 0.4771185753925238,
+              "task_seconds": 13.346650093008066,
+              "temporal_decisions": 22542,
+              "temporal_feature_encoding_seconds": 0.1282417111651739,
+              "temporal_forward_calls": 3500,
+              "temporal_recurrent_inference_transfer_seconds": 11.073249434717582,
+              "temporal_sampling_state_scatter_seconds": 0.5612421651458135,
+              "tree_games": 0,
+              "tree_seconds": 1.9579994841478765e-05,
+              "vector_games": 462,
+              "vector_seconds": 13.273905129011837
+            }
+          ],
+          "4": [
+            {
+              "champion_decisions": 4782,
+              "champion_forward_calls": 204,
+              "champion_inference_transfer_seconds": 0.574586824994185,
+              "engine_bytes": 259448,
+              "rules_stepping_seconds": 0.24816436419496313,
+              "safe_observation_event_seconds": 0.706839678765391,
+              "task_seconds": 15.321657380001852,
+              "temporal_decisions": 24517,
+              "temporal_feature_encoding_seconds": 0.12302021199138835,
+              "temporal_forward_calls": 2955,
+              "temporal_recurrent_inference_transfer_seconds": 12.601783329140744,
+              "temporal_sampling_state_scatter_seconds": 0.5949051240604604,
+              "tree_games": 0,
+              "tree_seconds": 1.8930004443973303e-05,
+              "vector_games": 452,
+              "vector_seconds": 15.23721428999852
+            }
+          ],
+          "5": [
+            {
+              "champion_decisions": 2655,
+              "champion_forward_calls": 241,
+              "champion_inference_transfer_seconds": 0.4789751318603521,
+              "engine_bytes": 130560,
+              "rules_stepping_seconds": 0.13818958683987148,
+              "safe_observation_event_seconds": 0.37900235362758394,
+              "task_seconds": 11.333181298003183,
+              "temporal_decisions": 12040,
+              "temporal_feature_encoding_seconds": 0.07390746599412523,
+              "temporal_forward_calls": 3378,
+              "temporal_recurrent_inference_transfer_seconds": 9.686180331002106,
+              "temporal_sampling_state_scatter_seconds": 0.30961093195946887,
+              "tree_games": 0,
+              "tree_seconds": 9.660012437961996e-06,
+              "vector_games": 192,
+              "vector_seconds": 11.296243888995377
+            }
+          ],
+          "6": [
+            {
+              "champion_decisions": 3038,
+              "champion_forward_calls": 334,
+              "champion_inference_transfer_seconds": 0.5638765909970971,
+              "engine_bytes": 125760,
+              "rules_stepping_seconds": 0.14655588728783187,
+              "safe_observation_event_seconds": 0.32665798169909976,
+              "task_seconds": 15.495019914000295,
+              "temporal_decisions": 11740,
+              "temporal_feature_encoding_seconds": 0.11988796372315846,
+              "temporal_forward_calls": 6701,
+              "temporal_recurrent_inference_transfer_seconds": 13.723866102067404,
+              "temporal_sampling_state_scatter_seconds": 0.31568896915996447,
+              "tree_games": 0,
+              "tree_seconds": 7.85999873187393e-06,
+              "vector_games": 160,
+              "vector_seconds": 15.462180827002157
+            }
+          ],
+          "7": [
+            {
+              "champion_decisions": 2713,
+              "champion_forward_calls": 253,
+              "champion_inference_transfer_seconds": 0.4856760430848226,
+              "engine_bytes": 220480,
+              "rules_stepping_seconds": 0.13266563706565648,
+              "safe_observation_event_seconds": 0.2987326958682388,
+              "task_seconds": 16.559036308986833,
+              "temporal_decisions": 11546,
+              "temporal_feature_encoding_seconds": 0.1764625739888288,
+              "temporal_forward_calls": 6937,
+              "temporal_recurrent_inference_transfer_seconds": 14.87716431816807,
+              "temporal_sampling_state_scatter_seconds": 0.3049934640584979,
+              "tree_games": 0,
+              "tree_seconds": 7.850001566112041e-06,
+              "vector_games": 160,
+              "vector_seconds": 16.522515835007653
+            }
+          ],
+          "8": [
+            {
+              "champion_decisions": 2880,
+              "champion_forward_calls": 257,
+              "champion_inference_transfer_seconds": 0.5017724110221025,
+              "engine_bytes": 246080,
+              "rules_stepping_seconds": 0.15119368051819038,
+              "safe_observation_event_seconds": 0.38128634259919636,
+              "task_seconds": 20.176386488004937,
+              "temporal_decisions": 12809,
+              "temporal_feature_encoding_seconds": 0.1530675818939926,
+              "temporal_forward_calls": 8968,
+              "temporal_recurrent_inference_transfer_seconds": 18.341599115956342,
+              "temporal_sampling_state_scatter_seconds": 0.3302077007392654,
+              "tree_games": 0,
+              "tree_seconds": 7.68998870626092e-06,
+              "vector_games": 160,
+              "vector_seconds": 20.114857883992954
+            }
+          ]
+        }
+      },
+      "dagger_rollout_seconds": 23.690392582997447,
+      "match_gate_passed": false,
+      "replay_decisions": 350429,
+      "replay_trajectories": 15773,
+      "round": 2,
+      "student_policy_validation": {
+        "action_agreement": 0.8954598033545402,
+        "forward_kl": 0.1602459981167089,
+        "max_legal_logit_error": 36.060157775878906,
+        "samples": 27664,
+        "strategic_pass_opportunities": 18947,
+        "student_strategic_pass_rate": 0.11046603683960521,
+        "teacher_strategic_pass_rate": 0.11400221670976936,
+        "value_mse": 0.010964400631075583
+      },
+      "student_validation_contribution": {
+        "decisions": {
+          "current_selfplay": 22788,
+          "ppo_champion": 2315,
+          "random_rule": 2561
+        },
+        "deck_count_by_player_count": {
+          "2": 1,
+          "3": 1,
+          "4": 1,
+          "5": 1,
+          "6": 1,
+          "7": 2,
+          "8": 2
+        },
+        "games": {
+          "current_selfplay": 256,
+          "ppo_champion": 128,
+          "random_rule": 128
+        },
+        "player_counts": {
+          "2": 120,
+          "3": 112,
+          "4": 112,
+          "5": 48,
+          "6": 40,
+          "7": 40,
+          "8": 40
+        },
+        "total_turns": 34289,
+        "trajectories": 1308,
+        "tree_chunk_seconds": [],
+        "vector_cohort_stats": {
+          "2": [
+            {
+              "champion_decisions": 406,
+              "champion_forward_calls": 73,
+              "champion_inference_transfer_seconds": 0.09919707402877975,
+              "engine_bytes": 43440,
+              "rules_stepping_seconds": 0.04633467503299471,
+              "safe_observation_event_seconds": 0.09127418883144855,
+              "task_seconds": 3.508271123995655,
+              "temporal_decisions": 5087,
+              "temporal_feature_encoding_seconds": 0.05621475103544071,
+              "temporal_forward_calls": 1650,
+              "temporal_recurrent_inference_transfer_seconds": 3.0079712740698596,
+              "temporal_sampling_state_scatter_seconds": 0.13661153308930807,
+              "tree_games": 0,
+              "tree_seconds": 6.290007149800658e-06,
+              "vector_games": 120,
+              "vector_seconds": 3.491280222995556
+            }
+          ],
+          "3": [
+            {
+              "champion_decisions": 796,
+              "champion_forward_calls": 135,
+              "champion_inference_transfer_seconds": 0.18290446400351357,
+              "engine_bytes": 52416,
+              "rules_stepping_seconds": 0.04554745287168771,
+              "safe_observation_event_seconds": 0.12360200718103442,
+              "task_seconds": 3.2396797349938424,
+              "temporal_decisions": 4424,
+              "temporal_feature_encoding_seconds": 0.01441597800294403,
+              "temporal_forward_calls": 1079,
+              "temporal_recurrent_inference_transfer_seconds": 2.6671030898723984,
+              "temporal_sampling_state_scatter_seconds": 0.11348723602714017,
+              "tree_games": 0,
+              "tree_seconds": 5.449997843243182e-06,
+              "vector_games": 112,
+              "vector_seconds": 3.222506282007089
+            }
+          ],
+          "4": [
+            {
+              "champion_decisions": 1032,
+              "champion_forward_calls": 148,
+              "champion_inference_transfer_seconds": 0.21890736601199023,
+              "engine_bytes": 64288,
+              "rules_stepping_seconds": 0.06426002558146138,
+              "safe_observation_event_seconds": 0.16189646554994397,
+              "task_seconds": 6.096049066996784,
+              "temporal_decisions": 5958,
+              "temporal_feature_encoding_seconds": 0.028803490960854106,
+              "temporal_forward_calls": 2750,
+              "temporal_recurrent_inference_transfer_seconds": 5.342871072891285,
+              "temporal_sampling_state_scatter_seconds": 0.15670419711386785,
+              "tree_games": 0,
+              "tree_seconds": 5.45999500900507e-06,
+              "vector_games": 112,
+              "vector_seconds": 6.077530337002827
+            }
+          ],
+          "5": [
+            {
+              "champion_decisions": 1036,
+              "champion_forward_calls": 295,
+              "champion_inference_transfer_seconds": 0.3285959829809144,
+              "engine_bytes": 32640,
+              "rules_stepping_seconds": 0.0409650121582672,
+              "safe_observation_event_seconds": 0.07071709094452672,
+              "task_seconds": 4.791739804990357,
+              "temporal_decisions": 2691,
+              "temporal_feature_encoding_seconds": 0.014953488847822882,
+              "temporal_forward_calls": 2344,
+              "temporal_recurrent_inference_transfer_seconds": 4.1363637950707925,
+              "temporal_sampling_state_scatter_seconds": 0.08166351207182743,
+              "tree_games": 0,
+              "tree_seconds": 3.430002834647894e-06,
+              "vector_games": 48,
+              "vector_seconds": 4.77470349399664
+            }
+          ],
+          "6": [
+            {
+              "champion_decisions": 639,
+              "champion_forward_calls": 227,
+              "champion_inference_transfer_seconds": 0.2580041501496453,
+              "engine_bytes": 31440,
+              "rules_stepping_seconds": 0.0449204078031471,
+              "safe_observation_event_seconds": 0.12032933290174697,
+              "task_seconds": 7.474074733996531,
+              "temporal_decisions": 3368,
+              "temporal_feature_encoding_seconds": 0.021964935833238997,
+              "temporal_forward_calls": 4243,
+              "temporal_recurrent_inference_transfer_seconds": 6.836985212969012,
+              "temporal_sampling_state_scatter_seconds": 0.10491678485414013,
+              "tree_games": 0,
+              "tree_seconds": 2.749991836026311e-06,
+              "vector_games": 40,
+              "vector_seconds": 7.46563378899009
+            }
+          ],
+          "7": [
+            {
+              "champion_decisions": 655,
+              "champion_forward_calls": 182,
+              "champion_inference_transfer_seconds": 0.22008025394461583,
+              "engine_bytes": 55120,
+              "rules_stepping_seconds": 0.04099339313688688,
+              "safe_observation_event_seconds": 0.08315653217141517,
+              "task_seconds": 6.807045573004871,
+              "temporal_decisions": 3140,
+              "temporal_feature_encoding_seconds": 0.05605111786280759,
+              "temporal_forward_calls": 3648,
+              "temporal_recurrent_inference_transfer_seconds": 6.237872134981444,
+              "temporal_sampling_state_scatter_seconds": 0.08911484912096057,
+              "tree_games": 0,
+              "tree_seconds": 2.639993908815086e-06,
+              "vector_games": 40,
+              "vector_seconds": 6.798024661999079
+            }
+          ],
+          "8": [
+            {
+              "champion_decisions": 570,
+              "champion_forward_calls": 138,
+              "champion_inference_transfer_seconds": 0.18558012995345052,
+              "engine_bytes": 61520,
+              "rules_stepping_seconds": 0.041115171916317195,
+              "safe_observation_event_seconds": 0.12217136498657055,
+              "task_seconds": 9.313384303997736,
+              "temporal_decisions": 2996,
+              "temporal_feature_encoding_seconds": 0.025963909982237965,
+              "temporal_forward_calls": 6338,
+              "temporal_recurrent_inference_transfer_seconds": 8.754306000977522,
+              "temporal_sampling_state_scatter_seconds": 0.09550193013274111,
+              "tree_games": 0,
+              "tree_seconds": 2.720000338740647e-06,
+              "vector_games": 40,
+              "vector_seconds": 9.2950613360008
+            }
+          ]
+        }
+      },
+      "student_validation_rollout_seconds": 11.281792798996321,
+      "teacher_policy_validation": {
+        "action_agreement": 0.8979058067094102,
+        "forward_kl": 0.1566027599672626,
+        "max_legal_logit_error": 37.695926666259766,
+        "samples": 55057,
+        "strategic_pass_opportunities": 38036,
+        "student_strategic_pass_rate": 0.10087811546955516,
+        "teacher_strategic_pass_rate": 0.1137080660426964,
+        "value_mse": 0.011447875999496274
+      },
+      "wall_seconds": 238.24034221899637
+    },
+    {
+      "curve": [
+        {
+          "action_agreement": 0.9304094381877993,
+          "epoch": 1,
+          "kl": 0.27261510047160936,
+          "loss": 0.2764769424404848,
+          "samples": 466615,
+          "strategic_pass_opportunities": 320162,
+          "student_strategic_pass_rate": 0.1098662552083008,
+          "teacher_strategic_pass_rate": 0.11281476252647098,
+          "value_mse": 0.011033835964355806
+        },
+        {
+          "action_agreement": 0.937044458493619,
+          "epoch": 2,
+          "kl": 0.24065180047184898,
+          "loss": 0.24429310453560102,
+          "samples": 466615,
+          "strategic_pass_opportunities": 320162,
+          "student_strategic_pass_rate": 0.11048156870584266,
+          "teacher_strategic_pass_rate": 0.11281476252647098,
+          "value_mse": 0.01040372715148978
+        },
+        {
+          "action_agreement": 0.9418021280927531,
+          "epoch": 3,
+          "kl": 0.22045296463759828,
+          "loss": 0.2239649748537575,
+          "samples": 466615,
+          "strategic_pass_opportunities": 320162,
+          "student_strategic_pass_rate": 0.11032227434861101,
+          "teacher_strategic_pass_rate": 0.11281476252647098,
+          "value_mse": 0.010034313998324364
+        },
+        {
+          "action_agreement": 0.9451474984730452,
+          "epoch": 4,
+          "kl": 0.20471621537216733,
+          "loss": 0.20814659050827414,
+          "samples": 466615,
+          "strategic_pass_opportunities": 320162,
+          "student_strategic_pass_rate": 0.11073144220738251,
+          "teacher_strategic_pass_rate": 0.11281476252647098,
+          "value_mse": 0.009801071000732341
+        },
+        {
+          "action_agreement": 0.9482914179784191,
+          "epoch": 5,
+          "kl": 0.19157791054118484,
+          "loss": 0.19490999553271998,
+          "samples": 466615,
+          "strategic_pass_opportunities": 320162,
+          "student_strategic_pass_rate": 0.11104378408430732,
+          "teacher_strategic_pass_rate": 0.11281476252647098,
+          "value_mse": 0.009520242032043758
+        },
+        {
+          "action_agreement": 0.9505009483192782,
+          "epoch": 6,
+          "kl": 0.180452977213319,
+          "loss": 0.1836655338967596,
+          "samples": 466615,
+          "strategic_pass_opportunities": 320162,
+          "student_strategic_pass_rate": 0.11098756254646086,
+          "teacher_strategic_pass_rate": 0.11281476252647098,
+          "value_mse": 0.00917873209299129
+        },
+        {
+          "action_agreement": 0.9531048080323179,
+          "epoch": 7,
+          "kl": 0.17075643799938367,
+          "loss": 0.17390743642658218,
+          "samples": 466615,
+          "strategic_pass_opportunities": 320162,
+          "student_strategic_pass_rate": 0.11159975262523347,
+          "teacher_strategic_pass_rate": 0.11281476252647098,
+          "value_mse": 0.00900285156173289
+        },
+        {
+          "action_agreement": 0.9550828841764624,
+          "epoch": 8,
+          "kl": 0.1625264746388219,
+          "loss": 0.16564478320574028,
+          "samples": 466615,
+          "strategic_pass_opportunities": 320162,
+          "student_strategic_pass_rate": 0.11102504357169184,
+          "teacher_strategic_pass_rate": 0.11281476252647098,
+          "value_mse": 0.008909453662452679
+        }
+      ],
+      "match_gate_passed": false,
+      "replay_decisions": 466615,
+      "replay_trajectories": 21015,
+      "round": 3,
+      "student_policy_validation": {
+        "action_agreement": 0.9010669253152279,
+        "forward_kl": 0.14704949124877081,
+        "max_legal_logit_error": 32.079376220703125,
+        "samples": 26806,
+        "strategic_pass_opportunities": 18555,
+        "student_strategic_pass_rate": 0.10654810024252223,
+        "teacher_strategic_pass_rate": 0.10600916195095661,
+        "value_mse": 0.008736002874811985
+      },
+      "student_validation_contribution": {
+        "decisions": {
+          "current_selfplay": 21889,
+          "ppo_champion": 2475,
+          "random_rule": 2442
+        },
+        "deck_count_by_player_count": {
+          "2": 1,
+          "3": 1,
+          "4": 1,
+          "5": 1,
+          "6": 1,
+          "7": 2,
+          "8": 2
+        },
+        "games": {
+          "current_selfplay": 256,
+          "ppo_champion": 128,
+          "random_rule": 128
+        },
+        "player_counts": {
+          "2": 120,
+          "3": 112,
+          "4": 112,
+          "5": 48,
+          "6": 40,
+          "7": 40,
+          "8": 40
+        },
+        "total_turns": 33413,
+        "trajectories": 1308,
+        "tree_chunk_seconds": [],
+        "vector_cohort_stats": {
+          "2": [
+            {
+              "champion_decisions": 644,
+              "champion_forward_calls": 169,
+              "champion_inference_transfer_seconds": 0.1985176340531325,
+              "engine_bytes": 43440,
+              "rules_stepping_seconds": 0.04477255363599397,
+              "safe_observation_event_seconds": 0.12609905446879566,
+              "task_seconds": 3.0185061160009354,
+              "temporal_decisions": 5146,
+              "temporal_feature_encoding_seconds": 0.012176842094049789,
+              "temporal_forward_calls": 998,
+              "temporal_recurrent_inference_transfer_seconds": 2.4142146781814517,
+              "temporal_sampling_state_scatter_seconds": 0.13444473713752814,
+              "tree_games": 0,
+              "tree_seconds": 6.050002411939204e-06,
+              "vector_games": 120,
+              "vector_seconds": 3.0018016390095
+            }
+          ],
+          "3": [
+            {
+              "champion_decisions": 713,
+              "champion_forward_calls": 161,
+              "champion_inference_transfer_seconds": 0.18763908406253904,
+              "engine_bytes": 52416,
+              "rules_stepping_seconds": 0.048556510169873945,
+              "safe_observation_event_seconds": 0.13670412021747325,
+              "task_seconds": 3.8988276979944203,
+              "temporal_decisions": 5066,
+              "temporal_feature_encoding_seconds": 0.016940067027462646,
+              "temporal_forward_calls": 1430,
+              "temporal_recurrent_inference_transfer_seconds": 3.2881201930431416,
+              "temporal_sampling_state_scatter_seconds": 0.12884589708119165,
+              "tree_games": 0,
+              "tree_seconds": 5.559995770454407e-06,
+              "vector_games": 112,
+              "vector_seconds": 3.881555493004271
+            }
+          ],
+          "4": [
+            {
+              "champion_decisions": 988,
+              "champion_forward_calls": 119,
+              "champion_inference_transfer_seconds": 0.18366439602687024,
+              "engine_bytes": 64288,
+              "rules_stepping_seconds": 0.058106032069190405,
+              "safe_observation_event_seconds": 0.1441743939940352,
+              "task_seconds": 4.478430912000476,
+              "temporal_decisions": 5078,
+              "temporal_feature_encoding_seconds": 0.022169829011545517,
+              "temporal_forward_calls": 1655,
+              "temporal_recurrent_inference_transfer_seconds": 3.8399488620925695,
+              "temporal_sampling_state_scatter_seconds": 0.12510923322406597,
+              "tree_games": 0,
+              "tree_seconds": 5.45999500900507e-06,
+              "vector_games": 112,
+              "vector_seconds": 4.459744029009016
+            }
+          ],
+          "5": [
+            {
+              "champion_decisions": 644,
+              "champion_forward_calls": 168,
+              "champion_inference_transfer_seconds": 0.20334983202337753,
+              "engine_bytes": 32640,
+              "rules_stepping_seconds": 0.03594830783549696,
+              "safe_observation_event_seconds": 0.06838506655185483,
+              "task_seconds": 4.522393437990104,
+              "temporal_decisions": 2859,
+              "temporal_feature_encoding_seconds": 0.016619277928839438,
+              "temporal_forward_calls": 2337,
+              "temporal_recurrent_inference_transfer_seconds": 4.008242079085903,
+              "temporal_sampling_state_scatter_seconds": 0.08034105198748875,
+              "tree_games": 0,
+              "tree_seconds": 3.310007741674781e-06,
+              "vector_games": 48,
+              "vector_seconds": 4.513370405999012
+            }
+          ],
+          "6": [
+            {
+              "champion_decisions": 525,
+              "champion_forward_calls": 132,
+              "champion_inference_transfer_seconds": 0.1723186049348442,
+              "engine_bytes": 31440,
+              "rules_stepping_seconds": 0.034934242867166176,
+              "safe_observation_event_seconds": 0.09139838782721199,
+              "task_seconds": 4.6035031259962125,
+              "temporal_decisions": 2312,
+              "temporal_feature_encoding_seconds": 0.013969129082397558,
+              "temporal_forward_calls": 2413,
+              "temporal_recurrent_inference_transfer_seconds": 4.1616461139929015,
+              "temporal_sampling_state_scatter_seconds": 0.06659246307390276,
+              "tree_games": 0,
+              "tree_seconds": 2.7799978852272034e-06,
+              "vector_games": 40,
+              "vector_seconds": 4.59526056300092
+            }
+          ],
+          "7": [
+            {
+              "champion_decisions": 555,
+              "champion_forward_calls": 139,
+              "champion_inference_transfer_seconds": 0.17674361396348104,
+              "engine_bytes": 55120,
+              "rules_stepping_seconds": 0.041916292859241366,
+              "safe_observation_event_seconds": 0.08279606189171318,
+              "task_seconds": 7.56721938100236,
+              "temporal_decisions": 3023,
+              "temporal_feature_encoding_seconds": 0.054658800014294684,
+              "temporal_forward_calls": 4602,
+              "temporal_recurrent_inference_transfer_seconds": 7.046236395064625,
+              "temporal_sampling_state_scatter_seconds": 0.08983737995731644,
+              "tree_games": 0,
+              "tree_seconds": 2.9099901439622045e-06,
+              "vector_games": 40,
+              "vector_seconds": 7.558405442003277
+            }
+          ],
+          "8": [
+            {
+              "champion_decisions": 582,
+              "champion_forward_calls": 151,
+              "champion_inference_transfer_seconds": 0.17465601007279474,
+              "engine_bytes": 61520,
+              "rules_stepping_seconds": 0.04255966382334009,
+              "safe_observation_event_seconds": 0.096415742780664,
+              "task_seconds": 11.616290466001374,
+              "temporal_decisions": 3322,
+              "temporal_feature_encoding_seconds": 0.0597546399658313,
+              "temporal_forward_calls": 8318,
+              "temporal_recurrent_inference_transfer_seconds": 11.042613918732968,
+              "temporal_sampling_state_scatter_seconds": 0.10730113706085831,
+              "tree_games": 0,
+              "tree_seconds": 3.000008291564882e-06,
+              "vector_games": 40,
+              "vector_seconds": 11.600332437999896
+            }
+          ]
+        }
+      },
+      "student_validation_rollout_seconds": 13.715086372001679,
+      "teacher_policy_validation": {
+        "action_agreement": 0.9021741104673339,
+        "forward_kl": 0.14936114167327882,
+        "max_legal_logit_error": 37.323001861572266,
+        "samples": 55057,
+        "strategic_pass_opportunities": 38036,
+        "student_strategic_pass_rate": 0.10495320222946682,
+        "teacher_strategic_pass_rate": 0.1137080660426964,
+        "value_mse": 0.008873288564794423
+      },
+      "wall_seconds": 310.1206606610067
+    }
+  ],
+  "schema_version": 1
+}

@@ -12,6 +12,7 @@ from batched_pesten import BatchedPesten, PHASE_DRAW_RETRY, POLICY_RL
 from benchmark_agents import load_ppo_agent
 from temporal_league import _snapshot, collect_league_batch
 from temporal_observation import (
+    PASS_ACTION,
     DecisionInput,
     EventKind,
     PublicEventToken,
@@ -167,6 +168,85 @@ def test_deterministic_temporal_batch_uses_masked_argmax():
         deterministic=True,
     )
     assert actual == expected
+
+
+def test_disable_strategic_pass_forces_a_playable_card_but_keeps_forced_pass():
+    torch.manual_seed(44)
+    policy = NativePufferTemporalPolicy(
+        hidden_size=16, num_layers=1, mode_conditioned_heads=True
+    ).eval()
+    with torch.no_grad():
+        policy.puffer_policy.decoder.card_and_pass.weight.zero_()
+        policy.puffer_policy.decoder.card_and_pass.bias.zero_()
+        policy.puffer_policy.decoder.card_and_pass.bias[50] = 100.0
+
+    playable = _decision(seat=0)
+    forced_pass = DecisionInput(
+        playable.observation,
+        tuple(index == PASS_ACTION for index in range(55)),
+    )
+    runtimes = (
+        _runtime(policy, seat=0, seed=301),
+        _runtime(policy, seat=1, seed=302),
+    )
+    actions = _batch_temporal_actions(
+        policy,
+        list(zip(runtimes, (playable, forced_pass))),
+        None,
+        deterministic=True,
+        disable_strategic_pass=True,
+    )
+
+    assert actions[0] != PASS_ACTION
+    assert playable.legal_actions[actions[0]]
+    assert actions[1] == PASS_ACTION
+
+
+def test_strategic_pass_hand_cap_allows_pass_only_with_one_card():
+    torch.manual_seed(45)
+    policy = NativePufferTemporalPolicy(
+        hidden_size=16, num_layers=1, mode_conditioned_heads=True
+    ).eval()
+    with torch.no_grad():
+        policy.puffer_policy.decoder.card_and_pass.weight.zero_()
+        policy.puffer_policy.decoder.card_and_pass.bias.zero_()
+        policy.puffer_policy.decoder.card_and_pass.bias[50] = 100.0
+
+    many_cards = _decision(seat=0)
+    one_card_observation = build_private_observation(
+        own_cards=(4,),
+        current_suit="harten",
+        current_rank=5,
+        public_hand_sizes=(1, 3),
+        observer_index=0,
+        current_player_index=0,
+        direction=1,
+        penalty_amount=0,
+        public_sorts_played=(2, 1, 0, 0, 0),
+    )
+    one_card = DecisionInput(
+        one_card_observation,
+        build_legal_actions(
+            own_cards=(4,),
+            current_suit="harten",
+            current_rank=5,
+            penalty_amount=0,
+        ),
+    )
+    runtimes = (
+        _runtime(policy, seat=0, seed=401),
+        _runtime(policy, seat=1, seed=402),
+    )
+    actions = _batch_temporal_actions(
+        policy,
+        list(zip(runtimes, (many_cards, one_card))),
+        None,
+        deterministic=True,
+        strategic_pass_max_hand_size=1,
+    )
+
+    assert actions[0] != PASS_ACTION
+    assert actions[1] == PASS_ACTION
 
 
 def test_drawn_identity_and_opponent_cards_never_cross_safe_boundary():

@@ -12,9 +12,13 @@ pyproject.toml
 uv.lock
 repomix-output.txt
 .python-version
+# Raw training checkpoints stay local.  Promotion-backed winners belong in
+# /models/best, where normal `git add` tracks both PyTorch checkpoint formats.
 *.pth
 !/ppo_actor_100run3.pth
+!/models/best/*.pth
 *.pt
+!/models/best/*.pt
 /experiments/
 # Autoresearch keeps full per-deal evidence locally; the committed compact
 # summary and report deliberately omit these often multi-megabyte raw files.

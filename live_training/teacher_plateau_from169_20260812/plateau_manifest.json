@@ -1,0 +1,310 @@
+{
+  "baseline": "/home/tommie/Pesten/live_training/ludicrous_puffer_192x2/latest.pt",
+  "error": "CalledProcessError(1, ['/home/tommie/Pesten/puffer4-native/.venv/bin/python', 'train_puffer_fast.py', '--resume', '/home/tommie/Pesten/live_training/teacher_plateau_20260812/round_001/training/latest.pt', '--output-dir', '/home/tommie/Pesten/live_training/teacher_plateau_from169_20260812/round_001/training', '--champion', '/home/tommie/Pesten/live_training/long_segments/segment_0058/mlp/ppo_actor_64.pth', '--epochs', '60', '--games-per-epoch', '2048', '--rollout-workers', '10', '--rollout-engine', 'vector', '--learning-rate', '5e-05', '--update-epochs', '4', '--minibatch-trajectories', '128', '--diagnostic-minibatch-trajectories', '256', '--target-kl', '0.015', '--early-stop-diagnostic-trajectories', '512', '--checkpoint-every', '60', '--evaluate-every', '61', '--evaluation-pairs', '1', '--schedule', 'current_selfplay,ppo_champion,canonical_random', '--player-count-schedule', '2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,5,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8', '--seed', '20260900', '--campaign-offset', '169', '--persistent-replay', '--device', 'cuda'])",
+  "finished_at_unix": 1786550138.736394,
+  "initial_checkpoint": "/home/tommie/Pesten/live_training/teacher_plateau_20260812/round_001/training/latest.pt",
+  "initial_weighted_result": {
+    "after_normalized_win_share": 1.2466245275888133,
+    "after_score": 0.36875221180917994,
+    "before_normalized_win_share": 1.2254133282942807,
+    "before_score": 0.36343974627769976,
+    "delta": 0.005312465531480081,
+    "delta_hoeffding_ci99_9": [
+      -0.04922869331225595,
+      0.0598536243752161
+    ],
+    "delta_hoeffding_margin99_9": 0.054541158843736025,
+    "delta_normal_ci99_9": [
+      -0.007298633239259854,
+      0.017923564302220016
+    ],
+    "delta_normalized_ci99_9": [
+      -0.017870850768527638,
+      0.060293249357592685
+    ],
+    "delta_normalized_hoeffding_ci99_9": [
+      -0.18824539760952616,
+      0.2306677961985912
+    ],
+    "delta_normalized_hoeffding_margin99_9": 0.20945659690405868,
+    "delta_normalized_standard_error": 0.011877141033083282,
+    "delta_normalized_win_share": 0.021211199294532523,
+    "delta_standard_error": 0.0038325471268917666,
+    "positive_distribution_free_99_9": false,
+    "positive_normal_99_9": false,
+    "weights": [
+      {
+        "blocks": 300,
+        "opponent": "canonical_random",
+        "players": 2,
+        "weight": 0.07407407407407407
+      },
+      {
+        "blocks": 300,
+        "opponent": "canonical_random",
+        "players": 3,
+        "weight": 0.07407407407407407
+      },
+      {
+        "blocks": 300,
+        "opponent": "canonical_random",
+        "players": 4,
+        "weight": 0.07407407407407407
+      },
+      {
+        "blocks": 300,
+        "opponent": "canonical_random",
+        "players": 5,
+        "weight": 0.031746031746031744
+      },
+      {
+        "blocks": 300,
+        "opponent": "canonical_random",
+        "players": 6,
+        "weight": 0.026455026455026454
+      },
+      {
+        "blocks": 300,
+        "opponent": "canonical_random",
+        "players": 7,
+        "weight": 0.026455026455026454
+      },
+      {
+        "blocks": 300,
+        "opponent": "canonical_random",
+        "players": 8,
+        "weight": 0.026455026455026454
+      },
+      {
+        "blocks": 300,
+        "opponent": "mlp",
+        "players": 2,
+        "weight": 0.07407407407407407
+      },
+      {
+        "blocks": 300,
+        "opponent": "mlp",
+        "players": 3,
+        "weight": 0.07407407407407407
+      },
+      {
+        "blocks": 300,
+        "opponent": "mlp",
+        "players": 4,
+        "weight": 0.07407407407407407
+      },
+      {
+        "blocks": 300,
+        "opponent": "mlp",
+        "players": 5,
+        "weight": 0.031746031746031744
+      },
+      {
+        "blocks": 300,
+        "opponent": "mlp",
+        "players": 6,
+        "weight": 0.026455026455026454
+      },
+      {
+        "blocks": 300,
+        "opponent": "mlp",
+        "players": 7,
+        "weight": 0.026455026455026454
+      },
+      {
+        "blocks": 300,
+        "opponent": "mlp",
+        "players": 8,
+        "weight": 0.026455026455026454
+      },
+      {
+        "blocks": 300,
+        "opponent": "self_anchor",
+        "players": 2,
+        "weight": 0.07407407407407407
+      },
+      {
+        "blocks": 300,
+        "opponent": "self_anchor",
+        "players": 3,
+        "weight": 0.07407407407407407
+      },
+      {
+        "blocks": 300,
+        "opponent": "self_anchor",
+        "players": 4,
+        "weight": 0.07407407407407407
+      },
+      {
+        "blocks": 300,
+        "opponent": "self_anchor",
+        "players": 5,
+        "weight": 0.031746031746031744
+      },
+      {
+        "blocks": 300,
+        "opponent": "self_anchor",
+        "players": 6,
+        "weight": 0.026455026455026454
+      },
+      {
+        "blocks": 300,
+        "opponent": "self_anchor",
+        "players": 7,
+        "weight": 0.026455026455026454
+      },
+      {
+        "blocks": 300,
+        "opponent": "self_anchor",
+        "players": 8,
+        "weight": 0.026455026455026454
+      }
+    ]
+  },
+  "kind": "small_teacher_rlvr_until_confirmed_plateau",
+  "mlp": "/home/tommie/Pesten/live_training/long_segments/segment_0058/mlp/ppo_actor_64.pth",
+  "protocol": {
+    "block_epochs": 60,
+    "bulk_2_3_4_fraction": 0.6666666666666666,
+    "confirmation_blocks_per_stratum": 600,
+    "confirmation_seed_is_disjoint": true,
+    "consecutive_monitor_blocks": 2,
+    "games_per_epoch": 2048,
+    "initial_completed_phases": 169,
+    "larger_model_training": false,
+    "monitor_blocks_per_stratum": 300,
+    "opponent_schedule": [
+      "current_selfplay",
+      "ppo_champion",
+      "canonical_random"
+    ],
+    "plateau_confidence": "paired normal 99.9 percent",
+    "plateau_materiality_per_block": 0.02,
+    "plateau_metric": "weighted normalized win-share delta",
+    "player_count_schedule": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      6,
+      6,
+      6,
+      6,
+      6,
+      7,
+      7,
+      7,
+      7,
+      7,
+      8,
+      8,
+      8,
+      8,
+      8
+    ],
+    "tail_5_8_fraction": 0.3333333333333333
+  },
+  "rounds": [
+    {
+      "before": "/home/tommie/Pesten/live_training/teacher_plateau_20260812/round_001/training/latest.pt",
+      "phase_end": 228,
+      "phase_start": 169,
+      "round": 1,
+      "status": "training",
+      "training_command": [
+        "/home/tommie/Pesten/puffer4-native/.venv/bin/python",
+        "train_puffer_fast.py",
+        "--resume",
+        "/home/tommie/Pesten/live_training/teacher_plateau_20260812/round_001/training/latest.pt",
+        "--output-dir",
+        "/home/tommie/Pesten/live_training/teacher_plateau_from169_20260812/round_001/training",
+        "--champion",
+        "/home/tommie/Pesten/live_training/long_segments/segment_0058/mlp/ppo_actor_64.pth",
+        "--epochs",
+        "60",
+        "--games-per-epoch",
+        "2048",
+        "--rollout-workers",
+        "10",
+        "--rollout-engine",
+        "vector",
+        "--learning-rate",
+        "5e-05",
+        "--update-epochs",
+        "4",
+        "--minibatch-trajectories",
+        "128",
+        "--diagnostic-minibatch-trajectories",
+        "256",
+        "--target-kl",
+        "0.015",
+        "--early-stop-diagnostic-trajectories",
+        "512",
+        "--checkpoint-every",
+        "60",
+        "--evaluate-every",
+        "61",
+        "--evaluation-pairs",
+        "1",
+        "--schedule",
+        "current_selfplay,ppo_champion,canonical_random",
+        "--player-count-schedule",
+        "2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,5,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8",
+        "--seed",
+        "20260900",
+        "--campaign-offset",
+        "169",
+        "--persistent-replay",
+        "--device",
+        "cuda"
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "started_at_unix": 1786550011.270651,
+  "status": "failed"
+}

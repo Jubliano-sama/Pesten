@@ -1,0 +1,112 @@
+{
+  "after": {
+    "label": "teacher_229_pass_disabled",
+    "path": "/home/tommie/Pesten/live_training/teacher_plateau_from169_gpu_20260812/round_001/training/latest.pt",
+    "sha256": "88b49b6dbc8f5f0791c8d2859fce0d7940db7472792e1508cfc18aaddba1c532"
+  },
+  "after_result": {
+    "blocks": 50000,
+    "draws": 0,
+    "games": 100000,
+    "losses": 26926,
+    "outright_win_rate": 0.73074,
+    "outright_win_rate_hoeffding_ci99_9": [
+      0.7220216845322378,
+      0.7394583154677621
+    ],
+    "outright_win_rate_normal_ci99_9": [
+      0.7262361613093556,
+      0.7352438386906442
+    ],
+    "outright_win_rate_standard_error": 0.0013687287957701217,
+    "score_rate_draws_half": 0.73074,
+    "score_rate_normal_ci99_9": [
+      0.7262361613093556,
+      0.7352438386906442
+    ],
+    "score_rate_standard_error": 0.0013687287957701217,
+    "wins": 73074
+  },
+  "before": {
+    "label": "teacher_229_normal_pass",
+    "path": "/home/tommie/Pesten/live_training/teacher_plateau_from169_gpu_20260812/round_001/training/latest.pt",
+    "sha256": "88b49b6dbc8f5f0791c8d2859fce0d7940db7472792e1508cfc18aaddba1c532"
+  },
+  "before_result": {
+    "blocks": 50000,
+    "draws": 51,
+    "games": 100000,
+    "losses": 21969,
+    "outright_win_rate": 0.7798,
+    "outright_win_rate_hoeffding_ci99_9": [
+      0.7710816845322379,
+      0.7885183154677622
+    ],
+    "outright_win_rate_normal_ci99_9": [
+      0.7755800715739738,
+      0.7840199284260263
+    ],
+    "outright_win_rate_standard_error": 0.0012824476961817465,
+    "score_rate_draws_half": 0.780055,
+    "score_rate_normal_ci99_9": [
+      0.7758382547860956,
+      0.7842717452139045
+    ],
+    "score_rate_standard_error": 0.0012814803093827336,
+    "wins": 77980
+  },
+  "elapsed_seconds": 219.19987368899456,
+  "kind": "matched_canonical_random_1v1_batched_exact_engine",
+  "mlp_loader_dependency": {
+    "path": "/home/tommie/Pesten/live_training/long_segments/segment_0058/mlp/ppo_actor_64.pth",
+    "sha256": "e67b9c26aeaf16508925c9109510d4dd5da0416fda11604a5b234d2d6d07fe43",
+    "used_as_opponent": false
+  },
+  "opponent": {
+    "game_rng": "per-game numpy.random.RandomState(deal_seed), shared by deal, hand shuffle, and recycle",
+    "id": "randomAgent.AgentRandom-canonical-v1",
+    "opponent_rng_seed": null,
+    "policy_visibility": "canonical opponent RNG state never crosses the DecisionInput boundary",
+    "scalar_source": "randomAgent.AgentRandom",
+    "suit_rng": "per-game random.Random(deal_seed).randint(0, 3)"
+  },
+  "paired_outright_win_rate": {
+    "after_minus_before": -0.04906,
+    "hoeffding_ci99_9": [
+      -0.0664966309355243,
+      -0.031623369064475694
+    ],
+    "normal_ci99_9": [
+      -0.054157779263287464,
+      -0.043962220736712534
+    ],
+    "standard_error": 0.0015492289469947959
+  },
+  "paired_score_rate": {
+    "after_minus_before": -0.049315,
+    "hoeffding_ci99_9": [
+      -0.0667516309355243,
+      -0.03187836906447569
+    ],
+    "normal_ci99_9": [
+      -0.054410201419130985,
+      -0.04421979858086901
+    ],
+    "standard_error": 0.0015484455331626565
+  },
+  "protocol": {
+    "blocks": 50000,
+    "candidate_seats_per_block": 2,
+    "confidence": "two-sided 99.9% normal and distribution-free Hoeffding intervals over independent deal blocks",
+    "deterministic_temporal_actions": true,
+    "disable_strategic_pass_after": true,
+    "disable_strategic_pass_before": false,
+    "disabled_pass_definition": "mask PASS_ACTION iff at least one playable card exists; retain forced draw and penalty acceptance",
+    "engine": "BatchedPesten exact-semantics evaluator",
+    "games_per_model": 100000,
+    "matched_model_seeds": true,
+    "seed_end_exclusive": 4130150001,
+    "seed_start_inclusive": 4130100001
+  },
+  "schema_version": 1
+}

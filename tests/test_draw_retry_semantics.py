@@ -6,6 +6,7 @@ from torch import nn
 import card
 import deck
 import game
+import randomAgent
 from ai_observation import (
     ACTION_COUNT,
     COMPATIBLE_START,
@@ -188,6 +189,34 @@ def test_draw_retry_mask_exposes_only_drawn_card_and_pass():
         DRAWN_CARD,
         PASS_ACTION,
     ]
+
+
+def test_canonical_random_plays_a_compatible_card_after_forced_draw():
+    """AgentRandom cannot voluntarily pass, so its retry is unambiguous.
+
+    Reaching the draw proves every card already held was incompatible.  The
+    table state is unchanged by drawing, which makes a compatible drawn card
+    the only compatible card in the hand on the retry call.
+    """
+
+    instance = game.Game([randomAgent.AgentRandom, PassiveAgent])
+    actor = instance.players[0]
+    actor.mydeck.cards = [card.Card(12)]  # Ruiten ace: not hearts or rank five.
+    instance.players[1].mydeck.cards = [card.Card(28)]
+    instance.current_player_index = 0
+    instance.current_sort = "harten"
+    instance.current_true_number = 5
+    instance.grab_deck = deck.Deck([card.Card(DRAWN_CARD)])
+    instance.game_deck = deck.Deck([card.Card(OTHER_COMPATIBLE_CARD)])
+
+    instance.simulate_turn()
+
+    assert [held.number for held in actor.mydeck.cards] == [12]
+    assert [held.number for held in instance.game_deck.cards] == [
+        OTHER_COMPATIBLE_CARD,
+        DRAWN_CARD,
+    ]
+    assert instance.cards_played == 2  # Forced pass/draw, then drawn-card play.
 
 
 @pytest.mark.parametrize(

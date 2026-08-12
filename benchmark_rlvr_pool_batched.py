@@ -163,10 +163,31 @@ def _evaluate_task(task: dict) -> dict:
                 decision = build_safe_decision(
                     engine, row, seat, runtime.cursor
                 )
-                group = temporal_groups.setdefault(
-                    id(runtime.policy), (runtime.policy, [])
+                disable_strategic_pass = bool(
+                    task.get(f"disable_pass_{roles[row][seat][1]}", False)
                 )
-                group[1].append((runtime, decision))
+                pass_only_one_card = bool(
+                    task.get(
+                        f"pass_only_one_card_{roles[row][seat][1]}", False
+                    )
+                )
+                strategic_pass_max_hand_size = (
+                    1 if pass_only_one_card else None
+                )
+                group = temporal_groups.setdefault(
+                    (
+                        id(runtime.policy),
+                        disable_strategic_pass,
+                        strategic_pass_max_hand_size,
+                    ),
+                    (
+                        runtime.policy,
+                        disable_strategic_pass,
+                        strategic_pass_max_hand_size,
+                        [],
+                    ),
+                )
+                group[3].append((runtime, decision))
             elif kind == "mlp":
                 if (
                     int(engine.phase[row]) != PHASE_SUIT
@@ -183,12 +204,21 @@ def _evaluate_task(task: dict) -> dict:
             else:
                 raise AssertionError(f"unexpected role {kind}")
 
-        for _, (policy, entries) in temporal_groups.items():
+        for _, (
+            policy,
+            disable_strategic_pass,
+            strategic_pass_max_hand_size,
+            entries,
+        ) in temporal_groups.items():
             chosen = _batch_temporal_actions(
                 policy,
                 entries,
                 None,
                 deterministic=True,
+                disable_strategic_pass=disable_strategic_pass,
+                strategic_pass_max_hand_size=(
+                    strategic_pass_max_hand_size
+                ),
             )
             for (runtime, _), action in zip(entries, chosen):
                 actions[runtime.game_index] = action
@@ -207,6 +237,10 @@ def _evaluate_task(task: dict) -> dict:
         "before": np.zeros(blocks, dtype=np.float64),
         "after": np.zeros(blocks, dtype=np.float64),
     }
+    win_shares = {
+        "before": np.zeros(blocks, dtype=np.float64),
+        "after": np.zeros(blocks, dtype=np.float64),
+    }
     totals = {
         "before": defaultdict(int),
         "after": defaultdict(int),
@@ -220,15 +254,19 @@ def _evaluate_task(task: dict) -> dict:
         elif winner == candidate_seat:
             totals[variant]["wins"] += 1
             scores[variant][block] += 1.0
+            win_shares[variant][block] += 1.0
         else:
             totals[variant]["losses"] += 1
     for variant in scores:
         scores[variant] /= players
+        win_shares[variant] /= players
     return {
         "opponent": task["opponent"],
         "players": players,
         "before_scores": scores["before"].tolist(),
         "after_scores": scores["after"].tolist(),
+        "before_win_shares": win_shares["before"].tolist(),
+        "after_win_shares": win_shares["after"].tolist(),
         "totals": {
             name: dict(values) for name, values in totals.items()
         },

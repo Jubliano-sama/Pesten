@@ -377,6 +377,8 @@ def _batch_temporal_actions(
     stats: BatchRolloutStats | None,
     *,
     deterministic: bool = False,
+    disable_strategic_pass: bool = False,
+    strategic_pass_max_hand_size: int | None = None,
 ) -> list[int]:
     """Advance variable-length event streams, then sample one action per seat."""
 
@@ -428,6 +430,31 @@ def _batch_temporal_actions(
             device=device,
             dtype=torch.bool,
         )
+        if disable_strategic_pass and strategic_pass_max_hand_size is not None:
+            raise ValueError(
+                "disable_strategic_pass and strategic_pass_max_hand_size "
+                "are mutually exclusive"
+            )
+        if disable_strategic_pass or strategic_pass_max_hand_size is not None:
+            # Keep PASS legal when it is the only card-phase action (forced
+            # draw or penalty acceptance).  For an ablation, remove strategic
+            # pass either universally or above a safe observed hand-size cap.
+            # Suit decisions are unaffected.
+            has_playable_card = torch.any(legal[..., :50], dim=-1)
+            strategic_pass_allowed = torch.zeros_like(has_playable_card)
+            if strategic_pass_max_hand_size is not None:
+                strategic_pass_allowed = torch.tensor(
+                    [
+                        decision.observation.values[91]
+                        <= strategic_pass_max_hand_size
+                        for decision in decisions
+                    ],
+                    device=device,
+                    dtype=torch.bool,
+                )
+            legal[..., PASS_ACTION] &= (
+                ~has_playable_card | strategic_pass_allowed
+            )
         masked_logits = logits.masked_fill(
             ~legal, torch.finfo(logits.dtype).min
         )
