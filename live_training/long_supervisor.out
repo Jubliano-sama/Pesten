@@ -1,0 +1,45 @@
+/home/tommie/Pesten/venv/lib/python3.13/site-packages/torch/cuda/__init__.py:64: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+{"command": "/home/tommie/Pesten/venv/bin/python", "elapsed_seconds": 119.20132764399978, "log": "/home/tommie/Pesten/live_training/long_segments/segment_0054/mlp/training.log", "returncode": 0}
+{"command": "/home/tommie/Pesten/venv/bin/python", "elapsed_seconds": 21.23979994199999, "log": "/home/tommie/Pesten/live_training/measurements/mlp_long_segment_0054_benchmark.log", "returncode": 0}
+{"command": "/home/tommie/Pesten/puffer4-native/.venv/bin/python", "elapsed_seconds": 1247.7817143040002, "log": "/home/tommie/Pesten/live_training/long_segments/segment_0054/puffer/training.log", "returncode": 0}
+{"command": "/home/tommie/Pesten/puffer4-native/.venv/bin/python", "elapsed_seconds": 204.01940928000022, "log": "/home/tommie/Pesten/live_training/measurements/puffer_long_segment_0054_benchmark.log", "returncode": 0}
+{"benchmark_scheduled": true, "micro_cycles": 16, "mlp": {"random": {"ci95": [0.6853333333333333, 0.7173333333333334], "delta_vs_old": -0.006333333333333333, "score": 0.7013333333333334}}, "puffer": {"old_mlp": {"ci95": [0.5181666666666667, 0.5518333333333333], "games": 3000, "score": 0.5348333333333334}, "random": {"ci95": [0.7023333333333334, 0.7326666666666667], "games": 3000, "score": 0.7173333333333334}}, "segment": 54, "source_changed": false}
+{"command": "/home/tommie/Pesten/venv/bin/python", "elapsed_seconds": 117.62152918099946, "log": "/home/tommie/Pesten/live_training/long_segments/segment_0055/mlp/training.log", "returncode": 0}
+{"command": "/home/tommie/Pesten/puffer4-native/.venv/bin/python", "elapsed_seconds": 1225.756300526, "log": "/home/tommie/Pesten/live_training/long_segments/segment_0055/puffer/training.log", "returncode": 0}
+{"benchmark_scheduled": false, "micro_cycles": 16, "mlp": null, "puffer": null, "segment": 55, "source_changed": false}
+{"command": "/home/tommie/Pesten/venv/bin/python", "elapsed_seconds": 105.70940019600039, "log": "/home/tommie/Pesten/live_training/long_segments/segment_0056/mlp/training.log", "returncode": 0}
+{"command": "/home/tommie/Pesten/puffer4-native/.venv/bin/python", "elapsed_seconds": 1327.4243418719998, "log": "/home/tommie/Pesten/live_training/long_segments/segment_0056/puffer/training.log", "returncode": 0}
+{"benchmark_scheduled": false, "micro_cycles": 16, "mlp": null, "puffer": null, "segment": 56, "source_changed": false}
+{"command": "/home/tommie/Pesten/venv/bin/python", "elapsed_seconds": 114.43685736899988, "log": "/home/tommie/Pesten/live_training/long_segments/segment_0057/mlp/training.log", "returncode": 0}
+{"command": "/home/tommie/Pesten/puffer4-native/.venv/bin/python", "elapsed_seconds": 1038.0205102659993, "log": "/home/tommie/Pesten/live_training/long_segments/segment_0057/puffer/training.log", "returncode": 0}
+{"benchmark_scheduled": false, "micro_cycles": 16, "mlp": null, "puffer": null, "segment": 57, "source_changed": false}
+{"command": "/home/tommie/Pesten/venv/bin/python", "elapsed_seconds": 126.1715697999989, "log": "/home/tommie/Pesten/live_training/long_segments/segment_0058/mlp/training.log", "returncode": 0}
+{"command": "/home/tommie/Pesten/venv/bin/python", "elapsed_seconds": 18.936905554999612, "log": "/home/tommie/Pesten/live_training/measurements/mlp_long_segment_0058_benchmark.log", "returncode": 0}
+{"command": "/home/tommie/Pesten/puffer4-native/.venv/bin/python", "elapsed_seconds": 1095.935734437, "log": "/home/tommie/Pesten/live_training/long_segments/segment_0058/puffer/training.log", "returncode": 0}
+{"command": "/home/tommie/Pesten/puffer4-native/.venv/bin/python", "elapsed_seconds": 181.36965799899917, "log": "/home/tommie/Pesten/live_training/measurements/puffer_long_segment_0058_benchmark.log", "returncode": 0}
+{"benchmark_scheduled": true, "micro_cycles": 16, "mlp": {"random": {"ci95": [0.7096666666666667, 0.7413333333333333], "delta_vs_old": 0.0345, "score": 0.7256666666666667}}, "puffer": {"old_mlp": {"ci95": [0.5338333333333334, 0.5666708333333332], "games": 3000, "score": 0.5505}, "random": {"ci95": [0.7216666666666667, 0.752], "games": 3000, "score": 0.7368333333333333}}, "segment": 58, "source_changed": false}
+{"command": "/home/tommie/Pesten/venv/bin/python", "elapsed_seconds": 98.36075373800122, "log": "/home/tommie/Pesten/live_training/long_segments/segment_0059/mlp/training.log", "returncode": 1}
+Traceback (most recent call last):
+  File "/home/tommie/Pesten/long_training_supervisor.py", line 490, in <module>
+    main()
+    ~~~~^^
+  File "/home/tommie/Pesten/long_training_supervisor.py", line 334, in main
+    write_state()
+    ~~~~~~~~~~~^^
+  File "/home/tommie/Pesten/long_training_supervisor.py", line 287, in write_state
+    state_path.write_text(
+    ~~~~~~~~~~~~~~~~~~~~~^
+        json.dumps(state, indent=2, sort_keys=True) + "\n",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        encoding="utf-8",
+        ^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/tommie/.local/share/uv/python/cpython-3.13.11-linux-x86_64-gnu/lib/python3.13/pathlib/_local.py", line 555, in write_text
+    return PathBase.write_text(self, data, encoding, errors, newline)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tommie/.local/share/uv/python/cpython-3.13.11-linux-x86_64-gnu/lib/python3.13/pathlib/_abc.py", line 652, in write_text
+    return f.write(data)
+           ~~~~~~~^^^^^^
+OSError: [Errno 28] No space left on device

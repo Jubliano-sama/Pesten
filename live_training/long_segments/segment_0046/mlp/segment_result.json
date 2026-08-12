@@ -1,0 +1,124 @@
+{
+  "agent_sets": [
+    [
+      "smart",
+      "rl"
+    ],
+    [
+      "smart",
+      "rl"
+    ],
+    [
+      "random",
+      "rl"
+    ],
+    [
+      "self",
+      "self",
+      "rl"
+    ],
+    [
+      "self",
+      "self",
+      "rl"
+    ],
+    [
+      "smart",
+      "smart",
+      "rl",
+      "random"
+    ],
+    [
+      "random",
+      "random",
+      "rl",
+      "smart"
+    ],
+    [
+      "smart",
+      "random",
+      "random",
+      "smart",
+      "rl",
+      "random"
+    ],
+    [
+      "random",
+      "smart",
+      "random",
+      "smart",
+      "random",
+      "rl",
+      "random"
+    ],
+    [
+      "random",
+      "smart",
+      "random",
+      "smart",
+      "random",
+      "random",
+      "rl",
+      "random"
+    ]
+  ],
+  "elapsed_seconds": 63.07505131699145,
+  "episodes_per_iteration": 512,
+  "hyperparameters": {
+    "clip": 0.1,
+    "learning_rate": 3e-05,
+    "past_policy_probability": 0.35,
+    "temperature": 0.8,
+    "updates_per_iteration": 3
+  },
+  "iterations": 64,
+  "kind": "warm_mlp_ppo_segment",
+  "latest": {
+    "actor": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0046/mlp/ppo_actor_64.pth",
+      "sha256": "aa70f1a106483e60b7014025b964212af468e19791ae8b41f67aab1dc7a8d2a4"
+    },
+    "actor_optimizer": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0046/mlp/ppo_actor_opt_64.pth",
+      "sha256": "9ab4db079df73ba5bdd4594431b808babf76713a1c4c40869a0fae5c8b701305"
+    },
+    "critic": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0046/mlp/ppo_critic_64.pth",
+      "sha256": "3d8f3078b4a724d69458c6b46d24e2c0bb3296c970ec2cf2c28b1783f3aeaeb9"
+    },
+    "critic_optimizer": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0046/mlp/ppo_critic_opt_64.pth",
+      "sha256": "fd8cfad76492e9d40836194bbb3781b9fd767ca32249acb6b138ae56b2abd82b"
+    }
+  },
+  "runtime": {
+    "actor_device": "cuda",
+    "compile_updates": true,
+    "cuda": true,
+    "device": "cuda",
+    "python": "3.13.11 (main, Jan 28 2026, 00:01:45) [Clang 21.1.4 ]",
+    "rollout_device": "cpu",
+    "torch": "2.13.0+cu130",
+    "torch_threads": 8
+  },
+  "schema_version": 1,
+  "seed": 2026080147,
+  "warm_parent": {
+    "actor": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0045/mlp/ppo_actor_64.pth",
+      "sha256": "bf4d3a96d6c600bba13b03a7469daf91db31f98983f2a5e29f09fbcf4ac347eb"
+    },
+    "actor_optimizer": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0045/mlp/ppo_actor_opt_64.pth",
+      "sha256": "9ab4db079df73ba5bdd4594431b808babf76713a1c4c40869a0fae5c8b701305"
+    },
+    "critic": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0045/mlp/ppo_critic_64.pth",
+      "sha256": "e98e5dd8d031fa80c27066c15e2ffff5b7d09896bc3b431b6ba85c72086953fa"
+    },
+    "critic_optimizer": {
+      "path": "/home/tommie/Pesten/live_training/long_segments/segment_0045/mlp/ppo_critic_opt_64.pth",
+      "sha256": "fd8cfad76492e9d40836194bbb3781b9fd767ca32249acb6b138ae56b2abd82b"
+    }
+  }
+}

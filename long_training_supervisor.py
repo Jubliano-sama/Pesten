@@ -109,6 +109,25 @@ def _load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _segment_result_summary(path: Path) -> dict:
+    """Keep restart/evidence metadata without copying full training curves."""
+    result = _load_json(path)
+    result.pop("curve", None)
+    result["manifest_path"] = str(path.resolve())
+    result["manifest_sha256"] = _sha256(path)
+    return result
+
+
+def _write_json_atomic(path: Path, payload: dict) -> None:
+    """Replace a JSON state file only after the complete payload is durable."""
+    temporary = path.with_name(f".{path.name}.tmp")
+    temporary.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    temporary.replace(path)
+
+
 def _measurement_summary(path: Path) -> dict:
     result = _load_json(path)
     if "results" in result:
@@ -127,6 +146,34 @@ def _measurement_summary(path: Path) -> dict:
             "delta_vs_old": opponent["paired_delta"].get("mean"),
         }
         for opponent in result.get("pool", [])
+    }
+
+
+def _prune_segment(segment_root: Path, mlp_iterations: int) -> dict:
+    """Drop per-iteration checkpoints, keeping the final resume files."""
+    kept = []
+    removed = []
+    mlp_dir = segment_root / "mlp"
+    if mlp_dir.is_dir():
+        for checkpoint in sorted(mlp_dir.glob("ppo_*.pth")):
+            if checkpoint.name.endswith(f"_{mlp_iterations}.pth"):
+                kept.append(str(checkpoint))
+            else:
+                checkpoint.unlink(missing_ok=True)
+                removed.append(str(checkpoint))
+    puffer_dir = segment_root / "puffer"
+    if puffer_dir.is_dir():
+        for checkpoint in sorted(puffer_dir.glob("puffer_epoch_*.pt")):
+            if checkpoint.name == "latest.pt":
+                kept.append(str(checkpoint))
+            else:
+                checkpoint.unlink(missing_ok=True)
+                removed.append(str(checkpoint))
+    return {
+        "kept": len(kept),
+        "removed": len(removed),
+        "mlp": str(mlp_dir / f"ppo_actor_{mlp_iterations}.pth"),
+        "puffer": str(puffer_dir / "latest.pt"),
     }
 
 
@@ -157,6 +204,13 @@ def _build_parser() -> argparse.ArgumentParser:
         default=0,
         help="seat-balanced pairs per measurement run when one is scheduled; "
         "0 falls back to --pairs",
+    )
+    parser.add_argument(
+        "--prune-checkpoints",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="delete per-iteration MLP and per-epoch Puffer checkpoints of a "
+        "completed segment, keeping only the final resume files (default True)",
     )
     parser.add_argument("--mlp-seed", type=int, default=2026080101)
     parser.add_argument("--puffer-seed", type=int, default=54010001)
@@ -284,10 +338,7 @@ def main() -> None:
 
     def write_state() -> None:
         state["updated_at"] = datetime.now().astimezone().isoformat()
-        state_path.write_text(
-            json.dumps(state, indent=2, sort_keys=True) + "\n",
-            encoding="utf-8",
-        )
+        _write_json_atomic(state_path, state)
 
     write_state()
     while (
@@ -323,7 +374,9 @@ def main() -> None:
         ]
         record["mlp_returncode"] = _run(mlp_command, mlp_dir / "training.log")
         if record["mlp_returncode"] == 0:
-            record["mlp_segment"] = _load_json(mlp_dir / "segment_result.json")
+            record["mlp_segment"] = _segment_result_summary(
+                mlp_dir / "segment_result.json"
+            )
         else:
             record["mlp_segment"] = {
                 "error": "missing_segment_result",
@@ -397,7 +450,7 @@ def main() -> None:
         ]
         record["puffer_returncode"] = _run(puffer_command, puffer_dir / "training.log")
         if record["puffer_returncode"] == 0:
-            record["puffer_segment"] = _load_json(
+            record["puffer_segment"] = _segment_result_summary(
                 puffer_dir / "segment_result.json"
             )
         else:
@@ -446,6 +499,11 @@ def main() -> None:
         }
         state["source_fingerprint"] = source_fingerprint()
         write_state()
+        if args.prune_checkpoints:
+            record["pruned"] = _prune_segment(
+                segment_root, mlp_iterations
+            )
+            write_state()
         print(
             json.dumps(
                 {

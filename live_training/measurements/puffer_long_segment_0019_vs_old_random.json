@@ -1,0 +1,59 @@
+{
+  "checkpoint": {
+    "epoch": 1172,
+    "path": "/home/tommie/Pesten/live_training/long_segments/segment_0019/puffer/latest.pt",
+    "sha256": "1c77f4c648db184bc080db4a186d58ea466b9a99e2e1387e43a1a4a0c6eb025b"
+  },
+  "elapsed_seconds": 27.099795229994925,
+  "kind": "live_native_puffer_benchmark",
+  "protocol": {
+    "candidate_observation": "DecisionInput plus public event tokens only",
+    "fresh_development_seeds": true,
+    "games_per_pair": 2,
+    "pairs_per_opponent": 250,
+    "seat_balanced": true
+  },
+  "results": {
+    "old_mlp": {
+      "average_turns": 41.928,
+      "candidate": "native_puffer_candidate",
+      "draws": 0,
+      "elapsed_seconds": 15.37344840899459,
+      "games": 500,
+      "gate_passed": false,
+      "losses": 244,
+      "opponent": "old_mlp_ppo",
+      "paired_bootstrap_ci95": [
+        0.472,
+        0.554
+      ],
+      "pairs": 250,
+      "score": 0.512,
+      "seed": 54200001,
+      "wins": 256,
+      "wins_as_seat_0": 130,
+      "wins_as_seat_1": 126
+    },
+    "random": {
+      "average_turns": 45.746,
+      "candidate": "native_puffer_candidate",
+      "draws": 0,
+      "elapsed_seconds": 11.724125314009143,
+      "games": 500,
+      "gate_passed": true,
+      "losses": 144,
+      "opponent": "random",
+      "paired_bootstrap_ci95": [
+        0.676,
+        0.748
+      ],
+      "pairs": 250,
+      "score": 0.712,
+      "seed": 54300001,
+      "wins": 356,
+      "wins_as_seat_0": 186,
+      "wins_as_seat_1": 170
+    }
+  },
+  "schema_version": 1
+}
