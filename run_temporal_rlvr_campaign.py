@@ -100,7 +100,7 @@ def main() -> None:
     }
 
     try:
-        for index, (name, before) in enumerate(inputs.items()):
+        for name, before in inputs.items():
             model_dir = output_dir / name
             training_dir = model_dir / "training"
             model_dir.mkdir(parents=True, exist_ok=True)
@@ -194,7 +194,7 @@ def main() -> None:
                 "--chunks-per-stratum",
                 "3",
                 "--seed",
-                str(args.seed + 100_000_000 * (index + 1)),
+                str(args.seed + 100_000_000),
             ]
             model_row["evaluation_command"] = evaluation_command
             atomic_json(manifest, manifest_path)
