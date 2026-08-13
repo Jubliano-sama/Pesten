@@ -1,0 +1,586 @@
+{
+  "schema_version": 1,
+  "kind": "smarter_rule_agent_validation",
+  "created_on": "2026-08-13",
+  "implementation_base_commit": "4ccc872d0096ed95ecd5905370128a67b2784def",
+  "diagnosis": [
+    "The legacy candidate-hand simulation used Card equality in a filtering comprehension, so evaluating one play removed every equal duplicate instead of one physical card.",
+    "The legacy agent ignored the live penalty amount and could return a compatible Jack or Joker when only the active penalty rank could legally be stacked; canonical Game then treated that action as accepting the penalty.",
+    "The legacy Jack suit choice used the most-played public suit rather than a suit represented in the agent's remaining hand.",
+    "The legacy hand score rewarded effect cards for remaining in hand even though an effect card cannot legally finish a game, producing a strategically inverted endgame preference."
+  ],
+  "teacher_analysis": {
+    "role": "descriptive candidate-generation evidence only; no teacher correlation is counted as rule-agent strength evidence",
+    "source_worktree": "/home/tommie/.t3/worktrees/Pesten/t3code-9d0cd582",
+    "source_revision": "afc0939a0408d97de956e869bd6f82179787323b",
+    "analysis_script": "gru_strategy_dashboard/analyze.py",
+    "summary_artifact": "benchmarks/gru_strategy/strategy_summary.json",
+    "checkpoint": {
+      "path": "live_training/rlvr_breakthrough_20260812/teacher/training/latest.pt",
+      "sha256": "e123f4f355e109c7a4b409d1df4eeea7a3526cd7ba106e5be245d9f80f73d27f",
+      "epoch": 4097
+    },
+    "coverage": {
+      "games": 7168,
+      "teacher_decisions": 777357,
+      "player_counts": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "action_styles": [
+        "Varied choices",
+        "Always picks its favorite"
+      ]
+    },
+    "signals_used": {
+      "deterministic_all_tables_strategic_pass_rate": 0.11862617109506988,
+      "two_player_deterministic_jack_play_rate_with_6_plus_cards": 0.040452805060762445,
+      "two_player_deterministic_jack_play_rate_with_1_2_cards": 0.8247787610619469,
+      "two_player_deterministic_joker_play_rate_with_6_plus_cards": 0.08907077515647568,
+      "two_player_deterministic_joker_play_rate_with_1_2_cards": 0.8240740740740741,
+      "two_player_deterministic_joker_play_rate_rival_1_2_cards": 0.5905882352941176,
+      "two_player_deterministic_joker_play_rate_rival_3_plus_cards": 0.12656601349180854
+    },
+    "rank_pressure_rule": {
+      "derivation": "log-odds of deterministic dashboard-teacher play rates by card rank; rounded to three decimals before rule search",
+      "normal_two_player_rank_preferences_for_ranks_0_through_13": [
+        -2.325,
+        0.445,
+        0.075,
+        -0.391,
+        -0.301,
+        -0.388,
+        -0.359,
+        0.13,
+        -0.008,
+        -0.091,
+        -0.266,
+        -0.153,
+        -0.135,
+        -3.166
+      ],
+      "opponent_at_one_card_rank_preferences_for_ranks_0_through_13": [
+        0.366,
+        -0.015,
+        2.105,
+        -0.756,
+        -0.64,
+        -0.77,
+        -0.514,
+        0.625,
+        0.442,
+        -0.619,
+        -0.886,
+        -0.299,
+        -0.336,
+        -0.857
+      ],
+      "runtime_score": "remaining maximum standard-suit count + 6 * applicable rank preference",
+      "scope": "ordinary non-penalty two-player turns only",
+      "information_contract": "own hand, public opponent hand size, current card, and active penalty only; no hidden cards or recurrent state"
+    }
+  },
+  "implemented_policy": [
+    "Use the tuned Smart scorer as the base policy instead of the legacy inverted hand-value function.",
+    "Simulate removal of exactly one physical card, including duplicated Jacks and Jokers.",
+    "During a live penalty, consider only cards of the active penalty rank.",
+    "Choose a Jack suit from the remaining own-hand suit histogram.",
+    "Pass rather than play an effect card as the final card, and preserve the sole ordinary finisher in small hands.",
+    "Save Jack and Joker when they are the only early exits.",
+    "On ordinary two-player turns, combine remaining suit concentration with dashboard-derived rank pressure; use the threat table only when the opponent has exactly one card.",
+    "Keep the prior Smart-based selection path for multiplayer and active-penalty turns.",
+    "Keep canonical and batched implementations behaviorally identical and use only own-hand plus public state."
+  ],
+  "strength_evidence": {
+    "primary_fresh_confirmation_vs_smart": {
+      "engine": "canonical game.Game",
+      "candidate": "bug-fixed SmarterAgent revision 1 before rank-pressure distillation",
+      "opponent": "Smart Agent",
+      "seed_start": 828100000,
+      "independent_deal_blocks": 50000,
+      "seat_rotations_per_deal": 2,
+      "games": 100000,
+      "wins": 55599,
+      "draws": 0,
+      "win_rate": 0.55599,
+      "deal_clustered_normal_ci95": [
+        0.553273,
+        0.558707
+      ],
+      "wins_by_candidate_seat": [
+        28386,
+        27213
+      ],
+      "average_turns": 38.0143
+    },
+    "matched_legacy_and_new_vs_smart": {
+      "engine": "canonical game.Game",
+      "legacy_source": "git show 4ccc872d0096ed95ecd5905370128a67b2784def:smartAgent.py",
+      "seed_start": 828500000,
+      "independent_deal_blocks": 25000,
+      "seat_rotations_per_deal": 2,
+      "games_per_candidate": 50000,
+      "legacy_smarter": {
+        "wins": 13431,
+        "draws": 2,
+        "win_rate": 0.26864,
+        "deal_clustered_normal_ci95": [
+          0.264811,
+          0.272469
+        ],
+        "average_turns": 57.748
+      },
+      "new_smarter": {
+        "revision": "bug-fixed SmarterAgent revision 1 before rank-pressure distillation",
+        "wins": 27551,
+        "draws": 0,
+        "win_rate": 0.55102,
+        "deal_clustered_normal_ci95": [
+          0.54718,
+          0.55486
+        ],
+        "average_turns": 38.0499
+      },
+      "paired_new_minus_legacy": {
+        "percentage_points": 28.238,
+        "deal_clustered_normal_ci95_percentage_points": [
+          27.7034,
+          28.7726
+        ]
+      }
+    },
+    "random_guard": {
+      "engine": "canonical game.Game",
+      "opponent": "randomAgent.AgentRandom",
+      "seed_start": 828300000,
+      "independent_deal_blocks": 25000,
+      "seat_rotations_per_deal": 2,
+      "games_per_candidate": 50000,
+      "smart": {
+        "wins": 32505,
+        "win_rate": 0.6501,
+        "deal_clustered_normal_ci95": [
+          0.646037,
+          0.654163
+        ]
+      },
+      "new_smarter": {
+        "revision": "bug-fixed SmarterAgent revision 1 before rank-pressure distillation",
+        "wins": 35538,
+        "win_rate": 0.71076,
+        "deal_clustered_normal_ci95": [
+          0.706868,
+          0.714652
+        ]
+      },
+      "paired_new_smarter_minus_smart": {
+        "percentage_points": 6.066,
+        "deal_clustered_normal_ci95_percentage_points": [
+          5.5871,
+          6.5449
+        ]
+      }
+    },
+    "dashboard_teacher_1v1": {
+      "role": "direct strength test; this is separate from the descriptive teacher correlations used to design Smarter",
+      "teacher_checkpoint": {
+        "path": "live_training/rlvr_breakthrough_20260812/teacher/training/latest.pt",
+        "sha256": "e123f4f355e109c7a4b409d1df4eeea7a3526cd7ba106e5be245d9f80f73d27f",
+        "epoch": 4097,
+        "architecture": "min_gru",
+        "hidden_size": 192,
+        "num_layers": 2,
+        "parameters": 251384
+      },
+      "opponent": "bug-fixed SmarterAgent revision 1 before rank-pressure distillation",
+      "engine": "BatchedPesten exact-semantics evaluator",
+      "deterministic_teacher_actions": true,
+      "seed_start_inclusive": 829100000,
+      "seed_end_exclusive": 829150000,
+      "independent_deal_blocks": 50000,
+      "seat_rotations_per_deal": 2,
+      "games": 100000,
+      "draws": 8,
+      "teacher_wins": 60684,
+      "smarter_wins": 39308,
+      "teacher_score": 0.60688,
+      "teacher_paired_normal_ci95": [
+        0.6040108268235194,
+        0.6097491731764806
+      ],
+      "teacher_paired_normal_ci99_9": [
+        0.6020630283061529,
+        0.6116969716938471
+      ],
+      "teacher_paired_hoeffding_ci99_9": [
+        0.5981616845322378,
+        0.6155983154677621
+      ],
+      "smarter_score": 0.39312,
+      "smarter_paired_normal_ci95": [
+        0.3902508268235194,
+        0.39598917317648064
+      ],
+      "teacher_minus_smarter_score": 0.21376,
+      "teacher_minus_smarter_paired_normal_ci95": [
+        0.20802165364703873,
+        0.21949834635296117
+      ],
+      "elapsed_seconds": 80.3019553510021,
+      "result": "the dashboard teacher is decisively stronger than the replacement Smarter rule agent"
+    },
+    "rank_pressure_development": {
+      "role": "candidate selection only; none of these deal blocks are counted as final strength confirmation",
+      "teacher_checkpoint_sha256": "e123f4f355e109c7a4b409d1df4eeea7a3526cd7ba106e5be245d9f80f73d27f",
+      "protocol": "common deals, both seats, deterministic teacher actions",
+      "threshold_screen": {
+        "seed_start_inclusive": 829310000,
+        "independent_deal_blocks": 2500,
+        "revision_1_smarter_score": 0.3802,
+        "rank_pressure_with_threat_only_at_one_card_score": 0.4108,
+        "finding": "the dashboard's grouped rival-hand bucket hid a useful split: threat pressure helped at one opposing card but applying it at two cards was worse"
+      },
+      "weight_selection": {
+        "seed_start_inclusive": 829400000,
+        "independent_deal_blocks": 10000,
+        "revision_1_smarter_score": 0.38985,
+        "selected_rule_smarter_score": 0.42705,
+        "paired_selected_minus_revision_1_percentage_points": 3.72,
+        "paired_normal_ci95_percentage_points": [
+          2.9381907375655594,
+          4.50180926243444
+        ],
+        "selected_rule": "remaining suit concentration + 6 * rank preference, no separate follow-up bonus, threat table only at one opposing card"
+      }
+    },
+    "rank_pressure_fresh_preconfirmation_vs_dashboard_teacher": {
+      "role": "fresh disjoint preconfirmation after freezing and implementing the selected rule",
+      "engine": "BatchedPesten exact-semantics evaluator",
+      "seed_start_inclusive": 829700000,
+      "seed_end_exclusive": 829720000,
+      "independent_deal_blocks": 20000,
+      "seat_rotations_per_deal": 2,
+      "games": 40000,
+      "draws": 10,
+      "teacher_wins": 23277,
+      "smarter_wins": 16713,
+      "smarter_score": 0.41795,
+      "smarter_paired_normal_ci95": [
+        0.4134125266005272,
+        0.4224874733994729
+      ]
+    },
+    "rank_pressure_final_confirmation_vs_dashboard_teacher": {
+      "role": "primary fresh disjoint strength confirmation for revision 2",
+      "teacher_checkpoint_sha256": "e123f4f355e109c7a4b409d1df4eeea7a3526cd7ba106e5be245d9f80f73d27f",
+      "engine": "BatchedPesten exact-semantics evaluator",
+      "deterministic_teacher_actions": true,
+      "seed_start_inclusive": 830000000,
+      "seed_end_exclusive": 830050000,
+      "independent_deal_blocks": 50000,
+      "seat_rotations_per_deal": 2,
+      "games": 100000,
+      "draws": 23,
+      "teacher_wins": 57866,
+      "smarter_wins": 42111,
+      "teacher_score": 0.578775,
+      "teacher_paired_normal_ci95": [
+        0.5759036641935708,
+        0.5816463358064293
+      ],
+      "teacher_paired_normal_ci99_9": [
+        0.5739543975294078,
+        0.5835956024705923
+      ],
+      "teacher_paired_hoeffding_ci99_9": [
+        0.5700566845322379,
+        0.5874933154677622
+      ],
+      "smarter_score": 0.421225,
+      "smarter_paired_normal_ci95": [
+        0.4183536641935707,
+        0.42409633580642925
+      ],
+      "teacher_minus_smarter_score": 0.15755,
+      "teacher_minus_smarter_paired_normal_ci95": [
+        0.1518073283871415,
+        0.1632926716128586
+      ],
+      "revision_2_minus_revision_1": {
+        "comparison": "independent fresh 50000-deal confirmation banks",
+        "percentage_points": 2.8105,
+        "independent_normal_ci95_percentage_points": [
+          2.404584688267134,
+          3.216415311732864
+        ]
+      },
+      "elapsed_seconds": 51.60411379300058,
+      "result": "revision 2 remains weaker than the dashboard teacher but is decisively stronger than revision 1 against it"
+    },
+    "rank_pressure_rule_guardrails": {
+      "role": "fresh disjoint non-teacher strength checks after freezing revision 2",
+      "engine": "BatchedPesten exact-semantics evaluator with smart_agents_have_game_reference=true",
+      "protocol": "same deal, both candidate seats; Smart receives the canonical live Game reference",
+      "vs_smart": {
+        "seed_start_inclusive": 829800000,
+        "seed_end_exclusive": 829825000,
+        "independent_deal_blocks": 25000,
+        "games": 50000,
+        "smarter_wins": 28418,
+        "draws": 0,
+        "smarter_score": 0.56836,
+        "deal_paired_normal_ci95": [
+          0.5643163673979773,
+          0.5724036326020226
+        ],
+        "wins_by_smarter_seat": [
+          14498,
+          13920
+        ]
+      },
+      "vs_random": {
+        "seed_start_inclusive": 829825000,
+        "seed_end_exclusive": 829850000,
+        "independent_deal_blocks": 25000,
+        "games": 50000,
+        "smarter_wins": 36033,
+        "draws": 0,
+        "smarter_score": 0.72066,
+        "deal_paired_normal_ci95": [
+          0.71680563164699,
+          0.72451436835301
+        ],
+        "wins_by_smarter_seat": [
+          18168,
+          17865
+        ]
+      },
+      "qa": {
+        "discarded_run": "an initial Smart guardrail omitted smart_agents_have_game_reference and was rejected rather than cited",
+        "canonical_scalar_spotcheck_vs_smart": {
+          "seed_start_inclusive": 830100000,
+          "independent_deal_blocks": 5000,
+          "games": 10000,
+          "smarter_wins": 5667,
+          "draws": 0,
+          "smarter_score": 0.5667,
+          "wins_by_smarter_seat": [
+            2903,
+            2764
+          ]
+        }
+      },
+      "result": "the teacher-derived rule also improves the direct Smart matchup and preserves the Random guardrail"
+    },
+    "rank_pressure_mlp_1v1": {
+      "role": "fresh matched evaluation against both the dashboard campaign MLP and the pinned production MLP",
+      "engine": "BatchedPesten exact-semantics evaluator",
+      "deterministic_mlp_actions": true,
+      "base_seed": 91000000,
+      "deal_seed_derivation": "benchmark_checkpoint_batched derive_unsealed_seed with the pool:smarter namespace",
+      "independent_deal_blocks_per_mlp": 50000,
+      "seat_rotations_per_deal": 2,
+      "games_per_mlp": 100000,
+      "max_turns": 500,
+      "bootstrap_samples": 10000,
+      "dashboard_campaign_mlp": {
+        "path": "live_training/long_segments/segment_0058/mlp/ppo_actor_64.pth",
+        "sha256": "e67b9c26aeaf16508925c9109510d4dd5da0416fda11604a5b234d2d6d07fe43",
+        "mlp_wins": 49150,
+        "smarter_wins": 50850,
+        "draws": 0,
+        "mlp_score": 0.4915,
+        "mlp_deal_bootstrap_ci95": [
+          0.48852,
+          0.49443
+        ],
+        "smarter_score": 0.5085,
+        "smarter_deal_bootstrap_ci95": [
+          0.50557,
+          0.51148
+        ],
+        "mlp_wins_by_seat": [
+          24993,
+          24157
+        ],
+        "average_turns": 40.19109
+      },
+      "pinned_production_mlp": {
+        "path": "ppo_actor_100run3.pth",
+        "sha256": "aac589b3c7300895604e6c77755631ab4a31c8bf9810768448ab2f3ff5bbe186",
+        "mlp_wins": 47371,
+        "smarter_wins": 52629,
+        "draws": 0,
+        "mlp_score": 0.47371,
+        "mlp_deal_bootstrap_ci95": [
+          0.47078975,
+          0.47662
+        ],
+        "smarter_score": 0.52629,
+        "smarter_deal_bootstrap_ci95": [
+          0.52338,
+          0.52921025
+        ],
+        "mlp_wins_by_seat": [
+          24104,
+          23267
+        ],
+        "average_turns": 39.53458
+      },
+      "mlp_crosscheck": {
+        "dashboard_campaign_mlp_score_vs_pinned_production_mlp": 0.51712,
+        "deal_bootstrap_ci95": [
+          0.51453975,
+          0.5198
+        ],
+        "dashboard_campaign_minus_production_score_against_same_smarter_deals": 0.01779,
+        "paired_bootstrap_ci95": [
+          0.01467,
+          0.02094
+        ],
+        "result": "segment 58 is the stronger MLP reference by both direct cross-play and the common Smarter pool"
+      },
+      "qa": {
+        "canonical_parity_pairs": 20,
+        "canonical_parity_games_across_direct_and_pool_matchups": 120,
+        "result": "batched outcomes exactly matched scalar game.Game outcomes on the calibration subset"
+      },
+      "result": "revision 2 Smarter narrowly but decisively beats the stronger segment-58 MLP and more clearly beats the pinned production MLP"
+    },
+    "multiplayer_breadth_vs_smart": {
+      "role": "breadth check; the larger canonical two-player run is the primary strength confirmation",
+      "engine": "BatchedPesten after exact canonical-policy parity checks",
+      "candidate": "one bug-fixed SmarterAgent revision 1 seat; the 3-to-8-player selection path is unchanged in revision 2",
+      "other_seats": "Smart Agent",
+      "seed_start": 828700000,
+      "independent_deal_blocks_per_table_size": 2000,
+      "seat_rotations_per_deal": "equal to player count",
+      "draw_handling": "conditional_win_share divides candidate wins by non-draw games; its equal-policy null is 1/player_count",
+      "results": [
+        {
+          "players": 2,
+          "games": 4000,
+          "candidate_wins": 2254,
+          "draws": 0,
+          "unconditional_win_share": 0.5635,
+          "deal_clustered_normal_ci95": [
+            0.5498141377546735,
+            0.5771858622453265
+          ],
+          "conditional_win_share": 0.5635,
+          "equal_policy_conditional_null": 0.5,
+          "average_turns": 37.785
+        },
+        {
+          "players": 3,
+          "games": 6000,
+          "candidate_wins": 2295,
+          "draws": 0,
+          "unconditional_win_share": 0.3825,
+          "deal_clustered_normal_ci95": [
+            0.37144138805546106,
+            0.39355861194453895
+          ],
+          "conditional_win_share": 0.3825,
+          "equal_policy_conditional_null": 0.3333333333333333,
+          "average_turns": 53.3415
+        },
+        {
+          "players": 4,
+          "games": 8000,
+          "candidate_wins": 2276,
+          "draws": 0,
+          "unconditional_win_share": 0.2845,
+          "deal_clustered_normal_ci95": [
+            0.2755565626163127,
+            0.2934434373836873
+          ],
+          "conditional_win_share": 0.2845,
+          "equal_policy_conditional_null": 0.25,
+          "average_turns": 65.18425
+        },
+        {
+          "players": 5,
+          "games": 10000,
+          "candidate_wins": 2163,
+          "draws": 35,
+          "unconditional_win_share": 0.2163,
+          "deal_clustered_normal_ci95": [
+            0.2088768509304027,
+            0.22372314906959734
+          ],
+          "conditional_win_share": 0.21705970898143503,
+          "equal_policy_conditional_null": 0.2,
+          "average_turns": 81.7164
+        },
+        {
+          "players": 6,
+          "games": 12000,
+          "candidate_wins": 1965,
+          "draws": 840,
+          "unconditional_win_share": 0.16375,
+          "deal_clustered_normal_ci95": [
+            0.15773761317860407,
+            0.16976238682139594
+          ],
+          "conditional_win_share": 0.1760752688172043,
+          "equal_policy_conditional_null": 0.16666666666666666,
+          "average_turns": 92.93741666666666
+        },
+        {
+          "players": 7,
+          "games": 14000,
+          "candidate_wins": 2167,
+          "draws": 0,
+          "unconditional_win_share": 0.15478571428571428,
+          "deal_clustered_normal_ci95": [
+            0.14940392037234543,
+            0.16016750819908313
+          ],
+          "conditional_win_share": 0.15478571428571428,
+          "equal_policy_conditional_null": 0.14285714285714285,
+          "average_turns": 86.40757142857143
+        },
+        {
+          "players": 8,
+          "games": 16000,
+          "candidate_wins": 2141,
+          "draws": 0,
+          "unconditional_win_share": 0.1338125,
+          "deal_clustered_normal_ci95": [
+            0.12935566663306208,
+            0.13826933336693792
+          ],
+          "conditional_win_share": 0.1338125,
+          "equal_policy_conditional_null": 0.125,
+          "average_turns": 94.7959375
+        }
+      ],
+      "result": "candidate conditional win share exceeded the equal-policy seat null at every table size from 2 through 8"
+    }
+  },
+  "verification": {
+    "focused_command": "/home/tommie/Pesten/venv/bin/python -m pytest -q tests/test_batched_smarter_policy.py tests/test_numba_smart_policy.py",
+    "focused_result": "16 passed",
+    "full_command": "env PYTHONPATH=. /home/tommie/Pesten/venv/bin/pytest -q",
+    "full_result": {
+      "passed": 595,
+      "skipped": 8,
+      "subtests_passed": 1152,
+      "failed": 2,
+      "failure_reason": "expected frozen-campaign source-SHA guard after batched_pesten.py changed; the historical manifest was intentionally not rebound to new code"
+    },
+    "full_suite_excluding_the_two_historical_sha_guards": {
+      "passed": 595,
+      "skipped": 8,
+      "deselected": 2,
+      "subtests_passed": 1152
+    }
+  },
+  "conclusion": "The former Smarter implementation was substantially weaker than Smart. The first bug-fixed replacement reached 55.599% against Smart and 39.312% against the dashboard MinGRU teacher. The rank-pressure revision raises fresh score to 56.836% against canonical Smart, 72.066% against Random, 50.85% against the stronger segment-58 MLP, 52.629% against the pinned production MLP, and 42.1225% against that same frozen teacher. The teacher still wins the direct matchup, but Smarter gained 2.8105 percentage points against it on independent 100000-game confirmation banks."
+}

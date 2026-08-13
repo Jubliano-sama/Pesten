@@ -1,8 +1,6 @@
 import card
 import deck
 import logging
-import math
-import numpy as np
 
 class Agent:
     # The smart agent’s default parameters.
@@ -217,112 +215,213 @@ class Agent:
         logging.error("Card not found in hand")
 
 
-class SmarterAgent:
+class SmarterAgent(Agent):
+    """Measured upgrade of :class:`Agent` with public-state strategy rules.
+
+    The original implementation accidentally valued cards that remained in the
+    hand, removed every equal duplicate while evaluating a single play, ignored
+    active-penalty stacking, and chose a Jack's suit from public discard counts.
+    This policy keeps the tuned Smart scorer for multiplayer and penalty
+    decisions.  In ordinary two-player turns it uses a compact rank-pressure
+    rule distilled from the frozen dashboard teacher, then retains the
+    independently useful endgame rules.  No model or hidden state is needed at
+    runtime, and every input is visible to an ordinary player.
+    """
+
+    special_ranks = frozenset({0, 1, 2, 7, 8, 13})
+    wild_ranks = frozenset({0, 13})
+    # When preserving the only ordinary finisher, spend the most disruptive
+    # special first. Immediate 7/8 finishes are handled separately below.
+    preservation_order = {0: 0, 2: 1, 8: 2, 7: 3, 13: 4, 1: 5}
+    # Log-odds derived from the dashboard teacher's deterministic two-player
+    # play rates.  The first table applies normally; the second applies only
+    # when the opponent is literally one card from winning.  A small remaining
+    # suit-concentration term breaks strategically useful rank ties.
+    two_player_rank_preference = (
+        -2.325, 0.445, 0.075, -0.391, -0.301, -0.388, -0.359,
+        0.130, -0.008, -0.091, -0.266, -0.153, -0.135, -3.166,
+    )
+    two_player_last_card_preference = (
+        0.366, -0.015, 2.105, -0.756, -0.640, -0.770, -0.514,
+        0.625, 0.442, -0.619, -0.886, -0.299, -0.336, -0.857,
+    )
+    rank_preference_weight = 6.0
+
     def __init__(self, game=None):
-        self.mydeck = deck.Deck([])  # Initialize empty deck for the agent's hand
-        self.game = game             # Store game instance for state access
-        self.type = "Smarter"        # Identifier for debugging/logging
+        super().__init__(game)
+        self.type = "Smarter"
 
-        # Scoring parameters (tunable via benchmarking)
-        self.hand_penalty = 1.0       # Penalty per card in hand
-        self.suit_bonus = 0.5         # Bonus for cards in the most common suit
-        self.special_bonus = {        # Bonuses for keeping special cards in hand
-            7: 2.0, 8: 1.5, 1: 1.0, 0: 1.5, 13: 1.0, 2: 1.0
-        }
-        self.skip_bonus = 5.0         # Base bonus for skipping a player (8)
-        self.reverse_bonus = 0.5      # Bonus for reversing direction (1)
-        self.penalty_bonus = 0.2      # Bonus per penalty point added (0, 2)
-        self.suit_change_bonus = 1.0  # Base bonus for changing suit (13)
-        self.suit_depletion_bonus = 0.1  # Bonus per depleted suit count
-        self.seven_bonus = 2.0        # Bonus for extra turn (7)
+    def _penalty_active(self):
+        return bool(self.game and getattr(self.game, "penalty_amount", 0) > 0)
 
-    def addCard(self, _card):
-        """Add a card to the agent's hand."""
-        if _card is None:
-            print("Warning: Attempted to add None card")
-        else:
-            self.mydeck.cards.append(_card)
+    def _closest_opponent_hand(self):
+        if not self.game or self not in getattr(self.game, "players", ()):
+            return float("inf")
+        return min(
+            player.mydeck.cardCount()
+            for player in self.game.players
+            if player is not self
+        )
 
-    def remove(self, _card):
-        """Remove a specific card from the agent's hand."""
-        for c in self.mydeck.cards:
-            if c.number == _card.number:
-                self.mydeck.cards.remove(c)
-                return
-        print("Error: Card not found in hand")
+    def _remaining_after(self, candidate):
+        """Return the real one-card transition, including duplicate decks."""
+        remaining = self.mydeck.cards.copy()
+        remaining.remove(candidate)
+        return remaining
 
-    def card_value(self, c, max_suit):
-        """Compute the value of a card based on its properties."""
-        value = 0
-        if c.sort == max_suit:
-            value += self.suit_bonus  # Bonus if it matches the dominant suit
-        if c.truenumber in self.special_bonus:
-            value += self.special_bonus[c.truenumber]  # Bonus for special cards
-        return value
+    def _smart_choice(self, playable):
+        """Apply the tuned Smart scorer to an already legal candidate set."""
+        candidates = []
+        scores = []
+        sevens = [held for held in playable if held.truenumber == 7]
+        if sevens:
+            end_values = {
+                held: self._end_value(held, self._remaining_after(held))
+                for held in sevens
+            }
+            max_end = max(end_values.values())
+            for held in sevens:
+                candidates.append(held)
+                scores.append(
+                    self.chain_bonus
+                    * len(sevens)
+                    * (max_end - end_values[held])
+                )
+        for held in (item for item in playable if item.truenumber != 7):
+            score = self._hand_value(self._remaining_after(held))
+            score += self.penalty_card_bonus.get(held.truenumber, 0.0)
+            candidates.append(held)
+            scores.append(score)
+        return candidates[scores.index(max(scores))]
 
-    def hand_value(self, hand):
-        """Evaluate the hand’s value: penalize size, reward special cards and suit concentration."""
-        if not hand:
-            return 0  # Empty hand is a win, but we score before that happens
-        suit_counts = {s: 0 for s in card.sorts[:4]}
-        for c in hand:
-            if c.sort in suit_counts:
-                suit_counts[c.sort] += 1
-        max_suit = max(suit_counts, key=suit_counts.get) if suit_counts else None
-        return sum(self.card_value(c, max_suit) for c in hand) - self.hand_penalty * len(hand)
+    def _two_player_choice(self, playable, closest_opponent):
+        """Choose by public rank pressure and the resulting suit concentration."""
+        preferences = (
+            self.two_player_last_card_preference
+            if closest_opponent <= 1
+            else self.two_player_rank_preference
+        )
+        best_card = playable[0]
+        best_score = -float("inf")
+        standard_suits = card.sorts[:4]
+        for held in playable:
+            remaining = self._remaining_after(held)
+            concentration = max(
+                sum(candidate.sort == suit for candidate in remaining)
+                for suit in standard_suits
+            )
+            score = (
+                concentration
+                + self.rank_preference_weight
+                * preferences[held.truenumber]
+            )
+            if score > best_score:
+                best_score = score
+                best_card = held
+        return best_card
 
-    def score_candidate(self, c, new_hand):
-        """Score a playable card based on its effect and resulting hand value."""
-        base_score = self.hand_value(new_hand)
-        if not self.game:  # Fallback if game instance isn’t available
-            return base_score + (self.special_bonus.get(c.truenumber, 0) * 0.5)
-        
-        if c.truenumber == 7:
-            # Extra turn bonus
-            return base_score + self.seven_bonus
-        elif c.truenumber == 8:
-            # Skip next player; more valuable if they have few cards
-            try:
-                next_idx = self.game.calculate_next_player(self.game.players.index(self), self.game.direction)
-                next_count = self.game.players[next_idx].mydeck.cardCount()
-                return base_score + self.skip_bonus / (next_count + 1)
-            except (ValueError, AttributeError):
-                return base_score + self.skip_bonus / 2  # Fallback
-        elif c.truenumber == 1:
-            # Reverse direction; small fixed bonus
-            return base_score + self.reverse_bonus
-        elif c.truenumber == 0:
-            # Add 5 to penalty
-            return base_score + self.penalty_bonus * 5
-        elif c.truenumber == 2:
-            # Add 2 to penalty
-            return base_score + self.penalty_bonus * 2
-        elif c.truenumber == 13:
-            # Choose most depleted suit
-            best_suit_idx = np.argmax(self.game.sorts_played[:4])
-            depletion_value = self.game.sorts_played[best_suit_idx]
-            return base_score + self.suit_change_bonus + depletion_value * self.suit_depletion_bonus
-        else:
-            # Normal card: favor depleted suits
-            suit_idx = card.sorts.index(c.sort)
-            return base_score + self.game.sorts_played[suit_idx] * self.suit_depletion_bonus
+    def _preservation_card(self, specials, ordinary_finisher):
+        tempo_ranks = {7}
+        if self.game and self.game.num_players == 2:
+            # In a two-player game an 8 skips the opponent and retains the turn.
+            tempo_ranks.add(8)
+        immediate = [
+            held
+            for held in specials
+            if held.truenumber in tempo_ranks
+            and ordinary_finisher.compatible(held.sort, held.truenumber)
+        ]
+        if immediate:
+            return immediate[0]
+        return min(
+            specials,
+            key=lambda held: self.preservation_order[held.truenumber],
+        )
 
     def playCard(self, current_sort, current_true_number):
-        """Choose the best playable card."""
-        playable = [c for c in self.mydeck.cards if c.compatible(current_sort, current_true_number)]
+        playable = [
+            held
+            for held in self.mydeck.cards
+            if held.compatible(current_sort, current_true_number)
+        ]
+        penalty_active = self._penalty_active()
+        if penalty_active:
+            # Pesten only permits stacking the same penalty rank. Returning a
+            # different compatible wild card merely accepts the pending draw.
+            playable = [
+                held
+                for held in playable
+                if held.truenumber == current_true_number
+            ]
         if not playable:
             return None
-        scores = []
-        for c in playable:
-            new_hand = [card for card in self.mydeck.cards if card != c]
-            score = self.score_candidate(c, new_hand)
-            scores.append(score)
-        return playable[np.argmax(scores)]
+
+        hand_size = self.mydeck.cardCount()
+        if (
+            hand_size == 1
+            and self.mydeck.cards[0].truenumber in self.special_ranks
+            and not penalty_active
+        ):
+            # A special cannot finish the game and playing it draws two cards.
+            # Passing first instead searches for an ordinary finishing card.
+            return None
+
+        closest_opponent = self._closest_opponent_hand()
+        playable_ranks = {held.truenumber for held in playable}
+        if not penalty_active and closest_opponent > 2:
+            if hand_size >= 5 and playable_ranks <= self.wild_ranks:
+                # The analyzed GRU teacher likewise saves Jack/Joker early and
+                # uses them much more often once a rival is close.
+                return None
+            if (
+                hand_size == 2
+                and all(
+                    held.truenumber in self.special_ranks
+                    for held in self.mydeck.cards
+                )
+            ):
+                # Fish for an ordinary finisher instead of guaranteeing that
+                # the next remaining card is illegal as a final play.
+                return None
+
+        if (
+            self.game
+            and self.game.num_players == 2
+            and not penalty_active
+        ):
+            chosen = self._two_player_choice(playable, closest_opponent)
+        else:
+            candidates = playable
+            if closest_opponent <= 2:
+                jokers = [held for held in playable if held.truenumber == 0]
+                if jokers:
+                    candidates = jokers
+            chosen = self._smart_choice(candidates)
+
+        ordinary = [
+            held
+            for held in self.mydeck.cards
+            if held.truenumber not in self.special_ranks
+        ]
+        if (
+            len(ordinary) == 1
+            and hand_size <= 5
+            and chosen.truenumber not in self.special_ranks
+        ):
+            specials = [
+                held
+                for held in playable
+                if held.truenumber in self.special_ranks
+            ]
+            if specials:
+                chosen = self._preservation_card(specials, ordinary[0])
+        return chosen
 
     def changeSort(self):
-        """Choose the most depleted suit when playing a 13."""
-        if not self.game or not hasattr(self.game, 'sorts_played'):
-            return card.sorts[0]  # Fallback to first suit
+        """Choose a suit actually represented in the remaining hand."""
         suits = card.sorts[:4]
-        best_suit_idx = np.argmax(self.game.sorts_played[:4])
-        return suits[best_suit_idx]
+        counts = [
+            sum(held.sort == suit for held in self.mydeck.cards)
+            for suit in suits
+        ]
+        return suits[counts.index(max(counts))]

@@ -108,22 +108,16 @@ SMART_PENALTY_BONUS = (
     0.0,
     -3.0043124890687474,
 )
-SMARTER_SPECIAL_BONUS = (
-    1.5,
-    1.0,
-    1.0,
-    0.0,
-    0.0,
-    0.0,
-    0.0,
-    2.0,
-    1.5,
-    0.0,
-    0.0,
-    0.0,
-    0.0,
-    1.0,
+SMARTER_PRESERVATION_ORDER = (0, 5, 1, 6, 6, 6, 6, 3, 2, 6, 6, 6, 6, 4)
+SMARTER_TWO_PLAYER_RANK_PREFERENCE = (
+    -2.325, 0.445, 0.075, -0.391, -0.301, -0.388, -0.359,
+    0.130, -0.008, -0.091, -0.266, -0.153, -0.135, -3.166,
 )
+SMARTER_TWO_PLAYER_LAST_CARD_PREFERENCE = (
+    0.366, -0.015, 2.105, -0.756, -0.640, -0.770, -0.514,
+    0.625, 0.442, -0.619, -0.886, -0.299, -0.336, -0.857,
+)
+SMARTER_RANK_PREFERENCE_WEIGHT = 6.0
 CARD_RANK_MASKS.setflags(write=False)
 CARD_COMPATIBILITY_MASKS.setflags(write=False)
 CARD_IS_PENALTY.setflags(write=False)
@@ -1009,75 +1003,174 @@ class BatchedPesten:
             count=len(game_indices),
         )
 
-    @staticmethod
-    def _smarter_hand_value(hand: np.ndarray) -> float:
-        """Exact array equivalent of ``SmarterAgent.hand_value``."""
-        if len(hand) == 0:
-            return 0.0
-        standard_suits = CARD_SORT[hand]
-        suit_counts = np.bincount(standard_suits, minlength=5)[:4]
-        # Python ``max(dict, key=dict.get)`` and NumPy argmax both resolve a
-        # tie to the first standard suit.
-        max_suit = int(np.argmax(suit_counts))
-        ranks = CARD_RANK[hand]
-        value = 0.5 * int(np.count_nonzero(standard_suits == max_suit))
-        value += sum(SMARTER_SPECIAL_BONUS[int(rank)] for rank in ranks)
-        return value - len(hand)
-
     def smarter_action(self, game_index: int) -> int:
-        """Match ``smartAgent.SmarterAgent`` with a live public Game reference."""
+        """Match the measured-upgrade ``SmarterAgent`` exactly."""
         player_index = int(self.current_player[game_index])
         hand = self._ordered_hand(game_index, player_index)
+        current_rank = int(self.current_rank[game_index])
         compatible = CARD_COMPATIBILITY_MASKS[
             int(self.current_sort[game_index]),
-            int(self.current_rank[game_index]),
+            current_rank,
         ]
         playable = hand[compatible[hand]]
+        penalty_active = self.penalty_amount[game_index] > 0
+        if penalty_active:
+            playable = playable[CARD_RANK[playable] == current_rank]
         if len(playable) == 0:
             return PASS_ACTION
+        hand_ranks = CARD_RANK[hand]
+        hand_size = len(hand)
+        if (
+            hand_size == 1
+            and int(hand_ranks[0]) in PENALTY_RANKS
+            and not penalty_active
+        ):
+            return PASS_ACTION
 
-        best_number = int(playable[0])
-        best_score = -float("inf")
-        direction = int(self.direction[game_index])
-        next_player = (player_index + direction) % self.num_players
-        next_count = int(self.hand_sizes[game_index, next_player])
-        public_sorts = self.sorts_played[game_index]
-        for number_value in playable:
-            number = int(number_value)
-            # Canonical ``Card.__eq__`` makes the list comprehension remove
-            # every duplicate of the candidate number, not just one instance.
-            remaining = hand[hand != number]
-            score = self._smarter_hand_value(remaining)
-            rank = int(CARD_RANK[number])
-            if rank == 7:
-                score += 2.0
-            elif rank == 8:
-                score += 5.0 / (next_count + 1)
-            elif rank == 1:
-                score += 0.5
-            elif rank == 0:
-                score += 1.0
-            elif rank == 2:
-                score += 0.4
-            elif rank == 13:
-                best_suit = int(np.argmax(public_sorts[:4]))
-                # Preserve the canonical left-associative expression:
-                # ``base_score + suit_change_bonus + depletion * weight``.
-                # Grouping the final two terms can change a last-bit tie and
-                # therefore select a different first-max candidate.
+        closest_opponent = min(
+            int(self.hand_sizes[game_index, opponent])
+            for opponent in range(self.num_players)
+            if opponent != player_index
+        )
+        playable_ranks = CARD_RANK[playable]
+        if not penalty_active and closest_opponent > 2:
+            if (
+                hand_size >= 5
+                and np.all(np.isin(playable_ranks, (0, 13)))
+            ):
+                return PASS_ACTION
+            if hand_size == 2 and np.all(CARD_IS_PENALTY[hand]):
+                return PASS_ACTION
+
+        hand_suits = CARD_SORT[hand]
+        suit_counts = np.bincount(hand_suits, minlength=5)
+        if self.num_players == 2 and not penalty_active:
+            preferences = (
+                SMARTER_TWO_PLAYER_LAST_CARD_PREFERENCE
+                if closest_opponent <= 1
+                else SMARTER_TWO_PLAYER_RANK_PREFERENCE
+            )
+            best_number = int(playable[0])
+            best_score = -float("inf")
+            for number_value in playable:
+                number = int(number_value)
+                rank = int(CARD_RANK[number])
+                remaining_counts = suit_counts.copy()
+                remaining_counts[int(CARD_SORT[number])] -= 1
+                concentration = int(np.max(remaining_counts[:4]))
                 score = (
-                    score
-                    + 1.0
-                    + public_sorts[best_suit] * 0.1
+                    concentration
+                    + SMARTER_RANK_PREFERENCE_WEIGHT * preferences[rank]
                 )
+                if score > best_score:
+                    best_score = score
+                    best_number = number
+        else:
+            candidates = playable
+            if closest_opponent <= 2:
+                jokers = playable[playable_ranks == 0]
+                if len(jokers):
+                    candidates = jokers
+
+            candidate_ranks = CARD_RANK[candidates]
+            sevens = candidates[candidate_ranks == 7]
+            ordered_candidates = np.concatenate(
+                (sevens, candidates[candidate_ranks != 7])
+            )
+            remaining_length = hand_size - 1
+            rank_eight_count = (
+                int(np.count_nonzero(hand_ranks == 8))
+                if self.num_players == 2
+                else 0
+            )
+
+            seven_end_values: dict[int, float] = {}
+            if len(sevens):
+                penalty_suit_counts = np.bincount(
+                    hand_suits[CARD_IS_PENALTY[hand]], minlength=5
+                )
+                for number_value in sevens:
+                    number = int(number_value)
+                    suit = int(CARD_SORT[number])
+                    seven_end_values[number] = (
+                        0.43244878288347055 * int(suit_counts[suit] - 1)
+                        + int(penalty_suit_counts[suit] - 1)
+                    )
+                max_end = max(seven_end_values.values())
             else:
-                score = (
-                    score
-                    + public_sorts[int(CARD_SORT[number])] * 0.1
+                max_end = 0.0
+
+            standard_counts = suit_counts[:4]
+            maximum_count = int(np.max(standard_counts))
+            if int(np.count_nonzero(standard_counts == maximum_count)) == 1:
+                unique_maximum = int(np.argmax(standard_counts))
+                other_maximum = max(
+                    int(standard_counts[(unique_maximum + offset) % 4])
+                    for offset in (1, 2, 3)
                 )
-            if score > best_score:
-                best_score = score
-                best_number = number
+                decremented_maximum = max(maximum_count - 1, other_maximum)
+            else:
+                unique_maximum = -1
+                decremented_maximum = maximum_count
+
+            best_number = int(ordered_candidates[0])
+            best_score = -float("inf")
+            for number_value in ordered_candidates:
+                number = int(number_value)
+                rank = int(CARD_RANK[number])
+                if rank == 7:
+                    score = (
+                        1.3119838792608858
+                        * len(sevens)
+                        * (max_end - seven_end_values[number])
+                    )
+                else:
+                    if (
+                        self.num_players == 2
+                        and rank_eight_count - int(rank == 8) > 0
+                    ):
+                        stop_score = -1.9467897139799917
+                    else:
+                        removed_suit = int(CARD_SORT[number])
+                        stop_score = float(
+                            decremented_maximum
+                            if removed_suit == unique_maximum
+                            else maximum_count
+                        )
+                    score = stop_score - 1.0290830868190015 * remaining_length
+                    score += SMART_PENALTY_BONUS[rank]
+                if score > best_score:
+                    best_score = score
+                    best_number = number
+
+        ordinary = hand[~CARD_IS_PENALTY[hand]]
+        if (
+            len(ordinary) == 1
+            and hand_size <= 5
+            and int(CARD_RANK[best_number]) not in PENALTY_RANKS
+        ):
+            specials = playable[CARD_IS_PENALTY[playable]]
+            if len(specials):
+                tempo_ranks = (7, 8) if self.num_players == 2 else (7,)
+                immediate = [
+                    int(number)
+                    for number in specials
+                    if int(CARD_RANK[number]) in tempo_ranks
+                    and CARD_COMPATIBILITY_MASKS[
+                        int(CARD_SORT[number]), int(CARD_RANK[number])
+                    ][int(ordinary[0])]
+                ]
+                if immediate:
+                    best_number = immediate[0]
+                else:
+                    best_number = int(
+                        min(
+                            specials,
+                            key=lambda number: SMARTER_PRESERVATION_ORDER[
+                                int(CARD_RANK[number])
+                            ],
+                        )
+                    )
         return best_number
 
     def choose_suit(self, game_index: int, policy_kind: int) -> int:
@@ -1086,7 +1179,10 @@ class BatchedPesten:
         if policy_kind == POLICY_RANDOM:
             return int(self.rngs[game_index].randint(0, 4))
         if policy_kind == POLICY_SMARTER:
-            return int(np.argmax(self.sorts_played[game_index, :4]))
+            player_index = int(self.current_player[game_index])
+            hand = self._ordered_hand(game_index, player_index)
+            suit_counts = np.bincount(CARD_SORT[hand], minlength=5)
+            return int(np.argmax(suit_counts[:4]))
         if policy_kind != POLICY_SMART:
             raise ValueError("RL suit choices must come from the actor")
         player_index = int(self.current_player[game_index])
@@ -1289,7 +1385,9 @@ class BatchedPesten:
         player_index = int(self.current_player[game_index])
         for _ in range(amount):
             if self.game_over[game_index]:
-                break
+                # Canonical Game returns immediately here and leaves the
+                # pending amount intact when the deck is exhausted mid-draw.
+                return
             self._draw_card(game_index, player_index)
             self.event_counts["penalty_draw"] += 1
         self.penalty_amount[game_index] = 0
