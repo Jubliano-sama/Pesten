@@ -5,6 +5,8 @@ from run_factorized_league_until_plateau import (
     LEAGUE_SCHEDULES,
     PLAYER_COUNT_CURRICULA,
     _append_history,
+    _confirmation_passed,
+    _plateau_screen,
     _restore_campaign,
     _select_history,
 )
@@ -80,3 +82,52 @@ def test_restore_campaign_uses_last_accepted_checkpoint_and_marks_partial_round(
     assert consecutive == 1
     assert window == initial.resolve()
     assert manifest["rounds"][-1]["status"] == "abandoned_after_restart"
+
+
+def test_plateau_screen_uses_point_estimates_only_as_nomination():
+    fixed = {
+        "delta_normalized_win_share": 0.004,
+        "delta_normalized_ci99_9": [-0.03, 0.04],
+    }
+    rules = {
+        "delta_normalized_win_share": 0.009,
+        "delta_normalized_ci99_9": [-0.04, 0.06],
+    }
+
+    passed, detail = _plateau_screen(
+        fixed,
+        rules,
+        materiality=0.01,
+        history_noninferior=True,
+    )
+
+    assert passed
+    assert detail["passed"]
+    assert detail["confidence_claim_deferred_to_disjoint_confirmation"]
+    rules["delta_normalized_win_share"] = 0.011
+    assert not _plateau_screen(
+        fixed,
+        rules,
+        materiality=0.01,
+        history_noninferior=True,
+    )[0]
+
+
+def test_plateau_confirmation_requires_both_powered_pools():
+    fixed = {"delta_normalized_ci99_9": [-0.01, 0.025]}
+    rules = {"delta_normalized_ci99_9": [-0.02, 0.029]}
+
+    passed, detail = _confirmation_passed(
+        fixed,
+        rules,
+        maximum_gain=0.03,
+    )
+
+    assert passed
+    assert detail["passed"]
+    rules["delta_normalized_ci99_9"][1] = 0.031
+    assert not _confirmation_passed(
+        fixed,
+        rules,
+        maximum_gain=0.03,
+    )[0]

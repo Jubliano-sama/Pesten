@@ -252,6 +252,56 @@ def _history_records(paths: list[Path]) -> list[dict]:
     ]
 
 
+def _plateau_screen(
+    fixed_result: dict,
+    rule_result: dict,
+    *,
+    materiality: float,
+    history_noninferior: bool,
+) -> tuple[bool, dict]:
+    """Cheaply nominate a window for a powered, disjoint plateau test.
+
+    The 300-block monitor is deliberately a screen, not the final confidence
+    claim: at that sample size its 99.9% interval cannot resolve a one-point
+    normalized-share margin.  Requiring both point estimates to stay below the
+    materiality threshold avoids an impossible stopping condition while the
+    later, larger confirmation retains the actual confidence gate.
+    """
+    fixed_estimate = float(fixed_result["delta_normalized_win_share"])
+    rule_estimate = float(rule_result["delta_normalized_win_share"])
+    passed = (
+        fixed_estimate <= materiality
+        and rule_estimate <= materiality
+        and history_noninferior
+    )
+    return passed, {
+        "kind": "low_cost_nomination_only",
+        "fixed_pool_point_estimate": fixed_estimate,
+        "rule_pool_point_estimate": rule_estimate,
+        "maximum_material_gain_per_block": materiality,
+        "historical_noninferiority_99_9": history_noninferior,
+        "passed": passed,
+        "confidence_claim_deferred_to_disjoint_confirmation": True,
+    }
+
+
+def _confirmation_passed(
+    fixed_result: dict,
+    rule_result: dict,
+    *,
+    maximum_gain: float,
+) -> tuple[bool, dict]:
+    fixed_upper = float(fixed_result["delta_normalized_ci99_9"][1])
+    rule_upper = float(rule_result["delta_normalized_ci99_9"][1])
+    passed = fixed_upper <= maximum_gain and rule_upper <= maximum_gain
+    return passed, {
+        "fixed_pool_upper_99_9": fixed_upper,
+        "rule_pool_upper_99_9": rule_upper,
+        "maximum_material_gain_over_window": maximum_gain,
+        "passed": passed,
+    }
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--current", type=Path, required=True)
@@ -391,6 +441,37 @@ def main() -> None:
         manifest.pop("error", None)
         manifest.pop("finished_at_unix", None)
         manifest.pop("elapsed_seconds", None)
+        protocol = manifest.setdefault("protocol", {})
+        if int(protocol.get("plateau_protocol_revision", 1)) < 2:
+            protocol["plateau_protocol_revision"] = 2
+            protocol["plateau_protocol_revision_effective_round"] = (
+                len(manifest.get("rounds", [])) + 1
+            )
+            protocol["plateau_screen"] = (
+                "both fixed-pool and rule-pool normalized point estimates "
+                "at or below the per-block materiality threshold; nomination "
+                "only, with no confidence claim"
+            )
+            protocol["plateau_confirmation"] = (
+                "fresh disjoint fixed and rule pools must both have paired "
+                "normal 99.9% upper bounds at or below materiality times the "
+                "number of consecutive nominated blocks"
+            )
+            manifest.setdefault("protocol_amendments", []).append(
+                {
+                    "revision": 2,
+                    "reason": (
+                        "300-block screen cannot statistically resolve the "
+                        "one-point materiality margin; retain it only as a "
+                        "nomination gate and move confidence to powered "
+                        "disjoint confirmation"
+                    ),
+                    "effective_round": len(manifest.get("rounds", [])) + 1,
+                    "recorded_at_unix": time.time(),
+                }
+            )
+            consecutive = 0
+            plateau_window_start = None
         atomic_json(manifest, manifest_path)
     else:
         history_catalog = []
@@ -426,6 +507,17 @@ def main() -> None:
                 "history_check_blocks": args.history_check_blocks,
                 "plateau_metric": "weighted normalized win-share delta",
                 "plateau_confidence": "paired normal 99.9 percent",
+                "plateau_protocol_revision": 2,
+                "plateau_screen": (
+                    "both fixed-pool and rule-pool normalized point estimates "
+                    "at or below the per-block materiality threshold; nomination "
+                    "only, with no confidence claim"
+                ),
+                "plateau_confirmation": (
+                    "fresh disjoint fixed and rule pools must both have paired "
+                    "normal 99.9% upper bounds at or below materiality times the "
+                    "number of consecutive nominated blocks"
+                ),
                 "plateau_materiality_per_block": args.plateau_materiality,
                 "consecutive_monitor_blocks": args.plateau_consecutive_blocks,
                 "confirmation_blocks_per_stratum": (
@@ -547,10 +639,6 @@ def main() -> None:
                 seed=args.seed + 200_000_000 + round_index * 10_000_000,
             )
             weighted = pool["weighted_result"]
-            no_material_gain = (
-                weighted["delta_normalized_ci99_9"][1]
-                <= args.plateau_materiality
-            )
             row["weighted_result"] = weighted
             row["opponent_results"] = pool["opponent_results"]
 
@@ -565,10 +653,6 @@ def main() -> None:
                 seed=args.seed + 300_000_000 + round_index * 10_000_000,
             )
             rule_weighted = rules["weighted_result"]
-            rule_no_material_gain = (
-                rule_weighted["delta_normalized_ci99_9"][1]
-                <= args.plateau_materiality
-            )
             row["rule_weighted_result"] = rule_weighted
             row["rule_opponent_results"] = rules["opponent_results"]
 
@@ -624,11 +708,13 @@ def main() -> None:
                 current = previous
                 row["rollback_checkpoint"] = str(previous)
                 row["rollback_checkpoint_sha256"] = file_sha256(previous)
-            signal = (
-                no_material_gain
-                and rule_no_material_gain
-                and history_noninferior
+            signal, screen = _plateau_screen(
+                weighted,
+                rule_weighted,
+                materiality=args.plateau_materiality,
+                history_noninferior=history_noninferior,
             )
+            row["plateau_screen"] = screen
             row["plateau_signal"] = signal
             if signal:
                 if consecutive == 0:
@@ -659,18 +745,37 @@ def main() -> None:
                 seed=args.seed + 900_000_000 + round_index * 10_000_000,
             )
             confirmation_weighted = confirmation["weighted_result"]
+            rule_confirmation_path = (
+                round_dir / "plateau_rule_confirmation.json"
+            )
+            rule_confirmation = evaluate_rules(
+                plateau_window_start,
+                current,
+                mlp=mlp,
+                output=rule_confirmation_path,
+                blocks=args.confirmation_blocks_per_stratum,
+                workers=args.benchmark_workers,
+                seed=args.seed + 950_000_000 + round_index * 10_000_000,
+            )
+            rule_confirmation_weighted = rule_confirmation["weighted_result"]
             confirmation_limit = (
                 args.plateau_materiality * args.plateau_consecutive_blocks
             )
-            plateau = (
-                confirmation_weighted["delta_normalized_ci99_9"][1]
-                <= confirmation_limit
+            plateau, confirmation_gate = _confirmation_passed(
+                confirmation_weighted,
+                rule_confirmation_weighted,
+                maximum_gain=confirmation_limit,
             )
             row["confirmation"] = {
-                "path": str(confirmation_path),
-                "weighted_result": confirmation_weighted,
-                "maximum_material_gain_over_window": confirmation_limit,
-                "passed": plateau,
+                "fixed_pool": {
+                    "path": str(confirmation_path),
+                    "weighted_result": confirmation_weighted,
+                },
+                "rule_pool": {
+                    "path": str(rule_confirmation_path),
+                    "weighted_result": rule_confirmation_weighted,
+                },
+                "gate": confirmation_gate,
             }
             if not plateau:
                 consecutive = 0
