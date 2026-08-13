@@ -15,7 +15,7 @@ from temporal_puffer_v4 import (
     NativePufferTemporalPolicy,
     policy_model_config,
 )
-from train_puffer_fast import _append_jsonl_idempotent
+from train_puffer_fast import _append_jsonl_idempotent, _effective_vector_workers
 from vector_puffer_rollout import (
     VectorPufferRolloutPool,
     _build_tasks,
@@ -92,6 +92,27 @@ def test_parallel_rollout_validates_worker_count():
             player_counts=(2,),
             workers=0,
         )
+
+
+def test_vector_worker_count_does_not_replicate_idle_model_pools():
+    assert _effective_vector_workers(
+        10,
+        ("current_selfplay", "historical_temporal"),
+        (2, 3, 4, 5, 6, 7, 8),
+    ) == 7
+    assert _effective_vector_workers(
+        5,
+        ("current_selfplay",),
+        (2, 3, 4, 5, 6, 7, 8),
+    ) == 5
+
+
+def test_vector_worker_count_preserves_tree_parallelism():
+    assert _effective_vector_workers(
+        10,
+        ("current_selfplay", "bayesian_tree"),
+        (2, 3, 4, 5, 6, 7, 8),
+    ) == 10
 
 
 def test_parallel_benchmark_matches_sequential_pairs(tmp_path):

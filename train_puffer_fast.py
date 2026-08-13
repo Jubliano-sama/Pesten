@@ -106,6 +106,18 @@ def _append_jsonl_idempotent(path: Path, row: dict) -> None:
         handle.write(json.dumps(row, sort_keys=True) + "\n")
 
 
+def _effective_vector_workers(
+    requested_workers: int,
+    schedule: tuple[str, ...],
+    player_counts: tuple[int, ...],
+) -> int:
+    """Avoid loading model replicas into workers with no vector cohort."""
+    if "bayesian_tree" in schedule and any(count < 7 for count in player_counts):
+        # Scalar tree games are split into additional independent tasks.
+        return requested_workers
+    return min(requested_workers, len(set(player_counts)))
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--resume", type=Path, required=True)
@@ -337,7 +349,9 @@ def main() -> None:
     vector_rollout_pool = (
         VectorPufferRolloutPool(
             policy,
-            workers=args.rollout_workers,
+            workers=_effective_vector_workers(
+                args.rollout_workers, schedule, player_counts
+            ),
             champion_path=champion_path,
             historical_paths=historical_paths,
         )
@@ -478,6 +492,13 @@ def main() -> None:
                 "games_per_epoch": args.games_per_epoch,
                 "max_turns": args.max_turns,
                 "rollout_workers": args.rollout_workers,
+                "effective_rollout_workers": (
+                    _effective_vector_workers(
+                        args.rollout_workers, schedule, player_counts
+                    )
+                    if args.rollout_engine == "vector"
+                    else args.rollout_workers
+                ),
                 "chunks_per_worker": args.chunks_per_worker,
                 "rollout_engine": args.rollout_engine,
                 "update_epochs": args.update_epochs,
