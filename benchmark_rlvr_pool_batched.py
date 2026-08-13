@@ -81,12 +81,15 @@ def _make_layout(task: dict):
     players = int(task["players"])
     blocks = int(task["blocks"])
     opponent = str(task["opponent"])
+    variants = tuple(task.get("variants", ("before", "after")))
+    if not variants or any(variant not in {"before", "after"} for variant in variants):
+        raise ValueError("variants must be a non-empty subset of before/after")
     records = []
     seeds = []
     roles = []
     for block in range(blocks):
         deal_seed = int(task["seed"]) + block
-        for variant in ("before", "after"):
+        for variant in variants:
             for candidate_seat in range(players):
                 row_roles = []
                 for seat in range(players):
@@ -251,18 +254,14 @@ def _evaluate_task(task: dict) -> dict:
             row = int(row_value)
             engine.apply_action(row, actions[row])
 
+    variants = tuple(task.get("variants", ("before", "after")))
     scores = {
-        "before": np.zeros(blocks, dtype=np.float64),
-        "after": np.zeros(blocks, dtype=np.float64),
+        variant: np.zeros(blocks, dtype=np.float64) for variant in variants
     }
     win_shares = {
-        "before": np.zeros(blocks, dtype=np.float64),
-        "after": np.zeros(blocks, dtype=np.float64),
+        variant: np.zeros(blocks, dtype=np.float64) for variant in variants
     }
-    totals = {
-        "before": defaultdict(int),
-        "after": defaultdict(int),
-    }
+    totals = {variant: defaultdict(int) for variant in variants}
     for row, (block, variant, candidate_seat, _) in enumerate(records):
         winner = int(engine.winners[row])
         totals[variant]["turns"] += int(engine.turn_counts[row])
@@ -278,13 +277,14 @@ def _evaluate_task(task: dict) -> dict:
     for variant in scores:
         scores[variant] /= players
         win_shares[variant] /= players
+    arrays = {}
+    for variant in variants:
+        arrays[f"{variant}_scores"] = scores[variant].tolist()
+        arrays[f"{variant}_win_shares"] = win_shares[variant].tolist()
     return {
         "opponent": task["opponent"],
         "players": players,
-        "before_scores": scores["before"].tolist(),
-        "after_scores": scores["after"].tolist(),
-        "before_win_shares": win_shares["before"].tolist(),
-        "after_win_shares": win_shares["after"].tolist(),
+        **arrays,
         "totals": {
             name: dict(values) for name, values in totals.items()
         },

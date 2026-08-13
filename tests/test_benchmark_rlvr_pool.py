@@ -58,6 +58,24 @@ def test_batched_pool_layout_matches_every_variant_seat_on_each_deal():
         assert roles[row][candidate_seat] == ("temporal", variant)
 
 
+def test_batched_pool_layout_can_evaluate_one_variant_without_duplicate_games():
+    records, roles, seeds = _make_layout(
+        {
+            "players": 2,
+            "blocks": 3,
+            "opponent": "canonical_random",
+            "seed": 700,
+            "variants": ("after",),
+        }
+    )
+
+    assert len(records) == 3 * 2
+    assert list(seeds) == [700, 700, 701, 701, 702, 702]
+    assert {variant for _, variant, _, _ in records} == {"after"}
+    for row, (_, variant, candidate_seat, _) in enumerate(records):
+        assert roles[row][candidate_seat] == ("temporal", variant)
+
+
 @pytest.mark.parametrize("opponent", ("smart_rule", "smarter_rule"))
 def test_batched_pool_layout_supports_fixed_rule_opponents(opponent):
     records, roles, seeds = _make_layout(
