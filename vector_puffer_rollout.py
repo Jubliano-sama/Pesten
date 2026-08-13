@@ -80,6 +80,7 @@ def _collect_player_count(task: dict):
         schedule=task["schedule"],
         player_count=task["player_count"],
         game_indices=task["game_indices"],
+        max_turns=task["max_turns"],
         stats=stats,
     )
     if task["prepack_training"]:
@@ -107,14 +108,14 @@ def _collect_tree_chunk(task: dict):
 
     started = time.perf_counter()
     rows = []
-    total_turns = decisions = 0
+    total_turns = decisions = turn_limit_draws = 0
     for game_index, player_count in task["games"]:
-        episodes, turns = _collect_scalar_tree_game(
+        episodes, turns, winner = _collect_scalar_tree_game(
             _WORKER_POLICY,
             absolute_game_index=game_index,
             deal_seed=task["seed"] + game_index,
             player_count=player_count,
-            max_turns=1000,
+            max_turns=task["max_turns"],
         )
         if task["prepack_training"]:
             from packed_puffer_rollout import pack_puffer_episode
@@ -125,6 +126,8 @@ def _collect_tree_chunk(task: dict):
             ]
         rows.append((game_index, episodes))
         total_turns += turns
+        if winner is None and turns >= task["max_turns"]:
+            turn_limit_draws += 1
         decisions += sum(len(trajectory) for trajectory, _ in episodes)
     return {
         "kind": "tree",
@@ -134,6 +137,8 @@ def _collect_tree_chunk(task: dict):
             "decisions": {"bayesian_tree": decisions},
             "total_turns": total_turns,
             "trajectories": len(rows),
+            "max_turns": task["max_turns"],
+            "turn_limit_draws": turn_limit_draws,
             "task_seconds": time.perf_counter() - started,
         },
     }
@@ -171,7 +176,7 @@ def _merge_results(
     player_counts = Counter()
     deck_counts = {}
     fallbacks = Counter()
-    total_turns = trajectories = 0
+    total_turns = trajectories = turn_limit_draws = 0
     cohort_stats = {}
     tree_chunk_seconds = []
     for result in results:
@@ -183,6 +188,7 @@ def _merge_results(
             decision_counts.update(metadata["decisions"])
             total_turns += int(metadata["total_turns"])
             trajectories += int(metadata["trajectories"])
+            turn_limit_draws += int(metadata.get("turn_limit_draws", 0))
             tree_chunk_seconds.append(float(metadata["task_seconds"]))
             continue
         count = int(result["player_count"])
@@ -205,6 +211,7 @@ def _merge_results(
         decision_counts.update(metadata["decisions"])
         total_turns += int(metadata["total_turns"])
         trajectories += int(metadata["trajectories"])
+        turn_limit_draws += int(result["stats"].get("turn_limit_draws", 0))
         cohort_stats.setdefault(str(count), []).append(
             {
                 **result["stats"],
@@ -235,6 +242,7 @@ def _merge_results(
         "decisions": dict(decision_counts),
         "total_turns": total_turns,
         "trajectories": trajectories,
+        "turn_limit_draws": turn_limit_draws,
         "player_counts": dict(player_counts),
         "deck_count_by_player_count": deck_counts,
         "vector_cohort_stats": cohort_stats,
@@ -257,6 +265,7 @@ def collect_league_batch_vector_parallel(
     champion_path: Path = Path("ppo_actor_100run3.pth"),
     historical_paths: Sequence[Path] = (),
     prepack_training: bool = False,
+    max_turns: int = 1000,
 ):
     """Run one batch through a temporary vector worker pool."""
     with VectorPufferRolloutPool(
@@ -273,6 +282,7 @@ def collect_league_batch_vector_parallel(
             schedule=schedule,
             player_counts=player_counts,
             prepack_training=prepack_training,
+            max_turns=max_turns,
         )
 
 
@@ -335,6 +345,7 @@ class VectorPufferRolloutPool:
         schedule: Sequence[str],
         player_counts: Sequence[int],
         prepack_training: bool = False,
+        max_turns: int = 1000,
     ):
         """Refresh shared weights, run cohorts, and restore game ordering."""
         self._refresh_policy(policy)
@@ -346,15 +357,18 @@ class VectorPufferRolloutPool:
             player_counts=player_counts,
             workers=self.workers,
             prepack_training=prepack_training,
+            max_turns=max_turns,
         )
         results = self.pool.map(_collect_task, tasks, chunksize=1)
-        return _merge_results(
+        episodes, metadata = _merge_results(
             results,
             games=games,
             schedule_offset=schedule_offset,
             schedule=schedule,
             player_count_schedule=player_counts,
         )
+        metadata["max_turns"] = max_turns
+        return episodes, metadata
 
     def close(self) -> None:
         if not self.closed:
@@ -378,9 +392,10 @@ def _build_tasks(
     player_counts: Sequence[int],
     workers: int,
     prepack_training: bool,
+    max_turns: int = 1000,
 ):
-    if games < 1 or workers < 1:
-        raise ValueError("games and workers must be positive")
+    if games < 1 or workers < 1 or max_turns < 1:
+        raise ValueError("games, workers, and max_turns must be positive")
     schedule = tuple(schedule)
     player_counts = tuple(player_counts)
     if not schedule or not player_counts or any(count < 2 for count in player_counts):
@@ -406,6 +421,7 @@ def _build_tasks(
             "player_count": count,
             "game_indices": tuple(indices),
             "prepack_training": prepack_training,
+            "max_turns": max_turns,
         }
         for count, indices in grouped_indices.items()
     ]
@@ -417,6 +433,7 @@ def _build_tasks(
                 "seed": seed,
                 "games": tuple(tree_games[start : start + tree_chunk_size]),
                 "prepack_training": prepack_training,
+                "max_turns": max_turns,
             }
             for start in range(0, len(tree_games), tree_chunk_size)
         )

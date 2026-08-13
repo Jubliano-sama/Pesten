@@ -118,6 +118,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--epochs", type=int, default=1000)
     parser.add_argument("--games-per-epoch", type=int, default=2048)
+    parser.add_argument(
+        "--max-turns",
+        type=int,
+        default=1000,
+        help="training-only per-game turn cap; evaluation keeps its own contract",
+    )
     parser.add_argument("--rollout-workers", type=int, default=10)
     parser.add_argument("--chunks-per-worker", type=int, default=3)
     parser.add_argument(
@@ -204,6 +210,7 @@ def main() -> None:
     positive = (
         args.epochs,
         args.games_per_epoch,
+        args.max_turns,
         args.rollout_workers,
         args.chunks_per_worker,
         args.update_epochs,
@@ -352,6 +359,7 @@ def main() -> None:
             "seed": args.seed + campaign_phase * args.games_per_epoch,
             "schedule_offset": campaign_phase * args.games_per_epoch,
             "player_counts": player_counts,
+            "max_turns": args.max_turns,
         }
         if args.rollout_engine == "vector":
             episodes, contribution = vector_rollout_pool.collect(
@@ -468,6 +476,7 @@ def main() -> None:
                 "player_count_schedule": list(player_counts),
                 "historical_checkpoints": historical_records,
                 "games_per_epoch": args.games_per_epoch,
+                "max_turns": args.max_turns,
                 "rollout_workers": args.rollout_workers,
                 "chunks_per_worker": args.chunks_per_worker,
                 "rollout_engine": args.rollout_engine,

@@ -18,6 +18,7 @@ from temporal_puffer_v4 import (
 from train_puffer_fast import _append_jsonl_idempotent
 from vector_puffer_rollout import (
     VectorPufferRolloutPool,
+    _build_tasks,
     collect_league_batch_vector_parallel,
 )
 import torch
@@ -44,6 +45,7 @@ def test_parallel_rollout_is_exactly_equal_to_sequential_schedule():
         "schedule_offset": 3,
         "mixture": mixture,
         "player_counts": (2, 3, 7),
+        "max_turns": 5,
     }
     expected_episodes, expected_metadata = collect_league_batch(
         policy,
@@ -60,6 +62,23 @@ def test_parallel_rollout_is_exactly_equal_to_sequential_schedule():
 
     assert actual_metadata == expected_metadata
     assert actual_episodes == expected_episodes
+
+
+def test_vector_tasks_carry_the_training_turn_limit_to_every_backend():
+    tasks, _, _ = _build_tasks(
+        games=4,
+        seed=7,
+        schedule_offset=0,
+        schedule=("current_selfplay", "bayesian_tree"),
+        player_counts=(8, 2),
+        workers=2,
+        prepack_training=False,
+        max_turns=17,
+    )
+
+    assert tasks
+    assert {task["kind"] for task in tasks} == {"tree", "vector"}
+    assert all(task["max_turns"] == 17 for task in tasks)
 
 
 def test_parallel_rollout_validates_worker_count():
@@ -146,6 +165,7 @@ def test_persistent_vector_pool_refreshes_shared_policy_exactly():
         "schedule_offset": 5,
         "schedule": ("current_selfplay", "random_rule"),
         "player_counts": (2, 3),
+        "max_turns": 5,
     }
     with VectorPufferRolloutPool(policy, workers=2) as pool:
         with torch.no_grad():

@@ -311,6 +311,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--initial-phases", type=int, default=0)
     parser.add_argument("--block-epochs", type=int, default=60)
     parser.add_argument("--games-per-epoch", type=int, default=4096)
+    parser.add_argument(
+        "--training-max-turns",
+        type=int,
+        default=500,
+        help="training-only game cap; monitoring remains on its canonical limit",
+    )
     parser.add_argument("--update-epochs", type=int, default=4)
     parser.add_argument("--history-limit", type=int, default=8)
     parser.add_argument(
@@ -394,6 +400,7 @@ def main() -> None:
     positive = (
         args.block_epochs,
         args.games_per_epoch,
+        args.training_max_turns,
         args.update_epochs,
         args.history_limit,
         args.monitor_blocks_per_stratum,
@@ -442,6 +449,25 @@ def main() -> None:
         manifest.pop("finished_at_unix", None)
         manifest.pop("elapsed_seconds", None)
         protocol = manifest.setdefault("protocol", {})
+        recorded_training_max_turns = int(
+            protocol.get("training_max_turns", 1000)
+        )
+        if recorded_training_max_turns != args.training_max_turns:
+            protocol["training_max_turns"] = args.training_max_turns
+            manifest.setdefault("protocol_amendments", []).append(
+                {
+                    "revision": "training_turn_cap_v1",
+                    "reason": (
+                        "bound pathological rollout tails after an eight-player "
+                        "cohort exceeded thirty CPU-minutes"
+                    ),
+                    "previous_training_max_turns": recorded_training_max_turns,
+                    "training_max_turns": args.training_max_turns,
+                    "evaluation_max_turns": 1000,
+                    "effective_round": len(manifest.get("rounds", [])) + 1,
+                    "recorded_at_unix": time.time(),
+                }
+            )
         if int(protocol.get("plateau_protocol_revision", 1)) < 2:
             protocol["plateau_protocol_revision"] = 2
             protocol["plateau_protocol_revision_effective_round"] = (
@@ -492,6 +518,8 @@ def main() -> None:
                 "initial_phases": args.initial_phases,
                 "block_epochs": args.block_epochs,
                 "games_per_epoch": args.games_per_epoch,
+                "training_max_turns": args.training_max_turns,
+                "evaluation_max_turns": 1000,
                 "league_schedules": [list(schedule) for schedule in LEAGUE_SCHEDULES],
                 "player_count_curricula": [
                     list(schedule) for schedule in PLAYER_COUNT_CURRICULA
@@ -564,6 +592,8 @@ def main() -> None:
                 str(args.block_epochs),
                 "--games-per-epoch",
                 str(args.games_per_epoch),
+                "--max-turns",
+                str(args.training_max_turns),
                 "--rollout-workers",
                 str(args.rollout_workers),
                 "--rollout-engine",

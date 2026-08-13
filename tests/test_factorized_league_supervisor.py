@@ -1,5 +1,6 @@
 import math
 from pathlib import Path
+import sys
 
 from run_factorized_league_until_plateau import (
     LEAGUE_SCHEDULES,
@@ -9,6 +10,7 @@ from run_factorized_league_until_plateau import (
     _plateau_screen,
     _restore_campaign,
     _select_history,
+    parse_args,
 )
 
 
@@ -25,6 +27,28 @@ def test_every_curriculum_covers_2_through_8_without_schedule_lockstep():
             "smart_rule",
             "smarter_rule",
         } <= set(league)
+
+
+def test_supervisor_defaults_to_bounded_training_but_not_evaluation(monkeypatch):
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "run_factorized_league_until_plateau.py",
+            "--current",
+            "current.pt",
+            "--teacher",
+            "teacher.pt",
+            "--mlp",
+            "mlp.pt",
+            "--output-dir",
+            "output",
+        ],
+    )
+
+    args = parse_args()
+
+    assert args.training_max_turns == 500
 
 
 def test_bounded_history_preserves_oldest_newest_and_spans_lineage():

@@ -577,6 +577,7 @@ def collect_league_batch(
     mixture: Sequence[tuple[str, int]] = LEAGUE_MIXTURE,
     player_counts: Sequence[int] | None = None,
     game_index_offset: int = 0,
+    max_turns: int = 1000,
 ) -> tuple[list[tuple[Sequence[TrajectoryStep], bool]], dict]:
     schedule = league_schedule(mixture)
     player_count_schedule = tuple(player_counts or (2,))
@@ -587,6 +588,8 @@ def collect_league_batch(
         raise ValueError("player_counts must contain integers >= 2")
     if game_index_offset < 0:
         raise ValueError("game_index_offset must be non-negative")
+    if max_turns < 1:
+        raise ValueError("max_turns must be positive")
     episodes = []
     contributions = Counter()
     game_counts = Counter()
@@ -657,7 +660,7 @@ def collect_league_batch(
             current_seats = (current_seat,)
 
         match = game.Game(factories)
-        turns, winner = match.auto_simulate()
+        turns, winner = match.auto_simulate(max_turns=max_turns)
         total_turns += turns
         game_counts[opponent_type] += 1
         player_counts_seen[str(player_count)] += 1

@@ -70,6 +70,7 @@ def _collect_chunk(task: dict):
         mixture=task["mixture"],
         player_counts=task["player_counts"],
         game_index_offset=task["game_index_offset"],
+        max_turns=task["max_turns"],
     )
 
 
@@ -123,6 +124,7 @@ def collect_league_batch_parallel(
     chunks_per_worker: int = 2,
     champion_path: Path = Path("ppo_actor_100run3.pth"),
     historical_paths: Sequence[Path] = (),
+    max_turns: int = 1000,
 ):
     """Collect the same seeded games in ordered, load-balanced processes.
 
@@ -136,6 +138,8 @@ def collect_league_batch_parallel(
         raise ValueError("workers must be positive")
     if chunks_per_worker < 1:
         raise ValueError("chunks_per_worker must be positive")
+    if max_turns < 1:
+        raise ValueError("max_turns must be positive")
     historical_paths = tuple(Path(path).resolve() for path in historical_paths)
     for path in historical_paths:
         if not path.is_file():
@@ -162,6 +166,7 @@ def collect_league_batch_parallel(
             schedule_offset=schedule_offset,
             mixture=mixture,
             player_counts=player_counts,
+            max_turns=max_turns,
         )
 
     worker_count = min(workers, games)
@@ -178,6 +183,7 @@ def collect_league_batch_parallel(
                 "game_index_offset": start,
                 "mixture": tuple(mixture),
                 "player_counts": tuple(player_counts),
+                "max_turns": max_turns,
             }
         )
 

@@ -150,6 +150,8 @@ class BatchRolloutStats:
     temporal_sampling_state_scatter_seconds: float = 0.0
     champion_inference_transfer_seconds: float = 0.0
     rules_stepping_seconds: float = 0.0
+    max_turns: int = 0
+    turn_limit_draws: int = 0
 
 
 def ordered_legal_actions(
@@ -606,7 +608,7 @@ def _collect_scalar_tree_game(
     match = game.Game(factories)
     turns, winner = match.auto_simulate(max_turns=max_turns)
     trajectory = tuple(match.players[current_seat].trajectory)
-    return [(trajectory, winner == current_seat)], turns
+    return [(trajectory, winner == current_seat)], turns, winner
 
 
 def _make_vector_layout(
@@ -833,9 +835,11 @@ def collect_league_batch_batched(
     contributions = Counter()
     game_counts = Counter()
     total_turns = 0
+    turn_limit_draws = 0
 
     stats.vector_games = len(vector_absolute_indices)
     stats.tree_games = len(selected_game_indices) - len(vector_absolute_indices)
+    stats.max_turns = max_turns
     if vector_absolute_indices:
         engine = BatchedPesten(
             policy_kinds,
@@ -1096,6 +1100,11 @@ def collect_league_batch_batched(
                 opponent_type = "smarter_rule"
             game_counts[opponent_type] += 1
             winner = int(engine.winners[vector_index])
+            if (
+                winner < 0
+                and int(engine.turn_counts[vector_index]) >= max_turns
+            ):
+                turn_limit_draws += 1
             current_seats = [
                 seat
                 for seat in range(player_count)
@@ -1129,7 +1138,7 @@ def collect_league_batch_batched(
         ]
         if opponent_type != "bayesian_tree" or player_count >= 7:
             continue
-        tree_episodes, turns = _collect_scalar_tree_game(
+        tree_episodes, turns, winner = _collect_scalar_tree_game(
             policy,
             absolute_game_index=absolute_index,
             deal_seed=seed + absolute_index,
@@ -1138,11 +1147,14 @@ def collect_league_batch_batched(
         )
         episodes_by_game[absolute_index] = tree_episodes
         total_turns += turns
+        if winner is None and turns >= max_turns:
+            turn_limit_draws += 1
         game_counts[opponent_type] += 1
         contributions[opponent_type] += sum(
             len(trajectory) for trajectory, _ in tree_episodes
         )
     stats.tree_seconds = time.perf_counter() - tree_started
+    stats.turn_limit_draws = turn_limit_draws
 
     episodes = [
         episode
