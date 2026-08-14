@@ -169,6 +169,59 @@ def test_variable_event_batch_matches_individual_native_steps():
         )
 
 
+def test_event_limit_uses_recent_context_but_retains_full_replay_history():
+    torch.manual_seed(42)
+    policy = NativePufferTemporalPolicy(
+        hidden_size=16, num_layers=2
+    ).eval()
+    events = (
+        PublicEventToken(EventKind.EPISODE_START),
+        PublicEventToken(EventKind.DRAW_COUNT, actor_relative=1, count=2),
+        PublicEventToken(
+            EventKind.PLAY,
+            actor_relative=1,
+            card_id=7,
+            suit_id=0,
+            count=1,
+        ),
+        PublicEventToken(
+            EventKind.CHOOSE_SUIT,
+            actor_relative=1,
+            suit_id=2,
+        ),
+    )
+    full_decision = _decision(events, seat=0)
+    recent_decision = DecisionInput(
+        full_decision.observation,
+        full_decision.legal_actions,
+        events[-2:],
+    )
+    with torch.inference_mode():
+        expected = policy.step(recent_decision, policy.initial_state())
+
+    runtime = _runtime(policy, seat=0, seed=103)
+    stats = BatchRolloutStats()
+    _batch_temporal_actions(
+        policy,
+        [(runtime, full_decision)],
+        stats,
+        deterministic=True,
+        max_public_events=2,
+    )
+
+    assert stats.temporal_forward_calls == 3
+    assert runtime.safe_history == [full_decision]
+    assert runtime.trajectory[0].decision is full_decision
+    assert runtime.trajectory[0].action == int(expected.logits.argmax())
+    assert runtime.trajectory[0].value == pytest.approx(
+        float(expected.value), abs=2e-6
+    )
+    for actual_state, expected_state in zip(runtime.state, expected.state):
+        assert torch.allclose(
+            actual_state, expected_state, atol=2e-6, rtol=2e-6
+        )
+
+
 def test_deterministic_temporal_batch_uses_masked_argmax():
     torch.manual_seed(43)
     policy = NativePufferTemporalPolicy(

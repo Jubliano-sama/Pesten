@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "kind": "puffer_vector_cohort_worker_sweep",
+  "recorded_at": "2026-08-13",
+  "base_git_commit": "c7dae09c52c1c754f2807af9616a86b4db5bed69",
+  "implementation_state": "worktree vector cohort sharding implementation",
+  "hardware": {
+    "cpu": "AMD Ryzen 7 5800X3D 8-Core Processor",
+    "cpu_cores": 8,
+    "cpu_threads": 16,
+    "gpu": "NVIDIA GeForce RTX 3090",
+    "nvidia_driver": "580.159.03"
+  },
+  "source_checkpoint": {
+    "path": "live_training/wider_deeper_gru_distillation_20260813/full_model_rl_cuda_teacher_rich_2048_8pass_002/puffer_epoch_005535.pt",
+    "epoch": 5535,
+    "sha256": "2f50eee3b1d7b2d5261db3cb2fde2266b559dcf6dfec7c50496fd1bde8b17526"
+  },
+  "protocol": {
+    "trainer_paused_during_sweep": true,
+    "warmup_games_per_worker_count": 128,
+    "measured_repeats": 2,
+    "games_per_repeat": 2048,
+    "prepack_training": true,
+    "max_turns": 500,
+    "worker_counts_in_order": [
+      7,
+      10,
+      12,
+      14
+    ],
+    "repeat_seeds": [
+      3815650000,
+      3815660000
+    ],
+    "player_counts": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "bulk_2_3_4_fraction": 0.6666666666666666,
+    "tail_5_8_fraction": 0.3333333333333333,
+    "opponents": [
+      "current_selfplay",
+      "historical_temporal",
+      "ppo_champion",
+      "canonical_random",
+      "smart_rule",
+      "smarter_rule"
+    ]
+  },
+  "results": [
+    {
+      "workers": 7,
+      "seconds": [
+        25.94249183899956,
+        23.05680265200499
+      ],
+      "mean_seconds": 24.499647245502274,
+      "mean_games_per_second": 83.5930403192225
+    },
+    {
+      "workers": 10,
+      "seconds": [
+        21.134646848004195,
+        19.447788210993167
+      ],
+      "mean_seconds": 20.29121752949868,
+      "mean_games_per_second": 100.93036541659895
+    },
+    {
+      "workers": 12,
+      "seconds": [
+        22.36877777799964,
+        19.485375539996312
+      ],
+      "mean_seconds": 20.927076658997976,
+      "mean_games_per_second": 97.8636449501142
+    },
+    {
+      "workers": 14,
+      "seconds": [
+        21.523208776998217,
+        20.870003206000547
+      ],
+      "mean_seconds": 21.196605991499382,
+      "mean_games_per_second": 96.61924181736092
+    }
+  ],
+  "selected_workers": 10,
+  "selected_shards_by_player_count": {
+    "2": 1,
+    "3": 1,
+    "4": 2,
+    "5": 1,
+    "6": 1,
+    "7": 2,
+    "8": 2
+  },
+  "gain_over_previous_7_worker_cap": {
+    "rollout_throughput_multiplier": 1.20740153763,
+    "rollout_wall_time_reduction": 0.171775114712
+  }
+}

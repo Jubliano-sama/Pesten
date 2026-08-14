@@ -13,6 +13,7 @@ drawn card identities and draw-pile state are never included.
 from __future__ import annotations
 
 from collections import Counter
+from contextlib import nullcontext
 from dataclasses import dataclass, field
 import hashlib
 import random
@@ -25,6 +26,8 @@ import torch
 import game
 from batched_pesten import (
     BatchedPesten,
+    CARD_COMPATIBILITY_MASKS,
+    CARD_RANK,
     PHASE_DRAW_RETRY,
     PHASE_SUIT,
     POLICY_RANDOM,
@@ -36,9 +39,12 @@ from batched_pesten import (
 from hardcodedAgent import HardcodedStrategyAgent
 from ppo2 import build_action_masks
 from temporal_observation import (
+    ACTION_COUNT,
     DecisionInput,
     EventKind,
     PASS_ACTION,
+    OBSERVATION_SIZE,
+    PlayerPrivateObservation,
     PublicEventToken,
     SUIT_ACTION_START,
     build_draw_retry_legal_actions,
@@ -129,6 +135,8 @@ class TemporalSeatRuntime:
     cursor: SafeEventCursor
     trajectory: list[TrajectoryStep] = field(default_factory=list)
     safe_history: list[DecisionInput] = field(default_factory=list)
+    sampling_uniforms: torch.Tensor | None = None
+    sampling_uniform_cursor: int = 0
 
 
 @dataclass(slots=True)
@@ -230,7 +238,7 @@ def league_schedule() -> tuple[str, ...]:
 
 
 def _hand_sizes(engine: BatchedPesten, game_index: int) -> tuple[int, ...]:
-    return tuple(int(value) for value in engine.hand_sizes[game_index])
+    return tuple(engine.hand_sizes[game_index].tolist())
 
 
 def _own_cards(
@@ -239,9 +247,7 @@ def _own_cards(
     seat: int,
 ) -> tuple[int, ...]:
     size = int(engine.hand_sizes[game_index, seat])
-    return tuple(
-        int(number) for number in engine.hands[game_index, seat, :size]
-    )
+    return tuple(engine.hands[game_index, seat, :size].tolist())
 
 
 def build_safe_decision(
@@ -268,8 +274,10 @@ def build_safe_decision(
     for item in history[cursor.public_cursor :]:
         action = item[0]
         actor = int(item[1])
-        actor_relative = relative_index(
-            actor, seat, player_count, direction
+        actor_relative = (
+            ((actor - seat) * direction) % player_count
+            if 0 <= actor < player_count
+            else -1
         )
         if action == "play":
             number = int(item[2])
@@ -301,9 +309,8 @@ def build_safe_decision(
             events.append(
                 PublicEventToken(
                     EventKind.DRAW_COUNT,
-                    actor_relative=relative_index(
-                        actor, seat, player_count, direction
-                    ),
+                    actor_relative=((actor - seat) * direction)
+                    % player_count,
                     count=draw_count,
                 )
             )
@@ -314,30 +321,53 @@ def build_safe_decision(
 
     own_cards = _own_cards(engine, game_index, seat)
     suit_mode = int(engine.phase[game_index]) == PHASE_SUIT
-    current_suit = SUIT_NAMES[int(engine.current_sort[game_index])]
+    current_suit_index = int(engine.current_sort[game_index])
     current_rank = int(engine.current_rank[game_index])
     penalty_amount = int(engine.penalty_amount[game_index])
-    observation = build_private_observation(
-        own_cards=own_cards,
-        current_suit=current_suit,
-        current_rank=current_rank,
-        public_hand_sizes=current_sizes,
-        observer_index=seat,
-        current_player_index=int(engine.current_player[game_index]),
-        direction=direction,
-        penalty_amount=penalty_amount,
-        public_sorts_played=tuple(
-            int(value) for value in engine.sorts_played[game_index]
-        ),
-        change_suit_mode=suit_mode,
-    )
-    legal = build_legal_actions(
-        own_cards=own_cards,
-        current_suit=current_suit,
-        current_rank=current_rank,
-        penalty_amount=penalty_amount,
-        change_suit_mode=suit_mode,
-    )
+    # This hot path already owns validated BatchedPesten arrays, so construct
+    # the exact safe schema directly instead of repeatedly allocating Card
+    # objects and revalidating public values in the generic boundary helpers.
+    observation_values = [0.0] * OBSERVATION_SIZE
+    for card_id in own_cards:
+        observation_values[card_id] += 1.0
+    observation_values[50 + current_suit_index] = 1.0
+    observation_values[55 + current_rank] = 1.0
+    for actor, hand_size in enumerate(current_sizes):
+        relative = ((actor - seat) * direction) % player_count
+        observation_values[69 + relative] = float(hand_size)
+    for suit_index, played in enumerate(
+        engine.sorts_played[game_index, :5]
+    ):
+        observation_values[82 + suit_index] = float(played)
+    player_scale = max(1, player_count - 1)
+    observation_values[87] = seat / player_scale
+    observation_values[88] = (
+        ((int(engine.current_player[game_index]) - seat) * direction)
+        % player_count
+    ) / player_scale
+    observation_values[89] = float(direction)
+    observation_values[90] = float(penalty_amount)
+    observation_values[91] = float(len(own_cards))
+    observation_values[92] = float(player_count)
+    observation_values[93] = float(suit_mode)
+    observation = PlayerPrivateObservation(tuple(observation_values))
+
+    legal_values = [False] * ACTION_COUNT
+    if suit_mode:
+        legal_values[SUIT_ACTION_START : SUIT_ACTION_START + 4] = [True] * 4
+    else:
+        compatible = (
+            CARD_RANK == current_rank
+            if penalty_amount > 0
+            else CARD_COMPATIBILITY_MASKS[
+                current_suit_index, current_rank
+            ]
+        )
+        for card_id in own_cards:
+            if bool(compatible[card_id]):
+                legal_values[card_id] = True
+        legal_values[PASS_ACTION] = True
+    legal = tuple(legal_values)
     if int(engine.phase[game_index]) == PHASE_DRAW_RETRY:
         # The legacy engine permits only the just-drawn card or pass during
         # this immediate retry. The drawn card is the acting player's own
@@ -373,6 +403,64 @@ def _scatter_states(
         )
 
 
+def _next_sampling_uniform(runtime: TemporalSeatRuntime) -> torch.Tensor:
+    """Amortize independent per-seat RNG dispatch for approximate rollouts."""
+    draws = runtime.sampling_uniforms
+    if draws is None or runtime.sampling_uniform_cursor >= draws.numel():
+        draws = torch.rand(256, generator=runtime.generator)
+        runtime.sampling_uniforms = draws
+        runtime.sampling_uniform_cursor = 0
+    draw = draws[runtime.sampling_uniform_cursor]
+    runtime.sampling_uniform_cursor += 1
+    return draw
+
+
+def _advance_event_states(
+    core: torch.nn.Module,
+    tokens: torch.Tensor,
+    states: tuple[torch.Tensor, ...],
+) -> tuple[torch.Tensor, ...]:
+    """Advance recurrent state without computing unused policy/value heads."""
+    traced_event_eval = getattr(core, "forward_events_eval", None)
+    if traced_event_eval is not None:
+        return traced_event_eval(tokens, states)
+    network = getattr(core, "network", None)
+    encoder = getattr(core, "encoder", None)
+    if network is not None and encoder is not None:
+        hidden = encoder(tokens)
+        _, next_states = network.forward_eval(hidden, states)
+        return next_states
+
+    base = getattr(core, "base", None)
+    adapter = getattr(core, "adapter", None)
+    base_parts = getattr(core, "base_state_parts", None)
+    adapter_parts = getattr(core, "adapter_state_parts", None)
+    if (
+        base is not None
+        and adapter is not None
+        and isinstance(base_parts, int)
+        and isinstance(adapter_parts, int)
+    ):
+        expected = base_parts + adapter_parts
+        if len(states) != expected:
+            raise ValueError(
+                f"residual policy expects {expected} recurrent-state parts"
+            )
+        base_hidden = base.encoder(tokens)
+        _, next_base = base.network.forward_eval(
+            base_hidden, states[:base_parts]
+        )
+        adapter_hidden = adapter.encoder(tokens)
+        _, next_adapter = adapter.network.forward_eval(
+            adapter_hidden, states[base_parts:]
+        )
+        return (*next_base, *next_adapter)
+
+    # Preserve support for custom policy cores that only expose forward_eval.
+    _, _, next_states = core.forward_eval(tokens, states)
+    return next_states
+
+
 def _batch_temporal_actions(
     policy: torch.nn.Module,
     entries: Sequence[tuple[TemporalSeatRuntime, DecisionInput]],
@@ -381,24 +469,74 @@ def _batch_temporal_actions(
     deterministic: bool = False,
     disable_strategic_pass: bool = False,
     strategic_pass_max_hand_size: int | None = None,
+    max_public_events: int | None = None,
 ) -> list[int]:
     """Advance variable-length event streams, then sample one action per seat."""
 
     if not entries:
         return []
-    parameter = next(policy.parameters())
-    device, dtype = parameter.device, parameter.dtype
+    device = getattr(policy, "_rollout_device", None)
+    dtype = getattr(policy, "_rollout_dtype", None)
+    if device is None or dtype is None:
+        parameter = next(policy.parameters())
+        device, dtype = parameter.device, parameter.dtype
     runtimes = [entry[0] for entry in entries]
     decisions = [entry[1] for entry in entries]
     feature_started = time.perf_counter()
-    event_rows = [policy._event_features(decision) for decision in decisions]
+    if max_public_events is not None and max_public_events < 1:
+        raise ValueError("max_public_events must be positive when provided")
+    recent_event_encoder = getattr(
+        policy, "_event_features_from_events", None
+    )
+    recent_event_token_encoder = (
+        getattr(policy, "_event_tokens_from_events", None)
+        if max_public_events is not None
+        else None
+    )
+    if (
+        max_public_events is not None
+        and recent_event_token_encoder is not None
+    ):
+        event_rows = [
+            decision.public_events[-max_public_events:]
+            for decision in decisions
+        ]
+    elif max_public_events is not None and recent_event_encoder is not None:
+        event_rows = [
+            recent_event_encoder(decision.public_events[-max_public_events:])
+            for decision in decisions
+        ]
+    else:
+        event_rows = [
+            policy._event_features(decision) for decision in decisions
+        ]
+    if max_public_events is not None and recent_event_encoder is None:
+        # This is an intentionally approximate behavior-policy optimization.
+        # Keep recent public context, which matters most for the current turn,
+        # while bounding recurrent calls in seven/eight-player games. The
+        # original DecisionInput remains in each trajectory, so PPO replay and
+        # the full learner still receive the complete information-safe history.
+        event_rows = [rows[-max_public_events:] for rows in event_rows]
     if stats is not None:
         stats.temporal_feature_encoding_seconds += (
             time.perf_counter() - feature_started
         )
 
     inference_started = time.perf_counter()
-    with torch.inference_mode():
+    inference_context = (
+        nullcontext()
+        if torch.is_inference_mode_enabled()
+        else torch.inference_mode()
+    )
+    with inference_context:
+        # Keep one contiguous state bank while consuming public events.  The
+        # previous path rebuilt that bank from every runtime before each event
+        # and immediately scattered it back into per-seat tensors afterwards.
+        # Large residual GRUs make those repeated copies substantial: their
+        # state has a small base branch plus a much wider/deeper adapter.  A
+        # local bank is equivalent because no runtime state is observed until
+        # this complete event-plus-decision step finishes.
+        batched_states = _stack_states(runtimes)
         max_events = max((len(rows) for rows in event_rows), default=0)
         for event_index in range(max_events):
             selected = [
@@ -406,32 +544,67 @@ def _batch_temporal_actions(
                 for index, rows in enumerate(event_rows)
                 if event_index < len(rows)
             ]
-            selected_runtimes = [runtimes[index] for index in selected]
-            tokens = torch.tensor(
-                [event_rows[index][event_index] for index in selected],
-                device=device,
-                dtype=dtype,
+            selected_events = [
+                event_rows[index][event_index] for index in selected
+            ]
+            if recent_event_token_encoder is not None:
+                tokens = recent_event_token_encoder(
+                    selected_events,
+                    device=device,
+                    dtype=dtype,
+                )
+            else:
+                tokens = torch.from_numpy(
+                    np.asarray(selected_events, dtype=np.float32)
+                )
+                if device.type != "cpu" or dtype != torch.float32:
+                    tokens = tokens.to(device=device, dtype=dtype)
+            if len(selected) == len(runtimes):
+                selected_states = batched_states
+                selected_indices = None
+            else:
+                selected_indices = torch.tensor(
+                    selected,
+                    device=device,
+                    dtype=torch.long,
+                )
+                selected_states = tuple(
+                    part.index_select(1, selected_indices)
+                    for part in batched_states
+                )
+            next_states = _advance_event_states(
+                policy.puffer_policy, tokens, selected_states
             )
-            _, _, next_states = policy.puffer_policy.forward_eval(
-                tokens, _stack_states(selected_runtimes)
-            )
-            _scatter_states(selected_runtimes, next_states)
+            if selected_indices is None:
+                batched_states = next_states
+            else:
+                for state, next_state in zip(batched_states, next_states):
+                    state.index_copy_(1, selected_indices, next_state)
             if stats is not None:
                 stats.temporal_forward_calls += 1
 
-        tokens = torch.tensor(
-            [policy._decision_features(decision) for decision in decisions],
-            device=device,
-            dtype=dtype,
+        tokens = torch.from_numpy(
+            np.asarray(
+                [
+                    policy._decision_features(decision)
+                    for decision in decisions
+                ],
+                dtype=np.float32,
+            )
         )
+        if device.type != "cpu" or dtype != torch.float32:
+            tokens = tokens.to(device=device, dtype=dtype)
         logits, values, next_states = policy.puffer_policy.forward_eval(
-            tokens, _stack_states(runtimes)
+            tokens, batched_states
         )
-        legal = torch.tensor(
-            [decision.legal_actions for decision in decisions],
-            device=device,
-            dtype=torch.bool,
+        legal = torch.from_numpy(
+            np.asarray(
+                [decision.legal_actions for decision in decisions],
+                dtype=np.bool_,
+            )
         )
+        if device.type != "cpu":
+            legal = legal.to(device=device)
         if disable_strategic_pass and strategic_pass_max_hand_size is not None:
             raise ValueError(
                 "disable_strategic_pass and strategic_pass_max_hand_size "
@@ -472,6 +645,21 @@ def _batch_temporal_actions(
         scatter_started = time.perf_counter()
         if deterministic:
             actions = masked_logits.argmax(dim=-1).cpu().tolist()
+        elif max_public_events is not None:
+            assert probabilities is not None
+            # Keep one independently seeded stream per seat, but draw it in
+            # blocks and invert every categorical CDF as a batch. This has the
+            # same categorical distribution as thousands of scalar
+            # ``torch.multinomial`` calls and preserves sharding independence.
+            draws = torch.stack(
+                [_next_sampling_uniform(runtime) for runtime in runtimes]
+            ).clamp_min_(torch.finfo(probabilities.dtype).tiny)
+            actions = (
+                (probabilities.cumsum(dim=-1) < draws.unsqueeze(-1))
+                .sum(dim=-1)
+                .clamp_max_(probabilities.shape[-1] - 1)
+                .tolist()
+            )
         else:
             assert probabilities is not None
             actions = [
@@ -772,6 +960,7 @@ def collect_league_batch_batched(
     trace_sink: list[dict] | None = None,
     player_count: int = 2,
     game_indices: Sequence[int] | None = None,
+    max_public_events: int | None = None,
 ) -> tuple[list[tuple[Sequence[TrajectoryStep], bool]], dict]:
     """Collect an explicit league schedule with batched neural decisions.
 
@@ -789,6 +978,8 @@ def collect_league_batch_batched(
         raise ValueError("games must be non-negative")
     if player_count < 2:
         raise ValueError("player_count must be at least two")
+    if max_public_events is not None and max_public_events < 1:
+        raise ValueError("max_public_events must be positive when provided")
     selected_game_indices = tuple(
         range(games) if game_indices is None else game_indices
     )
@@ -1026,7 +1217,10 @@ def collect_league_batch_batched(
 
             for _, (seat_policy, entries) in temporal_groups.items():
                 chosen = _batch_temporal_actions(
-                    seat_policy, entries, stats
+                    seat_policy,
+                    entries,
+                    stats,
+                    max_public_events=max_public_events,
                 )
                 for (runtime, _), action in zip(entries, chosen):
                     actions[runtime.game_index] = action
