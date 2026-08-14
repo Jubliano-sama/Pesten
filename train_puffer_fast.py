@@ -109,7 +109,7 @@ def _prune_frozen_optimizer_state(optimizer) -> dict[str, int]:
     }
 
 
-def _append_jsonl_idempotent(path: Path, row: dict) -> None:
+def _last_jsonl_row(path: Path) -> dict | None:
     if path.is_file() and path.stat().st_size:
         with path.open("rb") as handle:
             handle.seek(0, 2)
@@ -123,7 +123,13 @@ def _append_jsonl_idempotent(path: Path, row: dict) -> None:
                 position -= 1
             handle.seek(max(0, position))
             last_line = handle.read(end - max(0, position)).decode("utf-8").strip()
-        previous = json.loads(last_line)
+        return json.loads(last_line)
+    return None
+
+
+def _append_jsonl_idempotent(path: Path, row: dict) -> None:
+    previous = _last_jsonl_row(path)
+    if previous is not None:
         if previous.get("epoch") == row.get("epoch"):
             previous_hash = previous.get("checkpoint", {}).get("state_sha256")
             current_hash = row.get("checkpoint", {}).get("state_sha256")
@@ -254,6 +260,40 @@ def _configure_trainable_policy(
     }
 
 
+def _apply_residual_base_freeze(
+    policy,
+    architecture: str,
+    requested: bool,
+    training_scope: dict[str, float | int | str | None],
+) -> dict[str, float | int | str | bool | None]:
+    """Preserve the explicit adapter-only compatibility control."""
+    if not requested:
+        return training_scope
+    if architecture not in {"min_gru_residual", "hawk_residual"}:
+        raise ValueError(
+            "--freeze-residual-base requires a residual temporal policy"
+        )
+    for parameter in policy.puffer_policy.base.parameters():
+        parameter.requires_grad_(False)
+    trainable = sum(
+        parameter.numel()
+        for parameter in policy.parameters()
+        if parameter.requires_grad
+    )
+    total = int(training_scope["total_parameters"])
+    return {
+        **training_scope,
+        "mode": (
+            "residual_adapter_only"
+            if training_scope["mode"] == "all"
+            else training_scope["mode"]
+        ),
+        "freeze_residual_base": True,
+        "trainable_parameters": trainable,
+        "trainable_fraction": trainable / total,
+    }
+
+
 def _resolve_update_precision(
     requested: str,
     *,
@@ -371,6 +411,15 @@ def parse_args() -> argparse.Namespace:
         help=(
             "number of final residual-adapter GRU layers to backpropagate; "
             "auto uses two, 0 trains heads only, and -1 trains everything"
+        ),
+    )
+    parser.add_argument(
+        "--freeze-residual-base",
+        action="store_true",
+        help=(
+            "freeze the exact base branch of a residual temporal policy; "
+            "combine with --trainable-adapter-layers -1 to train its entire "
+            "added branch"
         ),
     )
     parser.add_argument(
@@ -568,6 +617,12 @@ def main() -> None:
         str(model_config.get("architecture", "min_gru")),
         args.trainable_adapter_layers,
     )
+    training_scope = _apply_residual_base_freeze(
+        policy,
+        str(model_config.get("architecture", "min_gru")),
+        args.freeze_residual_base,
+        training_scope,
+    )
     compile_updates = _resolve_compile_updates(
         args.compile_updates,
         pipelined_rollouts=pipelined_rollouts,
@@ -653,6 +708,16 @@ def main() -> None:
     curve = []
     result_path = output_dir / "training_result.json"
     jsonl_path = output_dir / "training_curve.jsonl"
+    previous_row = _last_jsonl_row(jsonl_path)
+    if (
+        previous_row is not None
+        and int(previous_row.get("epoch", -1)) >= start_epoch
+    ):
+        raise RuntimeError(
+            "output training curve already reaches epoch "
+            f"{previous_row.get('epoch')}; resume from that epoch's checkpoint "
+            "or choose a new output directory"
+        )
     vector_rollout_pool = (
         VectorPufferRolloutPool(
             policy,
@@ -860,6 +925,7 @@ def main() -> None:
                     1 if pipelined_rollouts else 0
                 ),
                 "update_epochs": args.update_epochs,
+                "freeze_residual_base": args.freeze_residual_base,
                 "training_scope": training_scope,
                 "optimizer_state_pruning": optimizer_state_pruning,
                 "minibatch_trajectories": args.minibatch_trajectories,

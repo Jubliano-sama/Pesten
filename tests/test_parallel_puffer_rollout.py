@@ -20,9 +20,11 @@ from temporal_puffer_v4 import (
 )
 from train_puffer_fast import (
     AUTO_INT8_ROLLOUT_PARAMETER_THRESHOLD,
+    _apply_residual_base_freeze,
     _append_jsonl_idempotent,
     _configure_trainable_policy,
     _effective_vector_workers,
+    _last_jsonl_row,
     _prune_frozen_optimizer_state,
     _resolve_compile_updates,
     _resolve_rollout_max_public_events,
@@ -62,6 +64,7 @@ def test_fast_trainer_defaults_to_nonlagged_compiled_path(monkeypatch):
     assert args.compile_updates is None
     assert args.update_epochs == 1
     assert args.full_rollout_diagnostics is False
+    assert args.freeze_residual_base is False
     assert args.rollout_precision == "auto"
     assert args.update_precision == "auto"
 
@@ -286,6 +289,30 @@ def test_frozen_optimizer_state_is_pruned_and_remains_reloadable():
     resumed.load_state_dict(optimizer.state_dict())
     assert _prune_frozen_optimizer_state(resumed)["removed_parameters"] == 0
     assert all(parameter.requires_grad for parameter in resumed.state)
+
+
+def test_explicit_residual_base_freeze_keeps_the_complete_adapter_trainable():
+    policy = MinGRUResidualTemporalPolicy(
+        base_hidden_size=8,
+        base_num_layers=1,
+        adapter_hidden_size=12,
+        adapter_num_layers=3,
+    )
+    scope = _configure_trainable_policy(policy, "min_gru_residual", -1)
+    scope = _apply_residual_base_freeze(
+        policy, "min_gru_residual", True, scope
+    )
+
+    assert scope["mode"] == "residual_adapter_only"
+    assert scope["freeze_residual_base"] is True
+    assert all(
+        not parameter.requires_grad
+        for parameter in policy.puffer_policy.base.parameters()
+    )
+    assert all(
+        parameter.requires_grad
+        for parameter in policy.puffer_policy.adapter.parameters()
+    )
 
 
 def test_auto_update_precision_prefers_supported_cuda_bfloat16():
@@ -540,6 +567,22 @@ def test_training_curve_append_is_idempotent_by_epoch_and_state(tmp_path):
     conflicting = {"epoch": 7, "checkpoint": {"state_sha256": "def"}}
     with pytest.raises(RuntimeError, match="conflicting"):
         _append_jsonl_idempotent(path, conflicting)
+
+
+def test_last_training_curve_row_is_read_without_modifying_file(tmp_path):
+    path = tmp_path / "curve.jsonl"
+    assert _last_jsonl_row(path) is None
+    path.write_text(
+        '{"epoch": 6, "checkpoint": {"state_sha256": "old"}}\n'
+        '{"epoch": 7, "checkpoint": {"state_sha256": "new"}}\n'
+    )
+    before = path.read_bytes()
+
+    assert _last_jsonl_row(path) == {
+        "epoch": 7,
+        "checkpoint": {"state_sha256": "new"},
+    }
+    assert path.read_bytes() == before
 
 
 def test_persistent_vector_pool_refreshes_shared_policy_exactly():
