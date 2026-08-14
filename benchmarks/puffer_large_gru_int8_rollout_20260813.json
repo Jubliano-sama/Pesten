@@ -1,0 +1,662 @@
+{
+  "schema_version": 1,
+  "kind": "puffer_large_gru_rollout_quantization_benchmark",
+  "date": "2026-08-13",
+  "updated_date": "2026-08-14",
+  "checkpoint": {
+    "path": "/home/tommie/Pesten/live_training/wider_deeper_gru_distillation_20260813/full_model_rl_cuda_teacher_rich_sharded_003/puffer_epoch_005600.pt",
+    "sha256": "4dba0ea466522ccad1e4b9429e6718a4c3853912065b1f4a3b2d1eace3499121",
+    "architecture": "min_gru_residual",
+    "base": "192x2",
+    "adapter": "512x6",
+    "parameter_count": 5027824
+  },
+  "host": {
+    "cpu": "AMD Ryzen 7 5800X3D",
+    "gpu": "NVIDIA GeForce RTX 3090",
+    "gpu_compute_capability": [
+      8,
+      6
+    ],
+    "torch": "2.13.0+cu130",
+    "cuda": "13.0",
+    "cuda_bfloat16_supported": true,
+    "native_fp8_tensor_cores": false,
+    "quantized_engine": "x86",
+    "threads_per_process": 1
+  },
+  "quantization": {
+    "mode": "per-channel dynamic int8",
+    "scope": "recurrent nn.Linear weights in both MinGRU branches",
+    "activation_dtype": "float32",
+    "recurrent_state_dtype": "float32",
+    "encoder_dtype": "float32",
+    "decoder_dtype": "float32",
+    "ppo_update_dtype": "bfloat16 autocast on supported CUDA with float32 parameters and optimizer state",
+    "calibration_required": false,
+    "current_policy_and_three_historical_policy_build_seconds": 0.08737895600000911
+  },
+  "batched_recurrent_state_bank": {
+    "model": "synthetic native MinGRU 512x6",
+    "games": 48,
+    "player_count": 4,
+    "schedule": [
+      "current_selfplay"
+    ],
+    "cpu_threads": 1,
+    "run_order": [
+      "old",
+      "new",
+      "new",
+      "old"
+    ],
+    "old_wall_seconds": [
+      17.45492281600309,
+      18.095851265010424
+    ],
+    "new_wall_seconds": [
+      11.124900237002294,
+      14.88480493199313
+    ],
+    "mean_old_wall_seconds": 17.775387040506757,
+    "mean_new_wall_seconds": 13.004852584497712,
+    "speedup": 1.366827261209843,
+    "wall_reduction": 0.26837865443592857,
+    "action_mismatches": 0,
+    "winner_mismatches": 0,
+    "max_log_probability_difference": 0.0,
+    "max_value_difference": 0.0
+  },
+  "event_decoder_bypass": {
+    "scope": "public event tokens run through the encoder and recurrent core without unused policy and value decoders",
+    "exact_checkpoint_single_process_games": 48,
+    "before_seconds": 2.9288,
+    "after_seconds": 2.7719,
+    "speedup": 1.0566037735849056,
+    "wall_reduction": 0.05357142857142849,
+    "behavior_contract": "decision tokens still use the full action and value decoders"
+  },
+  "traced_int8_eval_graphs": {
+    "scope": "trace the quantized MinGRU decision graph and decoder-free event graph once per worker policy generation",
+    "behavior_contract": "bit-exact logits, values, recurrent states, actions, and trajectories across tested dynamic batch sizes",
+    "single_process_exact_cohorts": {
+      "games_per_player_count": 256,
+      "player_counts": [
+        7,
+        8
+      ],
+      "repeats": 2,
+      "eager_total_wall_seconds": 38.294194783999956,
+      "traced_total_wall_seconds": 33.76826197399987,
+      "wall_speedup": 1.1340291902936805,
+      "eager_recurrent_seconds": 21.58465265097584,
+      "traced_recurrent_seconds": 16.364189625991457,
+      "recurrent_speedup": 1.3190175098370074,
+      "exact_trajectory_parity": true
+    },
+    "eight_worker_first_usable_adjacent_pair": {
+      "games": 2048,
+      "eager_games_per_second": 103.29765158752578,
+      "traced_games_per_second": 112.9833969558122,
+      "speedup": 1.0937653975616235
+    },
+    "extra_build_seconds_per_policy": 0.04393252700083365,
+    "host_load_note": "later process-level samples were excluded after unrelated host load exceeded 70; the exact single-process parity and recurrent timers remain the primary evidence"
+  },
+  "recent_event_behavior_cap": {
+    "selected_max_public_events": 5,
+    "scope": "behavior actor only; PPO replay and the full learner retain every original public event; capped actors use block-seeded inverse-CDF categorical sampling",
+    "probe": {
+      "games_per_case": 24,
+      "player_counts": [
+        7,
+        8
+      ],
+      "seeds_per_player_count": 2,
+      "measurement": "single-thread process CPU time to isolate unrelated host scheduling load",
+      "full_history_cpu_seconds": 3.890027125,
+      "latest_five_cpu_seconds": 2.786163951,
+      "fixed_game_speedup": 1.3961946222166164,
+      "full_history_decisions": 10612,
+      "latest_five_decisions": 11749,
+      "full_history_decisions_per_cpu_second": 2728.0015431769,
+      "latest_five_decisions_per_cpu_second": 4216.909057266028,
+      "decision_throughput_speedup": 1.5457869031683968,
+      "full_history_mean_approx_kl": 0.002177950620690061,
+      "latest_five_mean_approx_kl": 0.0124039003,
+      "full_history_mean_clip_fraction_0_1": 0.05564924297640853,
+      "latest_five_mean_clip_fraction_0_1": 0.0821017636
+    },
+    "accuracy_trade": "pre-update KL rises by design but remains below the trainer's 0.02 default target; pass --rollout-max-public-events 0 to restore full behavior history"
+  },
+  "capped_rollout_hot_path": {
+    "scope": "direct information-safe decision construction, C-backed array extraction, sparse recent-event tokens, per-group tensor conversion, block-seeded sampling, and one outer inference context",
+    "games": 48,
+    "player_count": 8,
+    "decisions": 5922,
+    "measurement": "same-seed single-thread process CPU time with identical action count",
+    "before_cpu_seconds": 3.03,
+    "after_cpu_seconds": 2.092,
+    "speedup": 1.4483747609942637,
+    "cpu_reduction": 0.3095709570957095
+  },
+  "single_step_microbenchmark": [
+    {
+      "batch": 1,
+      "float32_ms": 0.8616836866666707,
+      "int8_ms": 0.8974357866666575,
+      "speedup": 0.9601619407971453,
+      "mean_absolute_logit_error": 0.11023493111133575
+    },
+    {
+      "batch": 8,
+      "float32_ms": 1.9551702222220988,
+      "int8_ms": 1.3400158888896068,
+      "speedup": 1.4590649547015704,
+      "mean_absolute_logit_error": 0.37157100439071655
+    },
+    {
+      "batch": 32,
+      "float32_ms": 4.333912399999917,
+      "int8_ms": 2.934139099998845,
+      "speedup": 1.4770643968452701,
+      "mean_absolute_logit_error": 0.33152055740356445
+    },
+    {
+      "batch": 64,
+      "float32_ms": 7.532018000000562,
+      "int8_ms": 5.102489899999796,
+      "speedup": 1.4761455970742565,
+      "mean_absolute_logit_error": 0.4255388081073761
+    }
+  ],
+  "mixed_rollout": {
+    "games_per_repeat": 48,
+    "player_count": 4,
+    "seed": 2026081399,
+    "schedule_offset": 11468800,
+    "schedule": [
+      "current_selfplay",
+      "current_selfplay",
+      "current_selfplay",
+      "historical_temporal",
+      "historical_temporal",
+      "historical_temporal",
+      "historical_temporal",
+      "historical_temporal",
+      "historical_temporal",
+      "ppo_champion",
+      "canonical_random",
+      "smart_rule",
+      "smarter_rule"
+    ],
+    "run_order": [
+      "float32",
+      "int8_recurrent",
+      "int8_recurrent",
+      "float32"
+    ],
+    "runs": [
+      {
+        "mode": "float32",
+        "wall_seconds": 3.4108405129999824,
+        "games_per_second": 14.072777609229789,
+        "decisions": 1438,
+        "decisions_per_second": 421.5969625431758
+      },
+      {
+        "mode": "int8_recurrent",
+        "wall_seconds": 3.2140294050000193,
+        "games_per_second": 14.934524222251076,
+        "decisions": 1728,
+        "decisions_per_second": 537.6428720010388
+      },
+      {
+        "mode": "int8_recurrent",
+        "wall_seconds": 3.214202646999979,
+        "games_per_second": 14.93371926776349,
+        "decisions": 1728,
+        "decisions_per_second": 537.6138936394857
+      },
+      {
+        "mode": "float32",
+        "wall_seconds": 3.3661845889999995,
+        "games_per_second": 14.259467575501994,
+        "decisions": 1438,
+        "decisions_per_second": 427.18988278274725
+      }
+    ],
+    "mean_float32_wall_seconds": 3.388512550999991,
+    "mean_int8_wall_seconds": 3.2141160259999992,
+    "games_per_second_speedup": 1.0542595611325922,
+    "wall_reduction": 0.051466985107824104,
+    "mean_float32_decisions_per_second": 424.3934226629615,
+    "mean_int8_decisions_per_second": 537.6283828202622,
+    "decisions_per_second_speedup": 1.266816011065346,
+    "behavior_note": "The approximate int8 policy selected longer games, so fixed-game wall time understates compute throughput. Action trajectories are intentionally not parity-equivalent."
+  },
+  "ten_worker_training_shape": {
+    "model": "synthetic native MinGRU 512x6",
+    "parameter_count": 4782616,
+    "workers": 10,
+    "games_per_repeat": 256,
+    "repeats": 2,
+    "persistent_pool": true,
+    "fresh_current_policy_repack_each_repeat": true,
+    "prepack_training": true,
+    "player_count_schedule": "same weighted 2-8 player schedule as the active large-GRU run",
+    "opponent_schedule": "same current, historical, champion, random, and rule-role proportions as the active large-GRU run",
+    "runs": [
+      {
+        "mode": "float32",
+        "collect_seconds": 13.859701031999975,
+        "games_per_second": 18.47081689633379,
+        "decisions": 32877,
+        "decisions_per_second": 2372.129090237367
+      },
+      {
+        "mode": "float32",
+        "collect_seconds": 12.378784929000062,
+        "games_per_second": 20.680543483735867,
+        "decisions": 32877,
+        "decisions_per_second": 2655.9149535733754
+      },
+      {
+        "mode": "int8_recurrent",
+        "collect_seconds": 9.462787631999959,
+        "games_per_second": 27.0533388210356,
+        "decisions": 33034,
+        "decisions_per_second": 3490.937478961289
+      },
+      {
+        "mode": "int8_recurrent",
+        "collect_seconds": 7.600217837999935,
+        "games_per_second": 33.68324506700833,
+        "decisions": 33034,
+        "decisions_per_second": 4346.454365404504
+      }
+    ],
+    "mean_float32_games_per_second": 19.57568019003483,
+    "mean_int8_games_per_second": 30.368291944021962,
+    "games_per_second_speedup": 1.551327547713065,
+    "mean_float32_decisions_per_second": 2514.0220219053713,
+    "mean_int8_decisions_per_second": 3918.6959221828965,
+    "decisions_per_second_speedup": 1.5587357183183805,
+    "mean_float32_collect_seconds": 13.119242980500019,
+    "mean_int8_collect_seconds": 8.531502734999947,
+    "wall_reduction": 0.3496955009004047
+  },
+  "full_precision_ppo_compatibility": {
+    "games": 16,
+    "player_count": 4,
+    "schedule": [
+      "current_selfplay"
+    ],
+    "clip_ratio": 0.1,
+    "active_training_target_kl": 0.005,
+    "float32_behavior": {
+      "decisions": 1144,
+      "approx_kl_before_update": 1.6185676132707272e-09,
+      "clip_fraction_before_update": 0.0,
+      "mean_absolute_log_ratio": 3.159051175316563e-06,
+      "p95_absolute_log_ratio": 1.3297787518240511e-05
+    },
+    "int8_recurrent_behavior": {
+      "decisions": 1204,
+      "approx_kl_before_update": 0.002647126791998744,
+      "clip_fraction_before_update": 0.049833886325359344,
+      "mean_absolute_log_ratio": 0.018437983468174934,
+      "p95_absolute_log_ratio": 0.09857609122991562,
+      "max_absolute_log_ratio": 0.8575244545936584
+    },
+    "interpretation": "The full-precision learner begins below the active 0.005 KL target and about 95 percent of quantized behavior decisions remain inside the 0.1 PPO ratio clip band."
+  },
+  "residual_base_int8_actor": {
+    "mode": "int8_residual_base",
+    "behavior_policy": "the exact preserved 192x2 base teacher branch with recurrent weights dynamically quantized per channel to int8",
+    "learner_policy": "the full 192x2 plus 512x6 residual policy in float32 parameters with bfloat16 CUDA autocast",
+    "single_process_24_game_probe": {
+      "decisions_per_second": 3578.0335144093483,
+      "approx_kl_before_update": 0.002259170636534691,
+      "clip_fraction_0_1": 0.047204967588186264,
+      "clip_fraction_0_2": 0.023188406601548195,
+      "p95_absolute_log_ratio": 0.09550655633211136,
+      "importance_effective_sample_fraction": 0.9948999285697937
+    },
+    "ten_worker_exact_checkpoint": {
+      "games_per_repeat": 256,
+      "repeats": 2,
+      "full_residual_int8_recurrent": {
+        "mean_collect_seconds": 6.888680965999811,
+        "mean_games_per_second": 38.033064914981864,
+        "mean_decisions_per_second": 1434.7170152787082
+      },
+      "residual_base_int8": {
+        "mean_collect_seconds": 2.3742745580000246,
+        "mean_games_per_second": 119.8927088142477,
+        "mean_decisions_per_second": 4595.206604828413
+      },
+      "base_over_full_games_speedup": 3.152328351192647,
+      "base_over_full_decisions_speedup": 3.20286617910902,
+      "compatibility_repeats": [
+        {
+          "approx_kl": 0.0014593040104955435,
+          "clip_fraction_0_1": 0.05227078124880791,
+          "clip_fraction_0_2": 0.01799485832452774,
+          "importance_effective_sample_fraction": 0.9972081780433655
+        },
+        {
+          "approx_kl": 0.005952096544206142,
+          "clip_fraction_0_1": 0.06643150746822357,
+          "clip_fraction_0_2": 0.03586125746369362,
+          "importance_effective_sample_fraction": 0.978111982345581
+        }
+      ]
+    },
+    "full_2048_game_probe": {
+      "checkpoint_epoch": 5634,
+      "workers": 10,
+      "rollout_seconds": 10.557221274999847,
+      "games_per_second": 193.99043997020226,
+      "trajectories": 3525,
+      "decisions": 78027,
+      "decisions_per_second": 7390.865263454576,
+      "turn_limit_draws": 1
+    },
+    "effective_worker_cap": 8,
+    "worker_cap_reason": "a full 2048-game sweep selected eight workers for the cheap base actor; more processes did not improve throughput"
+  },
+  "bfloat16_cuda_update": {
+    "checkpoint": "same exact 5027824-parameter checkpoint as the rollout benchmark",
+    "device": "NVIDIA GeForce RTX 3090",
+    "compiled_forward": true,
+    "compile_mode": "reduce-overhead",
+    "prepared_minibatch_shape": [
+      64,
+      512,
+      100
+    ],
+    "real_behavior_samples": 1350,
+    "optimizer": "Adam",
+    "parameter_dtype": "float32",
+    "optimizer_state_dtype": "float32",
+    "gradient_scaler": false,
+    "run_order": [
+      "float32",
+      "bfloat16"
+    ],
+    "float32": {
+      "mean_update_seconds": 0.0591303059,
+      "decisions_per_second": 22830.9321,
+      "loss": 0.128092587,
+      "approx_kl": 0.003131199,
+      "peak_allocated_bytes": 94622208,
+      "warm_compile_seconds": 42.856116745
+    },
+    "bfloat16": {
+      "mean_update_seconds": 0.0424154534,
+      "decisions_per_second": 31828.0224,
+      "loss": 0.128008991,
+      "approx_kl": 0.003147293,
+      "peak_allocated_bytes": 114300416,
+      "warm_compile_seconds": 44.304620352
+    },
+    "update_speedup": 1.394074592,
+    "wall_reduction": 0.282677,
+    "interpretation": "Native CUDA bfloat16 autocast accelerates the compiled forward and backward pass while retaining float32 model parameters and Adam state. No gradient scaler is needed because bfloat16 retains the float32 exponent range."
+  },
+  "learner_trainable_scope": {
+    "scope": "full residual forward, but gradients only through the final two 512-wide adapter MinGRU layers and factorized policy/value heads",
+    "default_adapter_layers": 2,
+    "total_parameters": 5027824,
+    "trainable_parameters": 1585176,
+    "trainable_fraction": 0.3152807258169737,
+    "frozen": "complete 192x2 base, adapter encoder, and first four 512-wide adapter layers",
+    "behavior_change_before_update": "none; requires_grad flags do not alter the complete checkpoint forward pass",
+    "escape_hatches": {
+      "all_layers": "--trainable-adapter-layers -1",
+      "heads_only": "--trainable-adapter-layers 0"
+    },
+    "optimizer_state_pruning": {
+      "source_checkpoint_epoch": 5634,
+      "before_state_bytes": 40222672,
+      "removed_frozen_state_bytes": 27541240,
+      "after_state_bytes": 12681432,
+      "state_byte_reduction": 0.6847193045752903,
+      "source_checkpoint_bytes": 60368437,
+      "optimized_resume_smoke_checkpoint_bytes": 32816241,
+      "checkpoint_byte_reduction": 0.4564006850135941,
+      "resume_compatibility_validated": true,
+      "note": "parameter groups retain their original layout; missing Adam moments initialize normally if frozen parameters are later re-enabled"
+    },
+    "exact_checkpoint_cpu_microbenchmark": {
+      "checkpoint_epoch": 5634,
+      "input_shape": [
+        2,
+        32,
+        100
+      ],
+      "cpu_threads": 1,
+      "measured_repeats_after_warmup": 4,
+      "full_forward_backward_median_cpu_seconds": 0.06923224299999997,
+      "top_two_forward_backward_median_cpu_seconds": 0.029012943499999944,
+      "speedup": 2.386253673295855,
+      "note": "This isolates forward plus backward compute on CPU; it is not an end-to-end CUDA epoch claim."
+    }
+  },
+  "vectorized_replay_preparation": {
+    "gae_recurrence_probe": {
+      "trajectories": 3541,
+      "total_decisions": 98619,
+      "trajectory_length_range": [
+        1,
+        54
+      ],
+      "old_torch_scalar_seconds": 3.078761679000005,
+      "numpy_float32_seconds": 0.27068424333341073,
+      "speedup": 11.37399665782464,
+      "wall_reduction": 0.9120801570385499,
+      "max_return_difference": 0.0,
+      "max_advantage_difference": 0.0
+    },
+    "packed_field_materialization_probe": {
+      "trajectories": 3541,
+      "minibatch_trajectories": 128,
+      "python_list_seconds": 0.880505032000201,
+      "contiguous_numpy_seconds": 0.18348181533322835,
+      "speedup": 4.798868107997962,
+      "wall_reduction": 0.7916175278221619
+    },
+    "exact_real_epoch_after": {
+      "games": 2048,
+      "trajectories": 3541,
+      "decisions": 78275,
+      "preparation_seconds": 0.21737175599992042,
+      "post_update_approx_kl": 0.004670833951937281,
+      "target_kl": 0.005,
+      "host_load_note": "overall wall and rollout time excluded because unrelated OpenCode processes saturated the CPU"
+    },
+    "earlier_clean_compiled_preparation_seconds": [
+      1.7179574050001065,
+      1.7676373780000176
+    ],
+    "interpretation": "The exact real preparation timer is about eight times lower than the earlier clean mean, but this cross-run ratio is supporting evidence rather than a paired end-to-end benchmark."
+  },
+  "trainer_integration_smoke": {
+    "source_checkpoint": "live_training/sota_distillation_20260812_active_large/large_min_gru_512x2.pt",
+    "source_checkpoint_sha256": "3c88b8b667e84a2fdc7860df8ce53bb4550915ebc3fe6d1ae4c9f54e42c149fc",
+    "architecture": "min_gru",
+    "hidden_size": 512,
+    "num_layers": 2,
+    "parameter_count": 1653304,
+    "games": 8,
+    "players_per_game": 2,
+    "rollout_workers": 2,
+    "decisions": 71,
+    "optimizer_steps": 4,
+    "resolved_rollout_precision": "int8_recurrent",
+    "resolved_update_precision": "bfloat16",
+    "checkpoint_saved": true,
+    "training_result_saved": true,
+    "post_update_approx_kl": 0.015526640163341038,
+    "target_kl": 0.02,
+    "compile_included_in_update_seconds": true,
+    "interpretation": "A real train_puffer_fast.py epoch completed through rollout collection, packed PPO replay, CUDA update, evaluation, checkpoint save, and result serialization with both automatic precision modes active."
+  },
+  "full_epoch_benchmark": {
+    "baseline": {
+      "source": "mean of live epochs 5627 through 5634",
+      "wall_seconds": 46.04866764737926,
+      "rollout_seconds": 31.276624235497366,
+      "update_seconds": 14.553921785500279,
+      "games_per_second": 65.65177287175027,
+      "decisions_per_second": 2501.818118537083
+    },
+    "optimized_serial": {
+      "configuration": {
+        "rollout_precision": "int8_residual_base",
+        "effective_workers": 8,
+        "trace_int8_rollouts": false,
+        "rollout_max_public_events": null,
+        "update_precision": "bfloat16",
+        "compile_updates": true,
+        "update_epochs": 2,
+        "minibatch_trajectories": 128,
+        "pipelined_rollouts": false
+      },
+      "compile_warmup_epoch_seconds": 297.77578737199997,
+      "compile_warmup_update_seconds": 286.1882292980001,
+      "steady_epochs": [
+        {
+          "epoch": 5636,
+          "wall_seconds": 13.68219246999979,
+          "rollout_seconds": 9.533945274999951,
+          "update_seconds": 4.010505087000183,
+          "post_update_approx_kl": 0.00411805452265841
+        },
+        {
+          "epoch": 5637,
+          "wall_seconds": 14.85359309999967,
+          "rollout_seconds": 10.297612581999601,
+          "update_seconds": 3.8271552830001383,
+          "post_update_approx_kl": 0.004654893058803014
+        }
+      ],
+      "steady_mean_wall_seconds": 14.26789278499973,
+      "steady_mean_rollout_seconds": 9.915778928499776,
+      "steady_mean_update_seconds": 3.918830185000161,
+      "steady_mean_games_per_second": 206.8462179389319,
+      "steady_mean_decisions_per_second": 7777.735878968195,
+      "wall_speedup_over_live": 3.2274329742505232,
+      "rollout_speedup_over_live": 3.154227666936239,
+      "update_speedup_over_live": 3.713843442670043,
+      "wall_reduction": 0.6901562300508438,
+      "interpretation": "This is a conservative lower bound for the selected default: it was measured before vectorized replay preparation, traced INT8 graphs, and the five-event behavior cap; both steady epochs remained below the 0.005 KL target."
+    },
+    "optional_one_update_lag_pipeline": {
+      "configuration": "explicit --pipelined-rollouts with eager BF16 updates",
+      "short_clean_steady_mean_wall_seconds": 9.647415082500174,
+      "short_clean_wall_speedup_over_live": 4.773161230608679,
+      "short_clean_post_update_approx_kl": [
+        0.030004911805283824,
+        0.028777647045487385
+      ],
+      "short_clean_clip_fraction": [
+        0.08590051365958988,
+        0.08399857495348806
+      ],
+      "long_run_result_excluded": "a later six-epoch run was contaminated by host load from roughly eighteen unrelated OpenCode processes and did not beat the selected serial path",
+      "default": false,
+      "reason": "the short speed burst was not sustained, while the lag raised KL far above the 0.005 target"
+    }
+  },
+  "rejected_experiments": {
+    "fp8": "RTX 3090 compute capability 8.6 has no native FP8 tensor cores, so FP8 would add conversion or emulation overhead",
+    "whole_policy_dynamic_int8": "quantizing encoders and decoders was slower than recurrent-only quantization",
+    "per_tensor_recurrent_int8": "slower and less faithful than per-channel recurrent int8",
+    "truncated_residual_adapter_depths_1_to_4": "approximate KL ranged from 9.30 to 15.56; a trained recurrent stack cannot be truncated into a usable actor",
+    "fused_adam": "0.3 percent slower than standard Adam in the exact BF16 update benchmark",
+    "minibatch_256_and_512": "both OOM on the real rollout with safe-token sequences up to length 751; minibatch 128 used 9672001536 peak allocated bytes",
+    "adaptive_token_batches": "introduced expensive CUDA graph shape churn and was removed",
+    "move_replay_packing_out_of_workers": "paired warm result was 13.00999 seconds unpacked versus 12.95447 seconds packed, so worker packing remained",
+    "dense_event_tensor_packing": "materializing one dense time-by-batch event tensor regressed the representative capped rollout from about 2.31 to 2.35-2.41 seconds and was reverted",
+    "one_layer_base_actor": "about 1.5x more decision throughput but approximate KL was 1.82 to 1.85, making PPO ratios unusable",
+    "parallel_event_sequence_scan": "the mathematically exact initial-state correction was slower for representative batches of 32 and 128; dynamic INT8 also changed activation quantization scales across time",
+    "event_caps_below_five": "latest-four and latest-three probes raised approximate KL to 0.021 and 0.041; five events was the selected throughput-fidelity knee"
+  },
+  "selection": {
+    "default_policy": "auto",
+    "auto_threshold_parameters": 1000000,
+    "large_min_gru_residual_resolution": "int8_residual_base",
+    "other_large_model_resolution": "int8_recurrent",
+    "small_model_resolution": "float32",
+    "cuda_update_resolution": "bfloat16 when supported, otherwise float32",
+    "update_epochs": 1,
+    "full_rollout_diagnostics": false,
+    "early_stop_diagnostic_trajectories": 512,
+    "diagnostic_safety": "a sampled KL above 75 percent of target automatically triggers a full-rollout diagnostic",
+    "trainable_adapter_layers": 2,
+    "trainable_parameters": 1585176,
+    "trainable_fraction": 0.3152807258169737,
+    "minibatch_trajectories": 128,
+    "pipelined_rollouts": false,
+    "trace_int8_rollouts": true,
+    "rollout_max_public_events": 5,
+    "compile_updates": "automatic and enabled for the selected serial large-model path",
+    "fp8_resolution": "not selected because RTX 3090 has no native FP8 tensor-core acceleration",
+    "reason": "The user explicitly prioritizes training throughput over rollout-policy fidelity."
+  },
+  "validation": {
+    "focused_runtime_tests": {
+      "passed": 68,
+      "failed": 0,
+      "coverage": "precision selection, quantized worker refresh, cohort sharding, exact state-bank behavior, residual checkpoint loading, trainable-layer scope, packed PPO parity, and bit-exact GAE targets"
+    },
+    "expanded_related_tests": {
+      "passed": 131,
+      "failed": 0,
+      "skipped": 1
+    },
+    "exact_checkpoint_training_smoke": {
+      "games": 2048,
+      "checkpoint_written": true,
+      "training_result_written": true,
+      "resolved_rollout_precision": "int8_residual_base",
+      "resolved_update_precision": "bfloat16",
+      "effective_workers": 8,
+      "post_update_approx_kl": 0.004670833951937281,
+      "target_kl": 0.005
+    },
+    "optimized_default_cpu_cli_resume_smoke": {
+      "source_epoch": 5634,
+      "completed_epochs": [
+        5635,
+        5636
+      ],
+      "optimizer_state_resume": true,
+      "checkpoint_written_each_epoch": true,
+      "rollout_precision": "int8_residual_base",
+      "trace_int8_rollouts": true,
+      "rollout_max_public_events": 5,
+      "update_epochs": 1,
+      "full_rollout_diagnostics": false,
+      "trainable_parameters": 1585176,
+      "total_parameters": 5027824,
+      "post_update_approx_kl": [
+        0.009065479867988162,
+        0.0017568684437058188
+      ],
+      "target_kl": 0.02,
+      "scope": "temporary output only; no production trainer was started or modified"
+    },
+    "original_optimizer_pruning_cli_smoke": {
+      "source_epoch": 5634,
+      "completed_epoch": 5635,
+      "removed_frozen_optimizer_state_bytes": 27541240,
+      "checkpoint_bytes": 32816241,
+      "post_update_approx_kl": 0.0030039381235837936,
+      "target_kl": 0.02,
+      "scope": "resumed the original full-optimizer checkpoint into temporary CPU-only output"
+    }
+  }
+}

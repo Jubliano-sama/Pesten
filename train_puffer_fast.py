@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor
+from contextlib import nullcontext
 import hashlib
 import json
 import math
@@ -23,6 +25,10 @@ DEFAULT_PRIVILEGED_CRITIC = (
     / "best"
     / "ppo_omniscient_mlp_gamma025at20_2to8_20260814.pt"
 )
+
+
+AUTO_INT8_ROLLOUT_PARAMETER_THRESHOLD = 1_000_000
+INT8_RESIDUAL_BASE_WORKER_CAP = 8
 
 
 def _file_sha256(path: Path) -> str:
@@ -107,7 +113,31 @@ def _validate_privileged_target_gamma(payload: dict, requested: float) -> float:
     return checkpoint_gamma
 
 
-def _append_jsonl_idempotent(path: Path, row: dict) -> None:
+def _prune_frozen_optimizer_state(optimizer) -> dict[str, int]:
+    """Drop stale Adam moments for parameters excluded from backprop."""
+    removed_parameter_tensors = 0
+    removed_parameters = 0
+    removed_state_tensors = 0
+    removed_state_bytes = 0
+    for parameter, state_values in tuple(optimizer.state.items()):
+        if parameter.requires_grad:
+            continue
+        optimizer.state.pop(parameter)
+        removed_parameter_tensors += 1
+        removed_parameters += parameter.numel()
+        for value in state_values.values():
+            if isinstance(value, torch.Tensor):
+                removed_state_tensors += 1
+                removed_state_bytes += value.numel() * value.element_size()
+    return {
+        "removed_parameter_tensors": removed_parameter_tensors,
+        "removed_parameters": removed_parameters,
+        "removed_state_tensors": removed_state_tensors,
+        "removed_state_bytes": removed_state_bytes,
+    }
+
+
+def _last_jsonl_row(path: Path) -> dict | None:
     if path.is_file() and path.stat().st_size:
         with path.open("rb") as handle:
             handle.seek(0, 2)
@@ -121,7 +151,13 @@ def _append_jsonl_idempotent(path: Path, row: dict) -> None:
                 position -= 1
             handle.seek(max(0, position))
             last_line = handle.read(end - max(0, position)).decode("utf-8").strip()
-        previous = json.loads(last_line)
+        return json.loads(last_line)
+    return None
+
+
+def _append_jsonl_idempotent(path: Path, row: dict) -> None:
+    previous = _last_jsonl_row(path)
+    if previous is not None:
         if previous.get("epoch") == row.get("epoch"):
             previous_hash = previous.get("checkpoint", {}).get("state_sha256")
             current_hash = row.get("checkpoint", {}).get("state_sha256")
@@ -138,12 +174,198 @@ def _effective_vector_workers(
     requested_workers: int,
     schedule: tuple[str, ...],
     player_counts: tuple[int, ...],
+    games: int | None = None,
+    rollout_precision: str = "float32",
 ) -> int:
-    """Avoid loading model replicas into workers with no vector cohort."""
-    if "bayesian_tree" in schedule and any(count < 7 for count in player_counts):
-        # Scalar tree games are split into additional independent tasks.
-        return requested_workers
-    return min(requested_workers, len(set(player_counts)))
+    """Use the requested pool now that large vector cohorts can be sharded."""
+    del schedule, player_counts
+    effective = (
+        min(requested_workers, games)
+        if games is not None
+        else requested_workers
+    )
+    if rollout_precision == "int8_residual_base":
+        effective = min(effective, INT8_RESIDUAL_BASE_WORKER_CAP)
+    return effective
+
+
+def _resolve_rollout_precision(
+    requested: str,
+    parameter_count: int,
+    architecture: str | None = None,
+) -> str:
+    """Use int8 behavior inference automatically for genuinely large models."""
+    if requested not in (
+        "auto",
+        "float32",
+        "int8_recurrent",
+        "int8_residual_base",
+    ):
+        raise ValueError(f"unsupported rollout precision: {requested}")
+    if requested != "auto":
+        return requested
+    if (
+        parameter_count >= AUTO_INT8_ROLLOUT_PARAMETER_THRESHOLD
+        and architecture == "min_gru_residual"
+    ):
+        return "int8_residual_base"
+    return (
+        "int8_recurrent"
+        if parameter_count >= AUTO_INT8_ROLLOUT_PARAMETER_THRESHOLD
+        else "float32"
+    )
+
+
+def _resolve_rollout_max_public_events(
+    requested: int | None,
+    rollout_precision: str,
+) -> int | None:
+    """Bound behavior history for the throughput-first residual actor."""
+    if requested is not None:
+        if requested < 0:
+            raise ValueError("rollout max public events cannot be negative")
+        return requested or None
+    return 5 if rollout_precision == "int8_residual_base" else None
+
+
+def _configure_trainable_policy(
+    policy,
+    architecture: str,
+    requested_adapter_layers: int | None,
+) -> dict[str, float | int | str | None]:
+    """Restrict residual backprop while retaining the complete forward model."""
+    total = sum(parameter.numel() for parameter in policy.parameters())
+    if architecture != "min_gru_residual":
+        if requested_adapter_layers not in (None, -1):
+            raise ValueError(
+                "trainable adapter layers require min_gru_residual"
+            )
+        for parameter in policy.parameters():
+            parameter.requires_grad_(True)
+        return {
+            "mode": "all",
+            "adapter_layers": None,
+            "trainable_parameters": total,
+            "total_parameters": total,
+            "trainable_fraction": 1.0,
+        }
+
+    core = policy.puffer_policy
+    base = getattr(core, "base", None)
+    adapter = getattr(core, "adapter", None)
+    layers = getattr(getattr(adapter, "network", None), "layers", None)
+    if base is None or adapter is None or layers is None:
+        raise ValueError("residual policy does not expose adapter layers")
+    layer_count = len(layers)
+    selected = (
+        min(2, layer_count)
+        if requested_adapter_layers is None
+        else requested_adapter_layers
+    )
+    if selected < -1 or selected > layer_count:
+        raise ValueError(
+            f"trainable adapter layers must be in [-1, {layer_count}]"
+        )
+    for parameter in policy.parameters():
+        parameter.requires_grad_(selected == -1)
+    if selected != -1:
+        for layer in layers[layer_count - selected :]:
+            for parameter in layer.parameters():
+                parameter.requires_grad_(True)
+        for parameter in adapter.decoder.parameters():
+            parameter.requires_grad_(True)
+    trainable = sum(
+        parameter.numel()
+        for parameter in policy.parameters()
+        if parameter.requires_grad
+    )
+    return {
+        "mode": "all" if selected == -1 else "top_adapter_layers_and_heads",
+        "adapter_layers": None if selected == -1 else selected,
+        "trainable_parameters": trainable,
+        "total_parameters": total,
+        "trainable_fraction": trainable / total,
+    }
+
+
+def _apply_residual_base_freeze(
+    policy,
+    architecture: str,
+    requested: bool,
+    training_scope: dict[str, float | int | str | None],
+) -> dict[str, float | int | str | bool | None]:
+    """Preserve the explicit adapter-only compatibility control."""
+    if not requested:
+        return training_scope
+    if architecture not in {"min_gru_residual", "hawk_residual"}:
+        raise ValueError(
+            "--freeze-residual-base requires a residual temporal policy"
+        )
+    for parameter in policy.puffer_policy.base.parameters():
+        parameter.requires_grad_(False)
+    trainable = sum(
+        parameter.numel()
+        for parameter in policy.parameters()
+        if parameter.requires_grad
+    )
+    total = int(training_scope["total_parameters"])
+    return {
+        **training_scope,
+        "mode": (
+            "residual_adapter_only"
+            if training_scope["mode"] == "all"
+            else training_scope["mode"]
+        ),
+        "freeze_residual_base": True,
+        "trainable_parameters": trainable,
+        "trainable_fraction": trainable / total,
+    }
+
+
+def _resolve_update_precision(
+    requested: str,
+    *,
+    device_type: str,
+    bf16_supported: bool,
+) -> str:
+    """Prefer native BF16 tensor cores while retaining an FP32 escape hatch."""
+    if requested not in ("auto", "float32", "bfloat16"):
+        raise ValueError(f"unsupported update precision: {requested}")
+    if requested == "float32":
+        return requested
+    if requested == "bfloat16":
+        if device_type != "cuda" or not bf16_supported:
+            raise ValueError("bfloat16 updates require supported CUDA hardware")
+        return requested
+    return (
+        "bfloat16"
+        if device_type == "cuda" and bf16_supported
+        else "float32"
+    )
+
+
+def _update_autocast(device_type: str, update_precision: str):
+    if update_precision == "bfloat16":
+        return torch.autocast(device_type=device_type, dtype=torch.bfloat16)
+    return nullcontext()
+
+
+def _resolve_compile_updates(
+    requested: bool | None,
+    *,
+    pipelined_rollouts: bool,
+    parameter_count: int,
+) -> bool:
+    if requested is not None:
+        return requested
+    # Compiled updates are faster in isolation, but an explicitly requested
+    # large-model pipeline can overlap most eager BF16 work with CPU rollout.
+    # Avoid several minutes of multi-shape compilation unless the caller opts
+    # into it explicitly.
+    return not (
+        pipelined_rollouts
+        and parameter_count >= AUTO_INT8_ROLLOUT_PARAMETER_THRESHOLD
+    )
 
 
 def _collect_privileged_rollouts(
@@ -158,6 +380,7 @@ def _collect_privileged_rollouts(
     schedule: tuple[str, ...],
     player_counts: tuple[int, ...],
     max_turns: int,
+    max_public_events: int | None = None,
 ):
     """Collect mixed player counts in process so snapshots stay environment-side."""
 
@@ -195,6 +418,7 @@ def _collect_privileged_rollouts(
             game_indices=tuple(indices),
             privileged_critic=privileged_critic,
             capture_privileged_snapshots=True,
+            max_public_events=max_public_events,
         )
         episodes.extend(cohort)
         for field in ("games", "decisions"):
@@ -283,13 +507,72 @@ def parse_args() -> argparse.Namespace:
         choices=("vector", "process"),
         default="vector",
     )
+    parser.add_argument(
+        "--rollout-precision",
+        choices=(
+            "auto",
+            "float32",
+            "int8_recurrent",
+            "int8_residual_base",
+        ),
+        default="auto",
+        help=(
+            "behavior-policy precision; auto uses weight-only recurrent int8 "
+            "for large models and the preserved int8 base actor for large "
+            "MinGRU residual policies; learner precision is independent"
+        ),
+    )
+    parser.add_argument(
+        "--trace-int8-rollouts",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help=(
+            "trace quantized MinGRU decision/event graphs to remove Python "
+            "dispatch while preserving exact actor outputs"
+        ),
+    )
+    parser.add_argument(
+        "--rollout-max-public-events",
+        type=int,
+        default=None,
+        help=(
+            "maximum recent events consumed by the behavior actor; auto uses "
+            "five for int8_residual_base, while 0 restores full history"
+        ),
+    )
     parser.add_argument("--learning-rate", type=float, default=None)
     parser.add_argument(
         "--fresh-optimizer",
         action="store_true",
         help="ignore any checkpoint optimizer state and start a fresh Adam",
     )
-    parser.add_argument("--update-epochs", type=int, default=4)
+    parser.add_argument(
+        "--trainable-adapter-layers",
+        type=int,
+        default=None,
+        help=(
+            "number of final residual-adapter GRU layers to backpropagate; "
+            "auto uses two, 0 trains heads only, and -1 trains everything"
+        ),
+    )
+    parser.add_argument(
+        "--freeze-residual-base",
+        action="store_true",
+        help=(
+            "freeze the exact base branch of a residual temporal policy; "
+            "combine with --trainable-adapter-layers -1 to train its entire "
+            "added branch"
+        ),
+    )
+    parser.add_argument(
+        "--update-epochs",
+        type=int,
+        default=1,
+        help=(
+            "PPO replay passes per rollout; the throughput-biased default "
+            "trades some sample reuse for much shorter updates"
+        ),
+    )
     parser.add_argument("--minibatch-trajectories", type=int, default=128)
     parser.add_argument(
         "--diagnostic-minibatch-trajectories", type=int, default=256
@@ -305,6 +588,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--target-kl", type=float, default=0.02)
     parser.add_argument(
         "--early-stop-diagnostic-trajectories", type=int, default=512
+    )
+    parser.add_argument(
+        "--full-rollout-diagnostics",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help=(
+            "rescore the complete rollout after every update; the faster "
+            "default samples 512 trajectories and expands only near target KL"
+        ),
     )
     parser.add_argument("--entropy-coefficient", type=float, default=0.01)
     parser.add_argument(
@@ -381,12 +673,35 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--compile-updates",
         action=argparse.BooleanOptionalAction,
-        default=True,
+        default=None,
+        help=(
+            "compile recurrent CUDA updates; auto skips compilation when a "
+            "large-model rollout pipeline already hides eager update time"
+        ),
+    )
+    parser.add_argument(
+        "--update-precision",
+        choices=("auto", "float32", "bfloat16"),
+        default="auto",
+        help=(
+            "PPO forward/backward precision; auto selects native CUDA BF16 "
+            "while retaining FP32 parameters and optimizer state"
+        ),
     )
     parser.add_argument(
         "--persistent-replay",
         action=argparse.BooleanOptionalAction,
         default=True,
+    )
+    parser.add_argument(
+        "--pipelined-rollouts",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help=(
+            "overlap the next CPU vector rollout with the current CUDA update; "
+            "opt-in for short eager runs because sustained compiled training "
+            "is faster and avoids one-update policy lag"
+        ),
     )
     parser.add_argument(
         "--matmul-precision",
@@ -424,6 +739,14 @@ def main() -> None:
         raise ValueError("privileged critic learning rate must be positive")
     if args.value_coefficient is not None and args.value_coefficient < 0:
         raise ValueError("value coefficient must be nonnegative")
+    pipelined_rollouts = args.pipelined_rollouts
+    if pipelined_rollouts and args.rollout_engine != "vector":
+        raise ValueError("pipelined rollouts require --rollout-engine vector")
+    if pipelined_rollouts and args.privileged_critic is not None:
+        raise ValueError(
+            "pipelined rollouts cannot update and evaluate the privileged "
+            "critic concurrently"
+        )
     resume = args.resume.resolve()
     if not resume.is_file():
         raise FileNotFoundError(resume)
@@ -452,8 +775,58 @@ def main() -> None:
         resume, device=args.device
     )
     model_config = policy_model_config(policy)
+    parameter_count = sum(parameter.numel() for parameter in policy.parameters())
+    if (
+        args.rollout_engine != "vector"
+        and args.rollout_precision in (
+            "int8_recurrent",
+            "int8_residual_base",
+        )
+    ):
+        raise ValueError("int8 rollouts require --rollout-engine vector")
+    rollout_precision = (
+        _resolve_rollout_precision(
+            args.rollout_precision,
+            parameter_count,
+            str(model_config.get("architecture", "min_gru")),
+        )
+        if args.rollout_engine == "vector"
+        else "float32"
+    )
+    if args.privileged_critic is not None:
+        # Privileged snapshots are captured in the in-process collector, which
+        # currently evaluates the full-precision actor directly rather than a
+        # quantized worker replica.
+        rollout_precision = "float32"
+    update_precision = _resolve_update_precision(
+        args.update_precision,
+        device_type=args.device,
+        bf16_supported=(
+            torch.cuda.is_bf16_supported() if args.device == "cuda" else False
+        ),
+    )
+    rollout_max_public_events = _resolve_rollout_max_public_events(
+        args.rollout_max_public_events,
+        rollout_precision,
+    )
+    training_scope = _configure_trainable_policy(
+        policy,
+        str(model_config.get("architecture", "min_gru")),
+        args.trainable_adapter_layers,
+    )
+    training_scope = _apply_residual_base_freeze(
+        policy,
+        str(model_config.get("architecture", "min_gru")),
+        args.freeze_residual_base,
+        training_scope,
+    )
+    compile_updates = _resolve_compile_updates(
+        args.compile_updates,
+        pipelined_rollouts=pipelined_rollouts,
+        parameter_count=parameter_count,
+    )
     torch.set_float32_matmul_precision(args.matmul_precision)
-    if args.compile_updates:
+    if compile_updates:
         torch._dynamo.config.recompile_limit = 32
         policy.forward_native_sequence = torch.compile(
             policy.forward_native_sequence,
@@ -469,9 +842,10 @@ def main() -> None:
     optimizer = torch.optim.Adam(policy.parameters(), lr=learning_rate)
     if "optimizer_state_dict" in payload and not args.fresh_optimizer:
         optimizer.load_state_dict(payload["optimizer_state_dict"])
-        _move_optimizer(optimizer, next(policy.parameters()).device)
         for group in optimizer.param_groups:
             group["lr"] = learning_rate
+    optimizer_state_pruning = _prune_frozen_optimizer_state(optimizer)
+    _move_optimizer(optimizer, next(policy.parameters()).device)
 
     schedule = tuple(
         value.strip()
@@ -583,27 +957,43 @@ def main() -> None:
     curve = []
     result_path = output_dir / "training_result.json"
     jsonl_path = output_dir / "training_curve.jsonl"
+    previous_row = _last_jsonl_row(jsonl_path)
+    if (
+        previous_row is not None
+        and int(previous_row.get("epoch", -1)) >= start_epoch
+    ):
+        raise RuntimeError(
+            "output training curve already reaches epoch "
+            f"{previous_row.get('epoch')}; resume from that epoch's checkpoint "
+            "or choose a new output directory"
+        )
     vector_rollout_pool = (
         VectorPufferRolloutPool(
             policy,
             workers=_effective_vector_workers(
-                args.rollout_workers, schedule, player_counts
+                args.rollout_workers,
+                schedule,
+                player_counts,
+                args.games_per_epoch,
+                rollout_precision,
             ),
             champion_path=champion_path,
             historical_paths=historical_paths,
+            rollout_precision=rollout_precision,
+            trace_min_gru=args.trace_int8_rollouts,
+            max_public_events=rollout_max_public_events,
         )
         if args.rollout_engine == "vector" and privileged_critic is None
         else None
     )
-    for offset in range(args.epochs):
-        epoch = start_epoch + offset
-        campaign_phase = (
+    def campaign_phase_for_offset(offset: int) -> int:
+        return (
             args.campaign_offset + offset
             if args.campaign_offset is not None
-            else epoch
+            else start_epoch + offset
         )
-        epoch_started = time.perf_counter()
-        rollout_policy = _snapshot(policy)
+
+    def collect_phase(rollout_policy, campaign_phase: int):
         rollout_started = time.perf_counter()
         rollout_arguments = {
             "games": args.games_per_epoch,
@@ -619,6 +1009,7 @@ def main() -> None:
                 direct_historical,
                 privileged_critic,
                 schedule=schedule,
+                max_public_events=rollout_max_public_events,
                 **rollout_arguments,
             )
         elif args.rollout_engine == "vector":
@@ -638,35 +1029,67 @@ def main() -> None:
                 historical_paths=historical_paths,
                 **rollout_arguments,
             )
-        rollout_seconds = time.perf_counter() - rollout_started
+        return (
+            episodes,
+            contribution,
+            time.perf_counter() - rollout_started,
+        )
+
+    rollout_executor = (
+        ThreadPoolExecutor(max_workers=1, thread_name_prefix="puffer-rollout")
+        if pipelined_rollouts
+        else None
+    )
+    pending_rollout = None
+    for offset in range(args.epochs):
+        epoch = start_epoch + offset
+        campaign_phase = campaign_phase_for_offset(offset)
+        epoch_started = time.perf_counter()
+        rollout_wait_started = time.perf_counter()
+        if pending_rollout is not None:
+            episodes, contribution, rollout_seconds = pending_rollout.result()
+            pending_rollout = None
+        else:
+            episodes, contribution, rollout_seconds = collect_phase(
+                _snapshot(policy), campaign_phase
+            )
+        rollout_wait_seconds = time.perf_counter() - rollout_wait_started
+        if rollout_executor is not None and offset + 1 < args.epochs:
+            pending_rollout = rollout_executor.submit(
+                collect_phase,
+                _snapshot(policy),
+                campaign_phase_for_offset(offset + 1),
+            )
         pass_metrics = _strategic_pass_metrics(episodes, PASS_ACTION)
         if args.device == "cuda":
             torch.cuda.synchronize()
         update_started = time.perf_counter()
-        update = ppo_update_batched_epochs(
-            policy,
-            episodes,
-            optimizer,
-            update_epochs=args.update_epochs,
-            minibatch_trajectories=args.minibatch_trajectories,
-            seed=args.seed + 1_000_000 + campaign_phase,
-            target_kl=args.target_kl,
-            clip_ratio=args.clip_ratio,
-            value_coefficient=actor_value_coefficient,
-            entropy_coefficient=args.entropy_coefficient,
-            gamma=args.gamma,
-            gae_lambda=args.gae_lambda,
-            normalize_advantages=True,
-            diagnostic_minibatch_trajectories=(
-                args.diagnostic_minibatch_trajectories
-            ),
-            early_stop_diagnostic_trajectories=(
-                args.early_stop_diagnostic_trajectories
-            ),
-            static_compile_padding=args.compile_updates,
-            length_bucketed_minibatches=args.persistent_replay,
-            persistent_prepared_batches=args.persistent_replay,
-        )
+        with _update_autocast(args.device, update_precision):
+            update = ppo_update_batched_epochs(
+                policy,
+                episodes,
+                optimizer,
+                update_epochs=args.update_epochs,
+                minibatch_trajectories=args.minibatch_trajectories,
+                seed=args.seed + 1_000_000 + campaign_phase,
+                target_kl=args.target_kl,
+                clip_ratio=args.clip_ratio,
+                value_coefficient=actor_value_coefficient,
+                entropy_coefficient=args.entropy_coefficient,
+                gamma=args.gamma,
+                gae_lambda=args.gae_lambda,
+                normalize_advantages=True,
+                diagnostic_minibatch_trajectories=(
+                    args.diagnostic_minibatch_trajectories
+                ),
+                early_stop_diagnostic_trajectories=(
+                    args.early_stop_diagnostic_trajectories
+                ),
+                static_compile_padding=compile_updates,
+                length_bucketed_minibatches=args.persistent_replay,
+                persistent_prepared_batches=args.persistent_replay,
+                full_final_diagnostic=args.full_rollout_diagnostics,
+            )
         if args.device == "cuda":
             torch.cuda.synchronize()
         update_seconds = time.perf_counter() - update_started
@@ -764,7 +1187,11 @@ def main() -> None:
                     if privileged_critic is not None
                     else (
                         _effective_vector_workers(
-                            args.rollout_workers, schedule, player_counts
+                            args.rollout_workers,
+                            schedule,
+                            player_counts,
+                            args.games_per_epoch,
+                            rollout_precision,
                         )
                         if args.rollout_engine == "vector"
                         else args.rollout_workers
@@ -776,7 +1203,19 @@ def main() -> None:
                     if privileged_critic is not None
                     else args.rollout_engine
                 ),
+                "rollout_precision": rollout_precision,
+                "trace_int8_rollouts": args.trace_int8_rollouts,
+                "rollout_max_public_events": rollout_max_public_events,
+                "requested_rollout_precision": args.rollout_precision,
+                "pipelined_rollouts": pipelined_rollouts,
+                "requested_pipelined_rollouts": args.pipelined_rollouts,
+                "rollout_policy_lag_updates": (
+                    1 if pipelined_rollouts else 0
+                ),
                 "update_epochs": args.update_epochs,
+                "freeze_residual_base": args.freeze_residual_base,
+                "training_scope": training_scope,
+                "optimizer_state_pruning": optimizer_state_pruning,
                 "minibatch_trajectories": args.minibatch_trajectories,
                 "diagnostic_minibatch_trajectories": (
                     args.diagnostic_minibatch_trajectories
@@ -788,7 +1227,11 @@ def main() -> None:
                 "early_stop_diagnostic_trajectories": (
                     args.early_stop_diagnostic_trajectories
                 ),
-                "compile_updates": args.compile_updates,
+                "full_rollout_diagnostics": args.full_rollout_diagnostics,
+                "compile_updates": compile_updates,
+                "requested_compile_updates": args.compile_updates,
+                "update_precision": update_precision,
+                "requested_update_precision": args.update_precision,
                 "persistent_replay": args.persistent_replay,
                 "matmul_precision": args.matmul_precision,
                 "champion_checkpoint": str(champion_path),
@@ -851,8 +1294,18 @@ def main() -> None:
         row = {
             "epoch": epoch,
             "campaign_phase": campaign_phase,
+            "rollout_precision": rollout_precision,
+            "trace_int8_rollouts": args.trace_int8_rollouts,
+            "rollout_max_public_events": rollout_max_public_events,
+            "update_precision": update_precision,
+            "training_scope": training_scope,
+            "optimizer_state_pruning": optimizer_state_pruning,
             "wall_seconds": time.perf_counter() - epoch_started,
             "rollout_seconds": rollout_seconds,
+            "rollout_wait_seconds": rollout_wait_seconds,
+            "rollout_overlap_seconds": max(
+                0.0, rollout_seconds - rollout_wait_seconds
+            ),
             "update_seconds": update_seconds,
             "critic_update_seconds": critic_update_seconds,
             "games_per_second": args.games_per_epoch / rollout_seconds,
@@ -890,6 +1343,16 @@ def main() -> None:
             "elapsed_seconds": time.perf_counter() - started,
             "runtime": {
                 "device": str(next(policy.parameters()).device),
+                "rollout_precision": rollout_precision,
+                "trace_int8_rollouts": args.trace_int8_rollouts,
+                "rollout_max_public_events": rollout_max_public_events,
+                "update_precision": update_precision,
+                "training_scope": training_scope,
+                "optimizer_state_pruning": optimizer_state_pruning,
+                "pipelined_rollouts": pipelined_rollouts,
+                "rollout_policy_lag_updates": (
+                    1 if pipelined_rollouts else 0
+                ),
                 "torch": torch.__version__,
                 "cuda": torch.cuda.is_available(),
                 "pufferlib": __import__("pufferlib").__version__,
@@ -900,9 +1363,12 @@ def main() -> None:
             json.dumps(
                 {
                     "epoch": epoch,
+                    "rollout_precision": rollout_precision,
+                    "update_precision": update_precision,
                     "games_per_second": row["games_per_second"],
                     "decisions": pass_metrics["decisions"],
                     "rollout_seconds": rollout_seconds,
+                    "rollout_wait_seconds": rollout_wait_seconds,
                     "update_seconds": update_seconds,
                     "critic_update_seconds": critic_update_seconds,
                     "critic_value_mse": (
@@ -921,6 +1387,8 @@ def main() -> None:
             ),
             flush=True,
         )
+    if rollout_executor is not None:
+        rollout_executor.shutdown(wait=True, cancel_futures=True)
     if vector_rollout_pool is not None:
         vector_rollout_pool.close()
 

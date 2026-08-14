@@ -11,6 +11,7 @@ import math
 from pathlib import Path
 from typing import Mapping
 
+import numpy as np
 import torch
 import torch.nn.functional as F
 from torch import nn
@@ -91,15 +92,19 @@ class NativePufferTemporalPolicy(nn.Module):
         *,
         device: torch.device | str | None = None,
     ) -> tuple[torch.Tensor, ...]:
-        parameter = next(self.parameters())
+        resolved_device = device or getattr(
+            self, "_rollout_device", None
+        )
+        if resolved_device is None:
+            resolved_device = next(self.parameters()).device
         return self.puffer_policy.initial_state(
-            batch_size, device or parameter.device
+            batch_size, resolved_device
         )
 
     @staticmethod
-    def _event_features(decision: DecisionInput) -> list[tuple[float, ...]]:
+    def _event_features_from_events(events) -> list[tuple[float, ...]]:
         rows = []
-        for event in decision.public_events:
+        for event in events:
             event_values = (
                 int(event.kind) / 3.0,
                 event.actor_relative / 12.0,
@@ -111,6 +116,46 @@ class NativePufferTemporalPolicy(nn.Module):
                 (0.0,) * OBSERVATION_SIZE + event_values + (0.0,)
             )
         return rows
+
+    @staticmethod
+    def _event_features(decision: DecisionInput) -> list[tuple[float, ...]]:
+        return NativePufferTemporalPolicy._event_features_from_events(
+            decision.public_events
+        )
+
+    @staticmethod
+    def _event_tokens_from_events(
+        events,
+        *,
+        device: torch.device,
+        dtype: torch.dtype,
+    ) -> torch.Tensor:
+        """Materialize sparse event features without 94 Python zeros each."""
+        tokens = torch.zeros(
+            (len(events), NATIVE_INPUT_SIZE),
+            device=device,
+            dtype=dtype,
+        )
+        values = np.asarray(
+            [
+                (
+                    int(event.kind) / 3.0,
+                    event.actor_relative / 12.0,
+                    (event.card_id + 1) / 50.0,
+                    (event.suit_id + 1) / 5.0,
+                    event.count / 54.0,
+                )
+                for event in events
+            ],
+            dtype=np.float32,
+        )
+        value_tensor = torch.from_numpy(values)
+        if device.type != "cpu" or dtype != torch.float32:
+            value_tensor = value_tensor.to(device=device, dtype=dtype)
+        tokens[:, OBSERVATION_SIZE : OBSERVATION_SIZE + EVENT_TOKEN_SIZE] = (
+            value_tensor
+        )
+        return tokens
 
     @staticmethod
     def _decision_features(decision: DecisionInput) -> tuple[float, ...]:
@@ -615,6 +660,79 @@ class ResidualTemporalPolicyCore(nn.Module):
         )
 
 
+class MinGRUResidualTemporalPolicy(NativePufferTemporalPolicy):
+    """Exact MinGRU base plus a wider/deeper residual MinGRU branch."""
+
+    integration_status = (
+        "Function-preserving MinGRU plus wider/deeper MinGRU residual policy"
+    )
+
+    def __init__(
+        self,
+        base_hidden_size: int = 192,
+        base_num_layers: int = 2,
+        *,
+        adapter_hidden_size: int = 512,
+        adapter_num_layers: int = 6,
+        mode_conditioned_heads: bool = True,
+        action_head: str | None = None,
+    ) -> None:
+        nn.Module.__init__(self)
+        require_pufferlib_v4()
+        dimensions = (
+            base_hidden_size,
+            base_num_layers,
+            adapter_hidden_size,
+            adapter_num_layers,
+        )
+        if any(value < 1 for value in dimensions):
+            raise ValueError("residual MinGRU dimensions must be positive")
+        self.hidden_size = base_hidden_size
+        self.num_layers = base_num_layers
+        self.base_hidden_size = base_hidden_size
+        self.base_num_layers = base_num_layers
+        self.adapter_hidden_size = adapter_hidden_size
+        self.adapter_num_layers = adapter_num_layers
+        self.mode_conditioned_heads = mode_conditioned_heads
+        self.action_head = action_head or (
+            MODE_CONDITIONED_ACTION_HEAD
+            if mode_conditioned_heads
+            else FLAT_ACTION_HEAD
+        )
+
+        def branch(width: int, layers: int) -> nn.Module:
+            return pufferlib.models.Policy(
+                pufferlib.models.DefaultEncoder(NATIVE_INPUT_SIZE, width),
+                build_action_decoder(
+                    width,
+                    mode_conditioned_heads=mode_conditioned_heads,
+                    action_head=self.action_head,
+                ),
+                pufferlib.models.MinGRU(
+                    hidden_size=width,
+                    num_layers=layers,
+                ),
+            )
+
+        self.puffer_policy = ResidualTemporalPolicyCore(
+            branch(base_hidden_size, base_num_layers),
+            branch(adapter_hidden_size, adapter_num_layers),
+        )
+
+    def model_config(self) -> dict[str, object]:
+        return {
+            "architecture": "min_gru_residual",
+            "hidden_size": self.base_hidden_size,
+            "num_layers": self.base_num_layers,
+            "base_hidden_size": self.base_hidden_size,
+            "base_num_layers": self.base_num_layers,
+            "adapter_hidden_size": self.adapter_hidden_size,
+            "adapter_num_layers": self.adapter_num_layers,
+            "mode_conditioned_heads": self.mode_conditioned_heads,
+            "action_head": self.action_head,
+        }
+
+
 class HawkResidualTemporalPolicy(NativePufferTemporalPolicy):
     """Exact MinGRU teacher plus a zero-output Hawk recurrent adapter.
 
@@ -741,6 +859,22 @@ def build_temporal_policy(model: Mapping[str, object]) -> nn.Module:
             ),
             mlp_expansion=int(model.get("mlp_expansion", 2)),
         )
+    if architecture == "min_gru_residual":
+        return MinGRUResidualTemporalPolicy(
+            base_hidden_size=int(model.get("base_hidden_size", 192)),
+            base_num_layers=int(model.get("base_num_layers", 2)),
+            adapter_hidden_size=int(model.get("adapter_hidden_size", 512)),
+            adapter_num_layers=int(model.get("adapter_num_layers", 6)),
+            mode_conditioned_heads=common["mode_conditioned_heads"],
+            action_head=str(
+                model.get(
+                    "action_head",
+                    MODE_CONDITIONED_ACTION_HEAD
+                    if common["mode_conditioned_heads"]
+                    else FLAT_ACTION_HEAD,
+                )
+            ),
+        )
     if architecture == "hawk_residual":
         return HawkResidualTemporalPolicy(
             base_hidden_size=int(model.get("base_hidden_size", 192)),
@@ -783,7 +917,7 @@ def load_temporal_policy_checkpoint(
         raise TypeError("temporal checkpoint state_dict must be a mapping")
     model = dict(payload.get("model", {}))
     architecture = str(model.get("architecture", "min_gru"))
-    if architecture == "hawk_residual":
+    if architecture in {"min_gru_residual", "hawk_residual"}:
         model.setdefault(
             "hidden_size", int(model.get("base_hidden_size", 192))
         )
