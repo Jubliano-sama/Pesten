@@ -1,0 +1,128 @@
+{
+  "format": "pesten-promoted-privileged-critic-v1",
+  "decision": "promoted_as_default_ppo_critic",
+  "checkpoint": {
+    "bytes": 4310604,
+    "candidate": "selected_moments_exact_mlp",
+    "epoch": 7,
+    "format": "pesten-causal-privileged-critic-v1",
+    "path": "models/best/ppo_omniscient_mlp_gamma025at20_2to8_20260814.pt",
+    "sha256": "63fc1b610da5fa40838a96bb3157cb1aab328ac1a46ce1a3c823af484e0b9d6d"
+  },
+  "causal_contract": {
+    "actor_observation_unchanged": true,
+    "critic_snapshot_timing": "immediately before the controlled seat action",
+    "future_events": false,
+    "private_current_turn_state": true,
+    "rng_state": false
+  },
+  "dataset": {
+    "actor_checkpoint": {
+      "path": "models/best/puffer_min_gru_192x2_plateau_teacher_epoch4387.pt",
+      "sha256": "f8f0aece2d759eadc60b3cbccca30c321c01da13322f7cae511a73c8da3a9f93"
+    },
+    "opponent_lanes": [
+      "current_selfplay",
+      "ppo_champion",
+      "smart_rule",
+      "smarter_rule",
+      "historical_temporal"
+    ],
+    "player_counts": [2, 3, 4, 5, 6, 7, 8],
+    "seed_overlap_counts": {
+      "test_vs_confirmation": 0,
+      "train_vs_confirmation": 0,
+      "train_vs_test": 0,
+      "train_vs_validation": 0,
+      "validation_vs_confirmation": 0,
+      "validation_vs_test": 0
+    },
+    "splits": {
+      "confirmation": {
+        "decisions": 72060,
+        "games": 1792,
+        "seed_offset": 300000000,
+        "trajectories": 3248,
+        "unique_deal_seeds": 1792
+      },
+      "historical_test_audit_only": {
+        "decisions": 69946,
+        "games": 1792,
+        "seed_offset": 200000000,
+        "trajectories": 3248,
+        "unique_deal_seeds": 1792
+      },
+      "train": {
+        "decisions": 1105497,
+        "games": 28672,
+        "seed_offset": 0,
+        "trajectories": 51632,
+        "unique_deal_seeds": 28672
+      },
+      "validation": {
+        "decisions": 37046,
+        "games": 896,
+        "seed_offset": 100000000,
+        "trajectories": 1624,
+        "unique_deal_seeds": 896
+      }
+    }
+  },
+  "model": {
+    "backbone": "mlp",
+    "card_tokenization": "exact",
+    "dropout": 0.05,
+    "group_width": 96,
+    "hand_encoder": "counts_moments",
+    "hidden_size": 256,
+    "num_layers": 2,
+    "parameters": 1070291
+  },
+  "promotion_evidence": {
+    "confirmation": {
+      "correlation": 0.5032510815624768,
+      "explained_variance": 0.2532348183144144,
+      "mse": 0.170424441799185
+    },
+    "paired_mse_delta_vs_raw_public": {
+      "ci95": [-0.042179963004728566, -0.02903351146586636],
+      "delta": -0.035680096554113666,
+      "independent_deal_clusters": 1792
+    },
+    "paired_mse_delta_vs_validation_calibrated_public": {
+      "ci95": [-0.007438682009796841, -0.004242918116001656],
+      "delta": -0.005812374389927599,
+      "independent_deal_clusters": 1792
+    },
+    "public_comparators_on_confirmation": {
+      "raw_mse": 0.20610453841041165,
+      "validation_calibrated_mse": 0.17623681575900457
+    },
+    "selection_policy": "checkpoint and hyperparameters locked on train and validation before confirmation collection",
+    "validation_mse": 0.16158538948480297
+  },
+  "reports": {
+    "confirmation": "benchmarks/privileged_critic/mlp_gamma025at20_confirmation.json",
+    "investigation": "PRIVILEGED_CRITIC_20260814.md",
+    "training": "benchmarks/privileged_critic/mlp_gamma025at20_long24_h256_g96_seed20260814.json"
+  },
+  "reward_contract": {
+    "gamma": 0.9330329915368074,
+    "per_controlled_seat_decision_discount": 0.9330329915368074,
+    "per_controlled_seat_decision_terminal_component_depreciation": 0.06696700846319259,
+    "step_reward": -0.01,
+    "terminal_reward": {
+      "loss": -1.0,
+      "win": 1.0
+    },
+    "terminal_reward_retention_after_20_discount_steps": 0.25
+  },
+  "training": {
+    "epochs_completed": 24,
+    "learning_rate": 0.000075,
+    "rollback_to_best_validation_epoch": true,
+    "seed": 20260814,
+    "selected_epoch": 7,
+    "weight_decay": 0.0001
+  }
+}

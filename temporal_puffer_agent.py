@@ -56,6 +56,9 @@ class TrajectoryStep:
     action: int
     old_log_prob: float
     value: float
+    # Environment-side asymmetric-critic input.  It is opt-in and is never
+    # serialized into, or passed through, the actor's safe token stream.
+    privileged_snapshot: object | None = None
 
 
 class PufferStyleTemporalNet(nn.Module):

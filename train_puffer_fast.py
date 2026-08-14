@@ -6,12 +6,23 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 from pathlib import Path
 import random
 import time
 
 import numpy as np
 import torch
+
+from privileged_critic import DEFAULT_GAMMA
+
+
+DEFAULT_PRIVILEGED_CRITIC = (
+    Path(__file__).resolve().parent
+    / "models"
+    / "best"
+    / "ppo_omniscient_mlp_gamma025at20_2to8_20260814.pt"
+)
 
 
 def _file_sha256(path: Path) -> str:
@@ -79,6 +90,23 @@ def _move_optimizer(optimizer, device) -> None:
                 state_values[name] = value.to(device)
 
 
+def _validate_privileged_target_gamma(payload: dict, requested: float) -> float:
+    """Reject a value checkpoint trained against a different return target."""
+
+    checkpoint_gamma = float(payload.get("target_gamma", 0.97))
+    if not math.isclose(
+        checkpoint_gamma,
+        requested,
+        rel_tol=0.0,
+        abs_tol=1e-12,
+    ):
+        raise ValueError(
+            "privileged critic target gamma does not match PPO gamma: "
+            f"{checkpoint_gamma} != {requested}"
+        )
+    return checkpoint_gamma
+
+
 def _append_jsonl_idempotent(path: Path, row: dict) -> None:
     if path.is_file() and path.stat().st_size:
         with path.open("rb") as handle:
@@ -118,6 +146,118 @@ def _effective_vector_workers(
     return min(requested_workers, len(set(player_counts)))
 
 
+def _collect_privileged_rollouts(
+    policy,
+    champion_factory,
+    historical,
+    privileged_critic,
+    *,
+    games: int,
+    seed: int,
+    schedule_offset: int,
+    schedule: tuple[str, ...],
+    player_counts: tuple[int, ...],
+    max_turns: int,
+):
+    """Collect mixed player counts in process so snapshots stay environment-side."""
+
+    from temporal_batched_speed import collect_league_batch_batched
+
+    grouped_indices: dict[int, list[int]] = {}
+    for game_index in range(games):
+        count = player_counts[
+            (schedule_offset + game_index) % len(player_counts)
+        ]
+        grouped_indices.setdefault(count, []).append(game_index)
+    episodes = []
+    metadata = {
+        "games": {},
+        "decisions": {},
+        "total_turns": 0,
+        "trajectories": 0,
+        "player_counts": {
+            str(count): len(indices)
+            for count, indices in grouped_indices.items()
+        },
+        "collector": "in_process_privileged",
+    }
+    for count, indices in sorted(grouped_indices.items()):
+        cohort, cohort_metadata = collect_league_batch_batched(
+            policy,
+            champion_factory,
+            historical,
+            games=games,
+            seed=seed,
+            schedule_offset=schedule_offset,
+            schedule=schedule,
+            max_turns=max_turns,
+            player_count=count,
+            game_indices=tuple(indices),
+            privileged_critic=privileged_critic,
+            capture_privileged_snapshots=True,
+        )
+        episodes.extend(cohort)
+        for field in ("games", "decisions"):
+            target = metadata[field]
+            for name, value in cohort_metadata[field].items():
+                target[name] = target.get(name, 0) + int(value)
+        metadata["total_turns"] += int(cohort_metadata["total_turns"])
+        metadata["trajectories"] += int(cohort_metadata["trajectories"])
+    return episodes, metadata
+
+
+def _privileged_checkpoint_payload(
+    model,
+    optimizer,
+    *,
+    epoch: int,
+    parent_checkpoint: Path,
+    target_gamma: float,
+) -> dict:
+    """Create a loader-compatible restart checkpoint for either critic kind."""
+
+    from privileged_critic import AveragedPrivilegedCritic
+
+    common = {
+        "epoch": epoch,
+        "parent_checkpoint": str(parent_checkpoint),
+        "target_gamma": target_gamma,
+        "optimizer_state_dict": optimizer.state_dict(),
+    }
+    if isinstance(model, AveragedPrivilegedCritic):
+        return {
+            "format": "pesten-causal-privileged-critic-ensemble-v1",
+            "aggregation": "arithmetic_mean_then_player_count_affine_calibration",
+            "members": [
+                {
+                    "model": member.model_config(),
+                    "state_dict": {
+                        name: value.detach().cpu().clone()
+                        for name, value in member.state_dict().items()
+                    },
+                }
+                for member in model.models
+            ],
+            "value_calibration_scale": (
+                model.value_calibration_scale.detach().cpu().clone()
+            ),
+            "value_calibration_bias": (
+                model.value_calibration_bias.detach().cpu().clone()
+            ),
+            **common,
+        }
+    return {
+        "format": "pesten-causal-privileged-critic-v1",
+        "candidate": "online_asymmetric_critic",
+        "model": model.model_config(),
+        "state_dict": {
+            name: value.detach().cpu().clone()
+            for name, value in model.state_dict().items()
+        },
+        **common,
+    }
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--resume", type=Path, required=True)
@@ -154,7 +294,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--diagnostic-minibatch-trajectories", type=int, default=256
     )
-    parser.add_argument("--gamma", type=float, default=0.97)
+    parser.add_argument(
+        "--gamma",
+        type=float,
+        default=DEFAULT_GAMMA,
+        help="discount with exactly 25%% terminal-reward retention after 20 own decisions",
+    )
     parser.add_argument("--gae-lambda", type=float, default=0.95)
     parser.add_argument("--clip-ratio", type=float, default=0.2)
     parser.add_argument("--target-kl", type=float, default=0.02)
@@ -162,7 +307,41 @@ def parse_args() -> argparse.Namespace:
         "--early-stop-diagnostic-trajectories", type=int, default=512
     )
     parser.add_argument("--entropy-coefficient", type=float, default=0.01)
-    parser.add_argument("--value-coefficient", type=float, default=0.5)
+    parser.add_argument(
+        "--value-coefficient",
+        type=float,
+        default=None,
+        help=(
+            "actor's public value-head auxiliary coefficient; defaults to "
+            "0.5 normally and 0 with an external privileged critic"
+        ),
+    )
+    critic_group = parser.add_mutually_exclusive_group()
+    critic_group.add_argument(
+        "--privileged-critic",
+        type=Path,
+        default=DEFAULT_PRIVILEGED_CRITIC,
+        help=(
+            "single or ensemble external critic; enables causal omniscient "
+            "GAE values and environment-side snapshot retention (default: "
+            "the promoted 2-8-player MLP critic)"
+        ),
+    )
+    critic_group.add_argument(
+        "--no-privileged-critic",
+        dest="privileged_critic",
+        action="store_const",
+        const=None,
+        default=argparse.SUPPRESS,
+        help="disable the default external critic and use the actor value head",
+    )
+    parser.add_argument(
+        "--privileged-critic-learning-rate", type=float, default=1e-4
+    )
+    parser.add_argument("--privileged-critic-update-epochs", type=int, default=1)
+    parser.add_argument(
+        "--privileged-critic-minibatch-trajectories", type=int, default=32
+    )
     parser.add_argument("--checkpoint-every", type=int, default=10)
     parser.add_argument("--evaluate-every", type=int, default=10)
     parser.add_argument("--evaluation-pairs", type=int, default=250)
@@ -232,6 +411,8 @@ def main() -> None:
         args.evaluate_every,
         args.evaluation_pairs,
         args.early_stop_diagnostic_trajectories,
+        args.privileged_critic_update_epochs,
+        args.privileged_critic_minibatch_trajectories,
     )
     if any(value < 1 for value in positive):
         raise ValueError("count arguments must be positive")
@@ -239,6 +420,10 @@ def main() -> None:
         raise ValueError("campaign offset must be nonnegative")
     if args.device == "cuda" and not torch.cuda.is_available():
         raise RuntimeError("fast Puffer training requested unavailable CUDA")
+    if args.privileged_critic_learning_rate <= 0:
+        raise ValueError("privileged critic learning rate must be positive")
+    if args.value_coefficient is not None and args.value_coefficient < 0:
+        raise ValueError("value coefficient must be nonnegative")
     resume = args.resume.resolve()
     if not resume.is_file():
         raise FileNotFoundError(resume)
@@ -335,6 +520,58 @@ def main() -> None:
         {"path": str(path), "sha256": _file_sha256(path)}
         for path in historical_paths
     ]
+    privileged_path = (
+        args.privileged_critic.resolve()
+        if args.privileged_critic is not None
+        else None
+    )
+    privileged_critic = None
+    privileged_optimizer = None
+    privileged_source_sha256 = None
+    direct_historical = []
+    if privileged_path is not None:
+        if not privileged_path.is_file():
+            raise FileNotFoundError(privileged_path)
+        if "bayesian_tree" in schedule and any(
+            count < 7 for count in player_counts
+        ):
+            raise ValueError(
+                "privileged critic training requires vector opponent lanes; "
+                "remove scalar bayesian_tree games below seven players"
+            )
+        from privileged_critic import load_privileged_value_checkpoint
+
+        privileged_critic, privileged_payload = (
+            load_privileged_value_checkpoint(
+                privileged_path, device=args.device
+            )
+        )
+        _validate_privileged_target_gamma(privileged_payload, args.gamma)
+        privileged_optimizer = torch.optim.AdamW(
+            privileged_critic.parameters(),
+            lr=args.privileged_critic_learning_rate,
+            weight_decay=1e-4,
+        )
+        if (
+            "optimizer_state_dict" in privileged_payload
+            and not args.fresh_optimizer
+        ):
+            privileged_optimizer.load_state_dict(
+                privileged_payload["optimizer_state_dict"]
+            )
+            _move_optimizer(privileged_optimizer, next(privileged_critic.parameters()).device)
+            for group in privileged_optimizer.param_groups:
+                group["lr"] = args.privileged_critic_learning_rate
+        privileged_source_sha256 = _file_sha256(privileged_path)
+        direct_historical = [
+            load_temporal_policy_checkpoint(path, device="cpu")[0]
+            for path in historical_paths
+        ]
+    actor_value_coefficient = (
+        args.value_coefficient
+        if args.value_coefficient is not None
+        else (0.0 if privileged_critic is not None else 0.5)
+    )
     start_epoch = int(payload.get("epoch", 0)) + 1
     source_sha256 = _file_sha256(resume)
     champion_factory = load_ppo_agent(champion_path, "cpu")
@@ -355,7 +592,7 @@ def main() -> None:
             champion_path=champion_path,
             historical_paths=historical_paths,
         )
-        if args.rollout_engine == "vector"
+        if args.rollout_engine == "vector" and privileged_critic is None
         else None
     )
     for offset in range(args.epochs):
@@ -375,7 +612,16 @@ def main() -> None:
             "player_counts": player_counts,
             "max_turns": args.max_turns,
         }
-        if args.rollout_engine == "vector":
+        if privileged_critic is not None:
+            episodes, contribution = _collect_privileged_rollouts(
+                rollout_policy,
+                champion_factory,
+                direct_historical,
+                privileged_critic,
+                schedule=schedule,
+                **rollout_arguments,
+            )
+        elif args.rollout_engine == "vector":
             episodes, contribution = vector_rollout_pool.collect(
                 rollout_policy,
                 schedule=schedule,
@@ -406,7 +652,7 @@ def main() -> None:
             seed=args.seed + 1_000_000 + campaign_phase,
             target_kl=args.target_kl,
             clip_ratio=args.clip_ratio,
-            value_coefficient=args.value_coefficient,
+            value_coefficient=actor_value_coefficient,
             entropy_coefficient=args.entropy_coefficient,
             gamma=args.gamma,
             gae_lambda=args.gae_lambda,
@@ -424,6 +670,27 @@ def main() -> None:
         if args.device == "cuda":
             torch.cuda.synchronize()
         update_seconds = time.perf_counter() - update_started
+        critic_update = None
+        critic_update_seconds = 0.0
+        if privileged_critic is not None:
+            from privileged_critic import update_privileged_critic_from_ppo
+
+            assert privileged_optimizer is not None
+            critic_update_started = time.perf_counter()
+            critic_update = update_privileged_critic_from_ppo(
+                privileged_critic,
+                episodes,
+                privileged_optimizer,
+                update_epochs=args.privileged_critic_update_epochs,
+                minibatch_trajectories=(
+                    args.privileged_critic_minibatch_trajectories
+                ),
+                seed=args.seed + 1_500_000 + campaign_phase,
+                gamma=args.gamma,
+            )
+            if args.device == "cuda":
+                torch.cuda.synchronize()
+            critic_update_seconds = time.perf_counter() - critic_update_started
 
         evaluations = None
         if epoch % args.evaluate_every == 0 or offset == args.epochs - 1:
@@ -493,20 +760,29 @@ def main() -> None:
                 "max_turns": args.max_turns,
                 "rollout_workers": args.rollout_workers,
                 "effective_rollout_workers": (
-                    _effective_vector_workers(
-                        args.rollout_workers, schedule, player_counts
+                    1
+                    if privileged_critic is not None
+                    else (
+                        _effective_vector_workers(
+                            args.rollout_workers, schedule, player_counts
+                        )
+                        if args.rollout_engine == "vector"
+                        else args.rollout_workers
                     )
-                    if args.rollout_engine == "vector"
-                    else args.rollout_workers
                 ),
                 "chunks_per_worker": args.chunks_per_worker,
-                "rollout_engine": args.rollout_engine,
+                "rollout_engine": (
+                    "in_process_privileged"
+                    if privileged_critic is not None
+                    else args.rollout_engine
+                ),
                 "update_epochs": args.update_epochs,
                 "minibatch_trajectories": args.minibatch_trajectories,
                 "diagnostic_minibatch_trajectories": (
                     args.diagnostic_minibatch_trajectories
                 ),
                 "learning_rate": learning_rate,
+                "value_coefficient": actor_value_coefficient,
                 "fresh_optimizer": args.fresh_optimizer,
                 "target_kl": args.target_kl,
                 "early_stop_diagnostic_trajectories": (
@@ -520,6 +796,23 @@ def main() -> None:
                 "campaign_offset": args.campaign_offset,
                 "gamma": args.gamma,
                 "gae_lambda": args.gae_lambda,
+                "privileged_critic": (
+                    {
+                        "source_checkpoint": str(privileged_path),
+                        "source_checkpoint_sha256": privileged_source_sha256,
+                        "learning_rate": args.privileged_critic_learning_rate,
+                        "update_epochs": args.privileged_critic_update_epochs,
+                        "minibatch_trajectories": (
+                            args.privileged_critic_minibatch_trajectories
+                        ),
+                        "causal_boundary": (
+                            "pre-action environment state only; actor input "
+                            "remains the original safe observation"
+                        ),
+                    }
+                    if privileged_critic is not None
+                    else None
+                ),
                 "strategic_pass": {
                     "action": PASS_ACTION,
                     "legal_alongside_playable_cards": True,
@@ -533,22 +826,54 @@ def main() -> None:
             checkpoint_path = output_dir / f"puffer_epoch_{epoch:06d}.pt"
             _atomic_torch_save(checkpoint_payload, checkpoint_path)
 
+        privileged_checkpoint_path = None
+        if privileged_critic is not None:
+            assert privileged_optimizer is not None
+            privileged_checkpoint_payload = _privileged_checkpoint_payload(
+                privileged_critic,
+                privileged_optimizer,
+                epoch=epoch,
+                parent_checkpoint=privileged_path,
+                target_gamma=args.gamma,
+            )
+            privileged_checkpoint_path = output_dir / "privileged_critic_latest.pt"
+            _atomic_torch_save(
+                privileged_checkpoint_payload, privileged_checkpoint_path
+            )
+            if epoch % args.checkpoint_every == 0 or offset == args.epochs - 1:
+                privileged_checkpoint_path = output_dir / (
+                    f"privileged_critic_epoch_{epoch:06d}.pt"
+                )
+                _atomic_torch_save(
+                    privileged_checkpoint_payload, privileged_checkpoint_path
+                )
+
         row = {
             "epoch": epoch,
             "campaign_phase": campaign_phase,
             "wall_seconds": time.perf_counter() - epoch_started,
             "rollout_seconds": rollout_seconds,
             "update_seconds": update_seconds,
+            "critic_update_seconds": critic_update_seconds,
             "games_per_second": args.games_per_epoch / rollout_seconds,
             "decisions_per_second": pass_metrics["decisions"] / rollout_seconds,
             "contribution": contribution,
             "strategic_pass": pass_metrics,
             "update": update,
+            "critic_update": critic_update,
             "evaluation": evaluations,
             "checkpoint": {
                 "path": str(checkpoint_path),
                 "state_sha256": _state_hash(cpu_state),
             },
+            "privileged_critic_checkpoint": (
+                {
+                    "path": str(privileged_checkpoint_path),
+                    "sha256": _file_sha256(privileged_checkpoint_path),
+                }
+                if privileged_checkpoint_path is not None
+                else None
+            ),
         }
         curve.append(row)
         _append_jsonl_idempotent(jsonl_path, row)
@@ -579,6 +904,12 @@ def main() -> None:
                     "decisions": pass_metrics["decisions"],
                     "rollout_seconds": rollout_seconds,
                     "update_seconds": update_seconds,
+                    "critic_update_seconds": critic_update_seconds,
+                    "critic_value_mse": (
+                        critic_update["epochs"][-1]["value_mse"]
+                        if critic_update is not None
+                        else None
+                    ),
                     "strategic_pass_rate": pass_metrics["rate"],
                     "evaluation": {
                         name: value["score"]

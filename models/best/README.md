@@ -23,6 +23,11 @@ training loss, an unfinished run, or a development-set result.
 - `puffer_min_gru_192x2_factorized23_distilled_epoch4387.pt`: outcome-matched
   23-score variant with lower parameter count and modestly lower recurring
   training OPEX.
+- `ppo_omniscient_mlp_gamma025at20_2to8_20260814.pt`: causal omniscient
+  1.07M-parameter PPO value estimator trained across 2-8 players. It is the
+  default external critic in `train_puffer_fast.py`; its discount retains 25%
+  of a terminal reward after 20 controlled-seat discount steps.
 
 Their hashes, gates, evaluation seeds, output contract, and selection decision
-are recorded in `puffer_min_gru_192x2_20260812_manifest.json`.
+are recorded in `puffer_min_gru_192x2_20260812_manifest.json` and
+`ppo_omniscient_mlp_gamma025at20_2to8_20260814_manifest.json`.

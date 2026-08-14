@@ -134,6 +134,31 @@ python ppo2.py --iterations 200 --episodes 1000 --agent_sets "smart,rl;random,rl
 *   `--torch-threads`: PyTorch CPU thread count. The profiled default is 8;
     override it when the host has a materially different CPU topology.
 
+#### Causal omniscient asymmetric critic
+
+The temporal PPO pipeline defaults to a separate environment-side critic that
+sees all current-turn cards and engine state while leaving the actor observation
+unchanged. The promoted 1.07M-parameter MLP was trained across 2-8 players and
+is loaded automatically by `train_puffer_fast.py`:
+
+```bash
+python train_puffer_fast.py \
+  --resume models/best/puffer_min_gru_192x2_plateau_teacher_epoch4387.pt \
+  --output-dir live_training/puffer_privileged
+```
+
+Use `--privileged-critic CHECKPOINT` to override it, or
+`--no-privileged-critic` to fall back to the actor's public value head. The
+default discount is `gamma=0.9330329915368074`, so a terminal component is
+multiplied by exactly 0.25 across 20 controlled-seat discount steps (6.6967%
+depreciation per step). The separate `-0.01` per-decision reward remains part
+of the return.
+
+The external value is used for GAE and updated only from retained pre-action
+snapshots; private fields never enter actor tokens. See
+[the 2026-08-14 investigation](PRIVILEGED_CRITIC_20260814.md) for the exact
+causal contract, feature findings, held-out results, and limitations.
+
 #### Iterative-reference two-player self-play
 
 `nashpg_ppo.py` is a development-only, shared-symmetric specialization of

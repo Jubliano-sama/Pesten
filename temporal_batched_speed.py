@@ -17,7 +17,7 @@ from dataclasses import dataclass, field
 import hashlib
 import random
 import time
-from typing import Hashable, Sequence
+from typing import Hashable, Mapping, Sequence
 
 import numpy as np
 import torch
@@ -381,11 +381,27 @@ def _batch_temporal_actions(
     deterministic: bool = False,
     disable_strategic_pass: bool = False,
     strategic_pass_max_hand_size: int | None = None,
+    engine: BatchedPesten | None = None,
+    roles: Mapping[
+        tuple[int, int], tuple[str, torch.nn.Module | None, int]
+    ] | None = None,
+    all_runtimes: Mapping[tuple[int, int], TemporalSeatRuntime] | None = None,
+    privileged_critic_runtime: object | None = None,
+    capture_privileged_snapshots: bool = False,
 ) -> list[int]:
     """Advance variable-length event streams, then sample one action per seat."""
 
     if not entries:
         return []
+    capture_privileged = (
+        capture_privileged_snapshots or privileged_critic_runtime is not None
+    )
+    if capture_privileged and (
+        engine is None or roles is None or all_runtimes is None
+    ):
+        raise ValueError(
+            "privileged temporal capture requires engine, roles, and all runtimes"
+        )
     parameter = next(policy.parameters())
     device, dtype = parameter.device, parameter.dtype
     runtimes = [entry[0] for entry in entries]
@@ -461,31 +477,89 @@ def _batch_temporal_actions(
             ~legal, torch.finfo(logits.dtype).min
         )
         probabilities = (
-            None
-            if deterministic
-            else torch.softmax(masked_logits, dim=-1).cpu()
+            torch.softmax(masked_logits.float(), dim=-1).cpu()
+            if not deterministic or capture_privileged
+            else None
         )
         if stats is not None:
             stats.temporal_recurrent_inference_transfer_seconds += (
                 time.perf_counter() - inference_started
             )
-        scatter_started = time.perf_counter()
-        if deterministic:
-            actions = masked_logits.argmax(dim=-1).cpu().tolist()
-        else:
-            assert probabilities is not None
-            actions = [
-                int(
-                    torch.multinomial(
-                        probabilities[index],
-                        1,
-                        generator=runtime.generator,
-                    ).item()
-                )
-                for index, runtime in enumerate(runtimes)
-            ]
         log_probabilities = torch.log_softmax(masked_logits, dim=-1)
+        scatter_started = time.perf_counter()
         _scatter_states(runtimes, next_states)
+        scatter_seconds = time.perf_counter() - scatter_started
+
+    privileged_by_index: dict[int, object] = {}
+    privileged_values: dict[int, float] = {}
+    if capture_privileged:
+        # Local import preserves the actor module's one-way information-safe
+        # dependency boundary; the privileged module itself uses this rollout
+        # helper for auditable trace replay.
+        from privileged_critic import capture_privileged_snapshot
+
+        snapshots = []
+        snapshot_indices = []
+        stream_ids = []
+        assert probabilities is not None
+        assert engine is not None and roles is not None
+        assert all_runtimes is not None
+        for index, (runtime, decision) in enumerate(entries):
+            role_name = roles[(runtime.game_index, runtime.seat)][0]
+            if role_name != ROLE_CURRENT:
+                continue
+            absolute_roles = tuple(
+                roles[(runtime.game_index, seat)][0]
+                for seat in range(engine.num_players)
+            )
+            memories = tuple(
+                (
+                    all_runtimes[(runtime.game_index, seat)].state
+                    if (runtime.game_index, seat) in all_runtimes
+                    else None
+                )
+                for seat in range(engine.num_players)
+            )
+            snapshot = capture_privileged_snapshot(
+                engine,
+                runtime.game_index,
+                runtime.seat,
+                safe_observation=decision.observation.values,
+                absolute_roles=absolute_roles,
+                actor_probabilities=probabilities[index].numpy(),
+                actor_memory=runtime.state,
+                public_value=float(values[index].reshape(-1)[0].item()),
+                all_actor_memories=memories,
+            )
+            snapshots.append(snapshot)
+            snapshot_indices.append(index)
+            stream_ids.append((runtime.absolute_game_index, runtime.seat))
+            privileged_by_index[index] = snapshot
+        if privileged_critic_runtime is not None and snapshots:
+            outputs = privileged_critic_runtime.evaluate(snapshots, stream_ids)
+            for index, value in zip(
+                snapshot_indices, outputs["value"].tolist()
+            ):
+                privileged_values[index] = float(value)
+
+    # Sampling happens only after the immutable baseline inputs and values have
+    # been captured.  This makes the chronology match the no-action schema,
+    # rather than merely relying on the snapshot builder not to accept actions.
+    sampling_started = time.perf_counter()
+    if deterministic:
+        actions = masked_logits.argmax(dim=-1).cpu().tolist()
+    else:
+        assert probabilities is not None
+        actions = [
+            int(
+                torch.multinomial(
+                    probabilities[index],
+                    1,
+                    generator=runtime.generator,
+                ).item()
+            )
+            for index, runtime in enumerate(runtimes)
+        ]
 
     for index, (runtime, decision) in enumerate(entries):
         action = actions[index]
@@ -497,14 +571,17 @@ def _batch_temporal_actions(
                 old_log_prob=float(
                     log_probabilities[index, action].item()
                 ),
-                value=float(values[index].reshape(-1)[0].item()),
+                value=privileged_values.get(
+                    index, float(values[index].reshape(-1)[0].item())
+                ),
+                privileged_snapshot=privileged_by_index.get(index),
             )
         )
     if stats is not None:
         stats.temporal_decisions += len(entries)
         stats.temporal_forward_calls += 1
         stats.temporal_sampling_state_scatter_seconds += (
-            time.perf_counter() - scatter_started
+            scatter_seconds + time.perf_counter() - sampling_started
         )
     return actions
 
@@ -772,6 +849,8 @@ def collect_league_batch_batched(
     trace_sink: list[dict] | None = None,
     player_count: int = 2,
     game_indices: Sequence[int] | None = None,
+    privileged_critic: object | None = None,
+    capture_privileged_snapshots: bool = False,
 ) -> tuple[list[tuple[Sequence[TrajectoryStep], bool]], dict]:
     """Collect an explicit league schedule with batched neural decisions.
 
@@ -782,7 +861,11 @@ def collect_league_batch_batched(
     ``canonical_random`` is the separately named legacy ``AgentRandom``
     contract with its coupled deal/opponent RNG.  ``trace_sink`` is an opt-in
     phase-zero diagnostic: it remains environment-side and never changes the
-    return schema or policy inputs.
+    return schema or policy inputs.  ``privileged_critic`` is an opt-in,
+    environment-side baseline: its pre-action values replace only
+    ``TrajectoryStep.value`` for GAE, while the actor continues to receive the
+    exact same safe ``DecisionInput``.  Captured snapshots can be retained for
+    an external critic update without entering actor tokens.
     """
 
     if games < 0:
@@ -808,8 +891,31 @@ def collect_league_batch_batched(
             "unknown opponent types: "
             + ", ".join(sorted(unknown_opponents))
         )
+    if (
+        privileged_critic is not None or capture_privileged_snapshots
+    ) and "bayesian_tree" in schedule and player_count < 7:
+        raise ValueError(
+            "privileged critic capture is unavailable for scalar bayesian-tree "
+            "games; use the vector opponent lanes"
+        )
     if stats is None:
         stats = BatchRolloutStats()
+    privileged_runtime = None
+    if privileged_critic is not None:
+        from privileged_critic import (
+            AveragedPrivilegedCritic,
+            AveragedPrivilegedCriticRuntime,
+            PrivilegedCriticRuntime,
+        )
+
+        if hasattr(privileged_critic, "evaluate"):
+            privileged_runtime = privileged_critic
+        elif isinstance(privileged_critic, AveragedPrivilegedCritic):
+            privileged_runtime = AveragedPrivilegedCriticRuntime(
+                privileged_critic
+            )
+        else:
+            privileged_runtime = PrivilegedCriticRuntime(privileged_critic)
     (
         vector_absolute_indices,
         policy_kinds,
@@ -1026,7 +1132,16 @@ def collect_league_batch_batched(
 
             for _, (seat_policy, entries) in temporal_groups.items():
                 chosen = _batch_temporal_actions(
-                    seat_policy, entries, stats
+                    seat_policy,
+                    entries,
+                    stats,
+                    engine=engine,
+                    roles=roles,
+                    all_runtimes=runtimes,
+                    privileged_critic_runtime=privileged_runtime,
+                    capture_privileged_snapshots=(
+                        capture_privileged_snapshots
+                    ),
                 )
                 for (runtime, _), action in zip(entries, chosen):
                     actions[runtime.game_index] = action

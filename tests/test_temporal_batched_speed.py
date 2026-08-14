@@ -10,6 +10,7 @@ if not str(getattr(pufferlib, "__version__", "")).startswith("4"):
 
 from batched_pesten import BatchedPesten, PHASE_DRAW_RETRY, POLICY_RL
 from benchmark_agents import load_ppo_agent
+from privileged_critic import CausalTemporalValueModel, flatten_recurrent_state
 from temporal_league import _snapshot, collect_league_batch
 from temporal_observation import (
     PASS_ACTION,
@@ -425,3 +426,69 @@ def test_explicit_no_ppo_schedule_never_requires_champion():
     assert "ppo_champion" not in contribution["decisions"]
     assert stats.champion_decisions == 0
     assert stats.champion_forward_calls == 0
+
+
+def test_external_privileged_critic_replaces_only_behavior_values():
+    torch.manual_seed(98)
+    policy = NativePufferTemporalPolicy(
+        hidden_size=8, num_layers=1
+    ).eval()
+    memory_size = int(flatten_recurrent_state(policy.initial_state()).size)
+    critic = CausalTemporalValueModel(
+        actor_memory_size=memory_size,
+        backbone="mlp",
+        hidden_size=32,
+        num_layers=1,
+        group_width=16,
+        transformer_heads=4,
+        dropout=0.0,
+    ).eval()
+    with torch.no_grad():
+        critic.value_head[-1].bias.fill_(0.75)
+
+    baseline, _ = collect_league_batch_batched(
+        policy,
+        None,
+        [policy],
+        games=1,
+        seed=98,
+        schedule=("current_selfplay",),
+        max_turns=60,
+    )
+    episodes, _ = collect_league_batch_batched(
+        policy,
+        None,
+        [policy],
+        games=1,
+        seed=98,
+        schedule=("current_selfplay",),
+        max_turns=60,
+        privileged_critic=critic,
+        capture_privileged_snapshots=True,
+    )
+
+    steps = [step for trajectory, _ in episodes for step in trajectory]
+    baseline_steps = [
+        step for trajectory, _ in baseline for step in trajectory
+    ]
+    assert steps
+    assert [step.action for step in steps] == [
+        step.action for step in baseline_steps
+    ]
+    assert [step.old_log_prob for step in steps] == pytest.approx(
+        [step.old_log_prob for step in baseline_steps], abs=0, rel=0
+    )
+    for step, baseline_step in zip(steps, baseline_steps):
+        assert step.decision.legal_actions == baseline_step.decision.legal_actions
+        assert np.array_equal(
+            step.decision.observation.values,
+            baseline_step.decision.observation.values,
+        )
+    for step in steps:
+        snapshot = step.privileged_snapshot
+        assert snapshot is not None
+        assert step.value == pytest.approx(
+            snapshot.public_value + 0.75, abs=2e-5
+        )
+        # The actor contract is still the original safe DecisionInput.
+        assert isinstance(step.decision, DecisionInput)
