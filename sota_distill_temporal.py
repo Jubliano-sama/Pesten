@@ -247,6 +247,7 @@ def main() -> None:
         mode_conditioned_heads=bool(
             teacher_model["mode_conditioned_heads"]
         ),
+        action_head=str(teacher_model["action_head"]),
     ).to(args.device)
     widening = initialize_widened_min_gru(large, teacher)
     large_metrics = evaluate_puffer_distillation(

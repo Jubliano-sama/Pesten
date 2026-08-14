@@ -1,0 +1,56 @@
+{
+  "elapsed_seconds": 104.51592600499862,
+  "kind": "single_canonical_random_1v1_batched_exact_engine",
+  "mlp_loader_dependency": {
+    "path": "/home/tommie/Pesten/live_training/long_segments/segment_0058/mlp/ppo_actor_64.pth",
+    "sha256": "e67b9c26aeaf16508925c9109510d4dd5da0416fda11604a5b234d2d6d07fe43",
+    "used_as_opponent": false
+  },
+  "model": {
+    "label": "epoch4747_round5_accepted",
+    "path": "/home/tommie/Pesten/live_training/factorized_full_force_league_20260812/round_005/training/puffer_epoch_004747.pt",
+    "sha256": "2fc42f96adaa0dafda76a06fd2aeaf4f4a32969182529dccd822c37f0dd62efd"
+  },
+  "opponent": {
+    "game_rng": "per-game numpy.random.RandomState(deal_seed), shared by deal, hand shuffle, and recycle",
+    "id": "randomAgent.AgentRandom-canonical-v1",
+    "opponent_rng_seed": null,
+    "policy_visibility": "canonical opponent RNG state never crosses the DecisionInput boundary",
+    "scalar_source": "randomAgent.AgentRandom",
+    "suit_rng": "per-game random.Random(deal_seed).randint(0, 3)"
+  },
+  "protocol": {
+    "blocks": 50000,
+    "candidate_seats_per_block": 2,
+    "confidence": "two-sided 99.9% normal and distribution-free Hoeffding intervals over independent deal blocks",
+    "deterministic_temporal_actions": true,
+    "engine": "BatchedPesten exact-semantics evaluator",
+    "games": 100000,
+    "seed_end_exclusive": 2026600000,
+    "seed_start_inclusive": 2026550000
+  },
+  "result": {
+    "blocks": 50000,
+    "draws": 159,
+    "games": 100000,
+    "losses": 20860,
+    "outright_win_rate": 0.78981,
+    "outright_win_rate_hoeffding_ci99_9": [
+      0.7810916845322379,
+      0.7985283154677622
+    ],
+    "outright_win_rate_normal_ci99_9": [
+      0.7856736954924322,
+      0.7939463045075679
+    ],
+    "outright_win_rate_standard_error": 0.0012570341605133942,
+    "score_rate_draws_half": 0.790605,
+    "score_rate_normal_ci99_9": [
+      0.7864779380732378,
+      0.7947320619267622
+    ],
+    "score_rate_standard_error": 0.0012542253151339366,
+    "wins": 78981
+  },
+  "schema_version": 1
+}

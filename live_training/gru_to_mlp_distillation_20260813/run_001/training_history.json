@@ -1,0 +1,752 @@
+[
+  {
+    "epoch": 1,
+    "epoch_seconds": 8.584127628993883,
+    "train_forward_kl": 5.323096307054084,
+    "train_hard_cross_entropy": 5.426888054155597,
+    "train_loss": 8.035335079727306,
+    "train_margin_loss": 5.418852796393865,
+    "validation": {
+      "action_agreement": 0.7423979545247009,
+      "agreement_count": 40650,
+      "agreement_wilson_95": [
+        0.7387181035568346,
+        0.7460437959432151
+      ],
+      "forward_kl": 3.473747996223233,
+      "samples": 54755,
+      "strategic_action_agreement": 0.6797850026219192,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.5960717335610589,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 15.525346786252397,
+      "teacher_pass_recall": 0.6972552457130334,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 2,
+    "epoch_seconds": 8.41163019999658,
+    "train_forward_kl": 2.8391748994398367,
+    "train_hard_cross_entropy": 2.9334685620978984,
+    "train_loss": 4.298967520488271,
+    "train_margin_loss": 2.887190945407528,
+    "validation": {
+      "action_agreement": 0.7618847593827047,
+      "agreement_count": 41717,
+      "agreement_wilson_95": [
+        0.7582988794950443,
+        0.7654338956325477
+      ],
+      "forward_kl": 2.08514666584744,
+      "samples": 54755,
+      "strategic_action_agreement": 0.7018353434714211,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.6443210930828351,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 11.722499033335996,
+      "teacher_pass_recall": 0.7424532953487099,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 3,
+    "epoch_seconds": 8.26385811700311,
+    "train_forward_kl": 1.6148538047113368,
+    "train_hard_cross_entropy": 1.704126209869141,
+    "train_loss": 2.4562373039405196,
+    "train_margin_loss": 1.6329288333048313,
+    "validation": {
+      "action_agreement": 0.7751986119989042,
+      "agreement_count": 42446,
+      "agreement_wilson_95": [
+        0.771682805856685,
+        0.7786758065084686
+      ],
+      "forward_kl": 1.1599094028941421,
+      "samples": 54755,
+      "strategic_action_agreement": 0.7164918720503408,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.6806148590947908,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 9.976380653022556,
+      "teacher_pass_recall": 0.7747767490275571,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 4,
+    "epoch_seconds": 8.899562825004978,
+    "train_forward_kl": 0.8793844925255917,
+    "train_hard_cross_entropy": 0.9646809644854256,
+    "train_loss": 1.347212534876219,
+    "train_margin_loss": 0.8679314046526704,
+    "validation": {
+      "action_agreement": 0.8025933704684504,
+      "agreement_count": 43946,
+      "agreement_wilson_95": [
+        0.7992381979339905,
+        0.8059060877594791
+      ],
+      "forward_kl": 0.7097160968461784,
+      "samples": 54755,
+      "strategic_action_agreement": 0.7514682747771368,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.7160546541417592,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 9.137578278382112,
+      "teacher_pass_recall": 0.8432038569002356,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 5,
+    "epoch_seconds": 7.8449347839996335,
+    "train_forward_kl": 0.6050077863102524,
+    "train_hard_cross_entropy": 0.6904344108477365,
+    "train_loss": 0.9330757340326481,
+    "train_margin_loss": 0.5761060594888983,
+    "validation": {
+      "action_agreement": 0.8144644324719204,
+      "agreement_count": 44596,
+      "agreement_wilson_95": [
+        0.8111864006471046,
+        0.8176983434886353
+      ],
+      "forward_kl": 0.5359311094502642,
+      "samples": 54755,
+      "strategic_action_agreement": 0.7661772417409544,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.7350555081127241,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 8.802935947630353,
+      "teacher_pass_recall": 0.8687886922697639,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 6,
+    "epoch_seconds": 7.942616101994645,
+    "train_forward_kl": 0.48092116314196987,
+    "train_hard_cross_entropy": 0.5675350602874224,
+    "train_loss": 0.7454190001731553,
+    "train_margin_loss": 0.4390704536043164,
+    "validation": {
+      "action_agreement": 0.8234864395945576,
+      "agreement_count": 45090,
+      "agreement_wilson_95": [
+        0.8202703766115526,
+        0.8266571159403128
+      ],
+      "forward_kl": 0.45187275210490196,
+      "samples": 54755,
+      "strategic_action_agreement": 0.7775301520713161,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.7480785653287788,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 8.556723986393937,
+      "teacher_pass_recall": 0.8812797896236235,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 7,
+    "epoch_seconds": 8.028920513002959,
+    "train_forward_kl": 0.4113757879251938,
+    "train_hard_cross_entropy": 0.4985030189217141,
+    "train_loss": 0.6400512394899549,
+    "train_margin_loss": 0.36132930853836487,
+    "validation": {
+      "action_agreement": 0.8312848141722217,
+      "agreement_count": 45517,
+      "agreement_wilson_95": [
+        0.8281247877402641,
+        0.8343983598190617
+      ],
+      "forward_kl": 0.4045998303076631,
+      "samples": 54755,
+      "strategic_action_agreement": 0.7867855270057682,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.7638770281810419,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 8.433020778638937,
+      "teacher_pass_recall": 0.8856078452857065,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 8,
+    "epoch_seconds": 8.386827430003905,
+    "train_forward_kl": 0.3643862767007585,
+    "train_hard_cross_entropy": 0.45171985823286614,
+    "train_loss": 0.5687568412486513,
+    "train_margin_loss": 0.3084574273372375,
+    "validation": {
+      "action_agreement": 0.8366724500045658,
+      "agreement_count": 45812,
+      "agreement_wilson_95": [
+        0.8335525457302557,
+        0.839745117583639
+      ],
+      "forward_kl": 0.36534044385751013,
+      "samples": 54755,
+      "strategic_action_agreement": 0.7939958049292082,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.7681468830059778,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 8.293538885575519,
+      "teacher_pass_recall": 0.8916890374185066,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 9,
+    "epoch_seconds": 8.296481170000334,
+    "train_forward_kl": 0.3308084087791587,
+    "train_hard_cross_entropy": 0.4178465963933857,
+    "train_loss": 0.5178355681972404,
+    "train_margin_loss": 0.2718723424121019,
+    "validation": {
+      "action_agreement": 0.8422609807323532,
+      "agreement_count": 46118,
+      "agreement_wilson_95": [
+        0.83918396681272,
+        0.8452899738601513
+      ],
+      "forward_kl": 0.3388320099370206,
+      "samples": 54755,
+      "strategic_action_agreement": 0.8007079181961195,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.7788215200683177,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 8.204002345676194,
+      "teacher_pass_recall": 0.8991946529337643,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 10,
+    "epoch_seconds": 8.166064247001486,
+    "train_forward_kl": 0.30523132458805413,
+    "train_hard_cross_entropy": 0.39176197569083504,
+    "train_loss": 0.4789998527012337,
+    "train_margin_loss": 0.24434558351084218,
+    "validation": {
+      "action_agreement": 0.8466076157428545,
+      "agreement_count": 46356,
+      "agreement_wilson_95": [
+        0.8435648917350018,
+        0.8496017091059622
+      ],
+      "forward_kl": 0.31789311679049004,
+      "samples": 54755,
+      "strategic_action_agreement": 0.8061090718405873,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.7856532877882152,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 8.050244269929687,
+      "teacher_pass_recall": 0.8973867309483372,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 11,
+    "epoch_seconds": 8.159052861999953,
+    "train_forward_kl": 0.2845716010443628,
+    "train_hard_cross_entropy": 0.37081274456024726,
+    "train_loss": 0.44783365200038294,
+    "train_margin_loss": 0.22318394993849094,
+    "validation": {
+      "action_agreement": 0.8500228289653913,
+      "agreement_count": 46543,
+      "agreement_wilson_95": [
+        0.8470076385993695,
+        0.8529889095165246
+      ],
+      "forward_kl": 0.3023758170049753,
+      "samples": 54755,
+      "strategic_action_agreement": 0.8097535395909806,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.7959009393680615,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 8.062737902788559,
+      "teacher_pass_recall": 0.899359009477894,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 12,
+    "epoch_seconds": 8.379406441003084,
+    "train_forward_kl": 0.26779789373252644,
+    "train_hard_cross_entropy": 0.35342491684370025,
+    "train_loss": 0.4224647750243553,
+    "train_margin_loss": 0.20645440557299485,
+    "validation": {
+      "action_agreement": 0.8545338325267099,
+      "agreement_count": 46790,
+      "agreement_wilson_95": [
+        0.8515558350221736,
+        0.8574620873017832
+      ],
+      "forward_kl": 0.28755325179439234,
+      "samples": 54755,
+      "strategic_action_agreement": 0.8153120083901416,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.8033731853116994,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 7.9055193125913155,
+      "teacher_pass_recall": 0.9008930038897716,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 13,
+    "epoch_seconds": 8.392412157001672,
+    "train_forward_kl": 0.2526825007347781,
+    "train_hard_cross_entropy": 0.3380115318270633,
+    "train_loss": 0.3996604191813616,
+    "train_margin_loss": 0.19115921790900445,
+    "validation": {
+      "action_agreement": 0.8578942562323075,
+      "agreement_count": 46974,
+      "agreement_wilson_95": [
+        0.8549445949821243,
+        0.860793703270106
+      ],
+      "forward_kl": 0.2742968773408607,
+      "samples": 54755,
+      "strategic_action_agreement": 0.8199265862611431,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.8050811272416738,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 7.808515560793535,
+      "teacher_pass_recall": 0.9046732044047554,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 14,
+    "epoch_seconds": 8.391223143000389,
+    "train_forward_kl": 0.23998377542728466,
+    "train_hard_cross_entropy": 0.3247154027067735,
+    "train_loss": 0.38058665940264225,
+    "train_margin_loss": 0.1796832878547377,
+    "validation": {
+      "action_agreement": 0.8604328371838188,
+      "agreement_count": 47113,
+      "agreement_wilson_95": [
+        0.8575049495402348,
+        0.8633101544404195
+      ],
+      "forward_kl": 0.26568400529560654,
+      "samples": 54755,
+      "strategic_action_agreement": 0.8229680125852123,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.8099914602903501,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 7.733638516174322,
+      "teacher_pass_recall": 0.9001260066838328,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 15,
+    "epoch_seconds": 8.102610401001584,
+    "train_forward_kl": 0.227818659741057,
+    "train_hard_cross_entropy": 0.3120260444025464,
+    "train_loss": 0.36228996297081567,
+    "train_margin_loss": 0.1684145719886588,
+    "validation": {
+      "action_agreement": 0.8640124189571728,
+      "agreement_count": 47309,
+      "agreement_wilson_95": [
+        0.8611157863380133,
+        0.8668579789575409
+      ],
+      "forward_kl": 0.2546523586646268,
+      "samples": 54755,
+      "strategic_action_agreement": 0.8272941793392764,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.8166097352690008,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 7.627932344934252,
+      "teacher_pass_recall": 0.9093847586698077,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 16,
+    "epoch_seconds": 8.256992964001256,
+    "train_forward_kl": 0.2166651261971483,
+    "train_hard_cross_entropy": 0.30008381416394503,
+    "train_loss": 0.3454781626629871,
+    "train_margin_loss": 0.1585580104056103,
+    "validation": {
+      "action_agreement": 0.8668249474933796,
+      "agreement_count": 47463,
+      "agreement_wilson_95": [
+        0.8639533386158927,
+        0.8696450891413686
+      ],
+      "forward_kl": 0.24554535154555662,
+      "samples": 54755,
+      "strategic_action_agreement": 0.8310959622443629,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.818531169940222,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 7.554040869555291,
+      "teacher_pass_recall": 0.91415109844957,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 17,
+    "epoch_seconds": 8.113614813999448,
+    "train_forward_kl": 0.20705578299125635,
+    "train_hard_cross_entropy": 0.28973060283530666,
+    "train_loss": 0.33107564821276536,
+    "train_margin_loss": 0.15076104895726392,
+    "validation": {
+      "action_agreement": 0.8699479499589079,
+      "agreement_count": 47634,
+      "agreement_wilson_95": [
+        0.8671046224439743,
+        0.8727393720727151
+      ],
+      "forward_kl": 0.24031738805156921,
+      "samples": 54755,
+      "strategic_action_agreement": 0.8351599370739381,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.8219470538001707,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 7.449455368659255,
+      "teacher_pass_recall": 0.9113570371993645,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 18,
+    "epoch_seconds": 8.462568042996281,
+    "train_forward_kl": 0.19796913328868992,
+    "train_hard_cross_entropy": 0.2801132177212154,
+    "train_loss": 0.31753444245636014,
+    "train_margin_loss": 0.14350455589830563,
+    "validation": {
+      "action_agreement": 0.8715733722947676,
+      "agreement_count": 47723,
+      "agreement_wilson_95": [
+        0.8687449756015553,
+        0.8743496355326141
+      ],
+      "forward_kl": 0.23205926843064417,
+      "samples": 54755,
+      "strategic_action_agreement": 0.8380178290508652,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.8176771989752348,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 7.38297613731052,
+      "teacher_pass_recall": 0.9162877335232564,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 19,
+    "epoch_seconds": 8.137546822996228,
+    "train_forward_kl": 0.19025175339222508,
+    "train_hard_cross_entropy": 0.2715881293004228,
+    "train_loss": 0.3059049118818896,
+    "train_margin_loss": 0.13731541729627966,
+    "validation": {
+      "action_agreement": 0.8740754269016529,
+      "agreement_count": 47860,
+      "agreement_wilson_95": [
+        0.8712703031308774,
+        0.8768280661672784
+      ],
+      "forward_kl": 0.22670176170501696,
+      "samples": 54755,
+      "strategic_action_agreement": 0.8413476664918721,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.8198121263877028,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 7.324918939337731,
+      "teacher_pass_recall": 0.92023229058237,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 20,
+    "epoch_seconds": 8.126164576999145,
+    "train_forward_kl": 0.18341111248485714,
+    "train_hard_cross_entropy": 0.2639914454068644,
+    "train_loss": 0.2955990119565025,
+    "train_margin_loss": 0.1319392890880996,
+    "validation": {
+      "action_agreement": 0.8755364806866953,
+      "agreement_count": 47940,
+      "agreement_wilson_95": [
+        0.8727451123493848,
+        0.8782751595262812
+      ],
+      "forward_kl": 0.22194496609720288,
+      "samples": 54755,
+      "strategic_action_agreement": 0.8432878867330886,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.8210930828351836,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 7.210671952761164,
+      "teacher_pass_recall": 0.9223689256560565,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 21,
+    "epoch_seconds": 8.117667943995912,
+    "train_forward_kl": 0.17696911798771697,
+    "train_hard_cross_entropy": 0.256946421462668,
+    "train_loss": 0.2859114613871045,
+    "train_margin_loss": 0.12674064314309974,
+    "validation": {
+      "action_agreement": 0.875993059994521,
+      "agreement_count": 47965,
+      "agreement_wilson_95": [
+        0.8732060156197375,
+        0.8787273508114003
+      ],
+      "forward_kl": 0.22006350766250657,
+      "samples": 54755,
+      "strategic_action_agreement": 0.8444939695857367,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.8166097352690008,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 7.146831410944206,
+      "teacher_pass_recall": 0.9193009368323015,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 22,
+    "epoch_seconds": 8.287027507001767,
+    "train_forward_kl": 0.17077253396119024,
+    "train_hard_cross_entropy": 0.24982225070645267,
+    "train_loss": 0.27646920620044396,
+    "train_margin_loss": 0.12172590569311072,
+    "validation": {
+      "action_agreement": 0.8776915350196329,
+      "agreement_count": 48058,
+      "agreement_wilson_95": [
+        0.874920683263168,
+        0.8804093949143255
+      ],
+      "forward_kl": 0.21664317631523378,
+      "samples": 54755,
+      "strategic_action_agreement": 0.8459360251704248,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.8247224594363791,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 7.074860279597754,
+      "teacher_pass_recall": 0.9176025858762943,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 23,
+    "epoch_seconds": 8.293609386004391,
+    "train_forward_kl": 0.16553626256685905,
+    "train_hard_cross_entropy": 0.2438940971500994,
+    "train_loss": 0.2685276413296351,
+    "train_margin_loss": 0.11752297314947806,
+    "validation": {
+      "action_agreement": 0.8784037987398411,
+      "agreement_count": 48097,
+      "agreement_wilson_95": [
+        0.87563978836234,
+        0.8811147173216894
+      ],
+      "forward_kl": 0.21491237456107748,
+      "samples": 54755,
+      "strategic_action_agreement": 0.8466177241740954,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.8274978650725875,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 7.03572158792576,
+      "teacher_pass_recall": 0.9203966471264997,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 24,
+    "epoch_seconds": 8.19383111299976,
+    "train_forward_kl": 0.15989571594173724,
+    "train_hard_cross_entropy": 0.23758556150475746,
+    "train_loss": 0.25996152472177403,
+    "train_margin_loss": 0.11273908097338081,
+    "validation": {
+      "action_agreement": 0.880138800109579,
+      "agreement_count": 48192,
+      "agreement_wilson_95": [
+        0.8773915824167109,
+        0.8828326825781121
+      ],
+      "forward_kl": 0.2124851411079753,
+      "samples": 54755,
+      "strategic_action_agreement": 0.8492396434189827,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.8264304013663536,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 6.917997428887773,
+      "teacher_pass_recall": 0.9203418616117899,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 25,
+    "epoch_seconds": 8.13051996899594,
+    "train_forward_kl": 0.15484129779910985,
+    "train_hard_cross_entropy": 0.23173763511625575,
+    "train_loss": 0.25222441178293575,
+    "train_margin_loss": 0.10849962241077478,
+    "validation": {
+      "action_agreement": 0.8804127476942745,
+      "agreement_count": 48207,
+      "agreement_wilson_95": [
+        0.8776681982026325,
+        0.8831039235254735
+      ],
+      "forward_kl": 0.21084106768574218,
+      "samples": 54755,
+      "strategic_action_agreement": 0.8489250131095962,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.832194705380017,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 6.883774651715597,
+      "teacher_pass_recall": 0.9200679340382403,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 26,
+    "epoch_seconds": 8.386638367999694,
+    "train_forward_kl": 0.15077574816053513,
+    "train_hard_cross_entropy": 0.2269202277176883,
+    "train_loss": 0.24593234127998906,
+    "train_margin_loss": 0.1048967590136697,
+    "validation": {
+      "action_agreement": 0.8814720116884303,
+      "agreement_count": 48265,
+      "agreement_wilson_95": [
+        0.8787378226347519,
+        0.8841526784620491
+      ],
+      "forward_kl": 0.20867225745205203,
+      "samples": 54755,
+      "strategic_action_agreement": 0.8506816990036706,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.8302732707087959,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 6.8491420767795175,
+      "teacher_pass_recall": 0.9223141401413466,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 27,
+    "epoch_seconds": 8.148203112003102,
+    "train_forward_kl": 0.1463568217009046,
+    "train_hard_cross_entropy": 0.22138795628927255,
+    "train_loss": 0.23904811418174243,
+    "train_margin_loss": 0.10137006582855694,
+    "validation": {
+      "action_agreement": 0.8825495388548991,
+      "agreement_count": 48324,
+      "agreement_wilson_95": [
+        0.8798259602383635,
+        0.8852194440093512
+      ],
+      "forward_kl": 0.2065605948737915,
+      "samples": 54755,
+      "strategic_action_agreement": 0.8521761929732564,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.8307002561912895,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 6.830194338701945,
+      "teacher_pass_recall": 0.9310250369802224,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 28,
+    "epoch_seconds": 8.368236906004313,
+    "train_forward_kl": 0.14195503394039893,
+    "train_hard_cross_entropy": 0.2163221225064553,
+    "train_loss": 0.23228886287133407,
+    "train_margin_loss": 0.09747391139557028,
+    "validation": {
+      "action_agreement": 0.8829695918180988,
+      "agreement_count": 48347,
+      "agreement_wilson_95": [
+        0.8802501691566986,
+        0.8856352820820501
+      ],
+      "forward_kl": 0.2050361310735749,
+      "samples": 54755,
+      "strategic_action_agreement": 0.852884111169376,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.8298462852263023,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 6.7606790333074605,
+      "teacher_pass_recall": 0.9261491261710404,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 29,
+    "epoch_seconds": 8.09522686299897,
+    "train_forward_kl": 0.13786631293555873,
+    "train_hard_cross_entropy": 0.21121642442029415,
+    "train_loss": 0.22586265279067802,
+    "train_margin_loss": 0.09380394224248467,
+    "validation": {
+      "action_agreement": 0.8821294858916994,
+      "agreement_count": 48301,
+      "agreement_wilson_95": [
+        0.8794017623884286,
+        0.8848035948682519
+      ],
+      "forward_kl": 0.2056376035284663,
+      "samples": 54755,
+      "strategic_action_agreement": 0.8516255899318301,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.8302732707087959,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 6.694532569799562,
+      "teacher_pass_recall": 0.930038897715444,
+      "teacher_pass_samples": 18253
+    }
+  },
+  {
+    "epoch": 30,
+    "epoch_seconds": 8.059688784000173,
+    "train_forward_kl": 0.13386920463339247,
+    "train_hard_cross_entropy": 0.2064501228961468,
+    "train_loss": 0.21970183769850313,
+    "train_margin_loss": 0.09050060422059618,
+    "validation": {
+      "action_agreement": 0.8831887498858552,
+      "agreement_count": 48359,
+      "agreement_wilson_95": [
+        0.8804714999599886,
+        0.8858522366653868
+      ],
+      "forward_kl": 0.20663195879924637,
+      "samples": 54755,
+      "strategic_action_agreement": 0.8528578919769271,
+      "strategic_samples": 38140,
+      "suit_action_agreement": 0.8326216908625107,
+      "suit_samples": 4684,
+      "teacher_margin_mae": 6.6495047362969135,
+      "teacher_pass_recall": 0.9183147975675231,
+      "teacher_pass_samples": 18253
+    }
+  }
+]

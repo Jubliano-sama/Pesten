@@ -1,0 +1,261 @@
+{
+  "best": {
+    "action_agreement": 0.9008327175158335,
+    "agreement_count": 181634,
+    "agreement_wilson_95": [
+      0.8995204695242814,
+      0.9021296923766081
+    ],
+    "epoch": 13,
+    "forward_kl": 0.1605167630989584,
+    "samples": 201629,
+    "strategic_action_agreement": 0.877471896573721,
+    "strategic_samples": 141086,
+    "suit_action_agreement": 0.8440092165898617,
+    "suit_samples": 17360,
+    "teacher_margin_mae": 5.983725693871851,
+    "teacher_pass_recall": 0.942269031115912,
+    "teacher_pass_samples": 66654
+  },
+  "best_train": {
+    "action_agreement": 0.944991079864021,
+    "agreement_count": 779182,
+    "agreement_wilson_95": [
+      0.9444968813363388,
+      0.9454811320579461
+    ],
+    "forward_kl": 0.09079591279618338,
+    "samples": 824539,
+    "strategic_action_agreement": 0.9310091774951857,
+    "strategic_samples": 576410,
+    "suit_action_agreement": 0.921398239545544,
+    "suit_samples": 71118,
+    "teacher_margin_mae": 5.787580843469805,
+    "teacher_pass_recall": 0.9696974113805971,
+    "teacher_pass_samples": 274432
+  },
+  "best_validation": {
+    "action_agreement": 0.9008327175158335,
+    "agreement_count": 181634,
+    "agreement_wilson_95": [
+      0.8995204695242814,
+      0.9021296923766081
+    ],
+    "forward_kl": 0.1605167630989584,
+    "samples": 201629,
+    "strategic_action_agreement": 0.877471896573721,
+    "strategic_samples": 141086,
+    "suit_action_agreement": 0.8440092165898617,
+    "suit_samples": 17360,
+    "teacher_margin_mae": 5.983725693871851,
+    "teacher_pass_recall": 0.942269031115912,
+    "teacher_pass_samples": 66654
+  },
+  "data": {
+    "additional_opponent_schedule": [
+      "current_selfplay",
+      "current_selfplay",
+      "historical_temporal",
+      "ppo_champion",
+      "canonical_random",
+      "smart_rule",
+      "smarter_rule"
+    ],
+    "additional_train_games": 12288,
+    "additional_validation_games": 3072,
+    "base_train_samples": 220288,
+    "base_validation_samples": 54755,
+    "extra_train": {
+      "decisions": {
+        "canonical_random": 37391,
+        "current_selfplay": 392028,
+        "historical_temporal": 45866,
+        "ppo_champion": 39022,
+        "smart_rule": 36761,
+        "smarter_rule": 53183
+      },
+      "games": {
+        "canonical_random": 1755,
+        "current_selfplay": 3512,
+        "historical_temporal": 1756,
+        "ppo_champion": 1755,
+        "smart_rule": 1755,
+        "smarter_rule": 1755
+      },
+      "player_counts": {
+        "2": 2733,
+        "3": 2730,
+        "4": 2730,
+        "5": 1170,
+        "6": 975,
+        "7": 975,
+        "8": 975
+      },
+      "total_turns": 987502,
+      "trajectories": 22820,
+      "wall_seconds": 226.93640900800528
+    },
+    "extra_validation": {
+      "decisions": {
+        "canonical_random": 9024,
+        "current_selfplay": 95144,
+        "historical_temporal": 11046,
+        "ppo_champion": 9841,
+        "smart_rule": 9058,
+        "smarter_rule": 12761
+      },
+      "games": {
+        "canonical_random": 439,
+        "current_selfplay": 878,
+        "historical_temporal": 439,
+        "ppo_champion": 439,
+        "smart_rule": 439,
+        "smarter_rule": 438
+      },
+      "player_counts": {
+        "2": 686,
+        "3": 686,
+        "4": 686,
+        "5": 294,
+        "6": 240,
+        "7": 240,
+        "8": 240
+      },
+      "total_turns": 240182,
+      "trajectories": 5696,
+      "wall_seconds": 52.08574411200243
+    },
+    "historical_checkpoints": [
+      "/home/tommie/Pesten/live_training/factorized_full_force_league_20260812/round_001/training/latest.pt",
+      "/home/tommie/Pesten/live_training/factorized_full_force_league_20260812/round_004/training/latest.pt",
+      "/home/tommie/Pesten/live_training/factorized_full_force_league_20260812/round_007/training/latest.pt",
+      "/home/tommie/Pesten/live_training/factorized_full_force_league_20260812/round_010/training/latest.pt",
+      "/home/tommie/Pesten/live_training/factorized_23_distillation_20260812/latest.pt"
+    ],
+    "player_count_schedule": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      6,
+      6,
+      6,
+      6,
+      6,
+      7,
+      7,
+      7,
+      7,
+      7,
+      8,
+      8,
+      8,
+      8,
+      8
+    ],
+    "total_train_samples": 824539,
+    "total_validation_samples": 201629
+  },
+  "experiment": "large_scratch_factorized_mlp_distillation",
+  "initial_validation": {
+    "action_agreement": 0.566609961860645,
+    "agreement_count": 114245,
+    "agreement_wilson_95": [
+      0.5644457297976343,
+      0.5687716558507537
+    ],
+    "forward_kl": 0.7911021386689205,
+    "samples": 201629,
+    "strategic_action_agreement": 0.4665168762315184,
+    "strategic_samples": 141086,
+    "suit_action_agreement": 0.30201612903225805,
+    "suit_samples": 17360,
+    "teacher_margin_mae": 10.06273230223424,
+    "teacher_pass_recall": 0.7312839439493504,
+    "teacher_pass_samples": 66654
+  },
+  "perfect_on_held_out": false,
+  "perfect_on_train": false,
+  "recorded_at": "2026-08-13T10:10:30.880378+00:00",
+  "schema_version": 1,
+  "student": {
+    "architecture": "DenseSkipNet factorized MLP",
+    "best_checkpoint": "/home/tommie/Pesten/live_training/gru_to_mlp_distillation_20260813/large_scratch_001/best_mlp.pth",
+    "best_checkpoint_sha256": "19ed87c94773e1af841caaf544f8a32b1bc192f5ecb0bd323cf29d8211377bac",
+    "expanded_actions": 55,
+    "hidden_layers": 8,
+    "hidden_width": 384,
+    "input_features": 121,
+    "learned_action_scores": 23,
+    "minimum_requested_parameters": 294250,
+    "over_current_mlp_ratio": 2.0754142307918726,
+    "over_teacher_ratio": 18.6908991550031,
+    "parameters": 4583158,
+    "randomly_initialized": true,
+    "recurrent": false
+  },
+  "teacher": {
+    "epoch": 5047,
+    "model": {
+      "action_head": "factorized_23",
+      "architecture": "min_gru",
+      "hidden_size": 192,
+      "mode_conditioned_heads": true,
+      "num_layers": 2
+    },
+    "parameters": 245208,
+    "path": "/home/tommie/Pesten/live_training/factorized_full_force_league_20260812/round_011/training/latest.pt",
+    "sha256": "0ab80afbe66423853b0f47b3029407d456a84bfebb15819a06dc1b52eda9e547"
+  },
+  "training": {
+    "batch_size": 4096,
+    "epochs_completed": 21,
+    "initial_learning_rate": 0.0003,
+    "minimum_learning_rate": 2e-05,
+    "objective": "0.50 forward KL + hard CE + 0.35 top-action margin"
+  }
+}

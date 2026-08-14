@@ -1,0 +1,232 @@
+{
+  "best": {
+    "action_agreement": 0.8831887498858552,
+    "epoch": 30,
+    "forward_kl": 0.20663195879924637
+  },
+  "best_validation": {
+    "action_agreement": 0.8831887498858552,
+    "agreement_count": 48359,
+    "agreement_wilson_95": [
+      0.8804714999599886,
+      0.8858522366653868
+    ],
+    "forward_kl": 0.20663195879924637,
+    "samples": 54755,
+    "strategic_action_agreement": 0.8528578919769271,
+    "strategic_samples": 38140,
+    "suit_action_agreement": 0.8326216908625107,
+    "suit_samples": 4684,
+    "teacher_margin_mae": 6.6495047362969135,
+    "teacher_pass_recall": 0.9183147975675231,
+    "teacher_pass_samples": 18253
+  },
+  "collision_analysis": {
+    "gru_current_snapshot": {
+      "conflicting_teacher_action_groups": 0,
+      "empirical_maximum_action_agreement": 1.0,
+      "empirical_minimum_errors_for_any_deterministic_snapshot_policy": 0,
+      "examples": [],
+      "key": "exact GRU 94-float current observation plus 55-action legal mask",
+      "repeated_input_groups": 0,
+      "samples": 54755,
+      "samples_in_conflicting_groups": 0,
+      "unique_inputs": 54755
+    },
+    "mlp_input": {
+      "conflicting_teacher_action_groups": 0,
+      "empirical_maximum_action_agreement": 1.0,
+      "empirical_minimum_errors_for_any_deterministic_snapshot_policy": 0,
+      "examples": [],
+      "key": "exact deployed MLP 121-float observation plus external legal mask",
+      "repeated_input_groups": 0,
+      "samples": 54755,
+      "samples_in_conflicting_groups": 0,
+      "unique_inputs": 54755
+    }
+  },
+  "data": {
+    "disjoint_seed_splits": true,
+    "opponent_schedule": [
+      "current_selfplay",
+      "current_selfplay",
+      "ppo_champion",
+      "canonical_random",
+      "smart_rule",
+      "smarter_rule"
+    ],
+    "player_count_schedule": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      6,
+      6,
+      6,
+      6,
+      6,
+      7,
+      7,
+      7,
+      7,
+      7,
+      8,
+      8,
+      8,
+      8,
+      8
+    ],
+    "train": {
+      "decisions": {
+        "canonical_random": 15543,
+        "current_selfplay": 154965,
+        "ppo_champion": 14300,
+        "smart_rule": 14247,
+        "smarter_rule": 21233
+      },
+      "games": {
+        "canonical_random": 683,
+        "current_selfplay": 1366,
+        "ppo_champion": 683,
+        "smart_rule": 682,
+        "smarter_rule": 682
+      },
+      "player_counts": {
+        "2": 911,
+        "3": 910,
+        "4": 910,
+        "5": 390,
+        "6": 325,
+        "7": 325,
+        "8": 325
+      },
+      "total_turns": 330271,
+      "trajectories": 8326,
+      "wall_seconds": 71.57470124000247
+    },
+    "train_samples": 220288,
+    "train_seed_start": 130000000,
+    "validation": {
+      "decisions": {
+        "canonical_random": 3562,
+        "current_selfplay": 38379,
+        "ppo_champion": 4112,
+        "smart_rule": 3444,
+        "smarter_rule": 5258
+      },
+      "games": {
+        "canonical_random": 171,
+        "current_selfplay": 342,
+        "ppo_champion": 171,
+        "smart_rule": 170,
+        "smarter_rule": 170
+      },
+      "player_counts": {
+        "2": 238,
+        "3": 226,
+        "4": 224,
+        "5": 96,
+        "6": 80,
+        "7": 80,
+        "8": 80
+      },
+      "total_turns": 83140,
+      "trajectories": 2070,
+      "wall_seconds": 19.427934505998564
+    },
+    "validation_legacy_mask_mismatch_samples": 1904,
+    "validation_samples": 54755,
+    "validation_seed_start": 131000000
+  },
+  "experiment": "final_gru_to_deployed_mlp_distillation",
+  "perfect_on_held_out": false,
+  "recorded_at": "2026-08-13T09:31:17.531288+00:00",
+  "schema_version": 1,
+  "student": {
+    "architecture": "ppo2.StudentNet DenseSkipNet 8x256",
+    "best_checkpoint": "/home/tommie/Pesten/live_training/gru_to_mlp_distillation_20260813/run_001/best_mlp.pth",
+    "best_checkpoint_sha256": "a46871348305732f72192649fa0cd14dc0338e7ddfedde803f51b0991a5ea04f",
+    "parameters": 2208310,
+    "warm_start_path": "/home/tommie/Pesten/live_training/long_segments/segment_0058/mlp/ppo_actor_64.pth",
+    "warm_start_sha256": "e67b9c26aeaf16508925c9109510d4dd5da0416fda11604a5b234d2d6d07fe43"
+  },
+  "teacher": {
+    "epoch": 5047,
+    "model": {
+      "action_head": "factorized_23",
+      "architecture": "min_gru",
+      "hidden_size": 192,
+      "mode_conditioned_heads": true,
+      "num_layers": 2
+    },
+    "path": "/home/tommie/Pesten/live_training/factorized_full_force_league_20260812/round_011/training/latest.pt",
+    "sha256": "0ab80afbe66423853b0f47b3029407d456a84bfebb15819a06dc1b52eda9e547"
+  },
+  "training": {
+    "batch_size": 2048,
+    "epochs_completed": 30,
+    "learning_rate": 0.0002,
+    "objective": "forward KL + 0.35 hard CE + 0.15 top-action margin"
+  },
+  "warm_start_validation": {
+    "action_agreement": 0.7301251027303443,
+    "agreement_count": 39978,
+    "agreement_wilson_95": [
+      0.7263909969409201,
+      0.7338269209080441
+    ],
+    "forward_kl": 10.10403683881609,
+    "samples": 54755,
+    "strategic_action_agreement": 0.6611431567907708,
+    "strategic_samples": 38140,
+    "suit_action_agreement": 0.604397950469684,
+    "suit_samples": 4684,
+    "teacher_margin_mae": 42.37860483631632,
+    "teacher_pass_recall": 0.6536459760039446,
+    "teacher_pass_samples": 18253
+  }
+}

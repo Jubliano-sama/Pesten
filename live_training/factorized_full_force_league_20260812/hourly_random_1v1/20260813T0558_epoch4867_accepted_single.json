@@ -1,0 +1,56 @@
+{
+  "elapsed_seconds": 98.2336970610013,
+  "kind": "single_canonical_random_1v1_batched_exact_engine",
+  "mlp_loader_dependency": {
+    "path": "/home/tommie/Pesten/live_training/long_segments/segment_0058/mlp/ppo_actor_64.pth",
+    "sha256": "e67b9c26aeaf16508925c9109510d4dd5da0416fda11604a5b234d2d6d07fe43",
+    "used_as_opponent": false
+  },
+  "model": {
+    "label": "epoch4867_round8_accepted",
+    "path": "/home/tommie/Pesten/live_training/factorized_full_force_league_20260812/round_008/training/puffer_epoch_004867.pt",
+    "sha256": "dbf4ee8e0ed94fe16548d3e2351213e3ad28dc04ca645dee4ef8a07bbe4888fa"
+  },
+  "opponent": {
+    "game_rng": "per-game numpy.random.RandomState(deal_seed), shared by deal, hand shuffle, and recycle",
+    "id": "randomAgent.AgentRandom-canonical-v1",
+    "opponent_rng_seed": null,
+    "policy_visibility": "canonical opponent RNG state never crosses the DecisionInput boundary",
+    "scalar_source": "randomAgent.AgentRandom",
+    "suit_rng": "per-game random.Random(deal_seed).randint(0, 3)"
+  },
+  "protocol": {
+    "blocks": 50000,
+    "candidate_seats_per_block": 2,
+    "confidence": "two-sided 99.9% normal and distribution-free Hoeffding intervals over independent deal blocks",
+    "deterministic_temporal_actions": true,
+    "engine": "BatchedPesten exact-semantics evaluator",
+    "games": 100000,
+    "seed_end_exclusive": 2026750000,
+    "seed_start_inclusive": 2026700000
+  },
+  "result": {
+    "blocks": 50000,
+    "draws": 310,
+    "games": 100000,
+    "losses": 20816,
+    "outright_win_rate": 0.78874,
+    "outright_win_rate_hoeffding_ci99_9": [
+      0.7800216845322379,
+      0.7974583154677621
+    ],
+    "outright_win_rate_normal_ci99_9": [
+      0.7845813987915117,
+      0.7928986012084883
+    ],
+    "outright_win_rate_standard_error": 0.001263810188407993,
+    "score_rate_draws_half": 0.79029,
+    "score_rate_normal_ci99_9": [
+      0.7861495340130259,
+      0.7944304659869742
+    ],
+    "score_rate_standard_error": 0.0012582988453939256,
+    "wins": 78874
+  },
+  "schema_version": 1
+}

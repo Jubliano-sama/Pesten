@@ -76,6 +76,10 @@ def initialize_widened_min_gru(student, teacher) -> dict:
         teacher.mode_conditioned_heads
     ):
         raise ValueError("teacher and student decoder modes must match")
+    if getattr(student, "action_head", None) != getattr(
+        teacher, "action_head", None
+    ):
+        raise ValueError("teacher and student action heads must match")
 
     teacher_state = teacher.state_dict()
     student_state = student.state_dict()
@@ -87,11 +91,12 @@ def initialize_widened_min_gru(student, teacher) -> dict:
         student_state[f"{encoder}.bias"][:teacher_hidden].copy_(
             teacher_state[f"{encoder}.bias"]
         )
-        decoder_names = (
-            ("card_and_pass", "suit", "value_function")
-            if student.mode_conditioned_heads
-            else ("decoder", "value_function")
-        )
+        if getattr(student, "action_head", None) == "factorized_23":
+            decoder_names = ("scores", "value_function")
+        elif student.mode_conditioned_heads:
+            decoder_names = ("card_and_pass", "suit", "value_function")
+        else:
+            decoder_names = ("decoder", "value_function")
         for name in decoder_names:
             prefix = f"puffer_policy.decoder.{name}"
             student_state[f"{prefix}.weight"][:, teacher_hidden:].zero_()
@@ -277,6 +282,61 @@ def initialize_hawk_residual(student, teacher) -> dict:
         "adapter_num_layers": student.adapter_num_layers,
         "adapter_recurrent_size": student.adapter_recurrent_size,
         "adapter_mlp_expansion": student.adapter_mlp_expansion,
+        "zeroed_adapter_decoder_parameters": zeroed,
+    }
+
+
+def initialize_min_gru_residual(student, teacher) -> dict:
+    """Embed a teacher exactly and zero a wider/deeper MinGRU branch."""
+    from temporal_puffer_v4 import MinGRUResidualTemporalPolicy
+
+    if not isinstance(student, MinGRUResidualTemporalPolicy):
+        raise TypeError("student must be a MinGRUResidualTemporalPolicy")
+    if int(teacher.hidden_size) != student.base_hidden_size:
+        raise ValueError("residual base hidden size must match the teacher")
+    if int(teacher.num_layers) != student.base_num_layers:
+        raise ValueError("residual base layer count must match the teacher")
+    if bool(teacher.mode_conditioned_heads) != bool(
+        student.mode_conditioned_heads
+    ):
+        raise ValueError("teacher and residual decoder modes must match")
+    if getattr(teacher, "action_head", None) != student.action_head:
+        raise ValueError("teacher and residual action heads must match")
+    if student.adapter_hidden_size <= student.base_hidden_size:
+        raise ValueError("residual MinGRU branch must be wider than the base")
+    if student.adapter_num_layers <= student.base_num_layers:
+        raise ValueError("residual MinGRU branch must be deeper than the base")
+
+    teacher_state = teacher.state_dict()
+    student_state = student.state_dict()
+    base_prefix = "puffer_policy.base."
+    teacher_prefix = "puffer_policy."
+    copied = 0
+    zeroed = 0
+    with torch.no_grad():
+        for name, value in teacher_state.items():
+            target = base_prefix + name[len(teacher_prefix) :]
+            if target not in student_state:
+                raise KeyError(f"residual base is missing teacher tensor {target}")
+            student_state[target].copy_(value)
+            copied += value.numel()
+
+        adapter_decoder = "puffer_policy.adapter.decoder."
+        for name, value in student_state.items():
+            if name.startswith(adapter_decoder):
+                value.zero_()
+                zeroed += value.numel()
+        if not zeroed:
+            raise RuntimeError("residual MinGRU branch has no decoder parameters")
+        student.load_state_dict(student_state, strict=True)
+    return {
+        "kind": "function_preserving_wider_deeper_min_gru_residual",
+        "teacher_hidden_size": int(teacher.hidden_size),
+        "teacher_num_layers": int(teacher.num_layers),
+        "adapter_hidden_size": student.adapter_hidden_size,
+        "adapter_num_layers": student.adapter_num_layers,
+        "action_head": student.action_head,
+        "copied_base_parameters": copied,
         "zeroed_adapter_decoder_parameters": zeroed,
     }
 

@@ -1,0 +1,56 @@
+{
+  "elapsed_seconds": 79.62458068299748,
+  "kind": "single_canonical_random_1v1_batched_exact_engine",
+  "mlp_loader_dependency": {
+    "path": "/home/tommie/Pesten/live_training/long_segments/segment_0058/mlp/ppo_actor_64.pth",
+    "sha256": "e67b9c26aeaf16508925c9109510d4dd5da0416fda11604a5b234d2d6d07fe43",
+    "used_as_opponent": false
+  },
+  "model": {
+    "label": "wider_deeper_epoch_5060",
+    "path": "/home/tommie/Pesten/live_training/wider_deeper_gru_distillation_20260813/full_model_rl_001/puffer_epoch_005060.pt",
+    "sha256": "224ce45229bb067b09b7493482621afa08509990936786ff99d47768042cbb97"
+  },
+  "opponent": {
+    "game_rng": "per-game numpy.random.RandomState(deal_seed), shared by deal, hand shuffle, and recycle",
+    "id": "randomAgent.AgentRandom-canonical-v1",
+    "opponent_rng_seed": null,
+    "policy_visibility": "canonical opponent RNG state never crosses the DecisionInput boundary",
+    "scalar_source": "randomAgent.AgentRandom",
+    "suit_rng": "per-game random.Random(deal_seed).randint(0, 3)"
+  },
+  "protocol": {
+    "blocks": 5000,
+    "candidate_seats_per_block": 2,
+    "confidence": "two-sided 99.9% normal and distribution-free Hoeffding intervals over independent deal blocks",
+    "deterministic_temporal_actions": true,
+    "engine": "BatchedPesten exact-semantics evaluator",
+    "games": 10000,
+    "seed_end_exclusive": 3813005000,
+    "seed_start_inclusive": 3813000000
+  },
+  "result": {
+    "blocks": 5000,
+    "draws": 18,
+    "games": 10000,
+    "losses": 2057,
+    "outright_win_rate": 0.7925,
+    "outright_win_rate_hoeffding_ci99_9": [
+      0.7649302657619953,
+      0.8200697342380047
+    ],
+    "outright_win_rate_normal_ci99_9": [
+      0.7792714349286489,
+      0.805728565071351
+    ],
+    "outright_win_rate_standard_error": 0.004020196810664783,
+    "score_rate_draws_half": 0.7934,
+    "score_rate_normal_ci99_9": [
+      0.7801962071137227,
+      0.8066037928862773
+    ],
+    "score_rate_standard_error": 0.004012668476420688,
+    "wins": 7925
+  },
+  "schema_version": 1
+}

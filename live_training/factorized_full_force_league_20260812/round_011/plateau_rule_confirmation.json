@@ -1,0 +1,730 @@
+{
+  "after": {
+    "path": "/home/tommie/Pesten/live_training/factorized_full_force_league_20260812/round_011/training/latest.pt",
+    "sha256": "0ab80afbe66423853b0f47b3029407d456a84bfebb15819a06dc1b52eda9e547"
+  },
+  "before": {
+    "path": "/home/tommie/Pesten/live_training/factorized_full_force_league_20260812/round_008/training/latest.pt",
+    "sha256": "4068a18d08d80792466c9f2c02195f3cf71c858699241423ec0416a8dc138bd0"
+  },
+  "elapsed_seconds": 158.5388607480054,
+  "kind": "matched_temporal_rule_pool_evaluation_batched_exact_engine",
+  "mlp_loader_dependency": {
+    "path": "/home/tommie/Pesten/live_training/long_segments/segment_0058/mlp/ppo_actor_64.pth",
+    "sha256": "e67b9c26aeaf16508925c9109510d4dd5da0416fda11604a5b234d2d6d07fe43",
+    "used_as_opponent": false
+  },
+  "opponent_results": {
+    "smart_rule": {
+      "after_normalized_win_share": 1.3533678980851598,
+      "after_score": 0.40147816588606344,
+      "before_normalized_win_share": 1.3739753558830936,
+      "before_score": 0.4081270471713818,
+      "delta": -0.00664888128531836,
+      "delta_hoeffding_ci99_9": [
+        -0.053882910395836064,
+        0.04058514782519934
+      ],
+      "delta_hoeffding_margin99_9": 0.0472340291105177,
+      "delta_normal_ci99_9": [
+        -0.01795796382403668,
+        0.00466020125339996
+      ],
+      "delta_normalized_ci99_9": [
+        -0.055943843721764946,
+        0.014728928125897295
+      ],
+      "delta_normalized_hoeffding_ci99_9": [
+        -0.20200219170708567,
+        0.160787276111218
+      ],
+      "delta_normalized_hoeffding_margin99_9": 0.18139473390915184,
+      "delta_normalized_standard_error": 0.01073882354020859,
+      "delta_normalized_win_share": -0.020607457797933826,
+      "delta_standard_error": 0.003436860861966248,
+      "positive_distribution_free_99_9": false,
+      "positive_normal_99_9": false,
+      "weights": [
+        {
+          "blocks": 1200,
+          "opponent": "smart_rule",
+          "players": 2,
+          "weight": 0.2222222222222222
+        },
+        {
+          "blocks": 1200,
+          "opponent": "smart_rule",
+          "players": 3,
+          "weight": 0.2222222222222222
+        },
+        {
+          "blocks": 1200,
+          "opponent": "smart_rule",
+          "players": 4,
+          "weight": 0.2222222222222222
+        },
+        {
+          "blocks": 1200,
+          "opponent": "smart_rule",
+          "players": 5,
+          "weight": 0.09523809523809523
+        },
+        {
+          "blocks": 1200,
+          "opponent": "smart_rule",
+          "players": 6,
+          "weight": 0.07936507936507936
+        },
+        {
+          "blocks": 1200,
+          "opponent": "smart_rule",
+          "players": 7,
+          "weight": 0.07936507936507936
+        },
+        {
+          "blocks": 1200,
+          "opponent": "smart_rule",
+          "players": 8,
+          "weight": 0.07936507936507936
+        }
+      ]
+    },
+    "smarter_rule": {
+      "after_normalized_win_share": 1.9387426618795667,
+      "after_score": 0.5534651094719193,
+      "before_normalized_win_share": 1.942134259259259,
+      "before_score": 0.5551875112853784,
+      "delta": -0.0017224018134590702,
+      "delta_hoeffding_ci99_9": [
+        -0.04895643092397677,
+        0.045511627297058634
+      ],
+      "delta_hoeffding_margin99_9": 0.0472340291105177,
+      "delta_normal_ci99_9": [
+        -0.013036967383633018,
+        0.009592163756714879
+      ],
+      "delta_normalized_ci99_9": [
+        -0.0417300432016406,
+        0.034946848442256
+      ],
+      "delta_normalized_hoeffding_ci99_9": [
+        -0.18478633128884414,
+        0.17800313652945954
+      ],
+      "delta_normalized_hoeffding_margin99_9": 0.18139473390915184,
+      "delta_normalized_standard_error": 0.011651157687014335,
+      "delta_normalized_win_share": -0.0033915973796923016,
+      "delta_standard_error": 0.003438527170099579,
+      "positive_distribution_free_99_9": false,
+      "positive_normal_99_9": false,
+      "weights": [
+        {
+          "blocks": 1200,
+          "opponent": "smarter_rule",
+          "players": 2,
+          "weight": 0.2222222222222222
+        },
+        {
+          "blocks": 1200,
+          "opponent": "smarter_rule",
+          "players": 3,
+          "weight": 0.2222222222222222
+        },
+        {
+          "blocks": 1200,
+          "opponent": "smarter_rule",
+          "players": 4,
+          "weight": 0.2222222222222222
+        },
+        {
+          "blocks": 1200,
+          "opponent": "smarter_rule",
+          "players": 5,
+          "weight": 0.09523809523809523
+        },
+        {
+          "blocks": 1200,
+          "opponent": "smarter_rule",
+          "players": 6,
+          "weight": 0.07936507936507936
+        },
+        {
+          "blocks": 1200,
+          "opponent": "smarter_rule",
+          "players": 7,
+          "weight": 0.07936507936507936
+        },
+        {
+          "blocks": 1200,
+          "opponent": "smarter_rule",
+          "players": 8,
+          "weight": 0.07936507936507936
+        }
+      ]
+    }
+  },
+  "protocol": {
+    "blocks_per_stratum": 1200,
+    "bulk_2_3_4_fraction": 0.6666666666666666,
+    "confidence": "paired normal and distribution-free Hoeffding 99.9% intervals",
+    "deterministic_temporal_actions": true,
+    "engine": "BatchedPesten exact-semantics evaluator",
+    "matched_pre_post_seeds": true,
+    "opponents": [
+      "smart_rule",
+      "smarter_rule"
+    ],
+    "player_weights": {
+      "2": 0.2222222222222222,
+      "3": 0.2222222222222222,
+      "4": 0.2222222222222222,
+      "5": 0.09523809523809523,
+      "6": 0.07936507936507936,
+      "7": 0.07936507936507936,
+      "8": 0.07936507936507936
+    },
+    "seat_rotations_per_block": "equal to player count",
+    "seed": 1080261300,
+    "tail_5_8_fraction": 0.3333333333333333
+  },
+  "schema_version": 1,
+  "strata": [
+    {
+      "after_normalized_win_share": 1.39125,
+      "after_score": 0.695625,
+      "before_normalized_win_share": 1.4254166666666668,
+      "before_score": 0.7127083333333334,
+      "blocks": 1200,
+      "delta": -0.017083333333333332,
+      "delta_normal_ci99_9": [
+        -0.05062787108976427,
+        0.016461204423097606
+      ],
+      "delta_standard_error": 0.010194276021341373,
+      "games_per_model": 2400,
+      "opponent": "smart_rule",
+      "players": 2,
+      "totals": {
+        "after": {
+          "draws": 7,
+          "losses": 727,
+          "turns": 111812,
+          "wins": 1666
+        },
+        "before": {
+          "draws": 9,
+          "losses": 685,
+          "turns": 107334,
+          "wins": 1706
+        }
+      }
+    },
+    {
+      "after_normalized_win_share": 1.3680555555555554,
+      "after_score": 0.4560185185185185,
+      "before_normalized_win_share": 1.3802777777777777,
+      "before_score": 0.46009259259259255,
+      "blocks": 1200,
+      "delta": -0.004074074074074074,
+      "delta_normal_ci99_9": [
+        -0.03203054274000089,
+        0.023882394591852738
+      ],
+      "delta_standard_error": 0.008496046665833146,
+      "games_per_model": 3600,
+      "opponent": "smart_rule",
+      "players": 3,
+      "totals": {
+        "after": {
+          "draws": 20,
+          "losses": 1945,
+          "turns": 195509,
+          "wins": 1635
+        },
+        "before": {
+          "draws": 16,
+          "losses": 1933,
+          "turns": 190021,
+          "wins": 1651
+        }
+      }
+    },
+    {
+      "after_normalized_win_share": 1.3352083333333333,
+      "after_score": 0.33380208333333333,
+      "before_normalized_win_share": 1.3572916666666666,
+      "before_score": 0.33932291666666664,
+      "blocks": 1200,
+      "delta": -0.005520833333333333,
+      "delta_normal_ci99_9": [
+        -0.028807312136287577,
+        0.01776564546962091
+      ],
+      "delta_standard_error": 0.00707682407806976,
+      "games_per_model": 4800,
+      "opponent": "smart_rule",
+      "players": 4,
+      "totals": {
+        "after": {
+          "draws": 57,
+          "losses": 3155,
+          "turns": 321204,
+          "wins": 1588
+        },
+        "before": {
+          "draws": 43,
+          "losses": 3139,
+          "turns": 320741,
+          "wins": 1618
+        }
+      }
+    },
+    {
+      "after_normalized_win_share": 1.3483333333333334,
+      "after_score": 0.26966666666666667,
+      "before_normalized_win_share": 1.3353333333333333,
+      "before_score": 0.2670666666666667,
+      "blocks": 1200,
+      "delta": 0.0026,
+      "delta_normal_ci99_9": [
+        -0.016550606005653015,
+        0.02175060600565302
+      ],
+      "delta_standard_error": 0.0058199211154774996,
+      "games_per_model": 6000,
+      "opponent": "smart_rule",
+      "players": 5,
+      "totals": {
+        "after": {
+          "draws": 175,
+          "losses": 4242,
+          "turns": 480630,
+          "wins": 1583
+        },
+        "before": {
+          "draws": 117,
+          "losses": 4304,
+          "turns": 477574,
+          "wins": 1579
+        }
+      }
+    },
+    {
+      "after_normalized_win_share": 1.3597222222222223,
+      "after_score": 0.2266203703703704,
+      "before_normalized_win_share": 1.3848611111111113,
+      "before_score": 0.2308101851851852,
+      "blocks": 1200,
+      "delta": -0.0041898148148148155,
+      "delta_normal_ci99_9": [
+        -0.020893684094255002,
+        0.01251405446462537
+      ],
+      "delta_standard_error": 0.005076351187053463,
+      "games_per_model": 7200,
+      "opponent": "smart_rule",
+      "players": 6,
+      "totals": {
+        "after": {
+          "draws": 604,
+          "losses": 5065,
+          "turns": 653254,
+          "wins": 1531
+        },
+        "before": {
+          "draws": 563,
+          "losses": 5069,
+          "turns": 646207,
+          "wins": 1568
+        }
+      }
+    },
+    {
+      "after_normalized_win_share": 1.2822619047619046,
+      "after_score": 0.18318027210884352,
+      "before_normalized_win_share": 1.3219047619047617,
+      "before_score": 0.18884353741496596,
+      "blocks": 1200,
+      "delta": -0.005663265306122448,
+      "delta_normal_ci99_9": [
+        -0.018489082435874167,
+        0.0071625518236292695
+      ],
+      "delta_standard_error": 0.003897800618667665,
+      "games_per_model": 8400,
+      "opponent": "smart_rule",
+      "players": 7,
+      "totals": {
+        "after": {
+          "draws": 5,
+          "losses": 6857,
+          "turns": 734208,
+          "wins": 1538
+        },
+        "before": {
+          "draws": 9,
+          "losses": 6806,
+          "turns": 733798,
+          "wins": 1585
+        }
+      }
+    },
+    {
+      "after_normalized_win_share": 1.3278125,
+      "after_score": 0.1659765625,
+      "before_normalized_win_share": 1.3465625,
+      "before_score": 0.1683203125,
+      "blocks": 1200,
+      "delta": -0.00234375,
+      "delta_normal_ci99_9": [
+        -0.013850201299528879,
+        0.009162701299528878
+      ],
+      "delta_standard_error": 0.003496841763784077,
+      "games_per_model": 9600,
+      "opponent": "smart_rule",
+      "players": 8,
+      "totals": {
+        "after": {
+          "draws": 3,
+          "losses": 8004,
+          "turns": 906359,
+          "wins": 1593
+        },
+        "before": {
+          "draws": 7,
+          "losses": 7978,
+          "turns": 904348,
+          "wins": 1615
+        }
+      }
+    },
+    {
+      "after_normalized_win_share": 1.6895833333333334,
+      "after_score": 0.8447916666666667,
+      "before_normalized_win_share": 1.6775,
+      "before_score": 0.83875,
+      "blocks": 1200,
+      "delta": 0.0060416666666666665,
+      "delta_normal_ci99_9": [
+        -0.022943934701779092,
+        0.03502726803511243
+      ],
+      "delta_standard_error": 0.008808802885884377,
+      "games_per_model": 2400,
+      "opponent": "smarter_rule",
+      "players": 2,
+      "totals": {
+        "after": {
+          "draws": 27,
+          "losses": 359,
+          "turns": 143268,
+          "wins": 2014
+        },
+        "before": {
+          "draws": 18,
+          "losses": 378,
+          "turns": 139289,
+          "wins": 2004
+        }
+      }
+    },
+    {
+      "after_normalized_win_share": 1.9533333333333336,
+      "after_score": 0.6511111111111112,
+      "before_normalized_win_share": 1.9972222222222222,
+      "before_score": 0.6657407407407407,
+      "blocks": 1200,
+      "delta": -0.014629629629629633,
+      "delta_normal_ci99_9": [
+        -0.04367615844521672,
+        0.014416899185957453
+      ],
+      "delta_standard_error": 0.008827318902350136,
+      "games_per_model": 3600,
+      "opponent": "smarter_rule",
+      "players": 3,
+      "totals": {
+        "after": {
+          "draws": 54,
+          "losses": 1220,
+          "turns": 285801,
+          "wins": 2326
+        },
+        "before": {
+          "draws": 44,
+          "losses": 1174,
+          "turns": 277107,
+          "wins": 2382
+        }
+      }
+    },
+    {
+      "after_normalized_win_share": 2.009375,
+      "after_score": 0.50234375,
+      "before_normalized_win_share": 2.0304166666666665,
+      "before_score": 0.5076041666666666,
+      "blocks": 1200,
+      "delta": -0.005260416666666667,
+      "delta_normal_ci99_9": [
+        -0.03180326504527713,
+        0.0212824317119438
+      ],
+      "delta_standard_error": 0.008066443625752262,
+      "games_per_model": 4800,
+      "opponent": "smarter_rule",
+      "players": 4,
+      "totals": {
+        "after": {
+          "draws": 93,
+          "losses": 2319,
+          "turns": 470213,
+          "wins": 2388
+        },
+        "before": {
+          "draws": 90,
+          "losses": 2296,
+          "turns": 461525,
+          "wins": 2414
+        }
+      }
+    },
+    {
+      "after_normalized_win_share": 2.046333333333333,
+      "after_score": 0.40926666666666667,
+      "before_normalized_win_share": 2.021333333333333,
+      "before_score": 0.40426666666666666,
+      "blocks": 1200,
+      "delta": 0.005000000000000002,
+      "delta_normal_ci99_9": [
+        -0.017656844315206584,
+        0.027656844315206586
+      ],
+      "delta_standard_error": 0.006885476449216982,
+      "games_per_model": 6000,
+      "opponent": "smarter_rule",
+      "players": 5,
+      "totals": {
+        "after": {
+          "draws": 253,
+          "losses": 3342,
+          "turns": 687788,
+          "wins": 2405
+        },
+        "before": {
+          "draws": 203,
+          "losses": 3412,
+          "turns": 679897,
+          "wins": 2385
+        }
+      }
+    },
+    {
+      "after_normalized_win_share": 1.9802777777777778,
+      "after_score": 0.3300462962962963,
+      "before_normalized_win_share": 1.9606944444444445,
+      "before_score": 0.32678240740740744,
+      "blocks": 1200,
+      "delta": 0.00326388888888889,
+      "delta_normal_ci99_9": [
+        -0.01593014740205683,
+        0.02245792517983461
+      ],
+      "delta_standard_error": 0.005833119696992445,
+      "games_per_model": 7200,
+      "opponent": "smarter_rule",
+      "players": 6,
+      "totals": {
+        "after": {
+          "draws": 722,
+          "losses": 4222,
+          "turns": 901984,
+          "wins": 2256
+        },
+        "before": {
+          "draws": 665,
+          "losses": 4293,
+          "turns": 884613,
+          "wins": 2242
+        }
+      }
+    },
+    {
+      "after_normalized_win_share": 2.0535714285714284,
+      "after_score": 0.2933673469387755,
+      "before_normalized_win_share": 2.005833333333333,
+      "before_score": 0.286547619047619,
+      "blocks": 1200,
+      "delta": 0.006819727891156462,
+      "delta_normal_ci99_9": [
+        -0.009753342170537992,
+        0.023392797952850916
+      ],
+      "delta_standard_error": 0.0050366009499580085,
+      "games_per_model": 8400,
+      "opponent": "smarter_rule",
+      "players": 7,
+      "totals": {
+        "after": {
+          "draws": 247,
+          "losses": 5724,
+          "turns": 1141772,
+          "wins": 2429
+        },
+        "before": {
+          "draws": 245,
+          "losses": 5783,
+          "turns": 1132157,
+          "wins": 2372
+        }
+      }
+    },
+    {
+      "after_normalized_win_share": 2.1122916666666667,
+      "after_score": 0.26403645833333333,
+      "before_normalized_win_share": 2.104375,
+      "before_score": 0.263046875,
+      "blocks": 1200,
+      "delta": 0.0009895833333333334,
+      "delta_normal_ci99_9": [
+        -0.013745232366643214,
+        0.01572439903330988
+      ],
+      "delta_standard_error": 0.004477950462750314,
+      "games_per_model": 9600,
+      "opponent": "smarter_rule",
+      "players": 8,
+      "totals": {
+        "after": {
+          "draws": 358,
+          "losses": 6752,
+          "turns": 1418483,
+          "wins": 2490
+        },
+        "before": {
+          "draws": 282,
+          "losses": 6828,
+          "turns": 1393016,
+          "wins": 2490
+        }
+      }
+    }
+  ],
+  "weighted_result": {
+    "after_normalized_win_share": 1.6460552799823631,
+    "after_score": 0.47747163767899137,
+    "before_normalized_win_share": 1.6580548075711765,
+    "before_score": 0.48165727922838003,
+    "delta": -0.0041856415493887154,
+    "delta_hoeffding_ci99_9": [
+      -0.03758514383619857,
+      0.029213860737421143
+    ],
+    "delta_hoeffding_margin99_9": 0.03339950228680986,
+    "delta_normal_ci99_9": [
+      -0.012184309280787948,
+      0.0038130261820105166
+    ],
+    "delta_normalized_ci99_9": [
+      -0.03806912961013507,
+      0.014070074432508274
+    ],
+    "delta_normalized_hoeffding_ci99_9": [
+      -0.14026497400750404,
+      0.11626591882987725
+    ],
+    "delta_normalized_hoeffding_margin99_9": 0.12826544641869064,
+    "delta_normalized_standard_error": 0.007922622773984185,
+    "delta_normalized_win_share": -0.011999527588813397,
+    "delta_standard_error": 0.00243081682177146,
+    "positive_distribution_free_99_9": false,
+    "positive_normal_99_9": false,
+    "weights": [
+      {
+        "blocks": 1200,
+        "opponent": "smart_rule",
+        "players": 2,
+        "weight": 0.1111111111111111
+      },
+      {
+        "blocks": 1200,
+        "opponent": "smart_rule",
+        "players": 3,
+        "weight": 0.1111111111111111
+      },
+      {
+        "blocks": 1200,
+        "opponent": "smart_rule",
+        "players": 4,
+        "weight": 0.1111111111111111
+      },
+      {
+        "blocks": 1200,
+        "opponent": "smart_rule",
+        "players": 5,
+        "weight": 0.047619047619047616
+      },
+      {
+        "blocks": 1200,
+        "opponent": "smart_rule",
+        "players": 6,
+        "weight": 0.03968253968253968
+      },
+      {
+        "blocks": 1200,
+        "opponent": "smart_rule",
+        "players": 7,
+        "weight": 0.03968253968253968
+      },
+      {
+        "blocks": 1200,
+        "opponent": "smart_rule",
+        "players": 8,
+        "weight": 0.03968253968253968
+      },
+      {
+        "blocks": 1200,
+        "opponent": "smarter_rule",
+        "players": 2,
+        "weight": 0.1111111111111111
+      },
+      {
+        "blocks": 1200,
+        "opponent": "smarter_rule",
+        "players": 3,
+        "weight": 0.1111111111111111
+      },
+      {
+        "blocks": 1200,
+        "opponent": "smarter_rule",
+        "players": 4,
+        "weight": 0.1111111111111111
+      },
+      {
+        "blocks": 1200,
+        "opponent": "smarter_rule",
+        "players": 5,
+        "weight": 0.047619047619047616
+      },
+      {
+        "blocks": 1200,
+        "opponent": "smarter_rule",
+        "players": 6,
+        "weight": 0.03968253968253968
+      },
+      {
+        "blocks": 1200,
+        "opponent": "smarter_rule",
+        "players": 7,
+        "weight": 0.03968253968253968
+      },
+      {
+        "blocks": 1200,
+        "opponent": "smarter_rule",
+        "players": 8,
+        "weight": 0.03968253968253968
+      }
+    ]
+  }
+}

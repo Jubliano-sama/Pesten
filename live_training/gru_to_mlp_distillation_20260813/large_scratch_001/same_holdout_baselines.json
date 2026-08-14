@@ -1,0 +1,42 @@
+{
+  "deployed_original": {
+    "checkpoint": "/home/tommie/Pesten/live_training/long_segments/segment_0058/mlp/ppo_actor_64.pth",
+    "metrics": {
+      "action_agreement": 0.72686468712338,
+      "agreement_count": 146557,
+      "agreement_wilson_95": [
+        0.7249155233347373,
+        0.7288052065726667
+      ],
+      "forward_kl": 10.0916420738437,
+      "samples": 201629,
+      "strategic_action_agreement": 0.6577194051854897,
+      "strategic_samples": 141086,
+      "suit_action_agreement": 0.6093894009216589,
+      "suit_samples": 17360,
+      "teacher_margin_mae": 41.52103246014338,
+      "teacher_pass_recall": 0.6478680949380382,
+      "teacher_pass_samples": 66654
+    }
+  },
+  "small_distilled_best": {
+    "checkpoint": "/home/tommie/Pesten/live_training/gru_to_mlp_distillation_20260813/run_002_hard/best_mlp.pth",
+    "metrics": {
+      "action_agreement": 0.8792782784222508,
+      "agreement_count": 177288,
+      "agreement_wilson_95": [
+        0.8778489564091683,
+        0.8806931486041971
+      ],
+      "forward_kl": 0.21894123482702627,
+      "samples": 201629,
+      "strategic_action_agreement": 0.8494606126759565,
+      "strategic_samples": 141086,
+      "suit_action_agreement": 0.8213133640552995,
+      "suit_samples": 17360,
+      "teacher_margin_mae": 6.3273217064005856,
+      "teacher_pass_recall": 0.9199447895100069,
+      "teacher_pass_samples": 66654
+    }
+  }
+}

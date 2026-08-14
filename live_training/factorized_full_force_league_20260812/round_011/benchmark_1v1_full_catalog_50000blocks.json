@@ -1,0 +1,169 @@
+{
+  "candidate": {
+    "path": "/home/tommie/Pesten/live_training/factorized_full_force_league_20260812/round_011/training/latest.pt",
+    "sha256": "0ab80afbe66423853b0f47b3029407d456a84bfebb15819a06dc1b52eda9e547"
+  },
+  "elapsed_seconds": 356.6897166419949,
+  "kind": "confirmed_factorized_student_1v1_opponent_catalog",
+  "mlp": {
+    "path": "/home/tommie/Pesten/live_training/long_segments/segment_0058/mlp/ppo_actor_64.pth",
+    "sha256": "e67b9c26aeaf16508925c9109510d4dd5da0416fda11604a5b234d2d6d07fe43"
+  },
+  "opponents": {
+    "canonical_random": {
+      "game_rng": "per-game numpy.random.RandomState(deal_seed), shared by deal, hand shuffle, and recycle",
+      "id": "randomAgent.AgentRandom-canonical-v1",
+      "opponent_rng_seed": null,
+      "policy_visibility": "canonical opponent RNG state never crosses the DecisionInput boundary",
+      "scalar_source": "randomAgent.AgentRandom",
+      "suit_rng": "per-game random.Random(deal_seed).randint(0, 3)"
+    },
+    "deployed_mlp": {
+      "engine_role": "mlp"
+    },
+    "pre_rlvr_distilled_gru_student": {
+      "engine_role": "self_anchor"
+    },
+    "smart_rule": {
+      "engine_role": "smart_rule"
+    },
+    "smarter_rule": {
+      "engine_role": "smarter_rule"
+    }
+  },
+  "pre_rlvr_gru_baseline": {
+    "original_full_action_gru_counted_separately": false,
+    "path": "/home/tommie/Pesten/live_training/factorized_23_distillation_20260812/latest.pt",
+    "representation": "perfectly_distilled_factorized_23_student",
+    "sha256": "9debaeabf20990d0d87329f7a210f58471890f1fbf1ae983c919858ff82b8924"
+  },
+  "protocol": {
+    "blocks_per_opponent": 50000,
+    "candidate_seats_per_block": 2,
+    "common_fresh_deal_bank_across_opponents": true,
+    "confidence": "two-sided 99.9% normal and distribution-free Hoeffding intervals over independent deal blocks",
+    "deterministic_neural_actions": true,
+    "engine": "BatchedPesten exact-semantics evaluator",
+    "games_per_opponent": 100000,
+    "seed_end_exclusive": 2026900000,
+    "seed_start_inclusive": 2026850000
+  },
+  "results": {
+    "canonical_random": {
+      "blocks": 50000,
+      "draws": 305,
+      "games": 100000,
+      "losses": 20888,
+      "outright_win_rate": 0.78807,
+      "outright_win_rate_hoeffding_ci99_9": [
+        0.7793516845322379,
+        0.7967883154677622
+      ],
+      "outright_win_rate_normal_ci99_9": [
+        0.7839186574239255,
+        0.7922213425760746
+      ],
+      "outright_win_rate_standard_error": 0.0012616042703267527,
+      "score_rate_draws_half": 0.789595,
+      "score_rate_normal_ci99_9": [
+        0.7854631920235919,
+        0.7937268079764082
+      ],
+      "score_rate_standard_error": 0.0012556676524961017,
+      "wins": 78807
+    },
+    "deployed_mlp": {
+      "blocks": 50000,
+      "draws": 304,
+      "games": 100000,
+      "losses": 39004,
+      "outright_win_rate": 0.60692,
+      "outright_win_rate_hoeffding_ci99_9": [
+        0.5982016845322379,
+        0.6156383154677622
+      ],
+      "outright_win_rate_normal_ci99_9": [
+        0.6021119954648418,
+        0.6117280045351582
+      ],
+      "outright_win_rate_standard_error": 0.0014611656210366578,
+      "score_rate_draws_half": 0.60844,
+      "score_rate_normal_ci99_9": [
+        0.6036407829810958,
+        0.6132392170189042
+      ],
+      "score_rate_standard_error": 0.001458495071008964,
+      "wins": 60692
+    },
+    "pre_rlvr_distilled_gru_student": {
+      "blocks": 50000,
+      "draws": 441,
+      "games": 100000,
+      "losses": 48160,
+      "outright_win_rate": 0.51399,
+      "outright_win_rate_hoeffding_ci99_9": [
+        0.5052716845322378,
+        0.5227083154677621
+      ],
+      "outright_win_rate_normal_ci99_9": [
+        0.5092059001698164,
+        0.5187740998301835
+      ],
+      "outright_win_rate_standard_error": 0.0014539009163479786,
+      "score_rate_draws_half": 0.516195,
+      "score_rate_normal_ci99_9": [
+        0.5114247899245561,
+        0.5209652100754438
+      ],
+      "score_rate_standard_error": 0.0014496797822034417,
+      "wins": 51399
+    },
+    "smart_rule": {
+      "blocks": 50000,
+      "draws": 247,
+      "games": 100000,
+      "losses": 30455,
+      "outright_win_rate": 0.69298,
+      "outright_win_rate_hoeffding_ci99_9": [
+        0.6842616845322379,
+        0.7016983154677622
+      ],
+      "outright_win_rate_normal_ci99_9": [
+        0.6883617439290962,
+        0.6975982560709039
+      ],
+      "outright_win_rate_standard_error": 0.0014035005480140595,
+      "score_rate_draws_half": 0.694215,
+      "score_rate_normal_ci99_9": [
+        0.6896079983071901,
+        0.69882200169281
+      ],
+      "score_rate_standard_error": 0.0014000803119812806,
+      "wins": 69298
+    },
+    "smarter_rule": {
+      "blocks": 50000,
+      "draws": 563,
+      "games": 100000,
+      "losses": 15110,
+      "outright_win_rate": 0.84327,
+      "outright_win_rate_hoeffding_ci99_9": [
+        0.8345516845322378,
+        0.8519883154677621
+      ],
+      "outright_win_rate_normal_ci99_9": [
+        0.8395390013938012,
+        0.8470009986061987
+      ],
+      "outright_win_rate_standard_error": 0.0011338605976032045,
+      "score_rate_draws_half": 0.846085,
+      "score_rate_normal_ci99_9": [
+        0.8424023970366672,
+        0.8497676029633328
+      ],
+      "score_rate_standard_error": 0.0011191530304520965,
+      "wins": 84327
+    }
+  },
+  "schema_version": 1
+}

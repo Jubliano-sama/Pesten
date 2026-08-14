@@ -1,0 +1,86 @@
+{
+  "best": {
+    "action_agreement": 0.8845219614647064,
+    "epoch": 21,
+    "forward_kl": 0.210773477562159
+  },
+  "best_checkpoint": "/home/tommie/Pesten/live_training/gru_to_mlp_distillation_20260813/run_002_hard/best_mlp.pth",
+  "best_checkpoint_sha256": "e725c697f14defbf560cd13c2d0a88ae2cc4d68a1080b5d1fe24f800cbe0d30b",
+  "best_train": {
+    "action_agreement": 0.9545095511330621,
+    "agreement_count": 210267,
+    "agreement_wilson_95": [
+      0.9536314292424475,
+      0.9553718215085891
+    ],
+    "forward_kl": 0.09445186523003055,
+    "samples": 220288,
+    "strategic_action_agreement": 0.9435400541984287,
+    "strategic_samples": 153879,
+    "suit_action_agreement": 0.930275133382153,
+    "suit_samples": 19118,
+    "teacher_margin_mae": 5.960356336080495,
+    "teacher_pass_recall": 0.9700431650757771,
+    "teacher_pass_samples": 73439
+  },
+  "best_validation": {
+    "action_agreement": 0.8845219614647064,
+    "agreement_count": 48432,
+    "agreement_wilson_95": [
+      0.8818179946624071,
+      0.8871719780649464
+    ],
+    "forward_kl": 0.210773477562159,
+    "samples": 54755,
+    "strategic_action_agreement": 0.8549816465652857,
+    "strategic_samples": 38140,
+    "suit_action_agreement": 0.8309137489325363,
+    "suit_samples": 4684,
+    "teacher_margin_mae": 6.29337228763355,
+    "teacher_pass_recall": 0.9266421958034295,
+    "teacher_pass_samples": 18253
+  },
+  "epochs_completed": 36,
+  "experiment": "gru_to_mlp_exact_action_continuation",
+  "initial_train": {
+    "action_agreement": 0.9249119334689134,
+    "agreement_count": 203747,
+    "agreement_wilson_95": [
+      0.9238040128543162,
+      0.9260050348175403
+    ],
+    "forward_kl": 0.12555654321833448,
+    "samples": 220288,
+    "strategic_action_agreement": 0.9060690542569162,
+    "strategic_samples": 153879,
+    "suit_action_agreement": 0.8908358614917878,
+    "suit_samples": 19118,
+    "teacher_margin_mae": 6.4091546935857835,
+    "teacher_pass_recall": 0.9459142962186304,
+    "teacher_pass_samples": 73439
+  },
+  "initial_validation": {
+    "action_agreement": 0.8831887498858552,
+    "agreement_count": 48359,
+    "agreement_wilson_95": [
+      0.8804714999599886,
+      0.8858522366653868
+    ],
+    "forward_kl": 0.20663195935659415,
+    "samples": 54755,
+    "strategic_action_agreement": 0.8528578919769271,
+    "strategic_samples": 38140,
+    "suit_action_agreement": 0.8326216908625107,
+    "suit_samples": 4684,
+    "teacher_margin_mae": 6.649504557945622,
+    "teacher_pass_recall": 0.9183147975675231,
+    "teacher_pass_samples": 18253
+  },
+  "objective": "0.25 forward KL + hard CE + 0.50 top-action margin",
+  "perfect_on_held_out": false,
+  "perfect_on_train": false,
+  "recorded_at": "2026-08-13T09:38:18.872740+00:00",
+  "resume": "/home/tommie/Pesten/live_training/gru_to_mlp_distillation_20260813/run_001/best_mlp.pth",
+  "resume_sha256": "a46871348305732f72192649fa0cd14dc0338e7ddfedde803f51b0991a5ea04f",
+  "schema_version": 1
+}

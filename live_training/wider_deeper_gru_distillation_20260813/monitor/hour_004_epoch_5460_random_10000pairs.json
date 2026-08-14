@@ -1,0 +1,56 @@
+{
+  "elapsed_seconds": 86.1915528679965,
+  "kind": "single_canonical_random_1v1_batched_exact_engine",
+  "mlp_loader_dependency": {
+    "path": "/home/tommie/Pesten/live_training/long_segments/segment_0058/mlp/ppo_actor_64.pth",
+    "sha256": "e67b9c26aeaf16508925c9109510d4dd5da0416fda11604a5b234d2d6d07fe43",
+    "used_as_opponent": false
+  },
+  "model": {
+    "label": "wider_deeper_rl_epoch_5460",
+    "path": "/home/tommie/Pesten/live_training/wider_deeper_gru_distillation_20260813/full_model_rl_cuda_2048_noscreen_001/puffer_epoch_005460.pt",
+    "sha256": "8dd3abb0f4b1eb3d816c09d78dc3d72777581eec28aeb63d2c8f260dd03bde86"
+  },
+  "opponent": {
+    "game_rng": "per-game numpy.random.RandomState(deal_seed), shared by deal, hand shuffle, and recycle",
+    "id": "randomAgent.AgentRandom-canonical-v1",
+    "opponent_rng_seed": null,
+    "policy_visibility": "canonical opponent RNG state never crosses the DecisionInput boundary",
+    "scalar_source": "randomAgent.AgentRandom",
+    "suit_rng": "per-game random.Random(deal_seed).randint(0, 3)"
+  },
+  "protocol": {
+    "blocks": 10000,
+    "candidate_seats_per_block": 2,
+    "confidence": "two-sided 99.9% normal and distribution-free Hoeffding intervals over independent deal blocks",
+    "deterministic_temporal_actions": true,
+    "engine": "BatchedPesten exact-semantics evaluator",
+    "games": 20000,
+    "seed_end_exclusive": 3814810000,
+    "seed_start_inclusive": 3814800000
+  },
+  "result": {
+    "blocks": 10000,
+    "draws": 0,
+    "games": 20000,
+    "losses": 4232,
+    "outright_win_rate": 0.7884,
+    "outright_win_rate_hoeffding_ci99_9": [
+      0.7689052539647959,
+      0.8078947460352041
+    ],
+    "outright_win_rate_normal_ci99_9": [
+      0.7790852253458265,
+      0.7977147746541735
+    ],
+    "outright_win_rate_standard_error": 0.002830785285840919,
+    "score_rate_draws_half": 0.7884,
+    "score_rate_normal_ci99_9": [
+      0.7790852253458265,
+      0.7977147746541735
+    ],
+    "score_rate_standard_error": 0.002830785285840919,
+    "wins": 15768
+  },
+  "schema_version": 1
+}

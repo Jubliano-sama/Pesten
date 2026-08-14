@@ -1,0 +1,50 @@
+{
+  "candidate": {
+    "path": "/home/tommie/Pesten/live_training/factorized_full_force_league_20260812/round_005/training/latest.pt",
+    "sha256": "c2fdf990498fd6abef5171ea9f2627fb8a054eb73ad635e28c0cda67ab7fb19c"
+  },
+  "elapsed_seconds": 47.42895403900184,
+  "kind": "matched_temporal_1v1_batched_exact_engine",
+  "mlp_loader_dependency": {
+    "path": "/home/tommie/Pesten/live_training/long_segments/segment_0058/mlp/ppo_actor_64.pth",
+    "sha256": "e67b9c26aeaf16508925c9109510d4dd5da0416fda11604a5b234d2d6d07fe43",
+    "used_as_opponent": false
+  },
+  "opponent": {
+    "path": "/home/tommie/Pesten/live_training/factorized_full_force_league_20260812/round_001/training/latest.pt",
+    "sha256": "f3d9231db58689068b02f4ad0bb7f9dad8e02e31e4669f0f5d37a71c0e76feee"
+  },
+  "protocol": {
+    "blocks": 10000,
+    "candidate_seats_per_block": 2,
+    "confidence": "two-sided paired normal and distribution-free Hoeffding intervals at 99.9%",
+    "deterministic_temporal_actions": true,
+    "engine": "BatchedPesten exact-semantics evaluator",
+    "games": 20000,
+    "matched_seat_rotations": true,
+    "seed_end_exclusive": 470771300,
+    "seed_start_inclusive": 470761300
+  },
+  "result": {
+    "blocks": 10000,
+    "draws": 46,
+    "games": 20000,
+    "losses": 9906,
+    "noninferiority_distribution_free_99_9": true,
+    "noninferiority_floor": 0.48,
+    "noninferiority_margin": 0.02,
+    "noninferiority_normal_99_9": true,
+    "paired_hoeffding_ci99_9": [
+      0.484055253964796,
+      0.5230447460352041
+    ],
+    "paired_normal_ci99_9": [
+      0.493129627299828,
+      0.5139703727001721
+    ],
+    "paired_standard_error": 0.0031667795312051526,
+    "score": 0.50355,
+    "wins": 10048
+  },
+  "schema_version": 1
+}
