@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 from collections import Counter
+import copy
 from dataclasses import asdict
 import multiprocessing
 from pathlib import Path
 import time
 from typing import Sequence
+import warnings
 
 import torch
 
@@ -15,8 +17,230 @@ from batched_pesten import deck_count_for_players
 
 
 _WORKER_POLICY = None
+_WORKER_POLICY_SOURCE = None
 _WORKER_CHAMPION = None
 _WORKER_HISTORICAL = None
+_WORKER_FIXED_HISTORICAL = None
+_WORKER_POLICY_GENERATION = -1
+_WORKER_ROLLOUT_PRECISION = "float32"
+_WORKER_TRACE_MIN_GRU = True
+
+ROLLOUT_PRECISION_FLOAT32 = "float32"
+ROLLOUT_PRECISION_INT8_RECURRENT = "int8_recurrent"
+ROLLOUT_PRECISION_INT8_RESIDUAL_BASE = "int8_residual_base"
+ROLLOUT_PRECISIONS = (
+    ROLLOUT_PRECISION_FLOAT32,
+    ROLLOUT_PRECISION_INT8_RECURRENT,
+    ROLLOUT_PRECISION_INT8_RESIDUAL_BASE,
+)
+
+
+class _MinGRUDecisionTrace(torch.nn.Module):
+    """Tensor-only wrapper so TorchScript can erase recurrent Python calls."""
+
+    def __init__(self, core: torch.nn.Module) -> None:
+        super().__init__()
+        self.core = core
+
+    def forward(
+        self, tokens: torch.Tensor, recurrent_state: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        logits, values, next_state = self.core.forward_eval(
+            tokens, (recurrent_state,)
+        )
+        return logits, values, next_state[0]
+
+
+class _MinGRUEventTrace(torch.nn.Module):
+    """Trace event-state advancement without the unused decoder heads."""
+
+    def __init__(self, core: torch.nn.Module) -> None:
+        super().__init__()
+        self.encoder = core.encoder
+        self.network = core.network
+
+    def forward(
+        self, tokens: torch.Tensor, recurrent_state: torch.Tensor
+    ) -> torch.Tensor:
+        hidden = self.encoder(tokens)
+        _, next_state = self.network.forward_eval(
+            hidden, (recurrent_state,)
+        )
+        return next_state[0]
+
+
+class _TracedMinGRURolloutCore(torch.nn.Module):
+    """Shape-polymorphic traced eval graphs for a weight-only INT8 MinGRU."""
+
+    def __init__(self, core: torch.nn.Module) -> None:
+        super().__init__()
+        network = core.network
+        self.hidden_size = int(network.hidden_size)
+        self.num_layers = int(network.num_layers)
+        input_size = int(core.encoder.encoder.in_features)
+        example_tokens = torch.zeros(1, input_size)
+        example_state = torch.zeros(1, self.num_layers, 1, self.hidden_size)
+        # Trace with a batch of one but keep all dimensions dynamic. MinGRU's
+        # eval graph contains no data-dependent branch; the Python assertion
+        # about matching batch dimensions is validated by the caller's state
+        # construction and intentionally omitted from the resulting graph.
+        with torch.inference_mode(), warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                category=torch.jit.TracerWarning,
+            )
+            warnings.filterwarnings(
+                "ignore",
+                message="`torch.jit.trace.*deprecated.*",
+                category=DeprecationWarning,
+            )
+            self.decision_graph = torch.jit.trace(
+                _MinGRUDecisionTrace(core),
+                (example_tokens, example_state[0]),
+                check_trace=False,
+            )
+            self.event_graph = torch.jit.trace(
+                _MinGRUEventTrace(core),
+                (example_tokens, example_state[0]),
+                check_trace=False,
+            )
+
+    def initial_state(
+        self, batch_size: int, device: torch.device | str
+    ) -> tuple[torch.Tensor, ...]:
+        return (
+            torch.zeros(
+                self.num_layers,
+                batch_size,
+                self.hidden_size,
+                device=device,
+            ),
+        )
+
+    def forward_eval(
+        self,
+        tokens: torch.Tensor,
+        state: tuple[torch.Tensor, ...],
+    ) -> tuple[torch.Tensor, torch.Tensor, tuple[torch.Tensor, ...]]:
+        logits, values, next_state = self.decision_graph(tokens, state[0])
+        return logits, values, (next_state,)
+
+    def forward_events_eval(
+        self,
+        tokens: torch.Tensor,
+        state: tuple[torch.Tensor, ...],
+    ) -> tuple[torch.Tensor, ...]:
+        return (self.event_graph(tokens, state[0]),)
+
+
+def _recurrent_networks(policy) -> tuple[torch.nn.Module, ...]:
+    """Return recurrent cores without quantizing encoders or action heads."""
+    core = policy.puffer_policy
+    if hasattr(core, "network"):
+        return (core.network,)
+    networks = tuple(
+        branch.network
+        for name in ("base", "adapter")
+        if (branch := getattr(core, name, None)) is not None
+        and hasattr(branch, "network")
+    )
+    if not networks:
+        raise ValueError("rollout policy has no supported recurrent network")
+    return networks
+
+
+def _build_rollout_policy(
+    policy,
+    rollout_precision: str,
+    *,
+    trace_min_gru: bool = True,
+):
+    """Build a CPU behavior policy, optionally with weight-only int8 GRUs."""
+    if rollout_precision not in ROLLOUT_PRECISIONS:
+        raise ValueError(f"unsupported rollout precision: {rollout_precision}")
+    if rollout_precision == ROLLOUT_PRECISION_FLOAT32:
+        return policy
+
+    quantized = copy.deepcopy(policy).cpu().eval()
+    if rollout_precision == ROLLOUT_PRECISION_INT8_RESIDUAL_BASE:
+        base = getattr(quantized.puffer_policy, "base", None)
+        if base is not None:
+            # Residual students preserve their teacher as a complete base
+            # policy.  Using that much cheaper actor for behavior collection
+            # is deliberately approximate; the full residual learner still
+            # evaluates PPO ratios and receives every optimizer update.
+            quantized.puffer_policy = base
+    # Per-channel dynamic quantization keeps recurrent activations and state in
+    # float32 but packs each Linear weight row as int8. This targets the large
+    # MinGRU matrix multiplies while leaving feature encoding and policy/value
+    # heads in float32. No calibration corpus is required.
+    qconfig = {
+        torch.nn.Linear: torch.ao.quantization.per_channel_dynamic_qconfig
+    }
+    for network in _recurrent_networks(quantized):
+        # PyTorch 2.13 ships this optimized CPU kernel in core but warns about
+        # its future migration to the optional torchao package, which is not a
+        # dependency of this pinned training environment.
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                message="torch.ao.quantization is deprecated.*",
+                category=DeprecationWarning,
+            )
+            warnings.filterwarnings(
+                "ignore",
+                message="torch.quantize_per_tensor.*deprecated.*",
+                category=UserWarning,
+            )
+            torch.ao.quantization.quantize_dynamic(
+                network,
+                qconfig,
+                dtype=torch.qint8,
+                inplace=True,
+            )
+    core = quantized.puffer_policy
+    if (
+        trace_min_gru
+        and core.__class__.__name__ == "Policy"
+        and getattr(core, "network", None).__class__.__name__ == "MinGRU"
+    ):
+        # Dynamic INT8 makes each matrix multiply cheap enough that Python
+        # dispatch around thousands of small recurrent calls becomes visible.
+        # Trace both the decision graph and decoder-free event graph once per
+        # policy generation. The traced operations are numerically identical
+        # and remain dynamic in batch size.
+        quantized.puffer_policy = _TracedMinGRURolloutCore(core)
+    for parameter in quantized.parameters():
+        parameter.requires_grad_(False)
+    # The traced graph exposes duplicated module trees, making a fresh
+    # ``next(policy.parameters())`` traversal surprisingly expensive at every
+    # vector turn. Rollout policies are immutable CPU float32 actors, so cache
+    # this stable execution metadata outside the state dict.
+    quantized._rollout_device = torch.device("cpu")
+    quantized._rollout_dtype = torch.float32
+    return quantized
+
+
+def _refresh_worker_policy(policy_generation: int) -> None:
+    """Repack int8 weights once after each shared float-policy refresh."""
+    global _WORKER_POLICY, _WORKER_HISTORICAL, _WORKER_POLICY_GENERATION
+    if _WORKER_POLICY_SOURCE is None or _WORKER_FIXED_HISTORICAL is None:
+        raise RuntimeError("vector rollout worker was not initialized")
+    if policy_generation == _WORKER_POLICY_GENERATION:
+        return
+    if policy_generation < _WORKER_POLICY_GENERATION:
+        raise RuntimeError("rollout policy generation moved backwards")
+    _WORKER_POLICY = _build_rollout_policy(
+        _WORKER_POLICY_SOURCE,
+        _WORKER_ROLLOUT_PRECISION,
+        trace_min_gru=_WORKER_TRACE_MIN_GRU,
+    )
+    _WORKER_HISTORICAL = (
+        _WORKER_FIXED_HISTORICAL
+        if _WORKER_FIXED_HISTORICAL
+        else [_WORKER_POLICY]
+    )
+    _WORKER_POLICY_GENERATION = policy_generation
 
 
 def _initialize_worker(
@@ -24,8 +248,13 @@ def _initialize_worker(
     model_config: dict,
     champion_path: str,
     historical_paths: tuple[str, ...],
+    rollout_precision: str = ROLLOUT_PRECISION_FLOAT32,
+    trace_min_gru: bool = True,
 ) -> None:
-    global _WORKER_POLICY, _WORKER_CHAMPION, _WORKER_HISTORICAL
+    global _WORKER_POLICY, _WORKER_POLICY_SOURCE, _WORKER_CHAMPION
+    global _WORKER_HISTORICAL, _WORKER_FIXED_HISTORICAL
+    global _WORKER_POLICY_GENERATION, _WORKER_ROLLOUT_PRECISION
+    global _WORKER_TRACE_MIN_GRU
     torch.set_num_threads(1)
     try:
         torch.set_num_interop_threads(1)
@@ -42,9 +271,15 @@ def _initialize_worker(
     policy.eval()
     for parameter in policy.parameters():
         parameter.requires_grad_(False)
-    _WORKER_POLICY = policy
+    _WORKER_POLICY_SOURCE = policy
+    _WORKER_POLICY = (
+        policy if rollout_precision == ROLLOUT_PRECISION_FLOAT32 else None
+    )
+    _WORKER_POLICY_GENERATION = -1
+    _WORKER_ROLLOUT_PRECISION = rollout_precision
+    _WORKER_TRACE_MIN_GRU = trace_min_gru
     _WORKER_CHAMPION = load_ppo_agent(Path(champion_path), "cpu")
-    _WORKER_HISTORICAL = []
+    _WORKER_FIXED_HISTORICAL = []
     for raw_path in historical_paths:
         historical, _ = load_temporal_policy_checkpoint(
             Path(raw_path), device="cpu"
@@ -52,11 +287,14 @@ def _initialize_worker(
         historical.eval()
         for parameter in historical.parameters():
             parameter.requires_grad_(False)
-        _WORKER_HISTORICAL.append(historical)
-    # Preserve the original current-policy mirror when callers do not request
-    # a genuinely frozen historical pool.
-    if not _WORKER_HISTORICAL:
-        _WORKER_HISTORICAL.append(_WORKER_POLICY)
+        _WORKER_FIXED_HISTORICAL.append(
+            _build_rollout_policy(
+                historical,
+                rollout_precision,
+                trace_min_gru=trace_min_gru,
+            )
+        )
+    _WORKER_HISTORICAL = list(_WORKER_FIXED_HISTORICAL)
 
 
 def _collect_player_count(task: dict):
@@ -70,19 +308,21 @@ def _collect_player_count(task: dict):
 
     started = time.perf_counter()
     stats = BatchRolloutStats()
-    episodes, metadata = collect_league_batch_batched(
-        _WORKER_POLICY,
-        _WORKER_CHAMPION,
-        _WORKER_HISTORICAL,
-        games=task["games"],
-        seed=task["seed"],
-        schedule_offset=task["schedule_offset"],
-        schedule=task["schedule"],
-        player_count=task["player_count"],
-        game_indices=task["game_indices"],
-        max_turns=task["max_turns"],
-        stats=stats,
-    )
+    with torch.inference_mode():
+        episodes, metadata = collect_league_batch_batched(
+            _WORKER_POLICY,
+            _WORKER_CHAMPION,
+            _WORKER_HISTORICAL,
+            games=task["games"],
+            seed=task["seed"],
+            schedule_offset=task["schedule_offset"],
+            schedule=task["schedule"],
+            player_count=task["player_count"],
+            game_indices=task["game_indices"],
+            max_turns=task["max_turns"],
+            max_public_events=task["max_public_events"],
+            stats=stats,
+        )
     if task["prepack_training"]:
         from packed_puffer_rollout import pack_puffer_episode
 
@@ -145,6 +385,7 @@ def _collect_tree_chunk(task: dict):
 
 
 def _collect_task(task: dict):
+    _refresh_worker_policy(int(task["policy_generation"]))
     return (
         _collect_player_count(task)
         if task["kind"] == "vector"
@@ -264,6 +505,9 @@ def collect_league_batch_vector_parallel(
     workers: int,
     champion_path: Path = Path("ppo_actor_100run3.pth"),
     historical_paths: Sequence[Path] = (),
+    rollout_precision: str = ROLLOUT_PRECISION_FLOAT32,
+    trace_min_gru: bool = True,
+    max_public_events: int | None = None,
     prepack_training: bool = False,
     max_turns: int = 1000,
 ):
@@ -273,6 +517,9 @@ def collect_league_batch_vector_parallel(
         workers=workers,
         champion_path=champion_path,
         historical_paths=historical_paths,
+        rollout_precision=rollout_precision,
+        trace_min_gru=trace_min_gru,
+        max_public_events=max_public_events,
     ) as pool:
         return pool.collect(
             policy,
@@ -296,11 +543,26 @@ class VectorPufferRolloutPool:
         workers: int,
         champion_path: Path = Path("ppo_actor_100run3.pth"),
         historical_paths: Sequence[Path] = (),
+        rollout_precision: str = ROLLOUT_PRECISION_FLOAT32,
+        trace_min_gru: bool = True,
+        max_public_events: int | None = None,
     ) -> None:
         if workers < 1:
             raise ValueError("workers must be positive")
+        if rollout_precision not in ROLLOUT_PRECISIONS:
+            raise ValueError(
+                f"unsupported rollout precision: {rollout_precision}"
+            )
+        if max_public_events is not None and max_public_events < 1:
+            raise ValueError(
+                "max_public_events must be positive when provided"
+            )
         self.workers = workers
         self.closed = False
+        self.rollout_precision = rollout_precision
+        self.trace_min_gru = trace_min_gru
+        self.max_public_events = max_public_events
+        self.policy_generation = -1
         self.historical_paths = tuple(
             Path(path).resolve() for path in historical_paths
         )
@@ -322,6 +584,8 @@ class VectorPufferRolloutPool:
                 policy_model_config(policy),
                 str(champion_path.resolve()),
                 tuple(str(path) for path in self.historical_paths),
+                rollout_precision,
+                trace_min_gru,
             ),
         )
 
@@ -349,6 +613,7 @@ class VectorPufferRolloutPool:
     ):
         """Refresh shared weights, run cohorts, and restore game ordering."""
         self._refresh_policy(policy)
+        self.policy_generation += 1
         tasks, schedule, player_counts = _build_tasks(
             games=games,
             seed=seed,
@@ -359,6 +624,9 @@ class VectorPufferRolloutPool:
             prepack_training=prepack_training,
             max_turns=max_turns,
         )
+        for task in tasks:
+            task["policy_generation"] = self.policy_generation
+            task["max_public_events"] = self.max_public_events
         results = self.pool.map(_collect_task, tasks, chunksize=1)
         episodes, metadata = _merge_results(
             results,
@@ -368,6 +636,9 @@ class VectorPufferRolloutPool:
             player_count_schedule=player_counts,
         )
         metadata["max_turns"] = max_turns
+        metadata["rollout_precision"] = self.rollout_precision
+        metadata["trace_min_gru"] = self.trace_min_gru
+        metadata["max_public_events"] = self.max_public_events
         return episodes, metadata
 
     def close(self) -> None:
@@ -411,20 +682,61 @@ def _build_tasks(
             tree_games.append((game_index, count))
         else:
             grouped_indices.setdefault(count, []).append(game_index)
-    tasks = [
-        {
-            "kind": "vector",
-            "games": games,
-            "seed": seed,
-            "schedule_offset": schedule_offset,
-            "schedule": schedule,
-            "player_count": count,
-            "game_indices": tuple(indices),
-            "prepack_training": prepack_training,
-            "max_turns": max_turns,
-        }
-        for count, indices in grouped_indices.items()
-    ]
+    # One task per player count caps useful parallelism at seven, even when a
+    # large recurrent policy makes each cohort expensive enough to split. Each
+    # game's deal, opponent, seat, and sampling RNG are keyed by its absolute
+    # game index, so sharding a cohort does not change training semantics.
+    # Reserve capacity for scalar tree tasks, then split the heaviest remaining
+    # cohorts until the requested worker pool can stay busy. Two-deck games get
+    # a modest premium because seven/eight-player cohorts cost more per game.
+    vector_games = sum(len(indices) for indices in grouped_indices.values())
+    vector_task_target = min(
+        vector_games,
+        max(len(grouped_indices), workers - len(tree_games)),
+    )
+    shard_counts = {count: 1 for count in grouped_indices}
+    while sum(shard_counts.values()) < vector_task_target:
+        candidates = [
+            count
+            for count, indices in grouped_indices.items()
+            if shard_counts[count] < len(indices)
+        ]
+        if not candidates:
+            break
+        count = max(
+            candidates,
+            key=lambda value: (
+                len(grouped_indices[value])
+                * value
+                * (3 if deck_count_for_players(value) > 1 else 2)
+                / shard_counts[value],
+                value,
+            ),
+        )
+        shard_counts[count] += 1
+
+    tasks = []
+    for count, indices in grouped_indices.items():
+        shards = shard_counts[count]
+        base, remainder = divmod(len(indices), shards)
+        cursor = 0
+        for shard in range(shards):
+            shard_size = base + (shard < remainder)
+            shard_indices = tuple(indices[cursor : cursor + shard_size])
+            cursor += shard_size
+            tasks.append(
+                {
+                    "kind": "vector",
+                    "games": games,
+                    "seed": seed,
+                    "schedule_offset": schedule_offset,
+                    "schedule": schedule,
+                    "player_count": count,
+                    "game_indices": shard_indices,
+                    "prepack_training": prepack_training,
+                    "max_turns": max_turns,
+                }
+            )
     if tree_games:
         tree_chunk_size = 1
         tasks.extend(

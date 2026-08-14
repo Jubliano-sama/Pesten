@@ -26,12 +26,14 @@ from temporal_puffer_v4 import (
     FactorizedActionDecoder,
     HawkRGLRUTemporalPolicy,
     HawkResidualTemporalPolicy,
+    MinGRUResidualTemporalPolicy,
     NativePufferTemporalPolicy,
     PUFFERLIB_REVISION,
     build_temporal_policy,
     policy_model_config,
 )
 from temporal_training import (
+    _gae_targets_from_values,
     collect_smoke_episodes,
     evaluate_ppo_drift,
     evaluate_ppo_drift_batched,
@@ -69,6 +71,40 @@ def state_bytes(state):
         part.detach().cpu().contiguous().numpy().tobytes()
         for part in state
     )
+
+
+@pytest.mark.parametrize("won", (False, True))
+def test_numpy_gae_recurrence_is_bit_exact_to_float32_tensor_reference(won):
+    behavior_values = torch.tensor(
+        [0.125, -0.75, 0.03125, 1.5, -0.2], dtype=torch.float32
+    )
+    rewards = torch.full((len(behavior_values),), -0.01, dtype=torch.float32)
+    rewards[-1] += 1.0 if won else -1.0
+    expected_advantages = torch.empty_like(rewards)
+    next_value = torch.tensor(0.0)
+    running_advantage = torch.tensor(0.0)
+    for index in reversed(range(len(behavior_values))):
+        delta = rewards[index] + 0.99 * next_value - behavior_values[index]
+        running_advantage = delta + 0.99 * 0.95 * running_advantage
+        expected_advantages[index] = running_advantage
+        next_value = behavior_values[index]
+
+    returns, advantages = _gae_targets_from_values(
+        behavior_values,
+        won=won,
+        gamma=0.99,
+        gae_lambda=0.95,
+    )
+
+    assert torch.equal(advantages, expected_advantages)
+    assert torch.equal(returns, expected_advantages + behavior_values)
+
+
+def test_numpy_gae_recurrence_rejects_empty_trajectory():
+    with pytest.raises(ValueError, match="at least one"):
+        _gae_targets_from_values(
+            torch.empty(0), won=False, gamma=0.99, gae_lambda=0.95
+        )
 
 
 def test_real_v4_policy_and_mingru_are_used():
@@ -198,6 +234,24 @@ def test_hawk_residual_model_config_and_state_shapes_round_trip():
     assert len(state) == 2
     assert state[0].shape == (2, 5, 18)
     assert state[1].shape == (3, 5, 16)
+
+
+def test_min_gru_residual_model_config_and_state_shapes_round_trip():
+    policy = MinGRUResidualTemporalPolicy(
+        base_hidden_size=18,
+        base_num_layers=2,
+        adapter_hidden_size=24,
+        adapter_num_layers=3,
+        action_head=FACTORIZED_ACTION_HEAD,
+    )
+    clone = build_temporal_policy(policy_model_config(policy))
+
+    assert isinstance(clone, MinGRUResidualTemporalPolicy)
+    assert policy_model_config(clone) == policy_model_config(policy)
+    state = clone.initial_state(batch_size=5)
+    assert len(state) == 2
+    assert state[0].shape == (2, 5, 18)
+    assert state[1].shape == (3, 5, 24)
 
 
 def test_hawk_residual_checkpoint_loader_round_trip(tmp_path):
@@ -440,15 +494,22 @@ def test_persistent_prepared_replay_matches_one_batched_epoch():
     worker_packed = NativePufferTemporalPolicy(
         hidden_size=16, num_layers=2, mode_conditioned_heads=True
     )
+    sampled_diagnostic = NativePufferTemporalPolicy(
+        hidden_size=16, num_layers=2, mode_conditioned_heads=True
+    )
     ordinary.load_state_dict(behavior.state_dict())
     persistent.load_state_dict(behavior.state_dict())
     worker_packed.load_state_dict(behavior.state_dict())
+    sampled_diagnostic.load_state_dict(behavior.state_dict())
     ordinary_optimizer = torch.optim.SGD(ordinary.parameters(), lr=1e-4)
     persistent_optimizer = torch.optim.SGD(
         persistent.parameters(), lr=1e-4
     )
     worker_packed_optimizer = torch.optim.SGD(
         worker_packed.parameters(), lr=1e-4
+    )
+    sampled_optimizer = torch.optim.SGD(
+        sampled_diagnostic.parameters(), lr=1e-4
     )
     arguments = {
         "update_epochs": 1,
@@ -480,11 +541,24 @@ def test_persistent_prepared_replay_matches_one_batched_epoch():
         persistent_prepared_batches=True,
         **arguments,
     )
+    sampled_metrics = ppo_update_batched_epochs(
+        sampled_diagnostic,
+        packed_episodes,
+        sampled_optimizer,
+        persistent_prepared_batches=True,
+        early_stop_diagnostic_trajectories=1,
+        full_final_diagnostic=False,
+        **{**arguments, "minibatch_trajectories": 1},
+    )
     assert persistent_metrics["persistent_prepared_batches"] is True
     assert persistent_metrics["samples"] == ordinary_metrics["samples"]
     assert persistent_metrics["optimizer_steps"] == ordinary_metrics[
         "optimizer_steps"
     ]
+    assert sampled_metrics["post_update_diagnostics"]["full_rollout"] is False
+    assert sampled_metrics["post_update_diagnostics"]["trajectories"] < len(
+        episodes
+    )
     for name in (
         "loss",
         "policy_loss",

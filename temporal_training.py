@@ -131,27 +131,15 @@ def _gae_targets(
     gae_lambda: float,
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """Return fixed behavior-value targets and generalized advantages."""
-    step_count = len(trajectory)
-    rewards = torch.full((step_count,), -0.01, dtype=torch.float32)
-    rewards[-1] += 1.0 if won else -1.0
     behavior_values = torch.tensor(
         [step.value for step in trajectory], dtype=torch.float32
     )
-    advantages = torch.empty_like(rewards)
-    next_value = torch.tensor(0.0)
-    running_advantage = torch.tensor(0.0)
-    for index in reversed(range(step_count)):
-        delta = (
-            rewards[index]
-            + gamma * next_value
-            - behavior_values[index]
-        )
-        running_advantage = (
-            delta + gamma * gae_lambda * running_advantage
-        )
-        advantages[index] = running_advantage
-        next_value = behavior_values[index]
-    return advantages + behavior_values, advantages
+    return _gae_targets_from_values(
+        behavior_values,
+        won=won,
+        gamma=gamma,
+        gae_lambda=gae_lambda,
+    )
 
 
 def _gae_targets_from_values(
@@ -161,20 +149,51 @@ def _gae_targets_from_values(
     gamma: float,
     gae_lambda: float,
 ) -> tuple[torch.Tensor, torch.Tensor]:
-    step_count = int(behavior_values.numel())
-    rewards = torch.full((step_count,), -0.01, dtype=torch.float32)
-    rewards[-1] += 1.0 if won else -1.0
-    advantages = torch.empty_like(rewards)
-    next_value = torch.tensor(0.0)
-    running_advantage = torch.tensor(0.0)
-    for index in reversed(range(step_count)):
-        delta = rewards[index] + gamma * next_value - behavior_values[index]
-        running_advantage = (
-            delta + gamma * gae_lambda * running_advantage
+    """Compute short CPU recurrences without thousands of tensor dispatches."""
+    values = behavior_values.detach().to(device="cpu", dtype=torch.float32)
+    returns_array, advantages_array = _gae_arrays_from_values(
+        values.numpy(),
+        won=won,
+        gamma=gamma,
+        gae_lambda=gae_lambda,
+    )
+    return torch.from_numpy(returns_array), torch.from_numpy(advantages_array)
+
+
+def _gae_arrays_from_values(
+    source: np.ndarray,
+    *,
+    won: bool,
+    gamma: float,
+    gae_lambda: float,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return float32 GAE arrays while preserving the scalar update order."""
+    source = np.asarray(source, dtype=np.float32)
+    if not source.size:
+        raise ValueError("GAE targets require at least one behavior value")
+    advantages_array = np.empty_like(source)
+    discount = np.float32(gamma)
+    trace_discount = np.float32(gamma * gae_lambda)
+    base_reward = np.float32(-0.01)
+    terminal_reward = np.float32(1.0 if won else -1.0)
+    next_value = np.float32(0.0)
+    running_advantage = np.float32(0.0)
+    last_index = source.size - 1
+    for index in range(last_index, -1, -1):
+        reward = (
+            np.float32(base_reward + terminal_reward)
+            if index == last_index
+            else base_reward
         )
-        advantages[index] = running_advantage
-        next_value = behavior_values[index]
-    return advantages + behavior_values, advantages
+        delta = np.float32(
+            reward + discount * next_value - source[index]
+        )
+        running_advantage = np.float32(
+            delta + trace_discount * running_advantage
+        )
+        advantages_array[index] = running_advantage
+        next_value = source[index]
+    return np.add(advantages_array, source, dtype=np.float32), advantages_array
 
 
 @dataclass(frozen=True)
@@ -195,6 +214,95 @@ class PreparedPPOBatch:
         return int(self.actions.numel())
 
 
+def _prepare_packed_ppo_batch(
+    policy,
+    episodes,
+    *,
+    gamma: float,
+    gae_lambda: float | None,
+    padded_batch_size: int | None,
+    power_of_two_sequence_padding: bool,
+) -> PreparedPPOBatch:
+    """Materialize worker-packed NumPy trajectories without Python lists."""
+    parameter = next(policy.parameters())
+    trajectories = [trajectory for trajectory, _ in episodes]
+    actual_batch_size = len(trajectories)
+    actual_max_length = max(
+        len(trajectory.tokens) for trajectory in trajectories
+    )
+    max_length = (
+        _next_power_of_two(actual_max_length)
+        if power_of_two_sequence_padding
+        else actual_max_length
+    )
+    model_batch_size = padded_batch_size or actual_batch_size
+    if model_batch_size < actual_batch_size:
+        raise ValueError("requested token padding is smaller than the data")
+    token_size = int(trajectories[0].tokens.shape[1])
+    host_tokens = np.zeros(
+        (model_batch_size, max_length, token_size), dtype=np.float32
+    )
+    decision_indices = []
+    masks = []
+    actions = []
+    old_log_probabilities = []
+    returns = []
+    advantages = []
+    for batch_index, (trajectory, won) in enumerate(episodes):
+        token_count = len(trajectory.tokens)
+        host_tokens[batch_index, :token_count] = trajectory.tokens
+        decision_indices.append(
+            np.asarray(trajectory.decision_indices, dtype=np.int64)
+            + batch_index * max_length
+        )
+        masks.append(np.asarray(trajectory.legal_masks, dtype=np.bool_))
+        actions.append(np.asarray(trajectory.actions, dtype=np.int64))
+        old_log_probabilities.append(
+            np.asarray(trajectory.old_log_probabilities, dtype=np.float32)
+        )
+        if gae_lambda is None:
+            returns.append(
+                _discounted_returns(
+                    len(trajectory), won=won, gamma=gamma
+                ).numpy()
+            )
+        else:
+            target, fixed_advantages = _gae_arrays_from_values(
+                trajectory.behavior_values,
+                won=won,
+                gamma=gamma,
+                gae_lambda=gae_lambda,
+            )
+            returns.append(target)
+            advantages.append(fixed_advantages)
+
+    def tensor(parts, *, dtype: torch.dtype) -> torch.Tensor:
+        return torch.from_numpy(np.concatenate(parts)).to(
+            device=parameter.device,
+            dtype=dtype,
+        )
+
+    return PreparedPPOBatch(
+        tokens=torch.from_numpy(host_tokens).to(
+            device=parameter.device,
+            dtype=parameter.dtype,
+        ),
+        decision_index=tensor(decision_indices, dtype=torch.long),
+        legal_masks=tensor(masks, dtype=torch.bool),
+        actions=tensor(actions, dtype=torch.long),
+        old_log_probabilities=tensor(
+            old_log_probabilities, dtype=parameter.dtype
+        ),
+        returns=tensor(returns, dtype=parameter.dtype),
+        advantages=(
+            tensor(advantages, dtype=parameter.dtype)
+            if advantages
+            else None
+        ),
+        trajectory_count=actual_batch_size,
+    )
+
+
 def _prepare_ppo_batch(
     policy,
     episodes: Sequence[tuple[Sequence[TrajectoryStep], bool]],
@@ -205,6 +313,15 @@ def _prepare_ppo_batch(
     power_of_two_sequence_padding: bool,
 ) -> PreparedPPOBatch:
     """Materialize immutable rollout data once for repeated PPO replay."""
+    if all(hasattr(trajectory, "tokens") for trajectory, _ in episodes):
+        return _prepare_packed_ppo_batch(
+            policy,
+            episodes,
+            gamma=gamma,
+            gae_lambda=gae_lambda,
+            padded_batch_size=padded_batch_size,
+            power_of_two_sequence_padding=power_of_two_sequence_padding,
+        )
     parameter = next(policy.parameters())
     packed_rows = []
     decision_indices = []
@@ -781,6 +898,7 @@ def ppo_update_batched_epochs(
     static_compile_padding: bool = False,
     length_bucketed_minibatches: bool = False,
     persistent_prepared_batches: bool = False,
+    full_final_diagnostic: bool = True,
 ) -> dict:
     """Run reproducible PPO epochs/minibatches with a rollout-level KL stop."""
     if update_epochs < 1:
@@ -820,6 +938,7 @@ def ppo_update_batched_epochs(
             ),
             static_compile_padding=static_compile_padding,
             length_bucketed_minibatches=length_bucketed_minibatches,
+            full_final_diagnostic=full_final_diagnostic,
         )
     rng = random.Random(seed)
     diagnostic_rng = random.Random(seed ^ 0x5EED5EED)
@@ -869,7 +988,10 @@ def ppo_update_batched_epochs(
         use_full_diagnostic = (
             early_stop_diagnostic_trajectories is None
             or len(usable) <= early_stop_diagnostic_trajectories
-            or epoch == update_epochs - 1
+            or (
+                full_final_diagnostic
+                and epoch == update_epochs - 1
+            )
         )
         diagnostic_episodes = usable
         if not use_full_diagnostic:
@@ -975,6 +1097,7 @@ def _ppo_update_prepared_epochs(
     early_stop_diagnostic_trajectories: int | None,
     static_compile_padding: bool,
     length_bucketed_minibatches: bool,
+    full_final_diagnostic: bool,
 ) -> dict:
     """Replay one GPU-resident packed rollout for every PPO epoch."""
     preparation_started = time.perf_counter()
@@ -1039,7 +1162,10 @@ def _ppo_update_prepared_epochs(
         use_full_diagnostic = (
             early_stop_diagnostic_trajectories is None
             or len(usable) <= early_stop_diagnostic_trajectories
-            or epoch == update_epochs - 1
+            or (
+                full_final_diagnostic
+                and epoch == update_epochs - 1
+            )
         )
         diagnostic_batches = prepared
         if not use_full_diagnostic:
