@@ -1,0 +1,85 @@
+{
+  "format": "pesten-default-privileged-critic-v1",
+  "decision": "selected_as_default_ppo_critic",
+  "decision_date": "2026-08-15",
+  "checkpoint": {
+    "bytes": 4311628,
+    "candidate": "selected_moments_exact_mlp",
+    "epoch": 4,
+    "format": "pesten-causal-privileged-critic-v1",
+    "path": "models/best/ppo_omniscient_mlp_gamma0p995_2to8_20260815.pt",
+    "sha256": "8b1ad78f180d0848ee8479108e261d6d450053085cbae915ef18a303f4817365"
+  },
+  "causal_contract": {
+    "actor_observation_unchanged": true,
+    "critic_snapshot_timing": "immediately before the controlled seat action",
+    "future_events": false,
+    "private_current_turn_state": true,
+    "rng_state": false
+  },
+  "dataset": {
+    "path": "/home/tommie/.t3/worktrees/Pesten/t3code-749791a2/live_training/privileged_critic_20260813/dataset",
+    "train_decisions": 1105497,
+    "validation_decisions": 37046,
+    "train_validation_seed_overlap": 0,
+    "player_counts": [2, 3, 4, 5, 6, 7, 8]
+  },
+  "model": {
+    "backbone": "mlp",
+    "card_tokenization": "exact",
+    "dropout": 0.05,
+    "group_width": 96,
+    "hand_encoder": "counts_moments",
+    "hidden_size": 256,
+    "num_layers": 2,
+    "parameters": 1070291,
+    "trainable_parameters_during_gamma_retargeting": 66049,
+    "trainable_scope": "value_head"
+  },
+  "provenance": {
+    "hot_start_checkpoint": "models/best/ppo_omniscient_mlp_gamma025at20_2to8_20260814.pt",
+    "hot_start_sha256": "63fc1b610da5fa40838a96bb3157cb1aab328ac1a46ce1a3c823af484e0b9d6d",
+    "source_calibration_reset": true,
+    "fresh_optimizer": true,
+    "target_gamma_training_completed_before_ppo": true
+  },
+  "reward_contract": {
+    "gamma": 0.995,
+    "per_controlled_seat_decision_discount": 0.995,
+    "per_controlled_seat_decision_terminal_component_depreciation": 0.005,
+    "step_reward": -0.01,
+    "terminal_reward": {
+      "loss": -1.0,
+      "win": 1.0
+    },
+    "terminal_reward_retention_after_20_discount_steps": 0.9046104802746175
+  },
+  "training": {
+    "batch_size_trajectories": 16,
+    "epochs_completed": 4,
+    "learning_rate": 0.00001,
+    "max_batches_per_epoch": 256,
+    "seed": 20260814,
+    "selected_epoch": 4,
+    "weight_decay": 0.0001
+  },
+  "validation": {
+    "calibration_fit_split": "train",
+    "epoch_zero_raw_mse": 0.6183205604152333,
+    "selected_raw_mse": 0.490802026840686,
+    "train_calibrated_heldout_mse": 0.4821606389658403
+  },
+  "playing_strength_evidence": {
+    "comparison": "gamma 0.995 minus gamma 0.99",
+    "confidence_level": 0.99,
+    "delta_normalized_win_share": 0.003229683816786233,
+    "paired_normal_ci": [-0.0009060870779389867, 0.007365454711511453],
+    "precision_target_met": true,
+    "resolved_improvement": false,
+    "note": "The operational default was explicitly selected despite the comparison not resolving superiority over gamma 0.99."
+  },
+  "reports": {
+    "gamma_protocol": "benchmarks/teacher_gru_gamma_0p995_protocol_20260815.json",
+    "investigation": "TEACHER_GRU_GAMMA_MATCHED_CRITIC_20260814.md"
+  }
+}

@@ -138,8 +138,8 @@ python ppo2.py --iterations 200 --episodes 1000 --agent_sets "smart,rl;random,rl
 
 The temporal PPO pipeline defaults to a separate environment-side critic that
 sees all current-turn cards and engine state while leaving the actor observation
-unchanged. The promoted 1.07M-parameter MLP was trained across 2-8 players and
-is loaded automatically by `train_puffer_fast.py`:
+unchanged. The gamma-0.995 1.07M-parameter MLP was trained across 2-8 players
+and is loaded automatically by `train_puffer_fast.py`:
 
 ```bash
 python train_puffer_fast.py \
@@ -149,10 +149,12 @@ python train_puffer_fast.py \
 
 Use `--privileged-critic CHECKPOINT` to override it, or
 `--no-privileged-critic` to fall back to the actor's public value head. The
-default discount is `gamma=0.9330329915368074`, so a terminal component is
-multiplied by exactly 0.25 across 20 controlled-seat discount steps (6.6967%
+default discount is `gamma=0.995`, so a terminal component retains about
+90.461% of its value across 20 controlled-seat discount steps (0.5%
 depreciation per step). The separate `-0.01` per-decision reward remains part
-of the return.
+of the return. The gamma sweep did not statistically resolve 0.995 as stronger
+than 0.99; 0.995 is the explicit operational default selected after that
+evaluation.
 
 The external value is used for GAE and updated only from retained pre-action
 snapshots; private fields never enter actor tokens. See

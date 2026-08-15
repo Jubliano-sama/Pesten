@@ -1,0 +1,54 @@
+{
+  "schema_version": 2,
+  "kind": "teacher_gamma_fixed_precision_allocation_v2",
+  "locked_at": "2026-08-15T10:50:48+02:00",
+  "status": "locked_before_gamma_0p995_training_and_evaluation",
+  "confidence_level": 0.99,
+  "normal_quantile": 2.5758293035489004,
+  "target_normalized_ci_half_width": 0.005,
+  "corrected_evaluation_seed": 3602608150,
+  "pre_evaluation_revision": "The initially written seed exceeded uint32 after stratum offsets. It was replaced before any gamma 0.995 playing-strength result was evaluated; allocation, confidence, target, and stopping rule are unchanged.",
+  "stopping_rule": "Run this fixed allocation once. Do not extend it based on the observed gamma effect or significance.",
+  "allocation_method": {
+    "name": "scaled cost-aware Neyman allocation with retained variance headroom",
+    "source_plan": "benchmarks/teacher_gru_gamma_precision_plan_20260814.json",
+    "source_plan_scale": 0.6,
+    "source_comparison": "gamma 0.99 minus gamma 0.97",
+    "source_result": "live_training/teacher_gru_gamma_matched_critic_20260814/fixed_precision_evaluation.json",
+    "source_result_sha256": "55c9137e1a9248cdce70204580f76e9b9f40b02909e733c9ad90fb253d9b0f1f",
+    "expected_half_width_under_source_variance": 0.004126267512173951,
+    "expected_standard_error_under_source_variance": 0.0016019180721676331,
+    "variance_headroom_before_target": 0.4687512168315184,
+    "source_results_are_disjoint_from_new_evaluation": true
+  },
+  "total_blocks_across_21_strata": 277479,
+  "allocations": {
+    "canonical_random": {
+      "2": 24735,
+      "3": 24745,
+      "4": 22538,
+      "5": 8229,
+      "6": 5994,
+      "7": 5153,
+      "8": 4752
+    },
+    "mlp": {
+      "2": 28885,
+      "3": 24304,
+      "4": 19681,
+      "5": 7105,
+      "6": 5011,
+      "7": 4555,
+      "8": 4271
+    },
+    "self_anchor": {
+      "2": 27070,
+      "3": 21941,
+      "4": 19462,
+      "5": 6847,
+      "6": 4557,
+      "7": 3996,
+      "8": 3648
+    }
+  }
+}

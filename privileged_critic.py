@@ -57,9 +57,9 @@ from temporal_observation import (
 MAX_PILE_CARDS = 108
 MAX_RECENT_PLAYS = 64
 
-# Retain exactly one quarter of a future terminal reward after twenty of the
-# controlled seat's own decisions.
-DEFAULT_GAMMA = 0.25 ** (1.0 / 20.0)
+# Selected teacher-training default. A future terminal reward retains about
+# 90.46% of its value after twenty of the controlled seat's own decisions.
+DEFAULT_GAMMA = 0.995
 
 HAND_ENCODERS = ("counts_moments", "token_gru", "token_bigru")
 CARD_TOKENIZATIONS = ("exact", "rank_suit")

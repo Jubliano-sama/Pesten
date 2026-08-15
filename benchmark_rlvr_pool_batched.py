@@ -53,6 +53,20 @@ def _initialize_worker(
     mlp: str,
     self_anchor: str,
 ) -> None:
+    _initialize_multi_worker(
+        {
+            "before": before,
+            "after": after,
+            "self_anchor": self_anchor,
+        },
+        mlp,
+    )
+
+
+def _initialize_multi_worker(
+    policy_paths: dict[str, str],
+    mlp: str,
+) -> None:
     global _POLICIES, _MLP_FACTORY
     from benchmark_agents import load_ppo_agent
 
@@ -61,14 +75,10 @@ def _initialize_worker(
         torch.set_num_interop_threads(1)
     except RuntimeError:
         pass
-    paths = {
-        "before": Path(before),
-        "after": Path(after),
-        "self_anchor": Path(self_anchor),
-    }
     loaded = {}
     cache = {}
-    for name, path in paths.items():
+    for name, raw_path in policy_paths.items():
+        path = Path(raw_path)
         key = str(path.resolve())
         if key not in cache:
             cache[key] = _load_policy(path)
@@ -82,8 +92,14 @@ def _make_layout(task: dict):
     blocks = int(task["blocks"])
     opponent = str(task["opponent"])
     variants = tuple(task.get("variants", ("before", "after")))
-    if not variants or any(variant not in {"before", "after"} for variant in variants):
-        raise ValueError("variants must be a non-empty subset of before/after")
+    policy_names = set(
+        task.get("policy_names", ("before", "after", "self_anchor"))
+    )
+    if not variants or any(variant not in policy_names for variant in variants):
+        raise ValueError("variants must be a non-empty subset of policy names")
+    self_anchor_name = str(task.get("self_anchor_name", "self_anchor"))
+    if opponent == "self_anchor" and self_anchor_name not in policy_names:
+        raise ValueError("self anchor must name one initialized policy")
     records = []
     seeds = []
     roles = []
@@ -96,7 +112,7 @@ def _make_layout(task: dict):
                     if seat == candidate_seat:
                         row_roles.append(("temporal", variant))
                     elif opponent == "self_anchor":
-                        row_roles.append(("temporal", "self_anchor"))
+                        row_roles.append(("temporal", self_anchor_name))
                     elif opponent == "mlp":
                         row_roles.append(("mlp", None))
                     elif opponent == "canonical_random":
@@ -369,6 +385,185 @@ def run_batched_pool_benchmark(
         "weighted_result": _weighted_summary(raw),
         "opponent_results": _opponent_summaries(raw),
         "elapsed_seconds": time.perf_counter() - started,
+    }
+
+
+def run_multi_policy_benchmark(
+    policies: dict[str, Path],
+    mlp: Path,
+    *,
+    self_anchor_name: str,
+    reference_name: str,
+    blocks_by_stratum: dict[tuple[str, int], int],
+    workers: int,
+    chunks_per_stratum: int,
+    seed: int,
+    target_normalized_ci_half_width: float,
+    normal_quantile: float = 3.2905267314919255,
+    confidence_label: str = "99.9 percent",
+) -> dict:
+    """Evaluate several actors once and form paired contrasts to a reference."""
+
+    if len(policies) < 2 or reference_name not in policies:
+        raise ValueError("multi-policy evaluation needs a named reference")
+    if self_anchor_name not in policies:
+        raise ValueError("multi-policy evaluation needs a fixed self anchor")
+    if workers < 1 or chunks_per_stratum < 1:
+        raise ValueError("benchmark worker and chunk counts must be positive")
+    if target_normalized_ci_half_width <= 0:
+        raise ValueError("confidence-interval target must be positive")
+    if normal_quantile <= 0 or not confidence_label:
+        raise ValueError("normal confidence specification must be positive")
+    expected_strata = {
+        (opponent, players)
+        for opponent in OPPONENTS
+        for players in range(2, 9)
+    }
+    if set(blocks_by_stratum) != expected_strata:
+        missing = sorted(expected_strata - set(blocks_by_stratum))
+        extra = sorted(set(blocks_by_stratum) - expected_strata)
+        raise ValueError(
+            f"allocation must cover every benchmark stratum; "
+            f"missing={missing}, extra={extra}"
+        )
+    if any(blocks < 2 for blocks in blocks_by_stratum.values()):
+        raise ValueError("each benchmark stratum needs at least two blocks")
+
+    candidate_names = tuple(
+        name
+        for name in policies
+        if name != self_anchor_name
+    )
+    if reference_name not in candidate_names:
+        raise ValueError("the fixed self anchor cannot also be the reference arm")
+    policy_names = tuple(policies)
+    tasks = []
+    for opponent_index, opponent in enumerate(OPPONENTS):
+        for players in range(2, 9):
+            blocks = blocks_by_stratum[(opponent, players)]
+            chunk_size = math.ceil(blocks / chunks_per_stratum)
+            stratum_seed = seed + opponent_index * 100_000_000 + players * 1_000_000
+            for start in range(0, blocks, chunk_size):
+                tasks.append(
+                    {
+                        "opponent": opponent,
+                        "players": players,
+                        "seed": stratum_seed + start,
+                        "blocks": min(chunk_size, blocks - start),
+                        "variants": candidate_names,
+                        "policy_names": policy_names,
+                        "self_anchor_name": self_anchor_name,
+                    }
+                )
+
+    context = multiprocessing.get_context("spawn")
+    started = time.perf_counter()
+    with context.Pool(
+        processes=min(workers, len(tasks)),
+        initializer=_initialize_multi_worker,
+        initargs=(
+            {name: str(path) for name, path in policies.items()},
+            str(mlp),
+        ),
+    ) as pool:
+        chunks = []
+        for completed, chunk in enumerate(
+            pool.imap(_evaluate_task, tasks, chunksize=1), start=1
+        ):
+            chunks.append(chunk)
+            if completed == 1 or completed % 10 == 0 or completed == len(tasks):
+                print(
+                    json.dumps(
+                        {
+                            "kind": "multiarm_evaluation_progress",
+                            "tasks_completed": completed,
+                            "tasks_total": len(tasks),
+                            "elapsed_seconds": time.perf_counter() - started,
+                        },
+                        sort_keys=True,
+                    ),
+                    flush=True,
+                )
+
+    grouped = {}
+    for chunk in chunks:
+        key = (chunk["opponent"], int(chunk["players"]))
+        target = grouped.setdefault(
+            key,
+            {
+                "opponent": chunk["opponent"],
+                "players": int(chunk["players"]),
+                "scores": {name: [] for name in candidate_names},
+                "totals": {
+                    name: defaultdict(int) for name in candidate_names
+                },
+            },
+        )
+        for name in candidate_names:
+            target["scores"][name].extend(chunk[f"{name}_scores"])
+            for metric, value in chunk["totals"][name].items():
+                target["totals"][name][metric] += value
+
+    pairwise = {}
+    for candidate_name in candidate_names:
+        if candidate_name == reference_name:
+            continue
+        raw = []
+        strata = []
+        for key in sorted(grouped):
+            grouped_row = grouped[key]
+            row = {
+                "opponent": grouped_row["opponent"],
+                "players": grouped_row["players"],
+                "before_scores": grouped_row["scores"][reference_name],
+                "after_scores": grouped_row["scores"][candidate_name],
+                "totals": {
+                    "before": dict(grouped_row["totals"][reference_name]),
+                    "after": dict(grouped_row["totals"][candidate_name]),
+                },
+            }
+            raw.append(row)
+            strata.append(_stratum_summary(row))
+        weighted = _weighted_summary(raw)
+        half_width = (
+            normal_quantile * weighted["delta_normalized_standard_error"]
+        )
+        selected_interval = [
+            weighted["delta_normalized_win_share"] - half_width,
+            weighted["delta_normalized_win_share"] + half_width,
+        ]
+        weighted["selected_normal_confidence"] = confidence_label
+        weighted["selected_normal_quantile"] = normal_quantile
+        weighted["delta_normalized_selected_normal_ci"] = selected_interval
+        weighted["delta_normalized_selected_normal_ci_half_width"] = (
+            half_width
+        )
+        weighted["positive_selected_normal"] = selected_interval[0] > 0
+        weighted["negative_selected_normal"] = selected_interval[1] < 0
+        if math.isclose(normal_quantile, 3.2905267314919255):
+            weighted["delta_normalized_ci99_9_half_width"] = half_width
+        elif math.isclose(normal_quantile, 2.5758293035489004):
+            weighted["delta_normalized_ci99"] = selected_interval
+            weighted["delta_normalized_ci99_half_width"] = half_width
+        weighted["precision_target_half_width"] = (
+            target_normalized_ci_half_width
+        )
+        weighted["precision_target_met"] = (
+            half_width <= target_normalized_ci_half_width
+        )
+        pairwise[candidate_name] = {
+            "reference": reference_name,
+            "candidate": candidate_name,
+            "strata": strata,
+            "weighted_result": weighted,
+            "opponent_results": _opponent_summaries(raw),
+        }
+
+    return {
+        "pairwise": pairwise,
+        "elapsed_seconds": time.perf_counter() - started,
+        "tasks": len(tasks),
+        "candidate_names": list(candidate_names),
     }
 
 

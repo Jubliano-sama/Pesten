@@ -10,7 +10,9 @@ from investigate_privileged_critic import (
     batches_for_epoch,
     candidate_representation,
     candidate_spec,
+    configure_critic_trainable_scope,
     fit_value_calibration,
+    hot_start_critic_weights,
 )
 from privileged_critic import (
     DATA_FIELDS,
@@ -337,8 +339,9 @@ def test_pack_and_metrics_contracts():
     assert exact["explained_variance"] == 1
 
 
-def test_default_discount_retains_quarter_after_twenty_decisions():
-    assert DEFAULT_GAMMA**20 == pytest.approx(0.25, abs=1e-12)
+def test_default_discount_is_gamma_0p995():
+    assert DEFAULT_GAMMA == pytest.approx(0.995)
+    assert DEFAULT_GAMMA**20 == pytest.approx(0.9046104802746175)
     for won in (False, True):
         expected = discounted_returns(20, won=won)
         actual = discounted_return_targets(
@@ -435,6 +438,91 @@ def test_player_count_value_calibration_is_explicit_and_reversible():
     with torch.inference_mode():
         reset = model(batch, mask=mask)["value"]
     assert torch.equal(reset, batch["public_value"].float())
+
+
+def test_hot_start_loads_weights_resets_calibration_and_records_source(tmp_path):
+    source = CausalTemporalValueModel(
+        actor_memory_size=8,
+        backbone="mlp",
+        hidden_size=32,
+        num_layers=1,
+        group_width=16,
+        dropout=0.0,
+    )
+    with torch.no_grad():
+        for parameter in source.parameters():
+            parameter.fill_(0.125)
+    source.set_value_calibration([1.5] * 14, [0.25] * 14)
+    checkpoint = tmp_path / "source.pt"
+    torch.save(
+        {
+            "format": "pesten-causal-privileged-critic-v1",
+            "candidate": "selected_moments_exact_mlp",
+            "epoch": 7,
+            "model": source.model_config(),
+            "state_dict": source.state_dict(),
+            "target_gamma": 0.9330329915368074,
+        },
+        checkpoint,
+    )
+    target = CausalTemporalValueModel(
+        actor_memory_size=8,
+        backbone="mlp",
+        hidden_size=32,
+        num_layers=1,
+        group_width=16,
+        dropout=0.0,
+    )
+
+    provenance = hot_start_critic_weights(target, checkpoint)
+
+    assert provenance["source_epoch"] == 7
+    assert provenance["source_target_gamma"] == pytest.approx(
+        0.9330329915368074
+    )
+    assert provenance["optimizer_initialization"] == "fresh AdamW"
+    assert provenance["source_validation_calibration_reset"] is True
+    for name, parameter in target.named_parameters():
+        assert torch.equal(parameter, dict(source.named_parameters())[name])
+    assert torch.equal(
+        target.value_calibration_scale,
+        torch.ones_like(target.value_calibration_scale),
+    )
+    assert torch.equal(
+        target.value_calibration_bias,
+        torch.zeros_like(target.value_calibration_bias),
+    )
+
+    incompatible = CausalTemporalValueModel(
+        actor_memory_size=8,
+        backbone="mlp",
+        hidden_size=64,
+        num_layers=1,
+        group_width=16,
+        dropout=0.0,
+    )
+    with pytest.raises(ValueError, match="architecture does not match"):
+        hot_start_critic_weights(incompatible, checkpoint)
+
+
+def test_value_head_scope_freezes_hot_start_representation():
+    model = CausalTemporalValueModel(
+        actor_memory_size=8,
+        backbone="mlp",
+        hidden_size=32,
+        num_layers=1,
+        group_width=16,
+        dropout=0.0,
+    )
+    evidence = configure_critic_trainable_scope(model, "value_head")
+
+    assert evidence["scope"] == "value_head"
+    assert evidence["trainable_parameters"] > 0
+    assert evidence["trainable_parameters"] < evidence["total_parameters"]
+    assert all(
+        parameter.requires_grad == name.startswith("value_head.")
+        for name, parameter in model.named_parameters()
+    )
 
 
 def test_hand_order_feature_is_order_sensitive_and_maskable():

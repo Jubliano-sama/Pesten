@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "kind": "teacher_min_gru_gamma_sweep_compact_result",
+  "source_teacher": {
+    "path": "models/best/puffer_min_gru_192x2_plateau_teacher_epoch4387.pt",
+    "sha256": "f8f0aece2d759eadc60b3cbccca30c321c01da13322f7cae511a73c8da3a9f93",
+    "epoch": 4387,
+    "historical_gamma": 0.97
+  },
+  "protocol": {
+    "runner": "run_teacher_gamma_sweep.py",
+    "training_seed": 202608140,
+    "campaign_offset": 5000,
+    "epochs_per_arm": 60,
+    "games_per_epoch": 2048,
+    "training_games_per_arm": 122880,
+    "training_games_total": 491520,
+    "update_epochs": 4,
+    "optimizer_steps_per_arm": 7920,
+    "fresh_optimizer_per_arm": true,
+    "critic": "actor public value head; external privileged critic disabled for every arm",
+    "screen_seed": 1202608140,
+    "screen_blocks_per_opponent_player_stratum": 300,
+    "screen_games_per_model_per_arm": 31500,
+    "direct_confirmation_seed": 2202608140,
+    "baseline_confirmation_seed": 3202608140,
+    "confirmation_blocks_per_opponent_player_stratum": 1200,
+    "confirmation_games_per_model_per_comparison": 126000,
+    "player_counts": [2, 3, 4, 5, 6, 7, 8],
+    "opponents": ["fixed starting-teacher self anchor", "MLP champion", "canonical random"],
+    "seat_rotation": "every candidate seat on every matched deal",
+    "action_selection": "deterministic favorite legal action",
+    "primary_metric": "weighted normalized win-share delta",
+    "primary_interval": "paired normal 99.9 percent"
+  },
+  "arms": [
+    {
+      "gamma": 0.9,
+      "terminal_reward_retention_after_20_decisions": 0.12157665459056935,
+      "checkpoint": "live_training/teacher_gru_gamma_sweep_20260814/gamma_0p9/training/latest.pt",
+      "checkpoint_sha256": "91f296f197825bf8849f5e80919753ce0cd8b9fa396ebab3b63eee5a6f40a6fc",
+      "epoch": 4447,
+      "screen_delta_normalized_win_share": -0.02817315444696411,
+      "screen_delta_normalized_ci99_9": [-0.06225814801543653, 0.005911839121508312],
+      "maximum_approx_kl": 0.002566704138149159
+    },
+    {
+      "gamma": 0.9330329915368074,
+      "terminal_reward_retention_after_20_decisions": 0.24999999999999997,
+      "checkpoint": "live_training/teacher_gru_gamma_sweep_20260814/gamma_0p933032991537/training/latest.pt",
+      "checkpoint_sha256": "33a86247fe6e762e0fb41f3d04b6c65328c0b06f40952e0fda8a15c485395b11",
+      "epoch": 4447,
+      "screen_delta_normalized_win_share": -0.005821113630637642,
+      "screen_delta_normalized_ci99_9": [-0.0387217334081157, 0.027079506146840418],
+      "maximum_approx_kl": 0.0024458564106960073
+    },
+    {
+      "gamma": 0.97,
+      "terminal_reward_retention_after_20_decisions": 0.543794342926747,
+      "checkpoint": "live_training/teacher_gru_gamma_sweep_20260814/gamma_0p97/training/latest.pt",
+      "checkpoint_sha256": "ad5e0afee8fd91f2e38de1d7c3d427613a78c85b2304c3af026eea4750da4e18",
+      "epoch": 4447,
+      "screen_delta_normalized_win_share": 0.016605967078189066,
+      "screen_delta_normalized_ci99_9": [-0.016195223297969158, 0.04940715745434729],
+      "maximum_approx_kl": 0.0029786241255918486
+    },
+    {
+      "gamma": 0.99,
+      "terminal_reward_retention_after_20_decisions": 0.8179069375972308,
+      "checkpoint": "live_training/teacher_gru_gamma_sweep_20260814/gamma_0p99/training/latest.pt",
+      "checkpoint_sha256": "fedd80e5cad46ece4ce20f20dcc7123a5099d25b62adee15840ae0c2e5c14ce9",
+      "epoch": 4447,
+      "screen_delta_normalized_win_share": 0.028277000923826234,
+      "screen_delta_normalized_ci99_9": [-0.004965913609035012, 0.06151991545668748],
+      "maximum_approx_kl": 0.013922950624082681
+    }
+  ],
+  "confirmation": {
+    "gamma_0p99_vs_gamma_0p97": {
+      "delta_normalized_win_share": 0.014678167254556396,
+      "delta_normalized_ci99_9": [-0.0032198688958728107, 0.0325762034049856],
+      "delta_raw_score": 0.004047061471193415,
+      "delta_raw_score_ci99_9": [-0.0017660487713821744, 0.009860171713769005],
+      "paired_normal_positive_at_99_9_percent": false,
+      "evidence": "live_training/teacher_gru_gamma_sweep_20260814/confirmation/screen_winner_vs_reference.json"
+    },
+    "gamma_0p99_vs_starting_teacher": {
+      "delta_normalized_win_share": 0.02398644704795516,
+      "delta_normalized_ci99_9": [0.007146519525096175, 0.040826374570814145],
+      "delta_raw_score": 0.005918841995204901,
+      "delta_raw_score_ci99_9": [0.00041208607911159996, 0.011425597911298203],
+      "paired_normal_positive_at_99_9_percent": true,
+      "distribution_free_positive_at_99_9_percent": false,
+      "evidence": "live_training/teacher_gru_gamma_sweep_20260814/confirmation/screen_winner_vs_start.json"
+    }
+  },
+  "candidate": {
+    "gamma": 0.99,
+    "path": "live_training/teacher_gru_gamma_sweep_20260814/gamma_0p99/training/latest.pt",
+    "sha256": "fedd80e5cad46ece4ce20f20dcc7123a5099d25b62adee15840ae0c2e5c14ce9",
+    "epoch": 4447,
+    "parameters": 251384,
+    "status": "research candidate; not promoted"
+  },
+  "decision": {
+    "continued_training_improved_over_starting_teacher": true,
+    "alternate_gamma_confirmed_better_than_gamma_0p97": false,
+    "gamma_effect_established": false,
+    "promotion_authorized": false,
+    "recommendation": "Keep the gamma conclusion open. Use 0.99 as the strongest research candidate, but replicate the paired 0.97 versus 0.99 training comparison before changing the training default or promoting the checkpoint."
+  },
+  "limitations": [
+    "The paired training sweep used one shared training seed.",
+    "The starting public value head was historically fitted at gamma 0.97, which initially favors the historical arm.",
+    "The promoted gamma-0.933 privileged critic was disabled for every arm to avoid a critic-quality confound, so this does not evaluate the current external-critic default recipe.",
+    "The baseline gain clears the paired-normal 99.9 percent interval but not the distribution-free Hoeffding interval."
+  ]
+}

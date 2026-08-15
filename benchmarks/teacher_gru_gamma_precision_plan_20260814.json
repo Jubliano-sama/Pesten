@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "kind": "teacher_gamma_fixed_precision_allocation_v1",
+  "locked_at": "2026-08-14T15:35:43Z",
+  "status": "locked_before_corrected_model_evaluation",
+  "target_normalized_ci99_9_half_width": 0.005,
+  "normal_quantile_99_9": 3.2905267314919255,
+  "corrected_evaluation_seed": 4002608140,
+  "stopping_rule": "Run this fixed allocation once. Do not extend it based on the observed gamma effect or significance.",
+  "allocation_method": {
+    "name": "cost-aware Neyman allocation with fixed safety multiplier",
+    "formula": "blocks are proportional to weight times player count times pilot paired standard deviation divided by the square root of pilot turns per block",
+    "pilot_blocks_per_stratum": 1200,
+    "pilot_normalized_standard_error": 0.0054392617385953385,
+    "base_design_half_width": 0.005,
+    "safety_multiplier_on_blocks": 1.5,
+    "expected_half_width_under_pilot_variance": 0.004082482904638631,
+    "pilot_is_disjoint_from_corrected_evaluation": true
+  },
+  "pilot": {
+    "path": "live_training/teacher_gru_gamma_sweep_20260814/confirmation/screen_winner_vs_reference.json",
+    "sha256": "03306bc8091e1860515875d215662d163ff952610f18c875ffaaf1c4a869388f",
+    "seed": 2202608140,
+    "note": "The pilot compared earlier no-external-critic gamma .99 and .97 actors and is used only for variance and runtime allocation, not corrected-model effect estimation."
+  },
+  "total_blocks_across_21_strata": 462463,
+  "allocations": {
+    "canonical_random": {
+      "2": 41225,
+      "3": 41241,
+      "4": 37563,
+      "5": 13715,
+      "6": 9990,
+      "7": 8588,
+      "8": 7920
+    },
+    "mlp": {
+      "2": 48141,
+      "3": 40506,
+      "4": 32802,
+      "5": 11841,
+      "6": 8352,
+      "7": 7592,
+      "8": 7119
+    },
+    "self_anchor": {
+      "2": 45116,
+      "3": 36569,
+      "4": 32436,
+      "5": 11412,
+      "6": 7595,
+      "7": 6660,
+      "8": 6080
+    }
+  }
+}

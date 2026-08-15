@@ -1167,6 +1167,7 @@ def affine_calibration_parameters(
     player_count: np.ndarray,
     *,
     mode: str,
+    fit_split: str = "validation",
 ) -> tuple[np.ndarray, np.ndarray, dict[str, object]]:
     """Fit bounded affine parameters globally or independently per count."""
 
@@ -1222,7 +1223,7 @@ def affine_calibration_parameters(
     calibrated = prediction * scale[player_count] + bias[player_count]
     row = {
         "mode": mode,
-        "fit_split": "validation",
+        "fit_split": fit_split,
         "groups": rows,
         "mse_before": float(np.mean((prediction - target) ** 2)),
         "mse_after_fit": float(np.mean((calibrated - target) ** 2)),
@@ -1237,14 +1238,80 @@ def fit_value_calibration(
     player_count: np.ndarray,
     *,
     mode: str,
+    fit_split: str = "validation",
 ) -> dict[str, object]:
-    """Fit a validation-only affine correction without touching model weights."""
+    """Fit an explicitly sourced affine correction without changing weights."""
 
     scale, bias, row = affine_calibration_parameters(
-        prediction, target, player_count, mode=mode
+        prediction,
+        target,
+        player_count,
+        mode=mode,
+        fit_split=fit_split,
     )
     model.set_value_calibration(scale, bias)
     return row
+
+
+def hot_start_critic_weights(
+    model: CausalTemporalValueModel,
+    checkpoint: Path,
+) -> dict[str, object]:
+    """Load compatible critic weights while discarding gamma-specific state."""
+
+    source = checkpoint.resolve()
+    source_model, source_payload = load_privileged_critic_checkpoint(
+        source, device="cpu"
+    )
+    source_config = source_model.model_config()
+    target_config = model.model_config()
+    if source_config != target_config:
+        raise ValueError(
+            "warm-start critic architecture does not match candidate: "
+            f"source={json.dumps(source_config, sort_keys=True)}, "
+            f"target={json.dumps(target_config, sort_keys=True)}"
+        )
+    model.load_state_dict(source_model.state_dict(), strict=True)
+    # Calibration belongs to the source gamma's validation targets. Keep every
+    # learned weight, but refit this non-trainable affine layer only after the
+    # gamma-specific weight training and model selection.
+    model.reset_value_calibration()
+    return {
+        "source_checkpoint": str(source),
+        "source_sha256": file_sha256(source),
+        "source_candidate": source_payload.get("candidate"),
+        "source_epoch": source_payload.get("epoch"),
+        "source_target_gamma": float(
+            source_payload.get("target_gamma", DEFAULT_GAMMA)
+        ),
+        "weight_initialization": "all compatible learned tensors",
+        "optimizer_initialization": "fresh AdamW",
+        "source_validation_calibration_reset": True,
+    }
+
+
+def configure_critic_trainable_scope(
+    model: CausalTemporalValueModel,
+    scope: str,
+) -> dict[str, object]:
+    if scope not in ("all", "value_head"):
+        raise ValueError(f"unknown critic trainable scope: {scope}")
+    names = []
+    parameters = 0
+    for name, parameter in model.named_parameters():
+        trainable = scope == "all" or name.startswith("value_head.")
+        parameter.requires_grad_(trainable)
+        if trainable:
+            names.append(name)
+            parameters += parameter.numel()
+    if not names:
+        raise RuntimeError("critic trainable scope selected no parameters")
+    return {
+        "scope": scope,
+        "trainable_parameter_tensors": names,
+        "trainable_parameters": parameters,
+        "total_parameters": parameter_count(model),
+    }
 
 
 def train_candidate(
@@ -1272,6 +1339,11 @@ def train_candidate(
     run_label: str,
     calibration: str,
     target_gamma: float,
+    initialize_checkpoint: Path | None,
+    trainable_scope: str,
+    require_trained_checkpoint: bool,
+    max_batches_per_epoch: int | None,
+    calibration_fit_split: str,
 ) -> dict[str, object]:
     backbone, features = candidate_spec(name)
     hand_encoder, card_tokenization = candidate_representation(name)
@@ -1292,8 +1364,14 @@ def train_candidate(
         hand_encoder=hand_encoder,
         card_tokenization=card_tokenization,
     ).to(device)
+    warm_start = None
+    if initialize_checkpoint is not None:
+        warm_start = hot_start_critic_weights(model, initialize_checkpoint)
+    training_scope = configure_critic_trainable_scope(model, trainable_scope)
     optimizer = torch.optim.AdamW(
-        model.parameters(), lr=learning_rate, weight_decay=weight_decay
+        (parameter for parameter in model.parameters() if parameter.requires_grad),
+        lr=learning_rate,
+        weight_decay=weight_decay,
     )
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
         optimizer, T_max=max(1, epochs)
@@ -1322,6 +1400,13 @@ def train_candidate(
                 "validation_mse": validation_mse,
                 "calibration": calibration_row,
                 "target_gamma": target_gamma,
+                "warm_start": warm_start,
+                "training_scope": training_scope,
+                "required_post_initialization_update": (
+                    require_trained_checkpoint
+                ),
+                "max_batches_per_epoch": max_batches_per_epoch,
+                "calibration_fit_split": calibration_fit_split,
             },
             checkpoint_path,
         )
@@ -1335,14 +1420,18 @@ def train_candidate(
         amp=amp,
         target_gamma=target_gamma,
     )
-    best_validation = float(initial_validation["model"]["mse"])
-    save_checkpoint(0, best_validation)
+    initial_validation_mse = float(initial_validation["model"]["mse"])
+    best_validation = (
+        math.inf if require_trained_checkpoint else initial_validation_mse
+    )
+    if not require_trained_checkpoint:
+        save_checkpoint(0, best_validation)
     curve = [
         {
             "epoch": 0,
             "train_loss": None,
             "train_value_mse": None,
-            "validation_mse": best_validation,
+            "validation_mse": initial_validation_mse,
             "validation_explained_variance": initial_validation["model"][
                 "explained_variance"
             ],
@@ -1353,15 +1442,26 @@ def train_candidate(
     print(json.dumps({"candidate": name, **curve[0]}, sort_keys=True), flush=True)
     stale_epochs = 0
     for epoch in range(1, epochs + 1):
-        model.train()
+        if trainable_scope == "all":
+            model.train()
+        else:
+            # Freeze dropout and every representation layer while adapting the
+            # deterministic value head to a different return horizon.
+            model.eval()
+            model.value_head.train()
         sums = {"loss": 0.0, "value_mse": 0.0, "samples": 0}
         epoch_started = time.perf_counter()
-        for indices in batches_for_epoch(
+        for batch_index, indices in enumerate(batches_for_epoch(
             train,
             batch_size=batch_size,
             seed=seed + epoch,
             shuffle=True,
-        ):
+        )):
+            if (
+                max_batches_per_epoch is not None
+                and batch_index >= max_batches_per_epoch
+            ):
+                break
             host_batch, host_mask = collate_episodes(
                 train, indices, target_gamma=target_gamma
             )
@@ -1387,6 +1487,12 @@ def train_candidate(
             sums["loss"] += loss_row["loss"] * samples
             sums["value_mse"] += loss_row["value_mse"] * samples
             sums["samples"] += samples
+        completed_batches = batch_index + 1
+        if (
+            max_batches_per_epoch is not None
+            and completed_batches > max_batches_per_epoch
+        ):
+            completed_batches = max_batches_per_epoch
         scheduler.step()
         validation_result = evaluate_model(
             model,
@@ -1401,6 +1507,8 @@ def train_candidate(
             "epoch": epoch,
             "train_loss": sums["loss"] / sums["samples"],
             "train_value_mse": sums["value_mse"] / sums["samples"],
+            "train_batches": completed_batches,
+            "train_samples": sums["samples"],
             "validation_mse": validation_mse,
             "validation_explained_variance": validation_result["model"][
                 "explained_variance"
@@ -1431,14 +1539,31 @@ def train_candidate(
         return_predictions=True,
         target_gamma=target_gamma,
     )
+    calibration_probe = (
+        pre_calibration_validation
+        if calibration_fit_split == "validation"
+        else evaluate_model(
+            model,
+            train,
+            device=device,
+            batch_size=batch_size,
+            amp=amp,
+            return_predictions=True,
+            target_gamma=target_gamma,
+        )
+    )
     calibration_row = fit_value_calibration(
         model,
-        pre_calibration_validation.pop("_prediction"),
-        pre_calibration_validation.pop("_target"),
-        pre_calibration_validation.pop("_player_count"),
+        calibration_probe["_prediction"],
+        calibration_probe["_target"],
+        calibration_probe["_player_count"],
         mode=calibration,
+        fit_split=calibration_fit_split,
     )
-    pre_calibration_validation.pop("_public_value")
+    if calibration_probe is not pre_calibration_validation:
+        del calibration_probe
+    for field in ("_prediction", "_target", "_player_count", "_public_value"):
+        pre_calibration_validation.pop(field)
     validation_result = evaluate_model(
         model,
         validation,
@@ -1469,6 +1594,11 @@ def train_candidate(
         "model": model.model_config(),
         "parameters": parameter_count(model),
         "target_gamma": target_gamma,
+        "warm_start": warm_start,
+        "training_scope": training_scope,
+        "required_post_initialization_update": require_trained_checkpoint,
+        "max_batches_per_epoch": max_batches_per_epoch,
+        "calibration_fit_split": calibration_fit_split,
         "best_epoch": int(best["epoch"]),
         "curve": curve,
         "calibration": calibration_row,
@@ -2020,7 +2150,11 @@ def run_training(args: argparse.Namespace) -> dict[str, object]:
     torch.set_num_threads(args.torch_threads)
     if device.type == "cuda":
         torch.backends.cuda.matmul.allow_tf32 = True
-    dataset_dir = args.output_dir.resolve() / "dataset"
+    dataset_dir = (
+        args.dataset_dir.resolve()
+        if args.dataset_dir is not None
+        else args.output_dir.resolve() / "dataset"
+    )
     train = PackedEpisodeCorpus(dataset_dir / "train")
     validation = PackedEpisodeCorpus(dataset_dir / "validation")
     test = (
@@ -2086,6 +2220,11 @@ def run_training(args: argparse.Namespace) -> dict[str, object]:
                 run_label=args.run_label,
                 calibration=args.calibration,
                 target_gamma=args.target_gamma,
+                initialize_checkpoint=args.initialize_checkpoint,
+                trainable_scope=args.trainable_scope,
+                require_trained_checkpoint=args.require_trained_checkpoint,
+                max_batches_per_epoch=args.max_batches_per_epoch,
+                calibration_fit_split=args.calibration_fit_split,
             )
         )
     validation_comparisons = comparison_table(
@@ -2150,6 +2289,7 @@ def run_training(args: argparse.Namespace) -> dict[str, object]:
             ),
         },
         "dataset": {
+            "path": str(dataset_dir),
             "train_episodes": len(train),
             "validation_episodes": len(validation),
             "test_episodes": len(test) if test is not None else None,
@@ -2172,10 +2312,23 @@ def run_training(args: argparse.Namespace) -> dict[str, object]:
             "target_retention_after_20_decisions": (
                 args.target_gamma**20
             ),
+            "trainable_scope": args.trainable_scope,
+            "require_trained_checkpoint": args.require_trained_checkpoint,
+            "max_batches_per_epoch": args.max_batches_per_epoch,
+            "calibration_fit_split": args.calibration_fit_split,
         },
         "target_gamma": args.target_gamma,
         "target_retention_after_20_decisions": args.target_gamma**20,
         "run_label": args.run_label,
+        "training_boundary": (
+            "offline critic-only optimization on a fixed actor corpus; no "
+            "actor parameters are loaded or updated by this command"
+        ),
+        "warm_start_checkpoint": (
+            str(args.initialize_checkpoint.resolve())
+            if args.initialize_checkpoint is not None
+            else None
+        ),
         "ranking": ranking,
         "inherited_public_head": (
             {
@@ -2395,6 +2548,56 @@ def parse_args() -> argparse.Namespace:
 
     train = subparsers.add_parser("train")
     add_shared_arguments(train)
+    train.add_argument(
+        "--dataset-dir",
+        type=Path,
+        help=(
+            "existing dataset root containing train/validation/test; defaults "
+            "to OUTPUT/dataset so immutable corpora can be reused"
+        ),
+    )
+    train.add_argument(
+        "--initialize-checkpoint",
+        type=Path,
+        help=(
+            "hot-start all compatible critic weights from this single-model "
+            "checkpoint; uses a fresh optimizer and resets source calibration"
+        ),
+    )
+    train.add_argument(
+        "--trainable-scope",
+        choices=("all", "value_head"),
+        default="all",
+        help=(
+            "parameters updated during offline fitting; value_head keeps the "
+            "hot-start representation frozen while retargeting return decay"
+        ),
+    )
+    train.add_argument(
+        "--require-trained-checkpoint",
+        action="store_true",
+        help=(
+            "exclude unchanged epoch zero from checkpoint selection so the "
+            "result necessarily contains a gamma-targeted gradient update"
+        ),
+    )
+    train.add_argument(
+        "--max-batches-per-epoch",
+        type=int,
+        help=(
+            "optional fixed warmup budget per epoch; useful when retargeting "
+            "an already-selected critic without a destructive full-corpus pass"
+        ),
+    )
+    train.add_argument(
+        "--calibration-fit-split",
+        choices=("train", "validation"),
+        default="validation",
+        help=(
+            "fit the final affine correction on train for a held-out validation "
+            "readiness check, or preserve the historical validation-fit mode"
+        ),
+    )
     train.add_argument("--candidates", default="screen")
     train.add_argument(
         "--run-label",
@@ -2564,6 +2767,8 @@ def main() -> None:
                 args.batch_size,
             )
         )
+        if args.max_batches_per_epoch is not None:
+            positive.append(args.max_batches_per_epoch)
         if args.learning_rate <= 0 or args.weight_decay < 0:
             raise ValueError(
                 "learning rate must be positive and weight decay nonnegative"

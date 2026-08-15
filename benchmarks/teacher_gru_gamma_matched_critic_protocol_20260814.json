@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "kind": "teacher_gru_gamma_matched_critic_protocol_v1",
+  "status": "complete_corrected_precision_target_met",
+  "completed_at": "2026-08-14T21:08:54.577388+00:00",
+  "gammas": [0.95, 0.97, 0.99],
+  "teacher_start": {
+    "path": "models/best/puffer_min_gru_192x2_plateau_teacher_epoch4387.pt",
+    "sha256": "f8f0aece2d759eadc60b3cbccca30c321c01da13322f7cae511a73c8da3a9f93",
+    "epoch": 4387
+  },
+  "critic_hot_start": {
+    "path": "models/best/ppo_omniscient_mlp_gamma025at20_2to8_20260814.pt",
+    "sha256": "63fc1b610da5fa40838a96bb3157cb1aab328ac1a46ce1a3c823af484e0b9d6d",
+    "source_target_gamma": 0.9330329915368074,
+    "source_epoch": 7,
+    "all_compatible_learned_tensors_loaded": true,
+    "source_validation_calibration_reset": true,
+    "fresh_optimizer": true
+  },
+  "critic_corpus": {
+    "path": "/home/tommie/.t3/worktrees/Pesten/t3code-749791a2/live_training/privileged_critic_20260813/dataset",
+    "actor_sha256": "f8f0aece2d759eadc60b3cbccca30c321c01da13322f7cae511a73c8da3a9f93",
+    "train_decisions": 1105497,
+    "validation_decisions": 37046,
+    "train_and_validation_deal_seeds_disjoint": true
+  },
+  "critic_prefit": {
+    "ordering": "complete and validate each gamma-matched critic before the first PPO actor update",
+    "trainable_scope": "value_head",
+    "trainable_parameters": 66049,
+    "representation_parameters_frozen": true,
+    "dropout_frozen": true,
+    "epochs": 4,
+    "max_batches_per_epoch": 256,
+    "batch_size_trajectories": 16,
+    "learning_rate": 0.00001,
+    "weight_decay": 0.0001,
+    "optimizer": "fresh AdamW",
+    "selection": "lowest raw MSE on disjoint validation with epoch zero excluded",
+    "calibration": "per-player-count affine fit on train only, followed by disjoint validation readiness check",
+    "method_lock_note": "The bounded value-head method was chosen after full-network hot-start attempts degraded gamma .95 validation MSE; it was then applied unchanged to all three arms before any corrected playing-strength evaluation."
+  },
+  "critic_arms": {
+    "0.95": {
+      "checkpoint": "live_training/teacher_gru_gamma_matched_critic_20260814/gamma_0p95/critic_fit/models/gamma_0p95_locked_warmup/selected_moments_exact_mlp/best.pt",
+      "sha256": "00fca2a5098d5cc87ff2136204aec2ce409729edbe9eddd32c21cc6fe957c428",
+      "selected_epoch": 1,
+      "epoch_zero_validation_mse": 0.19553397322596458,
+      "selected_raw_validation_mse": 0.19487807354931116,
+      "train_calibrated_validation_mse": 0.1940309902935106
+    },
+    "0.97": {
+      "checkpoint": "live_training/teacher_gru_gamma_matched_critic_20260814/gamma_0p97/critic_fit/models/gamma_0p97_locked_warmup/selected_moments_exact_mlp/best.pt",
+      "sha256": "1bfdcf826788f3c8651b229a6e55937f4abc815065674c060e78a3560fb80f96",
+      "selected_epoch": 2,
+      "epoch_zero_validation_mse": 0.27141648276454583,
+      "selected_raw_validation_mse": 0.25484726009556913,
+      "train_calibrated_validation_mse": 0.25350002545388517
+    },
+    "0.99": {
+      "checkpoint": "live_training/teacher_gru_gamma_matched_critic_20260814/gamma_0p99/critic_fit/models/gamma_0p99_locked_warmup/selected_moments_exact_mlp/best.pt",
+      "sha256": "842487ab7813bc71c746812ae6f46a161e8c588c394c892ea7c720df60a32edc",
+      "selected_epoch": 4,
+      "epoch_zero_validation_mse": 0.48921363658452394,
+      "selected_raw_validation_mse": 0.39996576298215375,
+      "train_calibrated_validation_mse": 0.39577147676650454
+    }
+  },
+  "ppo_protocol": {
+    "actor_start_identical": true,
+    "critic_target_matches_arm_gamma": true,
+    "actor_optimizer_fresh_per_arm": true,
+    "epochs_per_arm": 60,
+    "games_per_epoch": 2048,
+    "games_per_arm": 122880,
+    "training_seed": 202608140,
+    "campaign_offset": 7000,
+    "learning_rate": 0.00005,
+    "update_epochs": 4,
+    "minibatch_trajectories": 128,
+    "gae_lambda": 0.95,
+    "target_kl": 0.015,
+    "critic_online_learning_rate": 0.00001,
+    "critic_online_update_epochs": 1,
+    "critic_online_minibatch_trajectories": 32,
+    "opponent_schedule": ["current_selfplay", "ppo_champion", "canonical_random"],
+    "player_count_phase_weights": {"2": 14, "3": 14, "4": 14, "5": 6, "6": 5, "7": 5, "8": 5},
+    "rollout_precision": "float32",
+    "update_precision": "bfloat16"
+  },
+  "ppo_arms": {
+    "0.95": {
+      "actor_checkpoint": "live_training/teacher_gru_gamma_matched_critic_20260814/gamma_0p95/training/latest.pt",
+      "actor_sha256": "dc5d8ade279a678407d11a38bf6925322e79f461ff6857da97c865ec9f4e7cf6",
+      "final_online_critic_checkpoint": "live_training/teacher_gru_gamma_matched_critic_20260814/gamma_0p95/training/privileged_critic_latest.pt",
+      "final_online_critic_sha256": "5a42be3eb89756ce1821135dd0e989c2515ecafd36646b04f306eb18da9f3cff",
+      "completed_phases": 60,
+      "games": 122880,
+      "last_epoch": 4447,
+      "early_stopped_phases": 0,
+      "max_aggregate_approx_kl": 0.0020549406570250445,
+      "elapsed_seconds": 4939.838479098005
+    },
+    "0.97": {
+      "actor_checkpoint": "live_training/teacher_gru_gamma_matched_critic_20260814/gamma_0p97/training/latest.pt",
+      "actor_sha256": "813bf93d1518dc5c6a0f0e1b7d84061a2c51f4a302f11bcc28ab1e9d9788ce86",
+      "final_online_critic_checkpoint": "live_training/teacher_gru_gamma_matched_critic_20260814/gamma_0p97/training/privileged_critic_latest.pt",
+      "final_online_critic_sha256": "fb437e8e663e84a2f07139da892ff3e33dcaa129b5d8ff5c22e43ccabb20ea00",
+      "completed_phases": 60,
+      "games": 122880,
+      "last_epoch": 4447,
+      "early_stopped_phases": 0,
+      "max_aggregate_approx_kl": 0.0023475665497169037,
+      "elapsed_seconds": 4926.946521256992
+    },
+    "0.99": {
+      "actor_checkpoint": "live_training/teacher_gru_gamma_matched_critic_20260814/gamma_0p99/training/latest.pt",
+      "actor_sha256": "22373d842dfcbb219aaf2b47ceecfdb9827baaf137d2720276071572f4f21771",
+      "final_online_critic_checkpoint": "live_training/teacher_gru_gamma_matched_critic_20260814/gamma_0p99/training/privileged_critic_latest.pt",
+      "final_online_critic_sha256": "4630eadd876a0d009f0e686058f4a85fe652c2307c9ecce52714b37ff53ea9ed",
+      "completed_phases": 60,
+      "games": 122880,
+      "last_epoch": 4447,
+      "early_stopped_phases": 0,
+      "max_aggregate_approx_kl": 0.0018063600422088706,
+      "elapsed_seconds": 4572.39437817999
+    }
+  },
+  "evaluation": {
+    "implementation": "benchmark_teacher_gamma_precision.py",
+    "allocation_plan": "benchmarks/teacher_gru_gamma_precision_plan_20260814.json",
+    "allocation_plan_sha256": "1aa129a6c2b0764b39c297643fa315ef190b95aade4847213c186d2e610487aa",
+    "reference_gamma": 0.97,
+    "contrasts": ["0.95 minus 0.97", "0.99 minus 0.97"],
+    "target_normalized_ci99_9_half_width": 0.005,
+    "corrected_evaluation_seed": 4002608140,
+    "fixed_sample_no_optional_stopping": true,
+    "blocks_across_21_strata": 462463,
+    "seat_rotated_games_per_actor": 1704410,
+    "actors_evaluated_on_same_games": 3,
+    "output": "live_training/teacher_gru_gamma_matched_critic_20260814/fixed_precision_evaluation.json",
+    "output_sha256": "55c9137e1a9248cdce70204580f76e9b9f40b02909e733c9ad90fb253d9b0f1f",
+    "elapsed_seconds": 5726.105929197001,
+    "results": {
+      "0.95_minus_0.97": {
+        "delta_normalized_win_share": -0.013604018275957364,
+        "paired_normal_ci99_9": [-0.017632038732047547, -0.00957599781986718],
+        "ci99_9_half_width": 0.004028020456090182,
+        "precision_target_met": true
+      },
+      "0.99_minus_0.97": {
+        "delta_normalized_win_share": 0.011208831359457383,
+        "paired_normal_ci99_9": [0.00712581422903541, 0.015291848489879356],
+        "ci99_9_half_width": 0.004083017130421973,
+        "precision_target_met": true
+      }
+    },
+    "distribution_free_caveat": "The paired 99.9% normal intervals resolve both contrasts and meet the requested precision. The more conservative Hoeffding intervals include zero."
+  },
+  "conclusion": {
+    "best_gamma_in_corrected_sweep": 0.99,
+    "gamma_0.99_improves_over_0.97_on_primary_metric": true,
+    "gamma_0.95_harms_vs_0.97_on_primary_metric": true,
+    "recommended_candidate": "live_training/teacher_gru_gamma_matched_critic_20260814/gamma_0p99/training/latest.pt",
+    "candidate_sha256": "22373d842dfcbb219aaf2b47ceecfdb9827baaf137d2720276071572f4f21771",
+    "promotion_performed": false
+  },
+  "promotion_authorized": false
+}

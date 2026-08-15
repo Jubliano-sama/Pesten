@@ -23,7 +23,7 @@ DEFAULT_PRIVILEGED_CRITIC = (
     Path(__file__).resolve().parent
     / "models"
     / "best"
-    / "ppo_omniscient_mlp_gamma025at20_2to8_20260814.pt"
+    / "ppo_omniscient_mlp_gamma0p995_2to8_20260815.pt"
 )
 
 
@@ -581,7 +581,10 @@ def parse_args() -> argparse.Namespace:
         "--gamma",
         type=float,
         default=DEFAULT_GAMMA,
-        help="discount with exactly 25%% terminal-reward retention after 20 own decisions",
+        help=(
+            "per-decision reward discount (default: 0.995, retaining about "
+            "90.46%% of a terminal component after 20 own decisions)"
+        ),
     )
     parser.add_argument("--gae-lambda", type=float, default=0.95)
     parser.add_argument("--clip-ratio", type=float, default=0.2)
@@ -616,7 +619,7 @@ def parse_args() -> argparse.Namespace:
         help=(
             "single or ensemble external critic; enables causal omniscient "
             "GAE values and environment-side snapshot retention (default: "
-            "the promoted 2-8-player MLP critic)"
+            "the gamma-0.995 2-8-player MLP critic)"
         ),
     )
     critic_group.add_argument(
