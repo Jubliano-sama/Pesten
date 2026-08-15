@@ -586,6 +586,21 @@ def parse_args() -> argparse.Namespace:
             "90.46%% of a terminal component after 20 own decisions)"
         ),
     )
+    parser.add_argument(
+        "--decision-reward",
+        type=float,
+        default=-0.01,
+        help="reward added at each controlled-seat decision (default: -0.01)",
+    )
+    parser.add_argument(
+        "--draw-reward",
+        type=float,
+        default=-0.75,
+        help=(
+            "terminal reward for a turn-limit draw (default: -0.75); -1 makes "
+            "draws loss-equivalent and 0 makes them neutral"
+        ),
+    )
     parser.add_argument("--gae-lambda", type=float, default=0.95)
     parser.add_argument("--clip-ratio", type=float, default=0.2)
     parser.add_argument("--target-kl", type=float, default=0.02)
@@ -742,6 +757,21 @@ def main() -> None:
         raise ValueError("privileged critic learning rate must be positive")
     if args.value_coefficient is not None and args.value_coefficient < 0:
         raise ValueError("value coefficient must be nonnegative")
+    if not 0 < args.gamma <= 1 or not math.isfinite(args.gamma):
+        raise ValueError("gamma must be finite and in (0, 1]")
+    if not math.isfinite(args.decision_reward) or args.decision_reward > 0:
+        raise ValueError("decision reward must be finite and nonpositive")
+    if not math.isfinite(args.draw_reward) or not -1 <= args.draw_reward <= 1:
+        raise ValueError("draw reward must be finite and in [-1, 1]")
+    nonstandard_reward_contract = (
+        not math.isclose(args.decision_reward, -0.01)
+        or not math.isclose(args.draw_reward, -0.75)
+    )
+    if nonstandard_reward_contract and args.privileged_critic is not None:
+        raise ValueError(
+            "nonstandard decision/draw rewards require --no-privileged-critic "
+            "until an exactly reward-matched external critic is supplied"
+        )
     pipelined_rollouts = args.pipelined_rollouts
     if pipelined_rollouts and args.rollout_engine != "vector":
         raise ValueError("pipelined rollouts require --rollout-engine vector")
@@ -1081,6 +1111,8 @@ def main() -> None:
                 entropy_coefficient=args.entropy_coefficient,
                 gamma=args.gamma,
                 gae_lambda=args.gae_lambda,
+                decision_reward=args.decision_reward,
+                draw_reward=args.draw_reward,
                 normalize_advantages=True,
                 diagnostic_minibatch_trajectories=(
                     args.diagnostic_minibatch_trajectories
@@ -1113,6 +1145,8 @@ def main() -> None:
                 ),
                 seed=args.seed + 1_500_000 + campaign_phase,
                 gamma=args.gamma,
+                decision_reward=args.decision_reward,
+                draw_reward=args.draw_reward,
             )
             if args.device == "cuda":
                 torch.cuda.synchronize()
@@ -1242,6 +1276,12 @@ def main() -> None:
                 "campaign_offset": args.campaign_offset,
                 "gamma": args.gamma,
                 "gae_lambda": args.gae_lambda,
+                "decision_reward": args.decision_reward,
+                "terminal_rewards": {
+                    "win": 1.0,
+                    "loss": -1.0,
+                    "draw": args.draw_reward,
+                },
                 "privileged_critic": (
                     {
                         "source_checkpoint": str(privileged_path),

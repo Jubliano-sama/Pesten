@@ -74,4 +74,5 @@ def pack_puffer_trajectory(
 
 def pack_puffer_episode(policy, episode):
     trajectory, won = episode
-    return pack_puffer_trajectory(policy, trajectory), bool(won)
+    outcome = None if won is None else bool(won)
+    return pack_puffer_trajectory(policy, trajectory), outcome

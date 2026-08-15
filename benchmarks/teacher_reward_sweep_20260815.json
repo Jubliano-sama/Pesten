@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "kind": "teacher_min_gru_joint_reward_sweep_summary",
+  "status": "complete_no_confirmed_gain",
+  "started_at": "2026-08-15T16:35:08.466703+00:00",
+  "finished_at": "2026-08-15T17:01:24.409338+00:00",
+  "elapsed_seconds": 1575.9342589899898,
+  "teacher": {
+    "path": "models/best/puffer_min_gru_192x2_plateau_teacher_epoch4387.pt",
+    "sha256": "f8f0aece2d759eadc60b3cbccca30c321c01da13322f7cae511a73c8da3a9f93"
+  },
+  "champion": {
+    "path": "ppo_actor_100run3.pth",
+    "sha256": "aac589b3c7300895604e6c77755631ab4a31c8bf9810768448ab2f3ff5bbe186"
+  },
+  "protocol": {
+    "design": "orthogonal L9 main-effects screen plus operational control",
+    "training_arms": 10,
+    "epochs_per_arm": 12,
+    "games_per_epoch": 2048,
+    "games_per_arm": 24576,
+    "total_training_games": 245760,
+    "identical_teacher_start": true,
+    "fresh_optimizer_per_arm": true,
+    "training_seed": 202608150,
+    "campaign_offset": 9000,
+    "external_privileged_critic": false,
+    "critic_rationale": "No external critic matches every joint gamma, decision, and draw reward contract, so all arms used the same teacher public value head.",
+    "fixed_terminal_rewards": {
+      "win": 1.0,
+      "loss": -1.0
+    },
+    "gamma_levels": [0.99, 0.995, 0.9975],
+    "decision_reward_levels": [-0.02, -0.01, 0.0],
+    "draw_reward_levels": [-1.0, -0.25, 0.0],
+    "selection_objective": "lowest weighted loss rate, then highest weighted win rate, then highest weighted draw rate",
+    "evaluation": "fresh matched deals, all seats, 2-8 players, fixed teacher self anchor, MLP champion, and canonical random",
+    "screen_blocks_per_opponent_player_stratum": 100,
+    "confirmation_blocks_per_opponent_player_stratum": 600,
+    "confirmation_confidence": "paired normal 99.9 percent"
+  },
+  "screen_ranking": [
+    {"rank": 1, "name": "l9_03", "gamma": 0.99, "decision_reward": 0.0, "draw_reward": 0.0, "loss_rate": 0.6057535273368606, "win_rate": 0.38011413454270593, "draw_rate": 0.01413233812043336},
+    {"rank": 2, "name": "l9_08", "gamma": 0.9975, "decision_reward": -0.01, "draw_reward": -1.0, "loss_rate": 0.607607772738725, "win_rate": 0.38085934744268074, "draw_rate": 0.011532879818594105},
+    {"rank": 3, "name": "l9_01", "gamma": 0.99, "decision_reward": -0.02, "draw_reward": -1.0, "loss_rate": 0.6082990677752581, "win_rate": 0.37965810027714786, "draw_rate": 0.012042831947593853},
+    {"rank": 4, "name": "l9_05", "gamma": 0.995, "decision_reward": -0.01, "draw_reward": 0.0, "loss_rate": 0.6083396951373141, "win_rate": 0.3798092088687327, "draw_rate": 0.011851095993953136},
+    {"rank": 5, "name": "l9_06", "gamma": 0.995, "decision_reward": 0.0, "draw_reward": -1.0, "loss_rate": 0.611008377425044, "win_rate": 0.37648463088939277, "draw_rate": 0.012506991685563112},
+    {"rank": 6, "name": "control", "gamma": 0.995, "decision_reward": -0.01, "draw_reward": -1.0, "loss_rate": 0.6112113882590073, "win_rate": 0.37560487528344677, "draw_rate": 0.013183736457545982},
+    {"rank": 7, "name": "l9_09", "gamma": 0.9975, "decision_reward": 0.0, "draw_reward": -0.25, "loss_rate": 0.6114072184429327, "win_rate": 0.37661583522297803, "draw_rate": 0.011976946334089189},
+    {"rank": 8, "name": "l9_02", "gamma": 0.99, "decision_reward": -0.01, "draw_reward": -0.25, "loss_rate": 0.6118049886621314, "win_rate": 0.3752050894431847, "draw_rate": 0.012989921894683799},
+    {"rank": 9, "name": "l9_07", "gamma": 0.9975, "decision_reward": -0.02, "draw_reward": 0.0, "loss_rate": 0.611957420005039, "win_rate": 0.3757649281934996, "draw_rate": 0.012277651801461323},
+    {"rank": 10, "name": "l9_04", "gamma": 0.995, "decision_reward": -0.02, "draw_reward": -0.25, "loss_rate": 0.6162482363315697, "win_rate": 0.3728727009322248, "draw_rate": 0.010879062736205595}
+  ],
+  "orthogonal_main_effect_means": {
+    "gamma": {
+      "0.99": {"loss_rate": 0.6086191945914167, "win_rate": 0.3783257747543462},
+      "0.995": {"loss_rate": 0.611865436297976, "win_rate": 0.3763888468967835},
+      "0.9975": {"loss_rate": 0.6103241370622322, "win_rate": 0.37774670361971946}
+    },
+    "decision_reward": {
+      "-0.02": {"loss_rate": 0.6121682413706223, "win_rate": 0.3760985764676241},
+      "-0.01": {"loss_rate": 0.6092508188460568, "win_rate": 0.37862454858486605},
+      "0.0": {"loss_rate": 0.6093897077349457, "win_rate": 0.3777382002183589}
+    },
+    "draw_reward": {
+      "-1.0": {"loss_rate": 0.6089717393130091, "win_rate": 0.3790006928697405},
+      "-0.25": {"loss_rate": 0.6131534811455446, "win_rate": 0.3748978751994625},
+      "0.0": {"loss_rate": 0.6086835474930713, "win_rate": 0.37856275720164606}
+    }
+  },
+  "screen_winner": {
+    "name": "l9_03",
+    "gamma": 0.99,
+    "decision_reward": 0.0,
+    "draw_reward": 0.0,
+    "checkpoint": "live_training/teacher_reward_sweep_20260815/l9_03/training/latest.pt",
+    "checkpoint_sha256": "84a08f5d1f2be80d302106ca9af6f2bcb0ee608a1b78d106184d08d14dfa56ef"
+  },
+  "confirmation": {
+    "winner_vs_control": {
+      "loss_avoidance_delta": 0.0013087889476776082,
+      "loss_avoidance_ci99_9": [-0.005105439573983472, 0.007723017469338688],
+      "win_rate_delta": -0.00008928571428573617,
+      "win_rate_ci99_9": [-0.006425600110101054, 0.006247028681529582],
+      "draw_rate_delta": 0.0013980746619635508,
+      "draw_rate_ci99_9": [0.00014636991871767088, 0.002649779405209431],
+      "loss_reduction_confirmed": false
+    },
+    "winner_vs_teacher": {
+      "loss_avoidance_delta": 0.00008095028134702531,
+      "loss_avoidance_ci99_9": [-0.006409329606134622, 0.006571230168828672],
+      "win_rate_delta": 0.00015926555807505016,
+      "win_rate_ci99_9": [-0.006164404579937522, 0.006482935696087622],
+      "draw_rate_delta": -0.00007831527672797281,
+      "draw_rate_ci99_9": [-0.0020869629808900883, 0.0019303324274341426],
+      "loss_reduction_confirmed": false
+    }
+  },
+  "conclusion": {
+    "best_development_screen_contract": {"gamma": 0.99, "decision_reward": 0.0, "draw_reward": 0.0},
+    "confirmed_better_than_control": false,
+    "confirmed_better_than_teacher": false,
+    "promotion_performed": false,
+    "recommendation": "Keep the existing teacher/default unpromoted. If continuing, run longer independent training for the screen winner and the gamma-0.9975 win-rate leader before another fixed fresh confirmation."
+  },
+  "full_evidence": "live_training/teacher_reward_sweep_20260815/reward_sweep_manifest.json"
+}

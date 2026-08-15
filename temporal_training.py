@@ -109,12 +109,18 @@ def _gather_native_decisions(
 def _discounted_returns(
     step_count: int,
     *,
-    won: bool,
+    won: bool | None,
     gamma: float = 0.97,
+    decision_reward: float = -0.01,
+    draw_reward: float = -0.75,
 ) -> torch.Tensor:
-    rewards = torch.full((step_count,), -0.01, dtype=torch.float32)
+    rewards = torch.full(
+        (step_count,), float(decision_reward), dtype=torch.float32
+    )
     if step_count:
-        rewards[-1] += 1.0 if won else -1.0
+        rewards[-1] += (
+            float(draw_reward) if won is None else (1.0 if won else -1.0)
+        )
     returns = torch.empty_like(rewards)
     running = torch.tensor(0.0)
     for index in reversed(range(step_count)):
@@ -126,9 +132,11 @@ def _discounted_returns(
 def _gae_targets(
     trajectory: Sequence[TrajectoryStep],
     *,
-    won: bool,
+    won: bool | None,
     gamma: float,
     gae_lambda: float,
+    decision_reward: float = -0.01,
+    draw_reward: float = -0.75,
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """Return fixed behavior-value targets and generalized advantages."""
     behavior_values = torch.tensor(
@@ -139,15 +147,19 @@ def _gae_targets(
         won=won,
         gamma=gamma,
         gae_lambda=gae_lambda,
+        decision_reward=decision_reward,
+        draw_reward=draw_reward,
     )
 
 
 def _gae_targets_from_values(
     behavior_values: torch.Tensor,
     *,
-    won: bool,
+    won: bool | None,
     gamma: float,
     gae_lambda: float,
+    decision_reward: float = -0.01,
+    draw_reward: float = -0.75,
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """Compute short CPU recurrences without thousands of tensor dispatches."""
     values = behavior_values.detach().to(device="cpu", dtype=torch.float32)
@@ -156,6 +168,8 @@ def _gae_targets_from_values(
         won=won,
         gamma=gamma,
         gae_lambda=gae_lambda,
+        decision_reward=decision_reward,
+        draw_reward=draw_reward,
     )
     return torch.from_numpy(returns_array), torch.from_numpy(advantages_array)
 
@@ -163,9 +177,11 @@ def _gae_targets_from_values(
 def _gae_arrays_from_values(
     source: np.ndarray,
     *,
-    won: bool,
+    won: bool | None,
     gamma: float,
     gae_lambda: float,
+    decision_reward: float = -0.01,
+    draw_reward: float = -0.75,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Return float32 GAE arrays while preserving the scalar update order."""
     source = np.asarray(source, dtype=np.float32)
@@ -174,8 +190,10 @@ def _gae_arrays_from_values(
     advantages_array = np.empty_like(source)
     discount = np.float32(gamma)
     trace_discount = np.float32(gamma * gae_lambda)
-    base_reward = np.float32(-0.01)
-    terminal_reward = np.float32(1.0 if won else -1.0)
+    base_reward = np.float32(decision_reward)
+    terminal_reward = np.float32(
+        draw_reward if won is None else (1.0 if won else -1.0)
+    )
     next_value = np.float32(0.0)
     running_advantage = np.float32(0.0)
     last_index = source.size - 1
@@ -220,6 +238,8 @@ def _prepare_packed_ppo_batch(
     *,
     gamma: float,
     gae_lambda: float | None,
+    decision_reward: float,
+    draw_reward: float,
     padded_batch_size: int | None,
     power_of_two_sequence_padding: bool,
 ) -> PreparedPPOBatch:
@@ -263,7 +283,11 @@ def _prepare_packed_ppo_batch(
         if gae_lambda is None:
             returns.append(
                 _discounted_returns(
-                    len(trajectory), won=won, gamma=gamma
+                    len(trajectory),
+                    won=won,
+                    gamma=gamma,
+                    decision_reward=decision_reward,
+                    draw_reward=draw_reward,
                 ).numpy()
             )
         else:
@@ -272,6 +296,8 @@ def _prepare_packed_ppo_batch(
                 won=won,
                 gamma=gamma,
                 gae_lambda=gae_lambda,
+                decision_reward=decision_reward,
+                draw_reward=draw_reward,
             )
             returns.append(target)
             advantages.append(fixed_advantages)
@@ -305,10 +331,12 @@ def _prepare_packed_ppo_batch(
 
 def _prepare_ppo_batch(
     policy,
-    episodes: Sequence[tuple[Sequence[TrajectoryStep], bool]],
+    episodes: Sequence[tuple[Sequence[TrajectoryStep], bool | None]],
     *,
     gamma: float,
     gae_lambda: float | None,
+    decision_reward: float = -0.01,
+    draw_reward: float = -0.75,
     padded_batch_size: int | None,
     power_of_two_sequence_padding: bool,
 ) -> PreparedPPOBatch:
@@ -319,6 +347,8 @@ def _prepare_ppo_batch(
             episodes,
             gamma=gamma,
             gae_lambda=gae_lambda,
+            decision_reward=decision_reward,
+            draw_reward=draw_reward,
             padded_batch_size=padded_batch_size,
             power_of_two_sequence_padding=power_of_two_sequence_padding,
         )
@@ -343,7 +373,11 @@ def _prepare_ppo_batch(
             )
             if gae_lambda is None:
                 targets = _discounted_returns(
-                    len(trajectory), won=won, gamma=gamma
+                    len(trajectory),
+                    won=won,
+                    gamma=gamma,
+                    decision_reward=decision_reward,
+                    draw_reward=draw_reward,
                 )
             else:
                 targets, fixed_advantages = _gae_targets_from_values(
@@ -351,6 +385,8 @@ def _prepare_ppo_batch(
                     won=won,
                     gamma=gamma,
                     gae_lambda=gae_lambda,
+                    decision_reward=decision_reward,
+                    draw_reward=draw_reward,
                 )
                 advantages.append(fixed_advantages)
             returns.append(targets)
@@ -368,7 +404,11 @@ def _prepare_ppo_batch(
         decision_indices.append(indices)
         if gae_lambda is None:
             targets = _discounted_returns(
-                len(trajectory), won=won, gamma=gamma
+                len(trajectory),
+                won=won,
+                gamma=gamma,
+                decision_reward=decision_reward,
+                draw_reward=draw_reward,
             )
         else:
             targets, fixed_advantages = _gae_targets(
@@ -376,6 +416,8 @@ def _prepare_ppo_batch(
                 won=won,
                 gamma=gamma,
                 gae_lambda=gae_lambda,
+                decision_reward=decision_reward,
+                draw_reward=draw_reward,
             )
             advantages.append(fixed_advantages)
         returns.append(targets)
@@ -681,7 +723,7 @@ def ppo_update(
 
 def ppo_update_batched(
     policy,
-    episodes: Sequence[tuple[Sequence[TrajectoryStep], bool]],
+    episodes: Sequence[tuple[Sequence[TrajectoryStep], bool | None]],
     optimizer: torch.optim.Optimizer,
     *,
     clip_ratio: float = 0.2,
@@ -689,6 +731,8 @@ def ppo_update_batched(
     entropy_coefficient: float = 0.01,
     gamma: float = 0.97,
     gae_lambda: float | None = None,
+    decision_reward: float = -0.01,
+    draw_reward: float = -0.75,
     normalize_advantages: bool = False,
     padded_batch_size: int | None = None,
     power_of_two_sequence_padding: bool = False,
@@ -743,7 +787,11 @@ def ppo_update_batched(
         old_log_probability_rows.append(tuple(old_log_probabilities))
         if gae_lambda is None:
             targets = _discounted_returns(
-                len(trajectory), won=won, gamma=gamma
+                len(trajectory),
+                won=won,
+                gamma=gamma,
+                decision_reward=decision_reward,
+                draw_reward=draw_reward,
             )
         else:
             targets, advantages = _gae_targets(
@@ -751,6 +799,8 @@ def ppo_update_batched(
                 won=won,
                 gamma=gamma,
                 gae_lambda=gae_lambda,
+                decision_reward=decision_reward,
+                draw_reward=draw_reward,
             )
             advantage_rows.append(
                 advantages.to(
@@ -880,7 +930,7 @@ def ppo_update_batched(
 
 def ppo_update_batched_epochs(
     policy,
-    episodes: Sequence[tuple[Sequence[TrajectoryStep], bool]],
+    episodes: Sequence[tuple[Sequence[TrajectoryStep], bool | None]],
     optimizer: torch.optim.Optimizer,
     *,
     update_epochs: int = 4,
@@ -892,6 +942,8 @@ def ppo_update_batched_epochs(
     entropy_coefficient: float = 0.01,
     gamma: float = 0.97,
     gae_lambda: float | None = 0.95,
+    decision_reward: float = -0.01,
+    draw_reward: float = -0.75,
     normalize_advantages: bool = True,
     diagnostic_minibatch_trajectories: int | None = None,
     early_stop_diagnostic_trajectories: int | None = None,
@@ -932,6 +984,8 @@ def ppo_update_batched_epochs(
             entropy_coefficient=entropy_coefficient,
             gamma=gamma,
             gae_lambda=gae_lambda,
+            decision_reward=decision_reward,
+            draw_reward=draw_reward,
             normalize_advantages=normalize_advantages,
             early_stop_diagnostic_trajectories=(
                 early_stop_diagnostic_trajectories
@@ -976,6 +1030,8 @@ def ppo_update_batched_epochs(
                     entropy_coefficient=entropy_coefficient,
                     gamma=gamma,
                     gae_lambda=gae_lambda,
+                    decision_reward=decision_reward,
+                    draw_reward=draw_reward,
                     normalize_advantages=normalize_advantages,
                     padded_batch_size=(
                         minibatch_trajectories
@@ -1006,6 +1062,9 @@ def ppo_update_batched_epochs(
             policy,
             diagnostic_episodes,
             clip_ratio=clip_ratio,
+            gamma=gamma,
+            decision_reward=decision_reward,
+            draw_reward=draw_reward,
             minibatch_trajectories=diagnostic_minibatch_trajectories,
             static_compile_padding=static_compile_padding,
         )
@@ -1025,6 +1084,9 @@ def ppo_update_batched_epochs(
                 policy,
                 usable,
                 clip_ratio=clip_ratio,
+                gamma=gamma,
+                decision_reward=decision_reward,
+                draw_reward=draw_reward,
                 minibatch_trajectories=(
                     diagnostic_minibatch_trajectories
                 ),
@@ -1093,6 +1155,8 @@ def _ppo_update_prepared_epochs(
     entropy_coefficient: float,
     gamma: float,
     gae_lambda: float | None,
+    decision_reward: float,
+    draw_reward: float,
     normalize_advantages: bool,
     early_stop_diagnostic_trajectories: int | None,
     static_compile_padding: bool,
@@ -1120,6 +1184,8 @@ def _ppo_update_prepared_epochs(
             episode_batch,
             gamma=gamma,
             gae_lambda=gae_lambda,
+            decision_reward=decision_reward,
+            draw_reward=draw_reward,
             padded_batch_size=(
                 minibatch_trajectories if static_compile_padding else None
             ),
@@ -1244,9 +1310,12 @@ def _ppo_update_prepared_epochs(
 
 def evaluate_ppo_drift_batched_minibatches(
     policy,
-    episodes: Sequence[tuple[Sequence[TrajectoryStep], bool]],
+    episodes: Sequence[tuple[Sequence[TrajectoryStep], bool | None]],
     *,
     clip_ratio: float = 0.2,
+    gamma: float = 0.97,
+    decision_reward: float = -0.01,
+    draw_reward: float = -0.75,
     minibatch_trajectories: int | None = None,
     static_compile_padding: bool = False,
 ) -> dict[str, float]:
@@ -1256,6 +1325,9 @@ def evaluate_ppo_drift_batched_minibatches(
             policy,
             episodes,
             clip_ratio=clip_ratio,
+            gamma=gamma,
+            decision_reward=decision_reward,
+            draw_reward=draw_reward,
             padded_batch_size=(
                 minibatch_trajectories
                 if static_compile_padding
@@ -1270,6 +1342,9 @@ def evaluate_ppo_drift_batched_minibatches(
             policy,
             episodes[start : start + minibatch_trajectories],
             clip_ratio=clip_ratio,
+            gamma=gamma,
+            decision_reward=decision_reward,
+            draw_reward=draw_reward,
             _include_moments=True,
             padded_batch_size=(
                 minibatch_trajectories if static_compile_padding else None
@@ -1308,9 +1383,12 @@ def evaluate_ppo_drift_batched_minibatches(
 
 def evaluate_ppo_drift(
     policy,
-    episodes: Sequence[tuple[Sequence[TrajectoryStep], bool]],
+    episodes: Sequence[tuple[Sequence[TrajectoryStep], bool | None]],
     *,
     clip_ratio: float = 0.2,
+    gamma: float = 0.97,
+    decision_reward: float = -0.01,
+    draw_reward: float = -0.75,
 ) -> dict[str, float]:
     """Comparable post-update diagnostics against the collected behavior."""
     log_ratios = []
@@ -1322,7 +1400,11 @@ def evaluate_ppo_drift(
             if not trajectory:
                 continue
             returns = _discounted_returns(
-                len(trajectory), won=won
+                len(trajectory),
+                won=won,
+                gamma=gamma,
+                decision_reward=decision_reward,
+                draw_reward=draw_reward,
             ).to(next(policy.parameters()).device)
             state = policy.initial_state()
             for index, old_step in enumerate(trajectory):
@@ -1372,9 +1454,12 @@ def evaluate_ppo_drift(
 
 def evaluate_ppo_drift_batched(
     policy,
-    episodes: Sequence[tuple[Sequence[TrajectoryStep], bool]],
+    episodes: Sequence[tuple[Sequence[TrajectoryStep], bool | None]],
     *,
     clip_ratio: float = 0.2,
+    gamma: float = 0.97,
+    decision_reward: float = -0.01,
+    draw_reward: float = -0.75,
     _include_moments: bool = False,
     padded_batch_size: int | None = None,
     power_of_two_sequence_padding: bool = False,
@@ -1414,7 +1499,13 @@ def evaluate_ppo_drift_batched(
         decision_indices.append(indices)
         legal_masks.extend(masks)
         returns.append(
-            _discounted_returns(len(trajectory), won=won).to(
+            _discounted_returns(
+                len(trajectory),
+                won=won,
+                gamma=gamma,
+                decision_reward=decision_reward,
+                draw_reward=draw_reward,
+            ).to(
                 device=parameter.device,
                 dtype=parameter.dtype,
             )

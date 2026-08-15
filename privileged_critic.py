@@ -405,15 +405,19 @@ def capture_privileged_snapshot(
 def discounted_returns(
     decision_count: int,
     *,
-    won: bool,
+    won: bool | None,
     gamma: float = DEFAULT_GAMMA,
+    decision_reward: float = -0.01,
+    draw_reward: float = -0.75,
 ) -> np.ndarray:
     """Match the temporal PPO terminal and per-decision reward contract."""
 
     if decision_count < 1:
         return np.empty(0, dtype=np.float32)
-    rewards = np.full(decision_count, -0.01, dtype=np.float32)
-    rewards[-1] += 1.0 if won else -1.0
+    rewards = np.full(decision_count, decision_reward, dtype=np.float32)
+    rewards[-1] += (
+        draw_reward if won is None else (1.0 if won else -1.0)
+    )
     result = np.empty_like(rewards)
     running = 0.0
     for index in range(decision_count - 1, -1, -1):
@@ -456,12 +460,14 @@ def discounted_return_targets(
 def episode_from_snapshots(
     snapshots: Sequence[PrivilegedSnapshot],
     *,
-    won: bool,
+    won: bool | None,
     deal_seed: int,
     seat: int,
     player_count: int,
     gamma: float = DEFAULT_GAMMA,
-) -> dict[str, np.ndarray | int | bool]:
+    decision_reward: float = -0.01,
+    draw_reward: float = -0.75,
+) -> dict[str, np.ndarray | int | bool | None]:
     """Stack one player's causal snapshots and attach post-game targets."""
 
     if not snapshots:
@@ -486,7 +492,7 @@ def episode_from_snapshots(
         "actor_probabilities",
         "actor_memory",
     )
-    result: dict[str, np.ndarray | int | bool] = {
+    result: dict[str, np.ndarray | int | bool | None] = {
         name: np.stack([getattr(item, name) for item in snapshots])
         for name in fields
     }
@@ -506,16 +512,20 @@ def episode_from_snapshots(
                 [item.public_value for item in snapshots], dtype=np.float32
             ),
             "returns": discounted_returns(
-                len(snapshots), won=won, gamma=gamma
+                len(snapshots),
+                won=won,
+                gamma=gamma,
+                decision_reward=decision_reward,
+                draw_reward=draw_reward,
             ),
-            "win_target": np.full(len(snapshots), won, dtype=np.bool_),
+            "win_target": np.full(len(snapshots), won is True, dtype=np.bool_),
             "remaining_decisions": np.arange(
                 len(snapshots), 0, -1, dtype=np.uint16
             ),
             "deal_seed": int(deal_seed),
             "seat": int(seat),
             "player_count": int(player_count),
-            "won": bool(won),
+            "won": won,
         }
     )
     return result
@@ -2088,9 +2098,11 @@ def critic_loss(
 
 
 def collate_privileged_ppo_episodes(
-    episodes: Sequence[tuple[Sequence[object], bool]],
+    episodes: Sequence[tuple[Sequence[object], bool | None]],
     *,
     gamma: float = DEFAULT_GAMMA,
+    decision_reward: float = -0.01,
+    draw_reward: float = -0.75,
     device: str | torch.device = "cpu",
 ) -> tuple[dict[str, torch.Tensor], torch.Tensor]:
     """Materialize snapshots retained by the opt-in PPO rollout collector."""
@@ -2111,11 +2123,13 @@ def collate_privileged_ppo_episodes(
         rows.append(
             episode_from_snapshots(
                 snapshots,
-                won=bool(won),
+                won=won,
                 deal_seed=episode_index,
                 seat=0,
                 player_count=player_count,
                 gamma=gamma,
+                decision_reward=decision_reward,
+                draw_reward=draw_reward,
             )
         )
     if not rows:
@@ -2147,13 +2161,15 @@ def collate_privileged_ppo_episodes(
 
 def update_privileged_critic_from_ppo(
     model: nn.Module,
-    episodes: Sequence[tuple[Sequence[object], bool]],
+    episodes: Sequence[tuple[Sequence[object], bool | None]],
     optimizer: torch.optim.Optimizer,
     *,
     update_epochs: int = 4,
     minibatch_trajectories: int = 32,
     seed: int = 0,
     gamma: float = DEFAULT_GAMMA,
+    decision_reward: float = -0.01,
+    draw_reward: float = -0.75,
     win_coefficient: float = 0.15,
     remaining_coefficient: float = 0.05,
 ) -> dict[str, object]:
@@ -2184,7 +2200,11 @@ def update_privileged_critic_from_ppo(
                 for index in order[start : start + minibatch_trajectories]
             ]
             batch, mask = collate_privileged_ppo_episodes(
-                selected, gamma=gamma, device=device
+                selected,
+                gamma=gamma,
+                decision_reward=decision_reward,
+                draw_reward=draw_reward,
+                device=device,
             )
             optimizer.zero_grad(set_to_none=True)
             outputs = model(batch, mask=mask)
