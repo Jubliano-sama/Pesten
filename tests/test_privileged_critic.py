@@ -245,6 +245,14 @@ def test_trace_replay_reconstructs_every_current_seat_episode():
         assert np.all(episode["player_actor_memory_mask"][:, :3])
 
 
+def test_privileged_returns_prefer_default_draw_to_loss():
+    loss = discounted_returns(2, won=False, gamma=1.0)
+    draw = discounted_returns(2, won=None, gamma=1.0)
+
+    assert np.allclose(loss, np.asarray([-1.02, -1.01], dtype=np.float32))
+    assert np.allclose(draw, np.asarray([-0.77, -0.76], dtype=np.float32))
+
+
 def synthetic_snapshots():
     engine = make_engine(seed=992, players=3)
     policy = TinyCausalPolicy()

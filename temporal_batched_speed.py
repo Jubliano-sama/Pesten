@@ -858,7 +858,7 @@ def _collect_scalar_tree_game(
     deal_seed: int,
     player_count: int,
     max_turns: int,
-) -> tuple[list[tuple[Sequence[TrajectoryStep], bool]], int]:
+) -> tuple[list[tuple[Sequence[TrajectoryStep], bool | None]], int]:
     np.random.seed(deal_seed)
     random.seed(deal_seed)
     current_factory = temporal_agent_factory(
@@ -872,7 +872,8 @@ def _collect_scalar_tree_game(
     match = game.Game(factories)
     turns, winner = match.auto_simulate(max_turns=max_turns)
     trajectory = tuple(match.players[current_seat].trajectory)
-    return [(trajectory, winner == current_seat)], turns, winner
+    outcome = None if winner is None else winner == current_seat
+    return [(trajectory, outcome)], turns, winner
 
 
 def _make_vector_layout(
@@ -1039,7 +1040,7 @@ def collect_league_batch_batched(
     privileged_critic: object | None = None,
     capture_privileged_snapshots: bool = False,
     max_public_events: int | None = None,
-) -> tuple[list[tuple[Sequence[TrajectoryStep], bool]], dict]:
+) -> tuple[list[tuple[Sequence[TrajectoryStep], bool | None]], dict]:
     """Collect an explicit league schedule with batched neural decisions.
 
     The default retains the frozen 40/20/20/10/10 equivalence benchmark.
@@ -1126,7 +1127,7 @@ def collect_league_batch_batched(
         for vector, absolute in enumerate(vector_absolute_indices)
     }
     episodes_by_game: dict[
-        int, list[tuple[Sequence[TrajectoryStep], bool]]
+        int, list[tuple[Sequence[TrajectoryStep], bool | None]]
     ] = {}
     contributions = Counter()
     game_counts = Counter()
@@ -1419,7 +1420,8 @@ def collect_league_batch_batched(
             game_episodes = []
             for seat in current_seats:
                 trajectory = tuple(runtimes[(vector_index, seat)].trajectory)
-                game_episodes.append((trajectory, winner == seat))
+                outcome = None if winner < 0 else winner == seat
+                game_episodes.append((trajectory, outcome))
                 contributions[opponent_type] += len(trajectory)
             episodes_by_game[absolute_index] = game_episodes
             if trace_sink is not None:

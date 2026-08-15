@@ -36,6 +36,8 @@ def test_gamma_0p995_and_matching_mlp_are_defaults(monkeypatch):
     assert args.privileged_critic == DEFAULT_PRIVILEGED_CRITIC
     assert args.privileged_critic.is_file()
     assert args.gamma == DEFAULT_GAMMA
+    assert args.decision_reward == pytest.approx(-0.01)
+    assert args.draw_reward == pytest.approx(-0.75)
     assert args.gamma == pytest.approx(0.995)
     assert args.gamma**20 == pytest.approx(0.9046104802746175)
     _, critic_payload = load_privileged_value_checkpoint(

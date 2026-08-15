@@ -578,7 +578,7 @@ def collect_league_batch(
     player_counts: Sequence[int] | None = None,
     game_index_offset: int = 0,
     max_turns: int = 1000,
-) -> tuple[list[tuple[Sequence[TrajectoryStep], bool]], dict]:
+) -> tuple[list[tuple[Sequence[TrajectoryStep], bool | None]], dict]:
     schedule = league_schedule(mixture)
     player_count_schedule = tuple(player_counts or (2,))
     if not player_count_schedule or any(
@@ -676,7 +676,8 @@ def collect_league_batch(
             )
         for seat in current_seats:
             trajectory = tuple(match.players[seat].trajectory)
-            episodes.append((trajectory, winner == seat))
+            outcome = None if winner is None else winner == seat
+            episodes.append((trajectory, outcome))
             contributions[opponent_type] += len(trajectory)
     metadata = {
         "games": dict(game_counts),

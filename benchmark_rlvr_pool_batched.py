@@ -277,6 +277,12 @@ def _evaluate_task(task: dict) -> dict:
     win_shares = {
         variant: np.zeros(blocks, dtype=np.float64) for variant in variants
     }
+    loss_shares = {
+        variant: np.zeros(blocks, dtype=np.float64) for variant in variants
+    }
+    draw_shares = {
+        variant: np.zeros(blocks, dtype=np.float64) for variant in variants
+    }
     totals = {variant: defaultdict(int) for variant in variants}
     for row, (block, variant, candidate_seat, _) in enumerate(records):
         winner = int(engine.winners[row])
@@ -284,19 +290,25 @@ def _evaluate_task(task: dict) -> dict:
         if winner < 0:
             totals[variant]["draws"] += 1
             scores[variant][block] += 1.0 / players
+            draw_shares[variant][block] += 1.0
         elif winner == candidate_seat:
             totals[variant]["wins"] += 1
             scores[variant][block] += 1.0
             win_shares[variant][block] += 1.0
         else:
             totals[variant]["losses"] += 1
+            loss_shares[variant][block] += 1.0
     for variant in scores:
         scores[variant] /= players
         win_shares[variant] /= players
+        loss_shares[variant] /= players
+        draw_shares[variant] /= players
     arrays = {}
     for variant in variants:
         arrays[f"{variant}_scores"] = scores[variant].tolist()
         arrays[f"{variant}_win_shares"] = win_shares[variant].tolist()
+        arrays[f"{variant}_loss_shares"] = loss_shares[variant].tolist()
+        arrays[f"{variant}_draw_shares"] = draw_shares[variant].tolist()
     return {
         "opponent": task["opponent"],
         "players": players,
@@ -305,6 +317,58 @@ def _evaluate_task(task: dict) -> dict:
             name: dict(values) for name, values in totals.items()
         },
     }
+
+
+def _weighted_outcome_summary(strata: list[dict]) -> dict:
+    """Aggregate matched win/loss/draw rates with the campaign mixture."""
+
+    result = {}
+    for outcome in ("win", "loss", "draw"):
+        before = after = variance = 0.0
+        for row in strata:
+            players = int(row["players"])
+            weight = PLAYER_WEIGHTS[players] / len(OPPONENTS)
+            before_values = np.asarray(
+                row[f"before_{outcome}_shares"], dtype=np.float64
+            )
+            after_values = np.asarray(
+                row[f"after_{outcome}_shares"], dtype=np.float64
+            )
+            if len(before_values) != len(after_values) or not len(before_values):
+                raise ValueError("outcome arrays must be non-empty matched blocks")
+            differences = after_values - before_values
+            before += weight * float(before_values.mean())
+            after += weight * float(after_values.mean())
+            if len(differences) > 1:
+                variance += (
+                    weight
+                    * weight
+                    * float(differences.var(ddof=1))
+                    / len(differences)
+                )
+        delta = after - before
+        standard_error = math.sqrt(variance)
+        interval = [
+            delta - 3.2905267314919255 * standard_error,
+            delta + 3.2905267314919255 * standard_error,
+        ]
+        result[outcome] = {
+            "before_rate": before,
+            "after_rate": after,
+            "delta_after_minus_before": delta,
+            "delta_standard_error": standard_error,
+            "delta_normal_ci99_9": interval,
+        }
+    result["loss_avoidance"] = {
+        "delta_before_minus_after": -result["loss"][
+            "delta_after_minus_before"
+        ],
+        "delta_normal_ci99_9": [
+            -result["loss"]["delta_normal_ci99_9"][1],
+            -result["loss"]["delta_normal_ci99_9"][0],
+        ],
+    }
+    return result
 
 
 def run_batched_pool_benchmark(
@@ -359,6 +423,12 @@ def run_batched_pool_benchmark(
                 "players": chunk["players"],
                 "before_scores": [],
                 "after_scores": [],
+                "before_win_shares": [],
+                "after_win_shares": [],
+                "before_loss_shares": [],
+                "after_loss_shares": [],
+                "before_draw_shares": [],
+                "after_draw_shares": [],
                 "totals": {
                     "before": defaultdict(int),
                     "after": defaultdict(int),
@@ -367,6 +437,11 @@ def run_batched_pool_benchmark(
         )
         target["before_scores"].extend(chunk["before_scores"])
         target["after_scores"].extend(chunk["after_scores"])
+        for variant in ("before", "after"):
+            for outcome in ("win", "loss", "draw"):
+                target[f"{variant}_{outcome}_shares"].extend(
+                    chunk[f"{variant}_{outcome}_shares"]
+                )
         for variant in ("before", "after"):
             for name, value in chunk["totals"][variant].items():
                 target["totals"][variant][name] += value
@@ -383,6 +458,7 @@ def run_batched_pool_benchmark(
     return {
         "strata": strata,
         "weighted_result": _weighted_summary(raw),
+        "weighted_outcomes": _weighted_outcome_summary(raw),
         "opponent_results": _opponent_summaries(raw),
         "elapsed_seconds": time.perf_counter() - started,
     }
