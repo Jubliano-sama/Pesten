@@ -23,6 +23,7 @@ rather than estimate their conditional expectation.
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+from functools import lru_cache
 import math
 from pathlib import Path
 import random
@@ -145,6 +146,7 @@ def _readonly(array: np.ndarray) -> np.ndarray:
     return result
 
 
+@lru_cache(maxsize=256)
 def _relative_seats(
     observer: int,
     player_count: int,
@@ -152,9 +154,9 @@ def _relative_seats(
 ) -> np.ndarray:
     if direction not in (-1, 1):
         raise ValueError("direction must be -1 or 1")
-    return (
+    return _readonly((
         observer + direction * np.arange(player_count, dtype=np.int64)
-    ) % player_count
+    ) % player_count)
 
 
 def flatten_recurrent_state(state: object) -> np.ndarray:
@@ -165,8 +167,34 @@ def flatten_recurrent_state(state: object) -> np.ndarray:
     for part in parts:
         if not isinstance(part, torch.Tensor):
             raise TypeError("recurrent state parts must be tensors")
-        flattened.append(part.detach().float().cpu().reshape(-1).numpy())
-    return _readonly(np.concatenate(flattened).astype(np.float16, copy=False))
+        flattened.append(part.detach().float().cpu().numpy())
+    if len(flattened) == 1:
+        return _readonly(np.ascontiguousarray(flattened[0], dtype=np.float16).reshape(-1))
+    return _readonly(np.concatenate([part.reshape(-1) for part in flattened]).astype(np.float16))
+
+
+@dataclass(slots=True)
+class _EncodedSeatMemory:
+    source: object
+    flat: np.ndarray
+    quantized: np.ndarray
+    scale: float
+
+
+def _encode_seat_memory(state, key, cache) -> _EncodedSeatMemory:
+    if cache is not None:
+        cached = cache.get(key)
+        if cached is not None and cached.source is state:
+            return cached
+    flat = flatten_recurrent_state(state)
+    values = flat.astype(np.float32)
+    maximum = float(np.max(np.abs(values), initial=0.0))
+    scale = maximum / 127.0 if maximum > 0 else 1.0
+    quantized = np.clip(np.rint(values / scale), -127, 127).astype(np.int8)
+    encoded = _EncodedSeatMemory(state, flat, quantized, scale)
+    if cache is not None:
+        cache[key] = encoded
+    return encoded
 
 
 @dataclass(frozen=True, slots=True)
@@ -215,11 +243,16 @@ def _padded_top_first(
 
 
 def _card_counts(cards: np.ndarray, count: int, dtype) -> np.ndarray:
-    valid = np.asarray(cards[: int(count)], dtype=np.int64)
-    valid = valid[(valid >= 0) & (valid < CARD_TYPES)]
-    return _readonly(
-        np.bincount(valid, minlength=CARD_TYPES).astype(dtype, copy=False)
-    )
+    valid = cards[: int(count)]
+    if valid.dtype == np.int8:
+        # Engine piles use signed bytes. Negative padding lands above every
+        # valid card ID when viewed unsigned and is excluded by the slice.
+        valid = valid.view(np.uint8)
+    else:
+        valid = np.asarray(valid, dtype=np.int64)
+        valid = valid[(valid >= 0) & (valid < CARD_TYPES)]
+    counts = np.bincount(valid, minlength=CARD_TYPES)[:CARD_TYPES]
+    return _readonly(counts.astype(dtype, copy=False))
 
 
 def capture_privileged_snapshot(
@@ -233,6 +266,7 @@ def capture_privileged_snapshot(
     actor_memory: object,
     public_value: float,
     all_actor_memories: Sequence[object | None] | None = None,
+    rollout_memory_cache: dict[tuple[int, int], _EncodedSeatMemory] | None = None,
 ) -> PrivilegedSnapshot:
     """Capture the exact environment state before the current action.
 
@@ -240,6 +274,10 @@ def capture_privileged_snapshot(
     current decision observation, but must be captured before sampling or
     applying its action.  They therefore describe the behavior policy without
     becoming an action-dependent baseline.
+
+    The vector collector installs a fresh state tuple whenever a seat acts.
+    It may pass a per-collection cache to reuse other seats' immutable state
+    encodings until their next decision. Standalone callers need no cache.
     """
 
     game_index = int(game_index)
@@ -260,9 +298,9 @@ def capture_privileged_snapshot(
             "actor probabilities must have shape "
             f"({TEMPORAL_ACTION_COUNT},)"
         )
-    if not np.isfinite(probabilities).all() or not np.isclose(
-        probabilities.sum(), 1.0, atol=2e-4
-    ):
+    # A nonfinite entry makes the sum nonfinite. This scalar comparison
+    # preserves np.isclose(sum, 1, atol=2e-4) including its default rtol.
+    if not abs(float(probabilities.sum()) - 1.0) <= 2e-4 + 1e-5:
         raise ValueError("actor probabilities must be finite and sum to one")
 
     direction = int(engine.direction[game_index])
@@ -287,7 +325,8 @@ def capture_privileged_snapshot(
         for index in relative
     ]
 
-    flat_actor_memory = flatten_recurrent_state(actor_memory)
+    own_memory = _encode_seat_memory(actor_memory, (game_index, observer), rollout_memory_cache)
+    flat_actor_memory = own_memory.flat
     if all_actor_memories is None:
         all_actor_memories = tuple(
             actor_memory if seat == observer else None
@@ -304,18 +343,16 @@ def capture_privileged_snapshot(
         state = all_actor_memories[int(absolute_index)]
         if state is None:
             continue
-        flattened = flatten_recurrent_state(state).astype(np.float32)
-        if flattened.shape != flat_actor_memory.shape:
+        encoded = own_memory if state is actor_memory else _encode_seat_memory(
+            state, (game_index, int(absolute_index)), rollout_memory_cache
+        )
+        if encoded.flat.shape != flat_actor_memory.shape:
             # A historical opponent may legitimately use another recurrent
             # width.  The fixed-width current critic cannot encode that state;
             # leave its explicit mask false rather than corrupting dimensions.
             continue
-        maximum = float(np.max(np.abs(flattened), initial=0.0))
-        scale = maximum / 127.0 if maximum > 0 else 1.0
-        player_memories[relative_index] = np.clip(
-            np.rint(flattened / scale), -127, 127
-        ).astype(np.int8)
-        player_memory_scales[relative_index] = scale
+        player_memories[relative_index] = encoded.quantized
+        player_memory_scales[relative_index] = encoded.scale
         player_memory_mask[relative_index] = True
 
     draw_length = int(engine.draw_counts[game_index])
@@ -368,10 +405,9 @@ def capture_privileged_snapshot(
     scalar_values[31] = float(
         engine.turn_started_with_one_card[game_index]
     )
-    sizes = engine.hand_sizes[game_index, :player_count].astype(np.float32)
-    scalar_values[32] = float(sizes[observer]) / 54.0
-    opponents = np.delete(sizes, observer)
-    scalar_values[33] = float(opponents.min()) / 54.0
+    sizes = hand_lengths[:player_count]
+    scalar_values[32] = float(sizes[0]) / 54.0
+    scalar_values[33] = float(sizes[1:].min()) / 54.0
     scalar_values[34] = float(sizes.sum()) / MAX_PILE_CARDS
 
     return PrivilegedSnapshot(
@@ -1860,13 +1896,12 @@ class PrivilegedCriticRuntime:
             raise ValueError("a critic stream may advance at most once per batch")
         device = next(self.model.parameters()).device
         batch = snapshots_to_model_batch(snapshots, device=device)
-        states = [
-            self.states.get(
-                stream_id,
-                self.model.initial_state(1, device=device),
-            )
-            for stream_id in stream_ids
-        ]
+        if self.model.backbone_name in ("gru", "lstm"):
+            states = [
+                self.states[stream_id] if stream_id in self.states
+                else self.model.initial_state(1, device=device)
+                for stream_id in stream_ids
+            ]
         if self.model.backbone_name == "gru":
             stacked_state = torch.cat(states, dim=1)  # type: ignore[arg-type]
         elif self.model.backbone_name == "lstm":
@@ -2135,7 +2170,10 @@ def collate_privileged_ppo_episodes(
     if not rows:
         raise ValueError("privileged critic update requires non-empty episodes")
     max_length = max(len(row["returns"]) for row in rows)
-    mask = torch.zeros(len(rows), max_length, dtype=torch.bool, device=device)
+    lengths = np.asarray([len(row["returns"]) for row in rows])
+    mask = torch.from_numpy(
+        np.arange(max_length)[None, :] < lengths[:, None]
+    ).to(device=device)
     batch = {}
     for name in DATA_FIELDS:
         sample = np.asarray(rows[0][name])
@@ -2145,17 +2183,17 @@ def collate_privileged_ppo_episodes(
             in ("hand_order", "draw_order", "discard_order", "recent_plays")
             else 0
         )
-        target = torch.full(
+        # Pad on the host before transferring. Per-trajectory CUDA assignment
+        # launches hundreds of tiny transfers/copies per critic minibatch.
+        target = np.full(
             (len(rows), max_length, *sample.shape[1:]),
             fill_value=fill,
-            dtype=torch.from_numpy(sample).dtype,
-            device=device,
+            dtype=sample.dtype,
         )
         for row_index, row in enumerate(rows):
-            values = torch.as_tensor(row[name], device=device)
+            values = np.asarray(row[name])
             target[row_index, : len(values)] = values
-            mask[row_index, : len(values)] = True
-        batch[name] = target
+        batch[name] = torch.from_numpy(target).to(device=device)
     return batch, mask
 
 

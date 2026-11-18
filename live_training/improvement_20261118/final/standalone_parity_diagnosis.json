@@ -1,0 +1,96 @@
+{
+  "candidate": "live_training/improvement_20261118/recipe/belief_model1/branch_195.pt",
+  "candidate_sha256": "e887de486f6b97189f2b579ebffb1de35f5f6782140d44e18e515a298c1cc00d",
+  "freeze_manifest_sha256": "6df501340e6a0e0be88aa5395cf39eef4a758a0d6d3d628e3e301c9324731aae",
+  "parity_sha256": "316b1eda5c4e2d04314b47dddb365e3a1c6e516712bf4ab9e2a1d0da99f66f31",
+  "games_per_engine": 54,
+  "matched_outcome_blocks": 18,
+  "turn_mismatch_blocks": 1,
+  "affected_block": {
+    "opponent": "canonical_random",
+    "players": 3,
+    "deal_seed": 2421811053,
+    "scalar": {
+      "wins": 2,
+      "losses": 1,
+      "draws": 0,
+      "turns": 153
+    },
+    "batched": {
+      "wins": 2,
+      "losses": 1,
+      "draws": 0,
+      "turns": 152
+    }
+  },
+  "first_differing_candidate_decision": {
+    "seat": 0,
+    "decision_index": 1,
+    "scalar_action": 36,
+    "batched_action": 0,
+    "same_inputs": true,
+    "same_token": true,
+    "legal": [
+      0,
+      36,
+      54
+    ],
+    "scalar_logits": [
+      13.853294372558594,
+      13.853296279907227,
+      -17.057870864868164
+    ],
+    "batched_logits": [
+      13.853294372558594,
+      13.853294372558594,
+      -17.057870864868164
+    ],
+    "byte_identical_incoming_states": [
+      true,
+      true,
+      true,
+      true
+    ],
+    "state_max_errors": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "earlier_decisions_match": 1
+  },
+  "action_names": {
+    "0": "ace of hearts",
+    "36": "ace of clubs",
+    "54": "pass"
+  },
+  "scalar_decisions_for_focal_seats": [
+    26,
+    18,
+    19
+  ],
+  "batched_decisions_for_focal_seats": [
+    26,
+    18,
+    19
+  ],
+  "scalar_winner_and_turns_by_focal_seat": [
+    {
+      "focal_seat": 0,
+      "winner": 0,
+      "turns": 59
+    },
+    {
+      "focal_seat": 1,
+      "winner": 2,
+      "turns": 45
+    },
+    {
+      "focal_seat": 2,
+      "winner": 2,
+      "turns": 49
+    }
+  ],
+  "conclusion": "Two legal-card logits differ by two float32 ULPs in scalar inference and round to a tie in a batched forward with the same token and bit-identical incoming recurrent tensors. Masked argmax selects the first tied action. All selected-policy win/loss/draw counts match in the 18 parity blocks; one block differs by one turn.",
+  "official_supplementary_evaluator": "Scalar game.Game with scalar native policy.step for every seat, so all official decisions use the selected playable policy’s single-seat inference shape."
+}

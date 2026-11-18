@@ -1,0 +1,15 @@
+{
+  "objective": "Supplementary scalar evaluation against mixed tables. Excluded from selection and from the six-cell primary metric.",
+  "base_seed": 1524837801,
+  "stride": 1000000,
+  "independent_deals_per_roster": 128,
+  "rosters": [
+    {"best": 1, "random": 1, "first_seed": 1524837801, "games_per_deal_per_arm": 6},
+    {"best": 1, "random": 2, "first_seed": 1525837801, "games_per_deal_per_arm": 12},
+    {"best": 2, "random": 1, "first_seed": 1526837801, "games_per_deal_per_arm": 12}
+  ],
+  "game": "game.Game.auto_simulate, 1000-turn limit, actual randomAgent.AgentRandom, same deterministic temporal factories as the primary evaluation.",
+  "pairing": "Use each focal seat and every distinct clockwise ordering of its peers. Reset both the Python and NumPy RNGs to the deal seed immediately before each game in each arm.",
+  "outcome": "Focal wins divided by all games, including draws. Report candidate minus baseline, with pointwise two-sided 95% paired normal intervals over independent deals within each roster.",
+  "total_games": 7680
+}

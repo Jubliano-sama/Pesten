@@ -1,0 +1,806 @@
+{
+  "torch": "2.13.0+cu130",
+  "python": "3.12.12",
+  "gpu": "NVIDIA GeForce RTX 3090",
+  "cpus": "0-3,8-11",
+  "actor_sha256": "f8f0aece2d759eadc60b3cbccca30c321c01da13322f7cae511a73c8da3a9f93",
+  "source_hashes": {
+    "packed_puffer_rollout.py": {
+      "before": "611fd07c4f60ed397925e1ccb9e7ab96dffd668916c2f81d131483fe78a1661c",
+      "after": "27d1828e1ef0d6f4f820152ff3832dc9f5a7a4d851d811912065a3e946e2afb4"
+    },
+    "temporal_batched_speed.py": {
+      "before": "f684546918acc7042573badedcb3968948b3cb4eafd2f5d672e07688b01092b9",
+      "after": "110ed40ce4c6737df03965f0668b042e503316da46bf241042f5beb73ea5b401"
+    },
+    "temporal_puffer_v4.py": {
+      "before": "302f45f674dfb1550e6ee062f232321df21ed185cec4f7d1c1740499f335a1f7",
+      "after": "02971d8991756d9bb799d92c11b85864077edd22e480ee9d134b940c7a978a47"
+    },
+    "vector_puffer_rollout.py": {
+      "before": "e5e7db35449d52e0a47016aecbb69a8bb74ea34a6c455a9311efbab53ee77843",
+      "after": "caab0aeaacffb237c0b335347abc92cb41e851d684517667a1f70f0681f1ee11"
+    },
+    "train_puffer_fast.py": {
+      "before": "4851da69789eef64684b5a958b6b115f3336a067cc1a0f8ce9dacd2b44d40e3b",
+      "after": "416bf257a6995d5d0870272f3931b4211ea71c05d10dc9be9bf3bdd166c436d5"
+    }
+  },
+  "common_arguments": [
+    "--resume",
+    "/home/tommie/Pesten/models/best/puffer_min_gru_192x2_plateau_teacher_epoch4387.pt",
+    "--no-privileged-critic",
+    "--schedule",
+    "current_selfplay,canonical_random",
+    "--player-count-schedule",
+    "2,3,4",
+    "--games-per-epoch",
+    "768",
+    "--epochs",
+    "5",
+    "--rollout-workers",
+    "4",
+    "--max-turns",
+    "1000",
+    "--update-epochs",
+    "2",
+    "--minibatch-trajectories",
+    "64",
+    "--early-stop-diagnostic-trajectories",
+    "128",
+    "--diagnostic-minibatch-trajectories",
+    "64",
+    "--campaign-offset",
+    "0",
+    "--fresh-optimizer",
+    "--learning-rate",
+    "0.00005",
+    "--device",
+    "cuda",
+    "--update-precision",
+    "float32",
+    "--matmul-precision",
+    "highest",
+    "--no-compile-updates",
+    "--evaluate-every",
+    "1000000",
+    "--evaluation-pairs",
+    "1",
+    "--checkpoint-every",
+    "1000000"
+  ],
+  "steady_epochs": "middle three of each five; exclude initialization and final evaluation",
+  "seeds": [
+    202611180,
+    202611197,
+    202611214,
+    202611231,
+    202611248
+  ],
+  "pairs": [
+    {
+      "seed": 202611180,
+      "order": [
+        "before",
+        "after"
+      ],
+      "before": {
+        "process_wall_seconds": 18.388345529994695,
+        "epochs": [
+          {
+            "wall_seconds": 4.5695292680029524,
+            "rollout_seconds": 3.2438914840022335,
+            "update_seconds": 1.2981100409961073,
+            "actor_decisions": 38891,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "b01be5b235a74ee7522e1966242323e034752ea19801902e1224f53bc4fb9ed3",
+            "games": 768,
+            "turns": 47497,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.8287137819861528,
+            "rollout_seconds": 2.181390593003016,
+            "update_seconds": 0.6169265700009419,
+            "actor_decisions": 38782,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "4924ff5f2c6255c59bdc266e34f924d8cfb5d05c4bef7b3b471eeab4e3f2e1f1",
+            "games": 768,
+            "turns": 46599,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.658100950997323,
+            "rollout_seconds": 2.1238499870087253,
+            "update_seconds": 0.5051959819975309,
+            "actor_decisions": 36629,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "b6548b66e04200141fd09ed8f2039207f24e75d6390615b6bd4ced01f9542086",
+            "games": 768,
+            "turns": 45321,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.5149188600044,
+            "rollout_seconds": 1.9201781149895396,
+            "update_seconds": 0.5684750590007752,
+            "actor_decisions": 36881,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "a7d34adf5c0deb410db2358914b4ea0ff8b5ccb4bd6b9b55ba49e4a13f455f0d",
+            "games": 768,
+            "turns": 45212,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.938226393001969,
+            "rollout_seconds": 2.2474695650016656,
+            "update_seconds": 0.5501336700108368,
+            "actor_decisions": 37675,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "55215b1d244c5ec9b89ec4e2d1fcccfd6fc6c0a8d86e85f79e599ef2b42a2bc2",
+            "games": 768,
+            "turns": 46325,
+            "draws": 0
+          }
+        ]
+      },
+      "after": {
+        "process_wall_seconds": 14.607667278003646,
+        "epochs": [
+          {
+            "wall_seconds": 3.92209373699734,
+            "rollout_seconds": 2.713799632998416,
+            "update_seconds": 1.178386571991723,
+            "actor_decisions": 38891,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "b01be5b235a74ee7522e1966242323e034752ea19801902e1224f53bc4fb9ed3",
+            "games": 768,
+            "turns": 47497,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.031639560998883,
+            "rollout_seconds": 1.5572730230051093,
+            "update_seconds": 0.44625446799909696,
+            "actor_decisions": 38782,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "4924ff5f2c6255c59bdc266e34f924d8cfb5d05c4bef7b3b471eeab4e3f2e1f1",
+            "games": 768,
+            "turns": 46599,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 1.9303797720058355,
+            "rollout_seconds": 1.4937935439957073,
+            "update_seconds": 0.40859114000340924,
+            "actor_decisions": 36629,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "b6548b66e04200141fd09ed8f2039207f24e75d6390615b6bd4ced01f9542086",
+            "games": 768,
+            "turns": 45321,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 1.8201103509927634,
+            "rollout_seconds": 1.3594577830081107,
+            "update_seconds": 0.43308865500148386,
+            "actor_decisions": 36881,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "a7d34adf5c0deb410db2358914b4ea0ff8b5ccb4bd6b9b55ba49e4a13f455f0d",
+            "games": 768,
+            "turns": 45212,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.1007229889946757,
+            "rollout_seconds": 1.5561980189959286,
+            "update_seconds": 0.4082400159968529,
+            "actor_decisions": 37675,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "55215b1d244c5ec9b89ec4e2d1fcccfd6fc6c0a8d86e85f79e599ef2b42a2bc2",
+            "games": 768,
+            "turns": 46325,
+            "draws": 0
+          }
+        ]
+      },
+      "every_epoch_state_and_work_exact": true,
+      "final_actor_exact": true,
+      "final_optimizer_exact": true
+    },
+    {
+      "seed": 202611197,
+      "order": [
+        "after",
+        "before"
+      ],
+      "after": {
+        "process_wall_seconds": 15.939916919000098,
+        "epochs": [
+          {
+            "wall_seconds": 3.913385587002267,
+            "rollout_seconds": 2.5947311019990593,
+            "update_seconds": 1.2895780240069143,
+            "actor_decisions": 38363,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "6621f2b2e136f973b876080fdcaada69b61f728b68146cba5ce9f938914755ed",
+            "games": 768,
+            "turns": 46170,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.2377675929892575,
+            "rollout_seconds": 1.6898305310023716,
+            "update_seconds": 0.5145745279878611,
+            "actor_decisions": 38349,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "a65df51a35976b2e3466b7e89d55b9dd64d0335f3afdda76481acd24114b1b89",
+            "games": 768,
+            "turns": 46234,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 1.9775909290037816,
+            "rollout_seconds": 1.4905302330007544,
+            "update_seconds": 0.45679353999730665,
+            "actor_decisions": 38294,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "99abdee73aba2cde2f18fb401841ed1f5318419d8721b87c117cf9ba080b3f53",
+            "games": 768,
+            "turns": 45923,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 1.9178168549988186,
+            "rollout_seconds": 1.4587354980030796,
+            "update_seconds": 0.4308028070081491,
+            "actor_decisions": 35441,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "c7208f6c054cea8fef188ac56822d83e9bac4b695d457a269c0c3f1a02be662c",
+            "games": 768,
+            "turns": 44134,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.562798083992675,
+            "rollout_seconds": 1.7665360149985645,
+            "update_seconds": 0.5401667959959013,
+            "actor_decisions": 37945,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "8219a1d59ee92a6260fea0bc62a0175c0e520e4e3f09cf63f348b2d8395c63ac",
+            "games": 768,
+            "turns": 45914,
+            "draws": 0
+          }
+        ]
+      },
+      "before": {
+        "process_wall_seconds": 19.513324465995538,
+        "epochs": [
+          {
+            "wall_seconds": 4.757522402011091,
+            "rollout_seconds": 3.4839660879952135,
+            "update_seconds": 1.2363848319946555,
+            "actor_decisions": 38363,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "6621f2b2e136f973b876080fdcaada69b61f728b68146cba5ce9f938914755ed",
+            "games": 768,
+            "turns": 46170,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.9557563199923607,
+            "rollout_seconds": 2.3589272889948916,
+            "update_seconds": 0.5674753759958548,
+            "actor_decisions": 38349,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "a65df51a35976b2e3466b7e89d55b9dd64d0335f3afdda76481acd24114b1b89",
+            "games": 768,
+            "turns": 46234,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.849754431998008,
+            "rollout_seconds": 2.2304033410036936,
+            "update_seconds": 0.5897294320020592,
+            "actor_decisions": 38294,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "99abdee73aba2cde2f18fb401841ed1f5318419d8721b87c117cf9ba080b3f53",
+            "games": 768,
+            "turns": 45923,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.5574002469948027,
+            "rollout_seconds": 1.9773570950055728,
+            "update_seconds": 0.5505080440052552,
+            "actor_decisions": 35441,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "c7208f6c054cea8fef188ac56822d83e9bac4b695d457a269c0c3f1a02be662c",
+            "games": 768,
+            "turns": 44134,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 3.3187794929981465,
+            "rollout_seconds": 2.4746008770016488,
+            "update_seconds": 0.5824765420111362,
+            "actor_decisions": 37945,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "8219a1d59ee92a6260fea0bc62a0175c0e520e4e3f09cf63f348b2d8395c63ac",
+            "games": 768,
+            "turns": 45914,
+            "draws": 0
+          }
+        ]
+      },
+      "every_epoch_state_and_work_exact": true,
+      "final_actor_exact": true,
+      "final_optimizer_exact": true
+    },
+    {
+      "seed": 202611214,
+      "order": [
+        "before",
+        "after"
+      ],
+      "before": {
+        "process_wall_seconds": 19.24266156599333,
+        "epochs": [
+          {
+            "wall_seconds": 4.226749620996998,
+            "rollout_seconds": 3.0090305610065116,
+            "update_seconds": 1.1878005579928868,
+            "actor_decisions": 37213,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "63ef83e66feef01de5936cd4b4d09ab19d439f36cc5d57a3424967a406acd5d1",
+            "games": 768,
+            "turns": 45643,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.6616727229993558,
+            "rollout_seconds": 2.0913884229958057,
+            "update_seconds": 0.5404153690033127,
+            "actor_decisions": 37382,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "e62d60d3e3bd525cff9ba5e774244b5ee426f8311d2a15f1987d00995a041ae1",
+            "games": 768,
+            "turns": 45658,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.779663770008483,
+            "rollout_seconds": 2.1529365580063313,
+            "update_seconds": 0.5985087010049028,
+            "actor_decisions": 39659,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "edbe291998ba9116060280c9f01fe7b5e699ea1db3c174d02e835118b5220ab6",
+            "games": 768,
+            "turns": 47546,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 3.3586795090086525,
+            "rollout_seconds": 2.7220303540088935,
+            "update_seconds": 0.6066607930115424,
+            "actor_decisions": 36083,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "4df4a5c7a9963a86a1712b1019ee90a1a68a92a9f96d2eb24c29f2b93716911f",
+            "games": 768,
+            "turns": 44225,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.969489869006793,
+            "rollout_seconds": 2.194608296005754,
+            "update_seconds": 0.5841304619971197,
+            "actor_decisions": 37040,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "ddfe6e0ab876d70b7360b01a26be277b4b6e5908bc9a3291e30cb8c82c11281a",
+            "games": 768,
+            "turns": 45571,
+            "draws": 0
+          }
+        ]
+      },
+      "after": {
+        "process_wall_seconds": 16.571379891000106,
+        "epochs": [
+          {
+            "wall_seconds": 3.9756006590032484,
+            "rollout_seconds": 2.7991524409881094,
+            "update_seconds": 1.145297078997828,
+            "actor_decisions": 37213,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "63ef83e66feef01de5936cd4b4d09ab19d439f36cc5d57a3424967a406acd5d1",
+            "games": 768,
+            "turns": 45643,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.1746822979912395,
+            "rollout_seconds": 1.6575248980079778,
+            "update_seconds": 0.486115323001286,
+            "actor_decisions": 37382,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "e62d60d3e3bd525cff9ba5e774244b5ee426f8311d2a15f1987d00995a041ae1",
+            "games": 768,
+            "turns": 45658,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.4821795510069933,
+            "rollout_seconds": 1.8383558460045606,
+            "update_seconds": 0.6117929560132325,
+            "actor_decisions": 39659,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "edbe291998ba9116060280c9f01fe7b5e699ea1db3c174d02e835118b5220ab6",
+            "games": 768,
+            "turns": 47546,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.592312499997206,
+            "rollout_seconds": 2.038099159995909,
+            "update_seconds": 0.5245857520058053,
+            "actor_decisions": 36083,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "4df4a5c7a9963a86a1712b1019ee90a1a68a92a9f96d2eb24c29f2b93716911f",
+            "games": 768,
+            "turns": 44225,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.3068957020004746,
+            "rollout_seconds": 1.6078110599919455,
+            "update_seconds": 0.49016207399836276,
+            "actor_decisions": 37040,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "ddfe6e0ab876d70b7360b01a26be277b4b6e5908bc9a3291e30cb8c82c11281a",
+            "games": 768,
+            "turns": 45571,
+            "draws": 0
+          }
+        ]
+      },
+      "every_epoch_state_and_work_exact": true,
+      "final_actor_exact": true,
+      "final_optimizer_exact": true
+    },
+    {
+      "seed": 202611231,
+      "order": [
+        "after",
+        "before"
+      ],
+      "after": {
+        "process_wall_seconds": 16.18383829999948,
+        "epochs": [
+          {
+            "wall_seconds": 3.8654499080003006,
+            "rollout_seconds": 2.748964357000659,
+            "update_seconds": 1.0847358360042563,
+            "actor_decisions": 36814,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "8eb53630c0a40218471634a3696131c14f4a093d5bd3db94cfc719165feb56b6",
+            "games": 768,
+            "turns": 45167,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.0391846029961016,
+            "rollout_seconds": 1.5673890469915932,
+            "update_seconds": 0.43949924399203155,
+            "actor_decisions": 37065,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "683c144f72477ce3e5632f0f0216499ce12c14e56cbc2d4b34c4bdc008189109",
+            "games": 768,
+            "turns": 45385,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.1043811530107632,
+            "rollout_seconds": 1.5814601720048813,
+            "update_seconds": 0.49338881400763057,
+            "actor_decisions": 37878,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "4ec38ada7e3149a654c6d2d40aa9c188813acda6bb60b59bdc4160e0cc9b365d",
+            "games": 768,
+            "turns": 45773,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.1026446519972524,
+            "rollout_seconds": 1.5859661980066448,
+            "update_seconds": 0.4857975000049919,
+            "actor_decisions": 35964,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "184ee6aec7a3ee0b85e70f5917e3755c54409484e94ae6735762703f14c06f3c",
+            "games": 768,
+            "turns": 44220,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.55818589500268,
+            "rollout_seconds": 1.6948666120006237,
+            "update_seconds": 0.5790260889916681,
+            "actor_decisions": 35975,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "3e2361bfc3f491a5098093025b2c0da8fb49030847ee076af55f48d731371721",
+            "games": 768,
+            "turns": 44727,
+            "draws": 0
+          }
+        ]
+      },
+      "before": {
+        "process_wall_seconds": 20.170940426993184,
+        "epochs": [
+          {
+            "wall_seconds": 4.52445963100763,
+            "rollout_seconds": 3.291985197996837,
+            "update_seconds": 1.1989048249961343,
+            "actor_decisions": 36814,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "8eb53630c0a40218471634a3696131c14f4a093d5bd3db94cfc719165feb56b6",
+            "games": 768,
+            "turns": 45167,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.6529428830108372,
+            "rollout_seconds": 2.0723914360132767,
+            "update_seconds": 0.5486495710065356,
+            "actor_decisions": 37065,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "683c144f72477ce3e5632f0f0216499ce12c14e56cbc2d4b34c4bdc008189109",
+            "games": 768,
+            "turns": 45385,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.803703156998381,
+            "rollout_seconds": 2.2190029979974497,
+            "update_seconds": 0.5570765149896033,
+            "actor_decisions": 37878,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "4ec38ada7e3149a654c6d2d40aa9c188813acda6bb60b59bdc4160e0cc9b365d",
+            "games": 768,
+            "turns": 45773,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.7922178950102534,
+            "rollout_seconds": 2.1806970609904965,
+            "update_seconds": 0.5800933529972099,
+            "actor_decisions": 35964,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "184ee6aec7a3ee0b85e70f5917e3755c54409484e94ae6735762703f14c06f3c",
+            "games": 768,
+            "turns": 44220,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 3.420420214009937,
+            "rollout_seconds": 2.565648207993945,
+            "update_seconds": 0.5983943500032183,
+            "actor_decisions": 35975,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "3e2361bfc3f491a5098093025b2c0da8fb49030847ee076af55f48d731371721",
+            "games": 768,
+            "turns": 44727,
+            "draws": 0
+          }
+        ]
+      },
+      "every_epoch_state_and_work_exact": true,
+      "final_actor_exact": true,
+      "final_optimizer_exact": true
+    },
+    {
+      "seed": 202611248,
+      "order": [
+        "before",
+        "after"
+      ],
+      "before": {
+        "process_wall_seconds": 21.513748896992183,
+        "epochs": [
+          {
+            "wall_seconds": 4.454476180006168,
+            "rollout_seconds": 3.1070903680083575,
+            "update_seconds": 1.318815856007859,
+            "actor_decisions": 37030,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "57503590cf8b3d420478960e191592226e903c1b771e4c46fb199a9c780b3479",
+            "games": 768,
+            "turns": 44231,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.9343587210023543,
+            "rollout_seconds": 2.377574348007329,
+            "update_seconds": 0.5279632839956321,
+            "actor_decisions": 36329,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "892c0fdf742b3cf46053b767580e2c1eea3f5a21feefb62d526cf4be0f7bbd2e",
+            "games": 768,
+            "turns": 44573,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.757156637002481,
+            "rollout_seconds": 2.1578053470002487,
+            "update_seconds": 0.5705442629987374,
+            "actor_decisions": 36444,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "ff9f2dd111cd07ef76d49dd7ae33e5ccb103014ed9664933264e26ee07e72197",
+            "games": 768,
+            "turns": 43680,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.7817122929991456,
+            "rollout_seconds": 2.1794607159972657,
+            "update_seconds": 0.5733608490118058,
+            "actor_decisions": 37161,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "3f604f16a9beb0351548a897d990ee3c4dc0f1dd5c0e1cc900e7d9bf8d8ee21a",
+            "games": 768,
+            "turns": 44301,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.817892702994868,
+            "rollout_seconds": 1.9946166779991472,
+            "update_seconds": 0.5655747319979127,
+            "actor_decisions": 38542,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "fa9c181f80d7e435b4c1e3d03e73c27fa414bf542481e5a67d66b7852712c451",
+            "games": 768,
+            "turns": 45970,
+            "draws": 0
+          }
+        ]
+      },
+      "after": {
+        "process_wall_seconds": 15.225650697990204,
+        "epochs": [
+          {
+            "wall_seconds": 3.817854313994758,
+            "rollout_seconds": 2.511270989998593,
+            "update_seconds": 1.277998038000078,
+            "actor_decisions": 37030,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "57503590cf8b3d420478960e191592226e903c1b771e4c46fb199a9c780b3479",
+            "games": 768,
+            "turns": 44231,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 1.818798971013166,
+            "rollout_seconds": 1.38740319799399,
+            "update_seconds": 0.40341602500120644,
+            "actor_decisions": 36329,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "892c0fdf742b3cf46053b767580e2c1eea3f5a21feefb62d526cf4be0f7bbd2e",
+            "games": 768,
+            "turns": 44573,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.014831848005997,
+            "rollout_seconds": 1.522725550996256,
+            "update_seconds": 0.4526265269960277,
+            "actor_decisions": 36444,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "ff9f2dd111cd07ef76d49dd7ae33e5ccb103014ed9664933264e26ee07e72197",
+            "games": 768,
+            "turns": 43680,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.0023878840002,
+            "rollout_seconds": 1.5291774409997743,
+            "update_seconds": 0.4440016200096579,
+            "actor_decisions": 37161,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "3f604f16a9beb0351548a897d990ee3c4dc0f1dd5c0e1cc900e7d9bf8d8ee21a",
+            "games": 768,
+            "turns": 44301,
+            "draws": 0
+          },
+          {
+            "wall_seconds": 2.1580829399899812,
+            "rollout_seconds": 1.4816582299972652,
+            "update_seconds": 0.4357227470027283,
+            "actor_decisions": 38542,
+            "optimizer_steps": 48,
+            "ppo_epochs": 2,
+            "state_sha256": "fa9c181f80d7e435b4c1e3d03e73c27fa414bf542481e5a67d66b7852712c451",
+            "games": 768,
+            "turns": 45970,
+            "draws": 0
+          }
+        ]
+      },
+      "every_epoch_state_and_work_exact": true,
+      "final_actor_exact": true,
+      "final_optimizer_exact": true
+    }
+  ],
+  "metrics": {
+    "before": {
+      "steady_epochs": 15,
+      "steady_wall_seconds": 41.88675218001299,
+      "games_per_second": 275.02729145701045,
+      "actor_decisions_per_second": 13329.775428767245,
+      "mean_epoch_seconds": 2.7924501453341994,
+      "steady_rollout_seconds": 32.945393661022536,
+      "steady_update_seconds": 8.5015831610217,
+      "all_process_wall_seconds": 98.82902088596893
+    },
+    "after": {
+      "steady_epochs": 15,
+      "steady_wall_seconds": 31.24670852100826,
+      "games_per_second": 368.6788319561627,
+      "actor_decisions_per_second": 17868.7940723295,
+      "mean_epoch_seconds": 2.0831139014005506,
+      "steady_rollout_seconds": 23.75772212301672,
+      "steady_update_seconds": 7.031328899029177,
+      "all_process_wall_seconds": 78.52845308599353
+    },
+    "steady_speedup": 1.3405172628614965,
+    "all_process_speedup": 1.2585122589610294
+  }
+}

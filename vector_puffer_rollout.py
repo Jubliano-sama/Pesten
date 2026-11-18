@@ -70,7 +70,7 @@ class _MinGRUEventTrace(torch.nn.Module):
 
 
 class _TracedMinGRURolloutCore(torch.nn.Module):
-    """Shape-polymorphic traced eval graphs for a weight-only INT8 MinGRU."""
+    """Shape-polymorphic decision and event graphs for a CPU MinGRU."""
 
     def __init__(self, core: torch.nn.Module) -> None:
         super().__init__()
@@ -131,6 +131,25 @@ class _TracedMinGRURolloutCore(torch.nn.Module):
         state: tuple[torch.Tensor, ...],
     ) -> tuple[torch.Tensor, ...]:
         return (self.event_graph(tokens, state[0]),)
+
+
+def _trace_worker_min_gru(policy, *, shared_float_weights=False) -> None:
+    """Trace a worker-owned MinGRU, keeping its live parameter storage."""
+    core = policy.puffer_policy
+    if (
+        core.__class__.__name__ == "Policy"
+        and getattr(core, "network", None).__class__.__name__ == "MinGRU"
+    ):
+        traced = _TracedMinGRURolloutCore(core)
+        if shared_float_weights:
+            # Keep the source module and its canonical state_dict intact.
+            # The traced methods reference those same live parameters.
+            core.forward_eval = traced.forward_eval
+            core.forward_events_eval = traced.forward_events_eval
+        else:
+            policy.puffer_policy = traced
+        policy._rollout_device = torch.device("cpu")
+        policy._rollout_dtype = torch.float32
 
 
 def _recurrent_networks(policy) -> tuple[torch.nn.Module, ...]:
@@ -198,18 +217,8 @@ def _build_rollout_policy(
                 dtype=torch.qint8,
                 inplace=True,
             )
-    core = quantized.puffer_policy
-    if (
-        trace_min_gru
-        and core.__class__.__name__ == "Policy"
-        and getattr(core, "network", None).__class__.__name__ == "MinGRU"
-    ):
-        # Dynamic INT8 makes each matrix multiply cheap enough that Python
-        # dispatch around thousands of small recurrent calls becomes visible.
-        # Trace both the decision graph and decoder-free event graph once per
-        # policy generation. The traced operations are numerically identical
-        # and remain dynamic in batch size.
-        quantized.puffer_policy = _TracedMinGRURolloutCore(core)
+    if trace_min_gru:
+        _trace_worker_min_gru(quantized)
     for parameter in quantized.parameters():
         parameter.requires_grad_(False)
     # The traced graph exposes duplicated module trees, making a fresh
@@ -294,6 +303,11 @@ def _initialize_worker(
                 trace_min_gru=trace_min_gru,
             )
         )
+    if rollout_precision == ROLLOUT_PRECISION_FLOAT32 and trace_min_gru:
+        # Tracing (without freezing) preserves the parameters installed with
+        # assign=True. The current graph sees every in-place shared refresh.
+        for worker_policy in (policy, *_WORKER_FIXED_HISTORICAL):
+            _trace_worker_min_gru(worker_policy, shared_float_weights=True)
     _WORKER_HISTORICAL = list(_WORKER_FIXED_HISTORICAL)
 
 

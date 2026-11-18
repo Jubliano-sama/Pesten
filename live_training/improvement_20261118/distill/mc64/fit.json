@@ -1,0 +1,175 @@
+{
+  "settings": {
+    "rollouts": "/tmp/pesten_outcome_rollouts_20261118",
+    "output": "live_training/improvement_20261118/distill/mc64",
+    "chunks": 72,
+    "states_per_chunk": 1024,
+    "simulations": 64,
+    "horizon": 60,
+    "steps": 2000,
+    "seed": 622106333,
+    "workers": 2
+  },
+  "states": 73728,
+  "train_actions": 194753,
+  "validation_actions": 38822,
+  "zero_residual_validation_mse": 0.001671335776336491,
+  "best_validation_mse": 0.001082589034922421,
+  "validation_mse": [
+    [
+      100,
+      0.0014320374466478825
+    ],
+    [
+      200,
+      0.0014117083046585321
+    ],
+    [
+      300,
+      0.001348080113530159
+    ],
+    [
+      400,
+      0.001272955327294767
+    ],
+    [
+      500,
+      0.0012403305154293776
+    ],
+    [
+      600,
+      0.0011816571932286024
+    ],
+    [
+      700,
+      0.0011717412853613496
+    ],
+    [
+      800,
+      0.0011456969659775496
+    ],
+    [
+      900,
+      0.001151020172983408
+    ],
+    [
+      1000,
+      0.0011345651000738144
+    ],
+    [
+      1100,
+      0.0011266762157902122
+    ],
+    [
+      1200,
+      0.001116521074436605
+    ],
+    [
+      1300,
+      0.0011108976323157549
+    ],
+    [
+      1400,
+      0.001116611179895699
+    ],
+    [
+      1500,
+      0.001115683582611382
+    ],
+    [
+      1600,
+      0.0010969821596518159
+    ],
+    [
+      1700,
+      0.0010912222787737846
+    ],
+    [
+      1800,
+      0.0010899513727054
+    ],
+    [
+      1900,
+      0.001083287177607417
+    ],
+    [
+      2000,
+      0.001082589034922421
+    ]
+  ],
+  "targets": "public sampled model rollout action value minus mean of modeled card/suit alternatives; pass neutral",
+  "data": {
+    "chunk_0000.npz": "0d2552e409d0e0f356b4b6a2195cdea44e2d3a060b0d4831811e84d419583736",
+    "chunk_0001.npz": "4f9efb879434307c318a8068d094a50dbb8ac89d6ca59117309c4f78cc00796c",
+    "chunk_0002.npz": "d15b2ee21323e13c093e2228beb7b7976da6763b66979ec874077b0c2071ef05",
+    "chunk_0003.npz": "ee803b530201422a0c8237471b205a2d9ee039d87b27a2d2de0e46bab7c6cb17",
+    "chunk_0004.npz": "9377c913e815f89af8e80e1d0343d6bd475e31e082d056322fc47ca3e5ea8a24",
+    "chunk_0005.npz": "a85fd25f12704e35507f6abff09273453c0b30014ba3d3e64013206f169c165d",
+    "chunk_0006.npz": "6ca1db30f2231d5f913418ee0f9ad330b3ada50ccb64c830aab5420f299ab839",
+    "chunk_0007.npz": "4bb6d0335953fe469d7fa85331abe532f0d7e6d01e47017d9216440ec29538d0",
+    "chunk_0008.npz": "25962a2e16da9af2d378043106a43f593bd74d9544304f1c0ccfd33c841035e0",
+    "chunk_0009.npz": "f7355155eca0fe8793621c7f060aa9b0759cfa811afea64bbbbf15a2cdb91e92",
+    "chunk_0010.npz": "56488f3a7a91e30f171fea0a46ccd2c362b2d9b0670ea02066d714b3d105d00d",
+    "chunk_0011.npz": "453d551d567b181e91b6ae057c6b09f91e4916bdf79144a4395f72a059d88fba",
+    "chunk_0012.npz": "71400daaeb15b568b13e4c23a8f6d5b9e23bb57c14ffb9bce8074a5f5adccb5c",
+    "chunk_0013.npz": "4731d9442d948924f1c5dc98d852ca0ba80bb7b774b44b856fb77dccfbf6fc1a",
+    "chunk_0014.npz": "2e1c841912c5c4eb8d4a1957c80b364c01129c2c0b792fa0f1c9d238cd8b352b",
+    "chunk_0015.npz": "3a37290666415179d2ad1b9f0c5c386a9f3a32b8549f7a2350be838042f73390",
+    "chunk_0016.npz": "70314ccbf8b7a7118a4d785b1b4a33efb0371ce07e720979d0c745104b004ea6",
+    "chunk_0017.npz": "115a7ecba3af0efc0216d501dba8610ae6512985ebbb766fe1496f0ab2cbf5e9",
+    "chunk_0018.npz": "57a56a2fb74f14c7c49d9198eef38b2fd6967a9e3934b8c7d5c9083604c089f8",
+    "chunk_0019.npz": "a96c49b0c93a3a1d7e3920187d8c9468ef40e2ddb37cc10603d0fa2d793ad44c",
+    "chunk_0020.npz": "562bd84b345400509ec8b14cdc5fa1d26784952c86e733ef28881bffde10a247",
+    "chunk_0021.npz": "40a18e1dbfa95971735f6bb4c661e573ca3496eebecddf2c7fb8dd2de3e8455c",
+    "chunk_0022.npz": "1fc545f7eda4f5af910cdaae1d6a35085dd4274441a19644a142d6c8b8ab24f7",
+    "chunk_0023.npz": "2c82ffd5abdaf84b7fe37c78c3967f09dbdb31d0fad24dd8917462145d466c2e",
+    "chunk_0024.npz": "1dea7fd723b54d4b1f99ba416e58c71508550c4ebbdceb813c889f3e378664f7",
+    "chunk_0025.npz": "79acbf072a7990a09dbc14dd12f11b1669d81ed1239e58b53e94cd718d6cb24c",
+    "chunk_0026.npz": "281067bbf34d1e3def4512af2ae93eef5f710decff765d246dc8eb4abda203b7",
+    "chunk_0027.npz": "43bda9db71b602a4c9caf8d12c9c7dc29ebad57a13a089a8973e840beffb0e67",
+    "chunk_0028.npz": "92b9dcede104aa5fec87ab3dde9f32b11325b0d3a79b916822dd85041f7a248e",
+    "chunk_0029.npz": "786b58e74988aee2852b9440da70920a656aca6cbc3589305aa0c28525596c90",
+    "chunk_0030.npz": "feef60390669b450251b8930dedfb1aaf4206779b44eb2462bb94b1710f10c74",
+    "chunk_0031.npz": "5eca16981eb716e9020c6be3c6b20e2a34c1cb546918e68616c141fbe82ccae3",
+    "chunk_0032.npz": "79d4415a9210e61f4d2ebd717050d67acd0ec0f43052f74d84104996f0830830",
+    "chunk_0033.npz": "8ff3151f15ab031f52e86e7366f3a4f9c74e7d1b155213b2221d8b36b6d7109e",
+    "chunk_0034.npz": "997181444462eb30a1e71d156b7c75673cb0edcfe65a06c7d3014dc8e0502b2d",
+    "chunk_0035.npz": "144bf771721da07a82e7508a31bb7363f4c422feadbd648d20c11b418cfebcdd",
+    "chunk_0036.npz": "3c0f0578a9c2a44b741e6aa7f0e3af8b0483cb30fec2b2d1f1cf592afb74f135",
+    "chunk_0037.npz": "3747bfe0f6e688d514d757f7ba316fbe8303ad12a2f2af6842a5eb698a411afa",
+    "chunk_0038.npz": "fd358b29821f01ef8eab2745433aba0bcacadc236aac80c586588a170ee6ca0f",
+    "chunk_0039.npz": "95de17af1599d986884285da3b94e9ccb4e34308c7c2a4177fd2830364a73054",
+    "chunk_0040.npz": "2ccaab1ebb909a61d02461d170310c5ab3b1e7ca3436b5c572d611e3cd0748fd",
+    "chunk_0041.npz": "02a5e645d0a58fc032fbee478079f5e277b54130c0dcb63426bceacb897ba77f",
+    "chunk_0042.npz": "111af6aa8040e6c1c8978b3bc4e3e6ec3002c05d38b39fa5fd9ce03f206a048f",
+    "chunk_0043.npz": "ab793446c3e7d51cc892c9b2a5c0823012da993f65a573ac4ae3445e46b8720e",
+    "chunk_0044.npz": "bd45533d7534ea4a93e2427727ca876154b3baf9868e781e851d4aa46d95c67e",
+    "chunk_0045.npz": "5e79ac4b744ff940f0364b9f8c6952aa1b12155fedb5143269e888d1e900af2f",
+    "chunk_0046.npz": "67f35d1bbb398fc4b31fbaa1bbfcbb80d4c5a728e7c8e43f2ff05892c485290b",
+    "chunk_0047.npz": "caee2f4ea96fe892a0fb461f3480463ce4616e5566a4685c9c805fdf3c6eefb6",
+    "chunk_0048.npz": "ed7757fad3481626dae44c89020fa7d42e4a5600fd8a399478e7bb5df1922d93",
+    "chunk_0049.npz": "6a337676f32345fda3b516280897eb58a2a7f785a94206695da137bf61b48266",
+    "chunk_0050.npz": "51d16e669579c9da1e1fa8952812479ea99ff2eb2d8e3f4ebbf265a47b196179",
+    "chunk_0051.npz": "bc21a12786412b452ef8642fb8a2263e3101f2ce6b31e09b0da304b5c88a128e",
+    "chunk_0052.npz": "9c4f37553c9aefeff62c28f6d5a267de3dc9b6d8cc265239f1341b5520523865",
+    "chunk_0053.npz": "cbea54baa6053fa52bf679aac31f813224974886b7ac00fe806a012deda0be7c",
+    "chunk_0054.npz": "2ec6e249d935eb9d07a3e25ac4c3ff72fa6a177b49a30dbaf2adfbf8bab04fe9",
+    "chunk_0055.npz": "e6a2aa227eaa0c449625a614ad9b41122b52c5a2a1910df4ecf6b97abb7a6971",
+    "chunk_0056.npz": "463bdfdf629a4822b14bd1e99af42050e08c363edd49be5695f45000d782714c",
+    "chunk_0057.npz": "661a49e0d8f2fd90fc37360fbaa2d097e61eabd92074358e5d0ffccc1a7692f7",
+    "chunk_0058.npz": "2a9e6c9760399b590a0667cb5a6f2ce6ade4cd188733009327414def71ed2800",
+    "chunk_0059.npz": "1d3775afdebf49f671fdcfe97112a5a204f90bafa1fc5512d305aa4683465108",
+    "chunk_0060.npz": "49de5504fb73b159e6dfff7b5593a37c7664895fe1fa88f2bf4ed0716913c17e",
+    "chunk_0061.npz": "28c97825df6f92788a45606a4ed2ba5cc31dd3b3a06fd43649077fe9538042ea",
+    "chunk_0062.npz": "3e48164fff13393ed319e84671ff6e236cf204244c23f9ba166753899c1e0363",
+    "chunk_0063.npz": "02e58e7474932b9eefd4880908d97d03eb83c3659aceb07af29aa6145d7e597b",
+    "chunk_0064.npz": "48626d387f0f3f6833e1560b2e6715cc7f2b6415f162d6ba1e8d36b313912604",
+    "chunk_0065.npz": "bc9c87491a070bf56d80d3e2cf4ccff568d71a7247a053e0389a3dd8d9b97e69",
+    "chunk_0066.npz": "1acdedd45d71b307369361cb40b97994f117a3426b14bb6f48984f8497cf6025",
+    "chunk_0067.npz": "8ce06ab6821cd96f4d76382b03931ae94908b42a2e6bae0c7b732077fe7ba263",
+    "chunk_0068.npz": "92ffdc594528d8a054109ea3050ef4e0cef968676082bb1e1808834eaa13ec5a",
+    "chunk_0069.npz": "91ed42261a4009b0314c0be63ecd1ad8c47acf088e4db48bfedfd90a2bb06021",
+    "chunk_0070.npz": "f37b2f130d1d3e8b6fcfbeefba3c17ef7708fae40b4b47ed9d1551c3e06c3483",
+    "chunk_0071.npz": "5614b1aac734a0f0b58f0af22a1ad64e28b1c721de70bd56a4c9240409e172eb"
+  }
+}

@@ -30,6 +30,7 @@ from temporal_batched_speed import (
     TemporalSeatRuntime,
     _batch_temporal_actions,
     _make_vector_layout,
+    _sample_seat_actions,
     build_safe_decision,
     collect_league_batch_batched,
 )
@@ -88,6 +89,26 @@ def _runtime(policy, *, seat, seed):
         state=policy.initial_state(),
         cursor=SafeEventCursor(),
     )
+
+
+def test_seat_categorical_sampler_matches_multinomial_and_each_rng_state():
+    policy = NativePufferTemporalPolicy(hidden_size=8)
+    runtimes = [_runtime(policy, seat=index, seed=7100 + index) for index in range(13)]
+    reference = [torch.Generator().manual_seed(7100 + index) for index in range(13)]
+    logits_rng = torch.Generator().manual_seed(844)
+    # Exercise singleton batches, nonconsecutive seats, masks, and changes in
+    # batch size as other games finish. A skipped seat's stream stays put.
+    for indices in ([3], [8, 1, 3], list(range(13)), [0, 9], [3, 8, 11]):
+        logits = torch.randn(len(indices), 55, generator=logits_rng)
+        logits[:, 1::3] = -torch.inf
+        probabilities = logits.softmax(dim=1)
+        expected = [
+            int(torch.multinomial(row, 1, generator=reference[index]))
+            for index, row in zip(indices, probabilities)
+        ]
+        assert _sample_seat_actions(probabilities, [runtimes[i] for i in indices]) == expected
+        for index, runtime in enumerate(runtimes):
+            assert torch.equal(reference[index].get_state(), runtime.generator.get_state())
 
 
 def test_variable_event_batch_matches_individual_native_steps():

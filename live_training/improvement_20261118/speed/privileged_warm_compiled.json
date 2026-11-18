@@ -1,0 +1,1124 @@
+{
+  "torch": "2.13.0+cu130",
+  "python": "3.12.12",
+  "gpu": "NVIDIA GeForce RTX 3090",
+  "cpus": "5",
+  "actor_sha256": "f8f0aece2d759eadc60b3cbccca30c321c01da13322f7cae511a73c8da3a9f93",
+  "critic_sha256": "8b1ad78f180d0848ee8479108e261d6d450053085cbae915ef18a303f4817365",
+  "source_hashes": {
+    "packed_puffer_rollout.py": {
+      "before": "611fd07c4f60ed397925e1ccb9e7ab96dffd668916c2f81d131483fe78a1661c",
+      "after": "27d1828e1ef0d6f4f820152ff3832dc9f5a7a4d851d811912065a3e946e2afb4"
+    },
+    "temporal_batched_speed.py": {
+      "before": "f684546918acc7042573badedcb3968948b3cb4eafd2f5d672e07688b01092b9",
+      "after": "66782c8043fb13b471272fac0035bc72e326c3f4ba57ba9e72dfd6b5b3aea099"
+    },
+    "temporal_puffer_v4.py": {
+      "before": "302f45f674dfb1550e6ee062f232321df21ed185cec4f7d1c1740499f335a1f7",
+      "after": "02971d8991756d9bb799d92c11b85864077edd22e480ee9d134b940c7a978a47"
+    },
+    "vector_puffer_rollout.py": {
+      "before": "e5e7db35449d52e0a47016aecbb69a8bb74ea34a6c455a9311efbab53ee77843",
+      "after": "caab0aeaacffb237c0b335347abc92cb41e851d684517667a1f70f0681f1ee11"
+    },
+    "train_puffer_fast.py": {
+      "before": "4851da69789eef64684b5a958b6b115f3336a067cc1a0f8ce9dacd2b44d40e3b",
+      "after": "3a4481fa887c258e4ddbd54d5b0b953bf0c3d6e7b68fe4d5bbcac6cadfab4ff9"
+    },
+    "privileged_critic.py": {
+      "before": "003aa419469cead6a6b0f6f67f5b6ed161d84ae086904719751945768cb5eb6c",
+      "after": "8cb11d1f892bf874e7bec164b20e08777d8f18b8a971181738e1f73ddbac6cc8"
+    }
+  },
+  "common_arguments": [
+    "--resume",
+    "/home/tommie/Pesten/models/best/puffer_min_gru_192x2_plateau_teacher_epoch4387.pt",
+    "--privileged-critic",
+    "/home/tommie/Pesten/models/best/ppo_omniscient_mlp_gamma0p995_2to8_20260815.pt",
+    "--schedule",
+    "current_selfplay,canonical_random",
+    "--player-count-schedule",
+    "2,3,4",
+    "--games-per-epoch",
+    "256",
+    "--epochs",
+    "5",
+    "--max-turns",
+    "1000",
+    "--campaign-offset",
+    "0",
+    "--fresh-optimizer",
+    "--learning-rate",
+    "0.00005",
+    "--device",
+    "cuda",
+    "--update-precision",
+    "bfloat16",
+    "--matmul-precision",
+    "high",
+    "--compile-updates",
+    "--evaluate-every",
+    "1000000",
+    "--evaluation-pairs",
+    "1",
+    "--checkpoint-every",
+    "1000000"
+  ],
+  "seeds": [
+    563060100,
+    563080100,
+    563100100
+  ],
+  "pairs": [
+    {
+      "seed": 563060100,
+      "order": [
+        "before",
+        "after"
+      ],
+      "before": {
+        "process_wall_seconds": 56.39513134700246,
+        "epochs": [
+          {
+            "wall_seconds": 12.339027331996476,
+            "rollout_seconds": 8.24273569099023,
+            "update_seconds": 2.4765190559992334,
+            "actor_decisions": 12578,
+            "optimizer_steps": 4,
+            "ppo_epochs": 1,
+            "state_sha256": "d832817ec4f0383673a8196c66bba6b2ad6f2596229168aec1b4db6713857e10",
+            "games": 256,
+            "turns": 15187,
+            "draws": null,
+            "critic_update": {
+              "decisions": 12578,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7276226140998243,
+                  "remaining_smooth_l1": 0.009040303920740865,
+                  "samples": 12578,
+                  "value_mse": 0.6432914390513165,
+                  "win_bce": 0.5591944349193103
+                }
+              ],
+              "trajectories": 512
+            },
+            "critic_update_seconds": 1.5726959520106902
+          },
+          {
+            "wall_seconds": 11.284153306987719,
+            "rollout_seconds": 8.424046832005843,
+            "update_seconds": 0.9302939040062483,
+            "actor_decisions": 13240,
+            "optimizer_steps": 4,
+            "ppo_epochs": 1,
+            "state_sha256": "003546e7708971228fc76eac323ed7872ab812d0e9ee7f2109935fc7d759deda",
+            "games": 256,
+            "turns": 15677,
+            "draws": null,
+            "critic_update": {
+              "decisions": 13240,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7296625920472909,
+                  "remaining_smooth_l1": 0.008651715034430458,
+                  "samples": 13240,
+                  "value_mse": 0.6469645312410467,
+                  "win_bce": 0.5484364585191281
+                }
+              ],
+              "trajectories": 511
+            },
+            "critic_update_seconds": 1.5431739799969364
+          },
+          {
+            "wall_seconds": 9.78937054000562,
+            "rollout_seconds": 7.653862769991974,
+            "update_seconds": 0.5135918009909801,
+            "actor_decisions": 12439,
+            "optimizer_steps": 5,
+            "ppo_epochs": 1,
+            "state_sha256": "f1b8e09e225594ed12bc683a8cb3b849b0ca39c7edccac6f0e0e7ba4dd665c85",
+            "games": 256,
+            "turns": 14915,
+            "draws": null,
+            "critic_update": {
+              "decisions": 12439,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7575777453407903,
+                  "remaining_smooth_l1": 0.008596748735998864,
+                  "samples": 12439,
+                  "value_mse": 0.6700284359433833,
+                  "win_bce": 0.580796459948042
+                }
+              ],
+              "trajectories": 513
+            },
+            "critic_update_seconds": 1.4883135250129271
+          },
+          {
+            "wall_seconds": 8.326789078011643,
+            "rollout_seconds": 6.608229008008493,
+            "update_seconds": 0.3738180979999015,
+            "actor_decisions": 10693,
+            "optimizer_steps": 4,
+            "ppo_epochs": 1,
+            "state_sha256": "42345099246c719380d2974d0502adec1a9e010e0c55fd39dec0ceafc967ca3b",
+            "games": 256,
+            "turns": 13835,
+            "draws": null,
+            "critic_update": {
+              "decisions": 10693,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7056767486365397,
+                  "remaining_smooth_l1": 0.007851367065992897,
+                  "samples": 10693,
+                  "value_mse": 0.6235694382128942,
+                  "win_bce": 0.5447649040943912
+                }
+              ],
+              "trajectories": 512
+            },
+            "critic_update_seconds": 1.221131879996392
+          },
+          {
+            "wall_seconds": 10.15514683299989,
+            "rollout_seconds": 7.692957149993163,
+            "update_seconds": 0.505860773002496,
+            "actor_decisions": 12082,
+            "optimizer_steps": 4,
+            "ppo_epochs": 1,
+            "state_sha256": "146d8c9d0e084028cd6a779bb7642eb3319b39cd7322317e8958c0b6f4513d39",
+            "games": 256,
+            "turns": 14679,
+            "draws": null,
+            "critic_update": {
+              "decisions": 12082,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7606147440522539,
+                  "remaining_smooth_l1": 0.008876931352588335,
+                  "samples": 12082,
+                  "value_mse": 0.6738256937994545,
+                  "win_bce": 0.5756347337403137
+                }
+              ],
+              "trajectories": 511
+            },
+            "critic_update_seconds": 1.5878046019934118
+          }
+        ],
+        "compiler_counters": {
+          "stats": {
+            "calls_captured": 584,
+            "unique_graphs": 8
+          },
+          "aot_autograd": {
+            "total": 8,
+            "autograd_cache_hit": 8,
+            "ok": 8
+          },
+          "inductor": {
+            "triton_bundler_load_static_autotuner": 206,
+            "async_compile_cache_miss": 412,
+            "async_compile_cache_hit": 206,
+            "extern_calls": 88,
+            "fxgraph_cache_hit": 12,
+            "cudagraph_recorded_non_static_inputs": 16
+          }
+        }
+      },
+      "after": {
+        "process_wall_seconds": 41.391992646007566,
+        "epochs": [
+          {
+            "wall_seconds": 9.381023483001627,
+            "rollout_seconds": 5.176655934003065,
+            "update_seconds": 2.5848120920127258,
+            "actor_decisions": 12578,
+            "optimizer_steps": 4,
+            "ppo_epochs": 1,
+            "state_sha256": "d832817ec4f0383673a8196c66bba6b2ad6f2596229168aec1b4db6713857e10",
+            "games": 256,
+            "turns": 15187,
+            "draws": null,
+            "critic_update": {
+              "decisions": 12578,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7276226140998243,
+                  "remaining_smooth_l1": 0.009040303920740865,
+                  "samples": 12578,
+                  "value_mse": 0.6432914390513165,
+                  "win_bce": 0.5591944349193103
+                }
+              ],
+              "trajectories": 512
+            },
+            "critic_update_seconds": 1.5715626800083555
+          },
+          {
+            "wall_seconds": 8.345039388004807,
+            "rollout_seconds": 5.4622130089992424,
+            "update_seconds": 0.9368970070063369,
+            "actor_decisions": 13240,
+            "optimizer_steps": 4,
+            "ppo_epochs": 1,
+            "state_sha256": "003546e7708971228fc76eac323ed7872ab812d0e9ee7f2109935fc7d759deda",
+            "games": 256,
+            "turns": 15677,
+            "draws": null,
+            "critic_update": {
+              "decisions": 13240,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7296625920472909,
+                  "remaining_smooth_l1": 0.008651715034430458,
+                  "samples": 13240,
+                  "value_mse": 0.6469645312410467,
+                  "win_bce": 0.5484364585191281
+                }
+              ],
+              "trajectories": 511
+            },
+            "critic_update_seconds": 1.5548849430051632
+          },
+          {
+            "wall_seconds": 6.77478350000456,
+            "rollout_seconds": 4.5575258290045895,
+            "update_seconds": 0.5815234909969149,
+            "actor_decisions": 12439,
+            "optimizer_steps": 5,
+            "ppo_epochs": 1,
+            "state_sha256": "f1b8e09e225594ed12bc683a8cb3b849b0ca39c7edccac6f0e0e7ba4dd665c85",
+            "games": 256,
+            "turns": 14915,
+            "draws": null,
+            "critic_update": {
+              "decisions": 12439,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7575777453407903,
+                  "remaining_smooth_l1": 0.008596748735998864,
+                  "samples": 12439,
+                  "value_mse": 0.6700284359433833,
+                  "win_bce": 0.580796459948042
+                }
+              ],
+              "trajectories": 513
+            },
+            "critic_update_seconds": 1.4951387170003727
+          },
+          {
+            "wall_seconds": 5.7751975290011615,
+            "rollout_seconds": 3.9506420049874578,
+            "update_seconds": 0.41933464699832257,
+            "actor_decisions": 10693,
+            "optimizer_steps": 4,
+            "ppo_epochs": 1,
+            "state_sha256": "42345099246c719380d2974d0502adec1a9e010e0c55fd39dec0ceafc967ca3b",
+            "games": 256,
+            "turns": 13835,
+            "draws": null,
+            "critic_update": {
+              "decisions": 10693,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7056767486365397,
+                  "remaining_smooth_l1": 0.007851367065992897,
+                  "samples": 10693,
+                  "value_mse": 0.6235694382128942,
+                  "win_bce": 0.5447649040943912
+                }
+              ],
+              "trajectories": 512
+            },
+            "critic_update_seconds": 1.283991253003478
+          },
+          {
+            "wall_seconds": 6.963290505009354,
+            "rollout_seconds": 4.4738268140063155,
+            "update_seconds": 0.5327598940057214,
+            "actor_decisions": 12082,
+            "optimizer_steps": 4,
+            "ppo_epochs": 1,
+            "state_sha256": "146d8c9d0e084028cd6a779bb7642eb3319b39cd7322317e8958c0b6f4513d39",
+            "games": 256,
+            "turns": 14679,
+            "draws": null,
+            "critic_update": {
+              "decisions": 12082,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7606147440522539,
+                  "remaining_smooth_l1": 0.008876931352588335,
+                  "samples": 12082,
+                  "value_mse": 0.6738256937994545,
+                  "win_bce": 0.5756347337403137
+                }
+              ],
+              "trajectories": 511
+            },
+            "critic_update_seconds": 1.6143083209899487
+          }
+        ],
+        "compiler_counters": {
+          "stats": {
+            "calls_captured": 584,
+            "unique_graphs": 8
+          },
+          "aot_autograd": {
+            "total": 8,
+            "autograd_cache_hit": 8,
+            "ok": 8
+          },
+          "inductor": {
+            "triton_bundler_load_static_autotuner": 206,
+            "async_compile_cache_miss": 412,
+            "async_compile_cache_hit": 206,
+            "extern_calls": 88,
+            "fxgraph_cache_hit": 12,
+            "cudagraph_recorded_non_static_inputs": 16
+          }
+        }
+      },
+      "exact": {
+        "all_epochs_games": true,
+        "all_epochs_turns": true,
+        "all_epochs_actor_decisions": true,
+        "all_epochs_optimizer_steps": true,
+        "all_epochs_ppo_epochs": true,
+        "all_epochs_state_sha256": true,
+        "all_epochs_critic_update": true,
+        "latest.pt_state_dict": true,
+        "latest.pt_optimizer_state_dict": true,
+        "privileged_critic_latest.pt_state_dict": true,
+        "privileged_critic_latest.pt_optimizer_state_dict": true
+      }
+    },
+    {
+      "seed": 563080100,
+      "order": [
+        "after",
+        "before"
+      ],
+      "after": {
+        "process_wall_seconds": 42.16676251399622,
+        "epochs": [
+          {
+            "wall_seconds": 9.893969698008732,
+            "rollout_seconds": 5.460086537990719,
+            "update_seconds": 2.5968467550119385,
+            "actor_decisions": 13138,
+            "optimizer_steps": 4,
+            "ppo_epochs": 1,
+            "state_sha256": "dd876b4774860dd96c09419603b31db77aec35f976005902764ef18f6612342f",
+            "games": 256,
+            "turns": 15470,
+            "draws": null,
+            "critic_update": {
+              "decisions": 13138,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.8005309055695016,
+                  "remaining_smooth_l1": 0.009770432930887155,
+                  "samples": 13138,
+                  "value_mse": 0.7129160852841653,
+                  "win_bce": 0.5808418816873374
+                }
+              ],
+              "trajectories": 512
+            },
+            "critic_update_seconds": 1.791622463002568
+          },
+          {
+            "wall_seconds": 7.271427906991448,
+            "rollout_seconds": 4.968726377992425,
+            "update_seconds": 0.5995458000106737,
+            "actor_decisions": 13057,
+            "optimizer_steps": 4,
+            "ppo_epochs": 1,
+            "state_sha256": "07dd9c0a4af2a2c2b0e4404088abd7b2f7f1e843bf93a9068cc68d691c1cd3a6",
+            "games": 256,
+            "turns": 16067,
+            "draws": null,
+            "critic_update": {
+              "decisions": 13057,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7350282054213312,
+                  "remaining_smooth_l1": 0.009120498321327889,
+                  "samples": 13057,
+                  "value_mse": 0.6498646555464018,
+                  "win_bce": 0.5647167885975459
+                }
+              ],
+              "trajectories": 511
+            },
+            "critic_update_seconds": 1.5965571029955754
+          },
+          {
+            "wall_seconds": 7.045299232995603,
+            "rollout_seconds": 4.3600699469971005,
+            "update_seconds": 1.3498908830079017,
+            "actor_decisions": 12375,
+            "optimizer_steps": 5,
+            "ppo_epochs": 1,
+            "state_sha256": "d6a835584770353ea26831c605c1f9ed9742047830c21fd90fa3cf30cd7e3c9d",
+            "games": 256,
+            "turns": 14723,
+            "draws": null,
+            "critic_update": {
+              "decisions": 12375,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7735163124498695,
+                  "remaining_smooth_l1": 0.00799472833270527,
+                  "samples": 12375,
+                  "value_mse": 0.6842301721982281,
+                  "win_bce": 0.5925760877276912
+                }
+              ],
+              "trajectories": 513
+            },
+            "critic_update_seconds": 1.2272501409897814
+          },
+          {
+            "wall_seconds": 6.719480278014089,
+            "rollout_seconds": 4.6330421040038345,
+            "update_seconds": 0.5141122710047057,
+            "actor_decisions": 12186,
+            "optimizer_steps": 4,
+            "ppo_epochs": 1,
+            "state_sha256": "d66485bffe255bc1baa4fb7a32f893eefa663b155ce0057808ab97f11c1eec64",
+            "games": 256,
+            "turns": 14692,
+            "draws": null,
+            "critic_update": {
+              "decisions": 12186,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7173758163087066,
+                  "remaining_smooth_l1": 0.008759222431840514,
+                  "samples": 12186,
+                  "value_mse": 0.6340942159674153,
+                  "win_bce": 0.5522909286391768
+                }
+              ],
+              "trajectories": 512
+            },
+            "critic_update_seconds": 1.4385726350010373
+          },
+          {
+            "wall_seconds": 6.829017822994501,
+            "rollout_seconds": 4.622747707995586,
+            "update_seconds": 0.4162389359989902,
+            "actor_decisions": 12117,
+            "optimizer_steps": 4,
+            "ppo_epochs": 1,
+            "state_sha256": "b31729e0ba35c24a3f41d92403c6ca8e2675e350d2bdf778c97f98cad5f81268",
+            "games": 256,
+            "turns": 14898,
+            "draws": null,
+            "critic_update": {
+              "decisions": 12117,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7221329691160765,
+                  "remaining_smooth_l1": 0.008318610407626955,
+                  "samples": 12117,
+                  "value_mse": 0.6379997516766509,
+                  "win_bce": 0.5581152669921255
+                }
+              ],
+              "trajectories": 511
+            },
+            "critic_update_seconds": 1.361900756994146
+          }
+        ],
+        "compiler_counters": {
+          "stats": {
+            "calls_captured": 730,
+            "unique_graphs": 10
+          },
+          "aot_autograd": {
+            "total": 10,
+            "autograd_cache_hit": 10,
+            "ok": 10
+          },
+          "inductor": {
+            "triton_bundler_load_static_autotuner": 258,
+            "async_compile_cache_miss": 516,
+            "async_compile_cache_hit": 258,
+            "extern_calls": 110,
+            "fxgraph_cache_hit": 15,
+            "cudagraph_recorded_non_static_inputs": 16
+          }
+        }
+      },
+      "before": {
+        "process_wall_seconds": 56.995927994008525,
+        "epochs": [
+          {
+            "wall_seconds": 13.259397222995176,
+            "rollout_seconds": 8.792669967995607,
+            "update_seconds": 2.5799046579923015,
+            "actor_decisions": 13138,
+            "optimizer_steps": 4,
+            "ppo_epochs": 1,
+            "state_sha256": "dd876b4774860dd96c09419603b31db77aec35f976005902764ef18f6612342f",
+            "games": 256,
+            "turns": 15470,
+            "draws": null,
+            "critic_update": {
+              "decisions": 13138,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.8005309055695016,
+                  "remaining_smooth_l1": 0.009770432930887155,
+                  "samples": 13138,
+                  "value_mse": 0.7129160852841653,
+                  "win_bce": 0.5808418816873374
+                }
+              ],
+              "trajectories": 512
+            },
+            "critic_update_seconds": 1.8428873190132435
+          },
+          {
+            "wall_seconds": 10.344416713996907,
+            "rollout_seconds": 8.161170399005641,
+            "update_seconds": 0.5219003689999226,
+            "actor_decisions": 13057,
+            "optimizer_steps": 4,
+            "ppo_epochs": 1,
+            "state_sha256": "07dd9c0a4af2a2c2b0e4404088abd7b2f7f1e843bf93a9068cc68d691c1cd3a6",
+            "games": 256,
+            "turns": 16067,
+            "draws": null,
+            "critic_update": {
+              "decisions": 13057,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7350282054213312,
+                  "remaining_smooth_l1": 0.009120498321327889,
+                  "samples": 13057,
+                  "value_mse": 0.6498646555464018,
+                  "win_bce": 0.5647167885975459
+                }
+              ],
+              "trajectories": 511
+            },
+            "critic_update_seconds": 1.5536262730020098
+          },
+          {
+            "wall_seconds": 9.94875426600629,
+            "rollout_seconds": 7.307497014000546,
+            "update_seconds": 1.2962041599967051,
+            "actor_decisions": 12375,
+            "optimizer_steps": 5,
+            "ppo_epochs": 1,
+            "state_sha256": "d6a835584770353ea26831c605c1f9ed9742047830c21fd90fa3cf30cd7e3c9d",
+            "games": 256,
+            "turns": 14723,
+            "draws": null,
+            "critic_update": {
+              "decisions": 12375,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7735163124498695,
+                  "remaining_smooth_l1": 0.00799472833270527,
+                  "samples": 12375,
+                  "value_mse": 0.6842301721982281,
+                  "win_bce": 0.5925760877276912
+                }
+              ],
+              "trajectories": 513
+            },
+            "critic_update_seconds": 1.2327278099983232
+          },
+          {
+            "wall_seconds": 9.540353773001698,
+            "rollout_seconds": 7.592612198001007,
+            "update_seconds": 0.45631479399162345,
+            "actor_decisions": 12186,
+            "optimizer_steps": 4,
+            "ppo_epochs": 1,
+            "state_sha256": "d66485bffe255bc1baa4fb7a32f893eefa663b155ce0057808ab97f11c1eec64",
+            "games": 256,
+            "turns": 14692,
+            "draws": null,
+            "critic_update": {
+              "decisions": 12186,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7173758163087066,
+                  "remaining_smooth_l1": 0.008759222431840514,
+                  "samples": 12186,
+                  "value_mse": 0.6340942159674153,
+                  "win_bce": 0.5522909286391768
+                }
+              ],
+              "trajectories": 512
+            },
+            "critic_update_seconds": 1.3846995780040743
+          },
+          {
+            "wall_seconds": 9.541686038995977,
+            "rollout_seconds": 7.406536619004328,
+            "update_seconds": 0.40758622900466435,
+            "actor_decisions": 12117,
+            "optimizer_steps": 4,
+            "ppo_epochs": 1,
+            "state_sha256": "b31729e0ba35c24a3f41d92403c6ca8e2675e350d2bdf778c97f98cad5f81268",
+            "games": 256,
+            "turns": 14898,
+            "draws": null,
+            "critic_update": {
+              "decisions": 12117,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7221329691160765,
+                  "remaining_smooth_l1": 0.008318610407626955,
+                  "samples": 12117,
+                  "value_mse": 0.6379997516766509,
+                  "win_bce": 0.5581152669921255
+                }
+              ],
+              "trajectories": 511
+            },
+            "critic_update_seconds": 1.3183730360033223
+          }
+        ],
+        "compiler_counters": {
+          "stats": {
+            "calls_captured": 730,
+            "unique_graphs": 10
+          },
+          "aot_autograd": {
+            "total": 10,
+            "autograd_cache_hit": 10,
+            "ok": 10
+          },
+          "inductor": {
+            "triton_bundler_load_static_autotuner": 258,
+            "async_compile_cache_miss": 516,
+            "async_compile_cache_hit": 258,
+            "extern_calls": 110,
+            "fxgraph_cache_hit": 15,
+            "cudagraph_recorded_non_static_inputs": 16
+          }
+        }
+      },
+      "exact": {
+        "all_epochs_games": true,
+        "all_epochs_turns": true,
+        "all_epochs_actor_decisions": true,
+        "all_epochs_optimizer_steps": true,
+        "all_epochs_ppo_epochs": true,
+        "all_epochs_state_sha256": true,
+        "all_epochs_critic_update": true,
+        "latest.pt_state_dict": true,
+        "latest.pt_optimizer_state_dict": true,
+        "privileged_critic_latest.pt_state_dict": true,
+        "privileged_critic_latest.pt_optimizer_state_dict": true
+      }
+    },
+    {
+      "seed": 563100100,
+      "order": [
+        "before",
+        "after"
+      ],
+      "before": {
+        "process_wall_seconds": 59.72830048999458,
+        "epochs": [
+          {
+            "wall_seconds": 12.40686990400718,
+            "rollout_seconds": 8.250534259001142,
+            "update_seconds": 2.475774962003925,
+            "actor_decisions": 12474,
+            "optimizer_steps": 4,
+            "ppo_epochs": 1,
+            "state_sha256": "92bba8267d884ac0dece87aa9706655c1f7041d8f9826bd4a9617a642fcf1c59",
+            "games": 256,
+            "turns": 14787,
+            "draws": null,
+            "critic_update": {
+              "decisions": 12474,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7386114221697571,
+                  "remaining_smooth_l1": 0.009452086073620143,
+                  "samples": 12474,
+                  "value_mse": 0.6554223789758974,
+                  "win_bce": 0.5514429621953928
+                }
+              ],
+              "trajectories": 512
+            },
+            "critic_update_seconds": 1.635795625988976
+          },
+          {
+            "wall_seconds": 10.813255984990974,
+            "rollout_seconds": 8.446858643001178,
+            "update_seconds": 0.523797914996976,
+            "actor_decisions": 12844,
+            "optimizer_steps": 4,
+            "ppo_epochs": 1,
+            "state_sha256": "36dccd2569c5c797f1089e364dabc3299716c2401ed38a977e86dd5e24080692",
+            "games": 256,
+            "turns": 15644,
+            "draws": null,
+            "critic_update": {
+              "decisions": 12844,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7577929042537277,
+                  "remaining_smooth_l1": 0.010651594057279789,
+                  "samples": 12844,
+                  "value_mse": 0.6706510122200664,
+                  "win_bce": 0.5773953828172905
+                }
+              ],
+              "trajectories": 511
+            },
+            "critic_update_seconds": 1.6953426250111079
+          },
+          {
+            "wall_seconds": 11.082273233012529,
+            "rollout_seconds": 8.566818397011957,
+            "update_seconds": 0.9325627549987985,
+            "actor_decisions": 13415,
+            "optimizer_steps": 5,
+            "ppo_epochs": 1,
+            "state_sha256": "b547e517b0bfb41efbe00b66765a80ebffeb9a1ac50525bbe478fc46bbe1d629",
+            "games": 256,
+            "turns": 16203,
+            "draws": null,
+            "critic_update": {
+              "decisions": 13415,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7448891345040816,
+                  "remaining_smooth_l1": 0.008614866802815322,
+                  "samples": 13415,
+                  "value_mse": 0.6583463918660676,
+                  "win_bce": 0.5740799384578323
+                }
+              ],
+              "trajectories": 513
+            },
+            "critic_update_seconds": 1.4524983349983813
+          },
+          {
+            "wall_seconds": 10.26593956000579,
+            "rollout_seconds": 8.274708801007364,
+            "update_seconds": 0.4560565739957383,
+            "actor_decisions": 12973,
+            "optimizer_steps": 4,
+            "ppo_epochs": 1,
+            "state_sha256": "10ab741b8b46d4630592d2b3507e93608d7823499be6c1c8fa6c77dd53292c0f",
+            "games": 256,
+            "turns": 15572,
+            "draws": null,
+            "critic_update": {
+              "decisions": 12973,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7351757216580361,
+                  "remaining_smooth_l1": 0.00866921767062625,
+                  "samples": 12973,
+                  "value_mse": 0.6495336403018258,
+                  "win_bce": 0.5680574406882273
+                }
+              ],
+              "trajectories": 512
+            },
+            "critic_update_seconds": 1.4170007049979176
+          },
+          {
+            "wall_seconds": 10.90946693099977,
+            "rollout_seconds": 8.068837758008158,
+            "update_seconds": 0.5318182930059265,
+            "actor_decisions": 12383,
+            "optimizer_steps": 4,
+            "ppo_epochs": 1,
+            "state_sha256": "c50ff76daef85e7836ad3f2d262765f2cb42ef4ba9b2a1ae0f2ba35ed13402d2",
+            "games": 256,
+            "turns": 14510,
+            "draws": null,
+            "critic_update": {
+              "decisions": 12383,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7668532259262293,
+                  "remaining_smooth_l1": 0.01087840040295812,
+                  "samples": 12383,
+                  "value_mse": 0.6821835177699285,
+                  "win_bce": 0.5608385420092028
+                }
+              ],
+              "trajectories": 511
+            },
+            "critic_update_seconds": 1.9517303109896602
+          }
+        ],
+        "compiler_counters": {
+          "stats": {
+            "calls_captured": 584,
+            "unique_graphs": 8
+          },
+          "aot_autograd": {
+            "total": 8,
+            "autograd_cache_hit": 8,
+            "ok": 8
+          },
+          "inductor": {
+            "triton_bundler_load_static_autotuner": 206,
+            "async_compile_cache_miss": 412,
+            "async_compile_cache_hit": 206,
+            "extern_calls": 88,
+            "fxgraph_cache_hit": 12,
+            "cudagraph_recorded_non_static_inputs": 16
+          }
+        }
+      },
+      "after": {
+        "process_wall_seconds": 43.88871716600261,
+        "epochs": [
+          {
+            "wall_seconds": 9.902179543001694,
+            "rollout_seconds": 5.508841221992043,
+            "update_seconds": 2.596355094006867,
+            "actor_decisions": 12474,
+            "optimizer_steps": 4,
+            "ppo_epochs": 1,
+            "state_sha256": "92bba8267d884ac0dece87aa9706655c1f7041d8f9826bd4a9617a642fcf1c59",
+            "games": 256,
+            "turns": 14787,
+            "draws": null,
+            "critic_update": {
+              "decisions": 12474,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7386114221697571,
+                  "remaining_smooth_l1": 0.009452086073620143,
+                  "samples": 12474,
+                  "value_mse": 0.6554223789758974,
+                  "win_bce": 0.5514429621953928
+                }
+              ],
+              "trajectories": 512
+            },
+            "critic_update_seconds": 1.745453825002187
+          },
+          {
+            "wall_seconds": 7.838816286006477,
+            "rollout_seconds": 5.263276091995067,
+            "update_seconds": 0.6014477039861958,
+            "actor_decisions": 12844,
+            "optimizer_steps": 4,
+            "ppo_epochs": 1,
+            "state_sha256": "36dccd2569c5c797f1089e364dabc3299716c2401ed38a977e86dd5e24080692",
+            "games": 256,
+            "turns": 15644,
+            "draws": null,
+            "critic_update": {
+              "decisions": 12844,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7577929042537277,
+                  "remaining_smooth_l1": 0.010651594057279789,
+                  "samples": 12844,
+                  "value_mse": 0.6706510122200664,
+                  "win_bce": 0.5773953828172905
+                }
+              ],
+              "trajectories": 511
+            },
+            "critic_update_seconds": 1.8459524019999662
+          },
+          {
+            "wall_seconds": 7.3939510109921684,
+            "rollout_seconds": 4.908428101000027,
+            "update_seconds": 0.9341969579982106,
+            "actor_decisions": 13415,
+            "optimizer_steps": 5,
+            "ppo_epochs": 1,
+            "state_sha256": "b547e517b0bfb41efbe00b66765a80ebffeb9a1ac50525bbe478fc46bbe1d629",
+            "games": 256,
+            "turns": 16203,
+            "draws": null,
+            "critic_update": {
+              "decisions": 13415,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7448891345040816,
+                  "remaining_smooth_l1": 0.008614866802815322,
+                  "samples": 13415,
+                  "value_mse": 0.6583463918660676,
+                  "win_bce": 0.5740799384578323
+                }
+              ],
+              "trajectories": 513
+            },
+            "critic_update_seconds": 1.4397633990010945
+          },
+          {
+            "wall_seconds": 6.729479266999988,
+            "rollout_seconds": 4.682798912006547,
+            "update_seconds": 0.45956428699719254,
+            "actor_decisions": 12973,
+            "optimizer_steps": 4,
+            "ppo_epochs": 1,
+            "state_sha256": "10ab741b8b46d4630592d2b3507e93608d7823499be6c1c8fa6c77dd53292c0f",
+            "games": 256,
+            "turns": 15572,
+            "draws": null,
+            "critic_update": {
+              "decisions": 12973,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7351757216580361,
+                  "remaining_smooth_l1": 0.00866921767062625,
+                  "samples": 12973,
+                  "value_mse": 0.6495336403018258,
+                  "win_bce": 0.5680574406882273
+                }
+              ],
+              "trajectories": 512
+            },
+            "critic_update_seconds": 1.4634511559997918
+          },
+          {
+            "wall_seconds": 7.726816865004366,
+            "rollout_seconds": 4.939165496005444,
+            "update_seconds": 0.49451253800361883,
+            "actor_decisions": 12383,
+            "optimizer_steps": 4,
+            "ppo_epochs": 1,
+            "state_sha256": "c50ff76daef85e7836ad3f2d262765f2cb42ef4ba9b2a1ae0f2ba35ed13402d2",
+            "games": 256,
+            "turns": 14510,
+            "draws": null,
+            "critic_update": {
+              "decisions": 12383,
+              "epochs": [
+                {
+                  "epoch": 1,
+                  "loss": 0.7668532259262293,
+                  "remaining_smooth_l1": 0.01087840040295812,
+                  "samples": 12383,
+                  "value_mse": 0.6821835177699285,
+                  "win_bce": 0.5608385420092028
+                }
+              ],
+              "trajectories": 511
+            },
+            "critic_update_seconds": 1.9557231379876612
+          }
+        ],
+        "compiler_counters": {
+          "stats": {
+            "calls_captured": 584,
+            "unique_graphs": 8
+          },
+          "aot_autograd": {
+            "total": 8,
+            "autograd_cache_hit": 8,
+            "ok": 8
+          },
+          "inductor": {
+            "triton_bundler_load_static_autotuner": 206,
+            "async_compile_cache_miss": 412,
+            "async_compile_cache_hit": 206,
+            "extern_calls": 88,
+            "fxgraph_cache_hit": 12,
+            "cudagraph_recorded_non_static_inputs": 16
+          }
+        }
+      },
+      "exact": {
+        "all_epochs_games": true,
+        "all_epochs_turns": true,
+        "all_epochs_actor_decisions": true,
+        "all_epochs_optimizer_steps": true,
+        "all_epochs_ppo_epochs": true,
+        "all_epochs_state_sha256": true,
+        "all_epochs_critic_update": true,
+        "latest.pt_state_dict": true,
+        "latest.pt_optimizer_state_dict": true,
+        "privileged_critic_latest.pt_state_dict": true,
+        "privileged_critic_latest.pt_optimizer_state_dict": true
+      }
+    }
+  ],
+  "initial_compiler_cache": {
+    "before": {
+      "files": 2262,
+      "sha256": "4f425f3b6604f652903e2a1c23c5461e03160fa04ce6d6e20829435d4f21ac73"
+    },
+    "after": {
+      "files": 2262,
+      "sha256": "4f425f3b6604f652903e2a1c23c5461e03160fa04ce6d6e20829435d4f21ac73"
+    }
+  },
+  "steady_epochs": "middle three of five; the full process includes initialization and final evaluation",
+  "metrics": {
+    "before": {
+      "steady_epochs": 9,
+      "steady_wall_seconds": 91.39530645601917,
+      "games_per_second": 25.20917199515842,
+      "actor_decisions_per_second": 1238.816350536383,
+      "mean_epoch_seconds": 10.155034050668796,
+      "steady_rollout_seconds": 71.035804062034,
+      "steady_update_seconds": 6.004540369976894,
+      "all_process_wall_seconds": 173.11935983100557
+    },
+    "after": {
+      "steady_epochs": 9,
+      "steady_wall_seconds": 63.8934743990103,
+      "games_per_second": 36.06002055251653,
+      "actor_decisions_per_second": 1772.0432495646814,
+      "mean_epoch_seconds": 7.0992749332233664,
+      "steady_rollout_seconds": 42.78672237698629,
+      "steady_update_seconds": 6.3965130480064545,
+      "all_process_wall_seconds": 127.44747232600639
+    },
+    "steady_speedup": 1.430432564760242,
+    "all_process_speedup": 1.3583585195646095
+  }
+}

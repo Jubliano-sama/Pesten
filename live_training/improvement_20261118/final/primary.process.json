@@ -1,0 +1,35 @@
+{
+  "command": [
+    "/home/tommie/Pesten/puffer4-native/.venv/bin/python",
+    "-I",
+    "-u",
+    "/tmp/pesten-finals-20261118-E9mtK9jJ/v2/primary/live_training/improvement_20261118/freeze_candidate.py",
+    "run",
+    "--workers",
+    "6",
+    "--chunk-blocks",
+    "48",
+    "--checkpoint",
+    "/home/tommie/Pesten/live_training/improvement_20261118/final/primary.chunks.jsonl",
+    "--output",
+    "/home/tommie/Pesten/live_training/improvement_20261118/final/primary.json"
+  ],
+  "cwd": "/tmp/pesten-finals-20261118-E9mtK9jJ/v2/primary",
+  "cpu_affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "started_utc": "2026-11-18T17:52:48.374701+00:00",
+  "threads": {
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  },
+  "finished_utc": "2026-11-18T18:06:20.118290+00:00",
+  "wall_seconds": 811.7436165870022,
+  "return_code": 0
+}

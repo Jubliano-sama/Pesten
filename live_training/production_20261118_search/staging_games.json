@@ -1,0 +1,109 @@
+{
+  "status": "passed",
+  "games": [
+    {
+      "players": 2,
+      "seed": 3450000020,
+      "search_decisions": 25,
+      "changed_from_teacher": 2,
+      "decisions": 26,
+      "turns": 25,
+      "draw_retries": 1
+    },
+    {
+      "players": 2,
+      "seed": 3450000021,
+      "search_decisions": 116,
+      "changed_from_teacher": 10,
+      "decisions": 117,
+      "turns": 103,
+      "draw_retries": 8,
+      "suit_choices": 6
+    },
+    {
+      "players": 3,
+      "seed": 3450000030,
+      "search_decisions": 135,
+      "changed_from_teacher": 9,
+      "decisions": 137,
+      "turns": 109,
+      "suit_choices": 10,
+      "draw_retries": 18
+    },
+    {
+      "players": 3,
+      "seed": 3450000031,
+      "search_decisions": 70,
+      "changed_from_teacher": 4,
+      "decisions": 72,
+      "turns": 59,
+      "suit_choices": 6,
+      "draw_retries": 7
+    },
+    {
+      "players": 4,
+      "seed": 3450000040,
+      "search_decisions": 110,
+      "changed_from_teacher": 4,
+      "decisions": 113,
+      "turns": 101,
+      "suit_choices": 7,
+      "draw_retries": 5
+    },
+    {
+      "players": 4,
+      "seed": 3450000041,
+      "search_decisions": 494,
+      "changed_from_teacher": 16,
+      "decisions": 497,
+      "turns": 368,
+      "draw_retries": 65,
+      "suit_choices": 64
+    },
+    {
+      "players": 5,
+      "seed": 3450000050,
+      "decisions": 362,
+      "turns": 289,
+      "draw_retries": 41,
+      "suit_choices": 32
+    },
+    {
+      "players": 8,
+      "seed": 3450000080,
+      "decisions": 1199,
+      "turns": 884,
+      "draw_retries": 138,
+      "suit_choices": 177
+    }
+  ],
+  "model": {
+    "status": "ok",
+    "model_name": "MinGRU 192x2 with learned opponent hands and public rollouts",
+    "source_checkpoint_sha256": "f8f0aece2d759eadc60b3cbccca30c321c01da13322f7cae511a73c8da3a9f93",
+    "runtime_artifact_sha256": "14cb8f5b7f552c923ad4b6af6b333da1c97d444e09d4e8df56f97d65f2dc2afc",
+    "runtime": "portable_pytorch",
+    "device": "cpu",
+    "precision": "float32",
+    "profile": "teacher4387_orbit24_learned_search",
+    "orbit_size": 24,
+    "aggregation": "mean_logits",
+    "supported_active_players": [
+      2,
+      13
+    ],
+    "legacy_fallback": "raw MLP outside supported active player counts",
+    "profile_sha256": "03c8c111927fdfe6d3355fe47b6bc1d12e260ea31514622392e5de8aced08426",
+    "deployment_authorization": "user_requested",
+    "search_table_sizes": [
+      2,
+      3,
+      4
+    ],
+    "search_samples": 128,
+    "search_horizon": 72,
+    "search_trust": 72,
+    "evaluation_games": 57600,
+    "larger_table_policy": "teacher4387_orbit24 for up to 13 active players"
+  }
+}

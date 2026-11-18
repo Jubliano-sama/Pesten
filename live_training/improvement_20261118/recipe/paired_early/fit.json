@@ -1,0 +1,50 @@
+{
+  "games": 34560,
+  "roots": 10349,
+  "training_roots": 8566,
+  "validation_roots": 1783,
+  "outcome_changed": 3377,
+  "validation_mse": [
+    0.337086945772171,
+    0.3367578983306885,
+    0.3367088735103607,
+    0.33680832386016846,
+    0.3370806574821472,
+    0.33735591173171997,
+    0.33747729659080505,
+    0.3375244140625,
+    0.337655633687973,
+    0.33792632818222046,
+    0.33801379799842834,
+    0.3383485674858093,
+    0.33856162428855896,
+    0.3384646475315094,
+    0.3390185534954071,
+    0.3392959535121918,
+    0.3388557434082031,
+    0.33955276012420654,
+    0.3403249680995941
+  ],
+  "prior_win_probability_per_logit": 0.02,
+  "selected_epoch": 2,
+  "scales": [
+    16.0,
+    36.0
+  ],
+  "base_training_head_sha256": "053cc77db55f03eaa03fdabc53d8dff0868448e020c7998514b558d72c316fcb",
+  "arguments": {
+    "operation": "fit",
+    "directory": "/tmp/pesten_outcome_pairs_20261118",
+    "initial": "live_training/improvement_20261118/recipe/initial/residual_suit24_24.pt",
+    "output": "live_training/improvement_20261118/recipe/paired_early",
+    "chunks": 72,
+    "epochs": 18,
+    "fit_seed": 511500000,
+    "prior": 0.02,
+    "scales": [
+      16.0,
+      36.0
+    ],
+    "learning_rate": 0.001
+  }
+}

@@ -1,0 +1,327 @@
+{
+  "cpu": "0",
+  "actor_sha256": "f8f0aece2d759eadc60b3cbccca30c321c01da13322f7cae511a73c8da3a9f93",
+  "source_hashes": {
+    "packed_puffer_rollout.py": {
+      "before": "611fd07c4f60ed397925e1ccb9e7ab96dffd668916c2f81d131483fe78a1661c",
+      "after": "27d1828e1ef0d6f4f820152ff3832dc9f5a7a4d851d811912065a3e946e2afb4"
+    },
+    "temporal_batched_speed.py": {
+      "before": "f684546918acc7042573badedcb3968948b3cb4eafd2f5d672e07688b01092b9",
+      "after": "110ed40ce4c6737df03965f0668b042e503316da46bf241042f5beb73ea5b401"
+    },
+    "temporal_puffer_v4.py": {
+      "before": "302f45f674dfb1550e6ee062f232321df21ed185cec4f7d1c1740499f335a1f7",
+      "after": "02971d8991756d9bb799d92c11b85864077edd22e480ee9d134b940c7a978a47"
+    },
+    "vector_puffer_rollout.py": {
+      "before": "e5e7db35449d52e0a47016aecbb69a8bb74ea34a6c455a9311efbab53ee77843",
+      "after": "caab0aeaacffb237c0b335347abc92cb41e851d684517667a1f70f0681f1ee11"
+    },
+    "train_puffer_fast.py": {
+      "before": "4851da69789eef64684b5a958b6b115f3336a067cc1a0f8ce9dacd2b44d40e3b",
+      "after": "416bf257a6995d5d0870272f3931b4211ea71c05d10dc9be9bf3bdd166c436d5"
+    },
+    "privileged_critic.py": {
+      "before": "003aa419469cead6a6b0f6f67f5b6ed161d84ae086904719751945768cb5eb6c",
+      "after": "003aa419469cead6a6b0f6f67f5b6ed161d84ae086904719751945768cb5eb6c"
+    }
+  },
+  "recipes": {
+    "strongest_policy_search.py": "20032a7fe259cf7e3e8fdbbb67a2ebe76e1583183c3ec2915b157519ec97de7b",
+    "public_lookahead.py": "43654cda669b979a888ca279a10f17c40923ebd696c5977a2d617cf9913a5e28",
+    "public_lookahead_leaf.py": "217646277a5056b24bc091bede4b0ad9cb9e4912b7b932fbfe444d797038f416",
+    "public_card_belief.py": "077779677c4844b40864cd5422b65c44a9d62ee0f6361e0fe6613c7c38fa092b",
+    "public_rollout_policy.py": "e0aebfc9b0b3c79af08492923b4e2edd73d5816f1f6de4e5410b700f764348fa",
+    "train_public_lookahead.py": "f9261a7574f9a25db91a2d8c8ccf627acb33f6f5f392ab0f75df275d51450403",
+    "live_training/improvement_20261118/lookahead/fit_rollout_policy.py": "ccaf25a53501e4adf27fa8d2f0420a25df21a3255348a155d29c464eabca640d",
+    "train_outcome_residual.py": "1a134cd50c41c3717bb739f509867584656afc6e0c9b02cf8c7d1c90f9ed2921",
+    "train_public_leaf.py": "479130649cc83d8b34d90ce498bf971700e36ab232c62220f80f3464c131c069",
+    "train_card_belief.py": "8ebb6c84637bcf94b8a23460f19b1c8d92ac6cfeec0def56046f6b81e7d2017f"
+  },
+  "scale": "1/24 of the full candidate training game counts in all three components",
+  "scaled_games": {
+    "exploration": 1728,
+    "all_random": 192,
+    "conditional_labels": 1632
+  },
+  "actual_games": {
+    "exploration": 41472,
+    "all_random": 4608,
+    "conditional_labels": 39168
+  },
+  "conditional_batches": [
+    [
+      1,
+      0,
+      60
+    ],
+    [
+      4,
+      60,
+      24
+    ],
+    [
+      24,
+      84,
+      18
+    ]
+  ],
+  "conditional_games_per_shard": 16,
+  "conditional_iterations": 14,
+  "exploration_games_per_shard": 192,
+  "jit": "identical source and one prewarmed cache, one Numba and BLAS thread",
+  "pairs": [
+    {
+      "seed": 600000100,
+      "order": [
+        "before",
+        "after"
+      ],
+      "before": {
+        "orbit_1_seconds": 10.13751843800128,
+        "orbit_4_seconds": 8.261694009997882,
+        "hand_frequency_seconds": 1.566022029001033,
+        "continuation_seconds": 1.2871968299878063,
+        "total_seconds": 65.27064093897934,
+        "trajectory_sha256": "658766afc077000505f2a6a15c329132d9b0f19b8c272165f4cdb7797b748295",
+        "frequency_sha256": "721e91a69243dcb3aceb7ef1f2651578ada1dc36239ec87f6cfee50ea29c5ecd",
+        "continuation_sha256": "9766630718e35924251672fefe84e868fa2c9b2b2e743711d97eef3a215e98da",
+        "continuation_shape": [
+          3,
+          8,
+          24
+        ],
+        "hand_frequencies_shape": [
+          2,
+          3,
+          9,
+          10
+        ],
+        "focal_games": 1728,
+        "random_games": 192,
+        "decisions": 43924,
+        "strong_hand_observations": 40654,
+        "random_hand_observations": 13977,
+        "continuation_training_pairs": 65484,
+        "card_orbit_1_seconds": 15.590998824991402,
+        "card_orbit_4_seconds": 11.333601452002767,
+        "card_orbit_24_seconds": 15.70299836200138,
+        "card_fit_seconds": 1.3906109929957893,
+        "card_shards_data_sha256": "56c0f29af40a72b9feb81ce05fb4c9623da035edd26ca7ac07f54944db09c95d",
+        "card_odds_sha256": "653553e4b461293dea50613a931cbe3b76533b269607bc1b77cd6c4d19d762e1",
+        "card_fit_report_sha256": "343b8d6b18b96eca9c2d44bf2b4364f9277fa54bbae1bd1c4b861c79cac07d3c",
+        "card_fit_shape": [
+          2,
+          3,
+          5,
+          96
+        ],
+        "card_train_games": 1344,
+        "card_validation_games": 288,
+        "card_train_opponent_hands": 9406,
+        "card_validation_opponent_hands": 2067,
+        "card_validation_cards": 9948,
+        "card_validation": [
+          {
+            "role": "teacher",
+            "players": 2,
+            "opponent_hands": 176,
+            "cards": 878,
+            "baseline": 3.7539114320106384,
+            "fitted": 3.712346287814838
+          },
+          {
+            "role": "teacher",
+            "players": 3,
+            "opponent_hands": 348,
+            "cards": 1670,
+            "baseline": 3.7271292637231133,
+            "fitted": 3.7100541591593093
+          },
+          {
+            "role": "teacher",
+            "players": 4,
+            "opponent_hands": 594,
+            "cards": 3041,
+            "baseline": 3.707105393329089,
+            "fitted": 3.686651793003069
+          },
+          {
+            "role": "random",
+            "players": 2,
+            "opponent_hands": 197,
+            "cards": 917,
+            "baseline": 3.7813120276006273,
+            "fitted": 3.771374214500464
+          },
+          {
+            "role": "random",
+            "players": 3,
+            "opponent_hands": 374,
+            "cards": 1696,
+            "baseline": 3.778169990741501,
+            "fitted": 3.7787507291669074
+          },
+          {
+            "role": "random",
+            "players": 4,
+            "opponent_hands": 378,
+            "cards": 1746,
+            "baseline": 3.75616685585925,
+            "fitted": 3.756520577893849
+          }
+        ],
+        "complete_games": 3552
+      },
+      "after": {
+        "orbit_1_seconds": 7.725736439999309,
+        "orbit_4_seconds": 7.344531750000897,
+        "hand_frequency_seconds": 1.4409642230020836,
+        "continuation_seconds": 1.278070148997358,
+        "total_seconds": 57.35398100099701,
+        "trajectory_sha256": "658766afc077000505f2a6a15c329132d9b0f19b8c272165f4cdb7797b748295",
+        "frequency_sha256": "721e91a69243dcb3aceb7ef1f2651578ada1dc36239ec87f6cfee50ea29c5ecd",
+        "continuation_sha256": "9766630718e35924251672fefe84e868fa2c9b2b2e743711d97eef3a215e98da",
+        "continuation_shape": [
+          3,
+          8,
+          24
+        ],
+        "hand_frequencies_shape": [
+          2,
+          3,
+          9,
+          10
+        ],
+        "focal_games": 1728,
+        "random_games": 192,
+        "decisions": 43924,
+        "strong_hand_observations": 40654,
+        "random_hand_observations": 13977,
+        "continuation_training_pairs": 65484,
+        "card_orbit_1_seconds": 12.070752855986939,
+        "card_orbit_4_seconds": 10.915798500995152,
+        "card_orbit_24_seconds": 15.189003158011474,
+        "card_fit_seconds": 1.3891239240037976,
+        "card_shards_data_sha256": "56c0f29af40a72b9feb81ce05fb4c9623da035edd26ca7ac07f54944db09c95d",
+        "card_odds_sha256": "653553e4b461293dea50613a931cbe3b76533b269607bc1b77cd6c4d19d762e1",
+        "card_fit_report_sha256": "343b8d6b18b96eca9c2d44bf2b4364f9277fa54bbae1bd1c4b861c79cac07d3c",
+        "card_fit_shape": [
+          2,
+          3,
+          5,
+          96
+        ],
+        "card_train_games": 1344,
+        "card_validation_games": 288,
+        "card_train_opponent_hands": 9406,
+        "card_validation_opponent_hands": 2067,
+        "card_validation_cards": 9948,
+        "card_validation": [
+          {
+            "role": "teacher",
+            "players": 2,
+            "opponent_hands": 176,
+            "cards": 878,
+            "baseline": 3.7539114320106384,
+            "fitted": 3.712346287814838
+          },
+          {
+            "role": "teacher",
+            "players": 3,
+            "opponent_hands": 348,
+            "cards": 1670,
+            "baseline": 3.7271292637231133,
+            "fitted": 3.7100541591593093
+          },
+          {
+            "role": "teacher",
+            "players": 4,
+            "opponent_hands": 594,
+            "cards": 3041,
+            "baseline": 3.707105393329089,
+            "fitted": 3.686651793003069
+          },
+          {
+            "role": "random",
+            "players": 2,
+            "opponent_hands": 197,
+            "cards": 917,
+            "baseline": 3.7813120276006273,
+            "fitted": 3.771374214500464
+          },
+          {
+            "role": "random",
+            "players": 3,
+            "opponent_hands": 374,
+            "cards": 1696,
+            "baseline": 3.778169990741501,
+            "fitted": 3.7787507291669074
+          },
+          {
+            "role": "random",
+            "players": 4,
+            "opponent_hands": 378,
+            "cards": 1746,
+            "baseline": 3.75616685585925,
+            "fitted": 3.756520577893849
+          }
+        ],
+        "complete_games": 3552
+      },
+      "every_artifact_and_work_count_exact": true
+    }
+  ],
+  "totals": {
+    "before": {
+      "orbit_1_seconds": 10.13751843800128,
+      "orbit_4_seconds": 8.261694009997882,
+      "hand_frequency_seconds": 1.566022029001033,
+      "continuation_seconds": 1.2871968299878063,
+      "total_seconds": 65.27064093897934,
+      "focal_games": 1728,
+      "random_games": 192,
+      "decisions": 43924,
+      "strong_hand_observations": 40654,
+      "random_hand_observations": 13977,
+      "continuation_training_pairs": 65484,
+      "card_orbit_1_seconds": 15.590998824991402,
+      "card_orbit_4_seconds": 11.333601452002767,
+      "card_orbit_24_seconds": 15.70299836200138,
+      "card_fit_seconds": 1.3906109929957893,
+      "card_train_games": 1344,
+      "card_validation_games": 288,
+      "card_train_opponent_hands": 9406,
+      "card_validation_opponent_hands": 2067,
+      "card_validation_cards": 9948,
+      "complete_games": 3552,
+      "games_per_second": 54.41956672864172
+    },
+    "after": {
+      "orbit_1_seconds": 7.725736439999309,
+      "orbit_4_seconds": 7.344531750000897,
+      "hand_frequency_seconds": 1.4409642230020836,
+      "continuation_seconds": 1.278070148997358,
+      "total_seconds": 57.35398100099701,
+      "focal_games": 1728,
+      "random_games": 192,
+      "decisions": 43924,
+      "strong_hand_observations": 40654,
+      "random_hand_observations": 13977,
+      "continuation_training_pairs": 65484,
+      "card_orbit_1_seconds": 12.070752855986939,
+      "card_orbit_4_seconds": 10.915798500995152,
+      "card_orbit_24_seconds": 15.189003158011474,
+      "card_fit_seconds": 1.3891239240037976,
+      "card_train_games": 1344,
+      "card_validation_games": 288,
+      "card_train_opponent_hands": 9406,
+      "card_validation_opponent_hands": 2067,
+      "card_validation_cards": 9948,
+      "complete_games": 3552,
+      "games_per_second": 61.93118486296974
+    }
+  },
+  "speedup": 1.138031568163415
+}

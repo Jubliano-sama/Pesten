@@ -1,8 +1,21 @@
-FROM jubliano/pesten-server:v4
+ARG BASE_IMAGE=pesten-server:teacher4387-orbit24-20260926
+FROM ${BASE_IMAGE}
 
-COPY ai_observation.py supervisedAgent.py web_server.py /app/
+USER root
+COPY live_training/production_20261118_search/requirements-search.txt /tmp/requirements-search.txt
+RUN python -m pip install --disable-pip-version-check --only-binary=:all: --no-cache-dir \
+        --no-deps --require-hashes -r /tmp/requirements-search.txt && \
+    install -d -o app -g app /app/__pycache__
 
-RUN python -m py_compile \
-    /app/ai_observation.py \
-    /app/supervisedAgent.py \
-    /app/web_server.py
+COPY ai_observation.py supervisedAgent.py web_server.py production_temporal_policy.py \
+     web_temporal_player.py temporal_observation.py card.py batched_pesten.py \
+     public_lookahead.py public_lookahead_leaf.py public_rollout_policy.py public_card_belief.py web_search.py /app/
+COPY models/best/puffer_min_gru_192x2_plateau_teacher_epoch4387_portable.pt \
+     models/best/puffer_min_gru_192x2_plateau_teacher_epoch4387_portable.json /app/models/best/
+COPY live_training/improvement_20261118/card_belief/profile.json /app/live_training/improvement_20261118/card_belief/
+COPY live_training/improvement_20261118/card_belief/fit/card_odds.npy /app/live_training/improvement_20261118/card_belief/fit/
+COPY live_training/improvement_20261118/lookahead/hand_frequencies.json \
+     live_training/improvement_20261118/lookahead/rollout_weights.npy /app/live_training/improvement_20261118/lookahead/
+
+USER app
+RUN python web_search.py && python -c "from web_temporal_player import production_model_status; assert production_model_status()['profile'] == 'teacher4387_orbit24_learned_search'"

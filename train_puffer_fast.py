@@ -346,7 +346,11 @@ def _resolve_update_precision(
 
 def _update_autocast(device_type: str, update_precision: str):
     if update_precision == "bfloat16":
-        return torch.autocast(device_type=device_type, dtype=torch.bfloat16)
+        # This context spans multiple optimizer steps and post-update KL checks.
+        # Cached parameter casts would keep those forwards on stale weights.
+        return torch.autocast(
+            device_type=device_type, dtype=torch.bfloat16, cache_enabled=False
+        )
     return nullcontext()
 
 
@@ -523,12 +527,12 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
-        "--trace-int8-rollouts",
+        "--trace-int8-rollouts", "--trace-rollouts",
         action=argparse.BooleanOptionalAction,
         default=True,
         help=(
-            "trace quantized MinGRU decision/event graphs to remove Python "
-            "dispatch while preserving exact actor outputs"
+            "trace CPU MinGRU decision/event graphs for FP32 or quantized "
+            "rollouts; existing shared FP32 weights update in place"
         ),
     )
     parser.add_argument(
@@ -802,7 +806,7 @@ def main() -> None:
         policy_model_config,
     )
     from temporal_training import ppo_update_batched_epochs
-    from vector_puffer_rollout import VectorPufferRolloutPool
+    from vector_puffer_rollout import VectorPufferRolloutPool, _trace_worker_min_gru
 
     policy, payload = load_temporal_policy_checkpoint(
         resume, device=args.device
@@ -974,6 +978,9 @@ def main() -> None:
             load_temporal_policy_checkpoint(path, device="cpu")[0]
             for path in historical_paths
         ]
+        if args.trace_int8_rollouts:
+            for historical_policy in direct_historical:
+                _trace_worker_min_gru(historical_policy, shared_float_weights=True)
     actor_value_coefficient = (
         args.value_coefficient
         if args.value_coefficient is not None
@@ -1036,6 +1043,8 @@ def main() -> None:
             "max_turns": args.max_turns,
         }
         if privileged_critic is not None:
+            if args.trace_int8_rollouts:
+                _trace_worker_min_gru(rollout_policy, shared_float_weights=True)
             episodes, contribution = _collect_privileged_rollouts(
                 rollout_policy,
                 champion_factory,

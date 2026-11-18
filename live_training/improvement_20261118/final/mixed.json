@@ -1,0 +1,6055 @@
+{
+  "panel": "mixed opponents, supplementary",
+  "base_seed": 1524837801,
+  "stride": 1000000,
+  "candidate": "live_training/improvement_20261118/card_belief/profile.json",
+  "candidate_kind": "lookahead",
+  "candidate_sha256": "03c8c111927fdfe6d3355fe47b6bc1d12e260ea31514622392e5de8aced08426",
+  "incumbent": "models/best/puffer_min_gru_192x2_plateau_teacher_epoch4387.pt",
+  "incumbent_sha256": "f8f0aece2d759eadc60b3cbccca30c321c01da13322f7cae511a73c8da3a9f93",
+  "freeze_manifest_sha256": "7b38179a6d89467a2e46616eadacc49b6d26778a3676d842b95cf69b11d05efb",
+  "driver_sha256": "5fd7f3028f7e6862277f5b56c1e1827a462036ed24c2b669a6b1b4fc9e0dbe33",
+  "workers": 3,
+  "chunk_deals": 4,
+  "games": 7680,
+  "seconds": 839.7017407800013,
+  "games_per_second": 9.146104654809964,
+  "interval": "pointwise 95% paired normal, independent unit = deal, delta = candidate minus baseline",
+  "rosters": [
+    {
+      "peers": [
+        "best",
+        "random"
+      ],
+      "players": 3,
+      "independent_deals": 128,
+      "games_per_arm": 768,
+      "layouts": [
+        [
+          "focal",
+          "best",
+          "random"
+        ],
+        [
+          "focal",
+          "random",
+          "best"
+        ],
+        [
+          "random",
+          "focal",
+          "best"
+        ],
+        [
+          "best",
+          "focal",
+          "random"
+        ],
+        [
+          "best",
+          "random",
+          "focal"
+        ],
+        [
+          "random",
+          "best",
+          "focal"
+        ]
+      ],
+      "baseline": {
+        "wins": 329,
+        "losses": 437,
+        "draws": 2,
+        "turns": 41572,
+        "win_rate": 0.4283854166666667
+      },
+      "candidate": {
+        "wins": 325,
+        "losses": 440,
+        "draws": 3,
+        "turns": 42035,
+        "win_rate": 0.4231770833333333
+      },
+      "delta": -0.005208333333333333,
+      "paired_se": 0.015679585319090954,
+      "paired_ci95": [
+        -0.03593975585127457,
+        0.025523089184607904
+      ],
+      "raw_deals": [
+        {
+          "seed": 1524837801,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 258
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 248
+          }
+        },
+        {
+          "seed": 1524837802,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 298
+          },
+          "candidate": {
+            "wins": 1,
+            "losses": 5,
+            "draws": 0,
+            "turns": 320
+          }
+        },
+        {
+          "seed": 1524837803,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 542
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 2,
+            "draws": 0,
+            "turns": 286
+          }
+        },
+        {
+          "seed": 1524837804,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 370
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 310
+          }
+        },
+        {
+          "seed": 1524837805,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 320
+          },
+          "candidate": {
+            "wins": 1,
+            "losses": 5,
+            "draws": 0,
+            "turns": 252
+          }
+        },
+        {
+          "seed": 1524837806,
+          "baseline": {
+            "wins": 1,
+            "losses": 5,
+            "draws": 0,
+            "turns": 286
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 237
+          }
+        },
+        {
+          "seed": 1524837807,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 374
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 346
+          }
+        },
+        {
+          "seed": 1524837808,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 330
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 354
+          }
+        },
+        {
+          "seed": 1524837809,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 226
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 327
+          }
+        },
+        {
+          "seed": 1524837810,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 360
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 393
+          }
+        },
+        {
+          "seed": 1524837811,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 438
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 351
+          }
+        },
+        {
+          "seed": 1524837812,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 414
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 590
+          }
+        },
+        {
+          "seed": 1524837813,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 358
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 422
+          }
+        },
+        {
+          "seed": 1524837814,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 274
+          },
+          "candidate": {
+            "wins": 1,
+            "losses": 5,
+            "draws": 0,
+            "turns": 291
+          }
+        },
+        {
+          "seed": 1524837815,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 224
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 245
+          }
+        },
+        {
+          "seed": 1524837816,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 194
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 294
+          }
+        },
+        {
+          "seed": 1524837817,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 158
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 145
+          }
+        },
+        {
+          "seed": 1524837818,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 272
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 323
+          }
+        },
+        {
+          "seed": 1524837819,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 332
+          },
+          "candidate": {
+            "wins": 0,
+            "losses": 6,
+            "draws": 0,
+            "turns": 348
+          }
+        },
+        {
+          "seed": 1524837820,
+          "baseline": {
+            "wins": 2,
+            "losses": 2,
+            "draws": 2,
+            "turns": 674
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 3,
+            "draws": 1,
+            "turns": 458
+          }
+        },
+        {
+          "seed": 1524837821,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 506
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 1,
+            "draws": 0,
+            "turns": 504
+          }
+        },
+        {
+          "seed": 1524837822,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 230
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 2,
+            "draws": 0,
+            "turns": 341
+          }
+        },
+        {
+          "seed": 1524837823,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 328
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 2,
+            "draws": 0,
+            "turns": 246
+          }
+        },
+        {
+          "seed": 1524837824,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 404
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 399
+          }
+        },
+        {
+          "seed": 1524837825,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 180
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 406
+          }
+        },
+        {
+          "seed": 1524837826,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 560
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 312
+          }
+        },
+        {
+          "seed": 1524837827,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 300
+          },
+          "candidate": {
+            "wins": 1,
+            "losses": 5,
+            "draws": 0,
+            "turns": 198
+          }
+        },
+        {
+          "seed": 1524837828,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 352
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 379
+          }
+        },
+        {
+          "seed": 1524837829,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 202
+          },
+          "candidate": {
+            "wins": 1,
+            "losses": 5,
+            "draws": 0,
+            "turns": 207
+          }
+        },
+        {
+          "seed": 1524837830,
+          "baseline": {
+            "wins": 1,
+            "losses": 5,
+            "draws": 0,
+            "turns": 206
+          },
+          "candidate": {
+            "wins": 1,
+            "losses": 4,
+            "draws": 1,
+            "turns": 415
+          }
+        },
+        {
+          "seed": 1524837831,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 364
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 408
+          }
+        },
+        {
+          "seed": 1524837832,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 240
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 227
+          }
+        },
+        {
+          "seed": 1524837833,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 256
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 1,
+            "draws": 0,
+            "turns": 455
+          }
+        },
+        {
+          "seed": 1524837834,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 442
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 2,
+            "draws": 0,
+            "turns": 373
+          }
+        },
+        {
+          "seed": 1524837835,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 422
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 496
+          }
+        },
+        {
+          "seed": 1524837836,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 380
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 425
+          }
+        },
+        {
+          "seed": 1524837837,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 198
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 1,
+            "draws": 0,
+            "turns": 239
+          }
+        },
+        {
+          "seed": 1524837838,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 382
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 380
+          }
+        },
+        {
+          "seed": 1524837839,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 330
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 430
+          }
+        },
+        {
+          "seed": 1524837840,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 276
+          },
+          "candidate": {
+            "wins": 1,
+            "losses": 5,
+            "draws": 0,
+            "turns": 245
+          }
+        },
+        {
+          "seed": 1524837841,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 388
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 439
+          }
+        },
+        {
+          "seed": 1524837842,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 366
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 411
+          }
+        },
+        {
+          "seed": 1524837843,
+          "baseline": {
+            "wins": 1,
+            "losses": 5,
+            "draws": 0,
+            "turns": 264
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 415
+          }
+        },
+        {
+          "seed": 1524837844,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 284
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 259
+          }
+        },
+        {
+          "seed": 1524837845,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 608
+          },
+          "candidate": {
+            "wins": 1,
+            "losses": 5,
+            "draws": 0,
+            "turns": 318
+          }
+        },
+        {
+          "seed": 1524837846,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 278
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 316
+          }
+        },
+        {
+          "seed": 1524837847,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 142
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 2,
+            "draws": 0,
+            "turns": 184
+          }
+        },
+        {
+          "seed": 1524837848,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 362
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 417
+          }
+        },
+        {
+          "seed": 1524837849,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 670
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 3,
+            "draws": 1,
+            "turns": 602
+          }
+        },
+        {
+          "seed": 1524837850,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 336
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 385
+          }
+        },
+        {
+          "seed": 1524837851,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 338
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 375
+          }
+        },
+        {
+          "seed": 1524837852,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 324
+          },
+          "candidate": {
+            "wins": 1,
+            "losses": 5,
+            "draws": 0,
+            "turns": 396
+          }
+        },
+        {
+          "seed": 1524837853,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 202
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 241
+          }
+        },
+        {
+          "seed": 1524837854,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 184
+          },
+          "candidate": {
+            "wins": 1,
+            "losses": 5,
+            "draws": 0,
+            "turns": 295
+          }
+        },
+        {
+          "seed": 1524837855,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 508
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 401
+          }
+        },
+        {
+          "seed": 1524837856,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 318
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 260
+          }
+        },
+        {
+          "seed": 1524837857,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 368
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 422
+          }
+        },
+        {
+          "seed": 1524837858,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 192
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 192
+          }
+        },
+        {
+          "seed": 1524837859,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 158
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 208
+          }
+        },
+        {
+          "seed": 1524837860,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 532
+          },
+          "candidate": {
+            "wins": 1,
+            "losses": 5,
+            "draws": 0,
+            "turns": 407
+          }
+        },
+        {
+          "seed": 1524837861,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 254
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 365
+          }
+        },
+        {
+          "seed": 1524837862,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 234
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 213
+          }
+        },
+        {
+          "seed": 1524837863,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 398
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 243
+          }
+        },
+        {
+          "seed": 1524837864,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 392
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 338
+          }
+        },
+        {
+          "seed": 1524837865,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 450
+          },
+          "candidate": {
+            "wins": 1,
+            "losses": 5,
+            "draws": 0,
+            "turns": 444
+          }
+        },
+        {
+          "seed": 1524837866,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 296
+          },
+          "candidate": {
+            "wins": 1,
+            "losses": 5,
+            "draws": 0,
+            "turns": 377
+          }
+        },
+        {
+          "seed": 1524837867,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 440
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 525
+          }
+        },
+        {
+          "seed": 1524837868,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 436
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 419
+          }
+        },
+        {
+          "seed": 1524837869,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 248
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 2,
+            "draws": 0,
+            "turns": 305
+          }
+        },
+        {
+          "seed": 1524837870,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 432
+          },
+          "candidate": {
+            "wins": 1,
+            "losses": 5,
+            "draws": 0,
+            "turns": 420
+          }
+        },
+        {
+          "seed": 1524837871,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 222
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 238
+          }
+        },
+        {
+          "seed": 1524837872,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 234
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 436
+          }
+        },
+        {
+          "seed": 1524837873,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 194
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 1,
+            "draws": 0,
+            "turns": 185
+          }
+        },
+        {
+          "seed": 1524837874,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 324
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 375
+          }
+        },
+        {
+          "seed": 1524837875,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 416
+          },
+          "candidate": {
+            "wins": 1,
+            "losses": 5,
+            "draws": 0,
+            "turns": 314
+          }
+        },
+        {
+          "seed": 1524837876,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 136
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 136
+          }
+        },
+        {
+          "seed": 1524837877,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 252
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 2,
+            "draws": 0,
+            "turns": 173
+          }
+        },
+        {
+          "seed": 1524837878,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 322
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 360
+          }
+        },
+        {
+          "seed": 1524837879,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 354
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 2,
+            "draws": 0,
+            "turns": 458
+          }
+        },
+        {
+          "seed": 1524837880,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 276
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 202
+          }
+        },
+        {
+          "seed": 1524837881,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 440
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 1,
+            "draws": 0,
+            "turns": 401
+          }
+        },
+        {
+          "seed": 1524837882,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 290
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 261
+          }
+        },
+        {
+          "seed": 1524837883,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 324
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 2,
+            "draws": 0,
+            "turns": 370
+          }
+        },
+        {
+          "seed": 1524837884,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 426
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 332
+          }
+        },
+        {
+          "seed": 1524837885,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 406
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 304
+          }
+        },
+        {
+          "seed": 1524837886,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 340
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 286
+          }
+        },
+        {
+          "seed": 1524837887,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 210
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 244
+          }
+        },
+        {
+          "seed": 1524837888,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 476
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 2,
+            "draws": 0,
+            "turns": 429
+          }
+        },
+        {
+          "seed": 1524837889,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 274
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 2,
+            "draws": 0,
+            "turns": 443
+          }
+        },
+        {
+          "seed": 1524837890,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 502
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 2,
+            "draws": 0,
+            "turns": 335
+          }
+        },
+        {
+          "seed": 1524837891,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 366
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 274
+          }
+        },
+        {
+          "seed": 1524837892,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 274
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 268
+          }
+        },
+        {
+          "seed": 1524837893,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 498
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 482
+          }
+        },
+        {
+          "seed": 1524837894,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 242
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 2,
+            "draws": 0,
+            "turns": 297
+          }
+        },
+        {
+          "seed": 1524837895,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 386
+          },
+          "candidate": {
+            "wins": 1,
+            "losses": 5,
+            "draws": 0,
+            "turns": 359
+          }
+        },
+        {
+          "seed": 1524837896,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 190
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 268
+          }
+        },
+        {
+          "seed": 1524837897,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 226
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 211
+          }
+        },
+        {
+          "seed": 1524837898,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 350
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 504
+          }
+        },
+        {
+          "seed": 1524837899,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 212
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 195
+          }
+        },
+        {
+          "seed": 1524837900,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 232
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 282
+          }
+        },
+        {
+          "seed": 1524837901,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 338
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 274
+          }
+        },
+        {
+          "seed": 1524837902,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 204
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 2,
+            "draws": 0,
+            "turns": 221
+          }
+        },
+        {
+          "seed": 1524837903,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 314
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 361
+          }
+        },
+        {
+          "seed": 1524837904,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 390
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 240
+          }
+        },
+        {
+          "seed": 1524837905,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 342
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 308
+          }
+        },
+        {
+          "seed": 1524837906,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 298
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 277
+          }
+        },
+        {
+          "seed": 1524837907,
+          "baseline": {
+            "wins": 1,
+            "losses": 5,
+            "draws": 0,
+            "turns": 240
+          },
+          "candidate": {
+            "wins": 0,
+            "losses": 6,
+            "draws": 0,
+            "turns": 249
+          }
+        },
+        {
+          "seed": 1524837908,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 152
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 216
+          }
+        },
+        {
+          "seed": 1524837909,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 332
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 385
+          }
+        },
+        {
+          "seed": 1524837910,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 262
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 261
+          }
+        },
+        {
+          "seed": 1524837911,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 284
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 315
+          }
+        },
+        {
+          "seed": 1524837912,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 410
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 312
+          }
+        },
+        {
+          "seed": 1524837913,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 610
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 310
+          }
+        },
+        {
+          "seed": 1524837914,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 202
+          },
+          "candidate": {
+            "wins": 1,
+            "losses": 5,
+            "draws": 0,
+            "turns": 279
+          }
+        },
+        {
+          "seed": 1524837915,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 170
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 181
+          }
+        },
+        {
+          "seed": 1524837916,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 222
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 1,
+            "draws": 0,
+            "turns": 328
+          }
+        },
+        {
+          "seed": 1524837917,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 194
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 239
+          }
+        },
+        {
+          "seed": 1524837918,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 300
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 296
+          }
+        },
+        {
+          "seed": 1524837919,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 236
+          },
+          "candidate": {
+            "wins": 1,
+            "losses": 5,
+            "draws": 0,
+            "turns": 262
+          }
+        },
+        {
+          "seed": 1524837920,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 356
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 361
+          }
+        },
+        {
+          "seed": 1524837921,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 288
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 1,
+            "draws": 0,
+            "turns": 435
+          }
+        },
+        {
+          "seed": 1524837922,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 444
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 311
+          }
+        },
+        {
+          "seed": 1524837923,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 312
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 244
+          }
+        },
+        {
+          "seed": 1524837924,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 258
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 281
+          }
+        },
+        {
+          "seed": 1524837925,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 172
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 172
+          }
+        },
+        {
+          "seed": 1524837926,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 386
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 449
+          }
+        },
+        {
+          "seed": 1524837927,
+          "baseline": {
+            "wins": 3,
+            "losses": 3,
+            "draws": 0,
+            "turns": 298
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 246
+          }
+        },
+        {
+          "seed": 1524837928,
+          "baseline": {
+            "wins": 2,
+            "losses": 4,
+            "draws": 0,
+            "turns": 502
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 2,
+            "draws": 0,
+            "turns": 583
+          }
+        }
+      ]
+    },
+    {
+      "peers": [
+        "best",
+        "random",
+        "random"
+      ],
+      "players": 4,
+      "independent_deals": 128,
+      "games_per_arm": 1536,
+      "layouts": [
+        [
+          "focal",
+          "best",
+          "random",
+          "random"
+        ],
+        [
+          "focal",
+          "random",
+          "best",
+          "random"
+        ],
+        [
+          "focal",
+          "random",
+          "random",
+          "best"
+        ],
+        [
+          "random",
+          "focal",
+          "best",
+          "random"
+        ],
+        [
+          "random",
+          "focal",
+          "random",
+          "best"
+        ],
+        [
+          "best",
+          "focal",
+          "random",
+          "random"
+        ],
+        [
+          "random",
+          "random",
+          "focal",
+          "best"
+        ],
+        [
+          "best",
+          "random",
+          "focal",
+          "random"
+        ],
+        [
+          "random",
+          "best",
+          "focal",
+          "random"
+        ],
+        [
+          "best",
+          "random",
+          "random",
+          "focal"
+        ],
+        [
+          "random",
+          "best",
+          "random",
+          "focal"
+        ],
+        [
+          "random",
+          "random",
+          "best",
+          "focal"
+        ]
+      ],
+      "baseline": {
+        "wins": 558,
+        "losses": 964,
+        "draws": 14,
+        "turns": 99744,
+        "win_rate": 0.36328125
+      },
+      "candidate": {
+        "wins": 571,
+        "losses": 948,
+        "draws": 17,
+        "turns": 101443,
+        "win_rate": 0.3717447916666667
+      },
+      "delta": 0.008463541666666666,
+      "paired_se": 0.012326547129674157,
+      "paired_ci95": [
+        -0.015696046761230258,
+        0.032623130094563586
+      ],
+      "raw_deals": [
+        {
+          "seed": 1525837801,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 672
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 721
+          }
+        },
+        {
+          "seed": 1525837802,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 856
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 875
+          }
+        },
+        {
+          "seed": 1525837803,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 608
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 769
+          }
+        },
+        {
+          "seed": 1525837804,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 1188
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 962
+          }
+        },
+        {
+          "seed": 1525837805,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 776
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 627
+          }
+        },
+        {
+          "seed": 1525837806,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 860
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 810
+          }
+        },
+        {
+          "seed": 1525837807,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 940
+          },
+          "candidate": {
+            "wins": 6,
+            "losses": 5,
+            "draws": 1,
+            "turns": 1078
+          }
+        },
+        {
+          "seed": 1525837808,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 882
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 763
+          }
+        },
+        {
+          "seed": 1525837809,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 578
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 6,
+            "draws": 1,
+            "turns": 779
+          }
+        },
+        {
+          "seed": 1525837810,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 716
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 649
+          }
+        },
+        {
+          "seed": 1525837811,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 614
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 631
+          }
+        },
+        {
+          "seed": 1525837812,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 528
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 726
+          }
+        },
+        {
+          "seed": 1525837813,
+          "baseline": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 582
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 694
+          }
+        },
+        {
+          "seed": 1525837814,
+          "baseline": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 580
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 738
+          }
+        },
+        {
+          "seed": 1525837815,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 724
+          },
+          "candidate": {
+            "wins": 7,
+            "losses": 5,
+            "draws": 0,
+            "turns": 783
+          }
+        },
+        {
+          "seed": 1525837816,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 568
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 617
+          }
+        },
+        {
+          "seed": 1525837817,
+          "baseline": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 460
+          },
+          "candidate": {
+            "wins": 7,
+            "losses": 5,
+            "draws": 0,
+            "turns": 481
+          }
+        },
+        {
+          "seed": 1525837818,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 818
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 849
+          }
+        },
+        {
+          "seed": 1525837819,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 798
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 6,
+            "draws": 1,
+            "turns": 1149
+          }
+        },
+        {
+          "seed": 1525837820,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 712
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 854
+          }
+        },
+        {
+          "seed": 1525837821,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 1152
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 8,
+            "draws": 1,
+            "turns": 787
+          }
+        },
+        {
+          "seed": 1525837822,
+          "baseline": {
+            "wins": 1,
+            "losses": 11,
+            "draws": 0,
+            "turns": 1014
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 1093
+          }
+        },
+        {
+          "seed": 1525837823,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 940
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 7,
+            "draws": 1,
+            "turns": 1149
+          }
+        },
+        {
+          "seed": 1525837824,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 626
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 833
+          }
+        },
+        {
+          "seed": 1525837825,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 864
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 762
+          }
+        },
+        {
+          "seed": 1525837826,
+          "baseline": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 942
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 899
+          }
+        },
+        {
+          "seed": 1525837827,
+          "baseline": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 1124
+          },
+          "candidate": {
+            "wins": 1,
+            "losses": 11,
+            "draws": 0,
+            "turns": 844
+          }
+        },
+        {
+          "seed": 1525837828,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 850
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 742
+          }
+        },
+        {
+          "seed": 1525837829,
+          "baseline": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 834
+          },
+          "candidate": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 915
+          }
+        },
+        {
+          "seed": 1525837830,
+          "baseline": {
+            "wins": 3,
+            "losses": 7,
+            "draws": 2,
+            "turns": 854
+          },
+          "candidate": {
+            "wins": 6,
+            "losses": 5,
+            "draws": 1,
+            "turns": 750
+          }
+        },
+        {
+          "seed": 1525837831,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 604
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 778
+          }
+        },
+        {
+          "seed": 1525837832,
+          "baseline": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 596
+          },
+          "candidate": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 621
+          }
+        },
+        {
+          "seed": 1525837833,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 708
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 825
+          }
+        },
+        {
+          "seed": 1525837834,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 896
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 1128
+          }
+        },
+        {
+          "seed": 1525837835,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 880
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 651
+          }
+        },
+        {
+          "seed": 1525837836,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 884
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 921
+          }
+        },
+        {
+          "seed": 1525837837,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 788
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 908
+          }
+        },
+        {
+          "seed": 1525837838,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 798
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 868
+          }
+        },
+        {
+          "seed": 1525837839,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 832
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 777
+          }
+        },
+        {
+          "seed": 1525837840,
+          "baseline": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 548
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 446
+          }
+        },
+        {
+          "seed": 1525837841,
+          "baseline": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 784
+          },
+          "candidate": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 773
+          }
+        },
+        {
+          "seed": 1525837842,
+          "baseline": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 866
+          },
+          "candidate": {
+            "wins": 1,
+            "losses": 11,
+            "draws": 0,
+            "turns": 841
+          }
+        },
+        {
+          "seed": 1525837843,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 496
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 499
+          }
+        },
+        {
+          "seed": 1525837844,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 830
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 6,
+            "draws": 1,
+            "turns": 988
+          }
+        },
+        {
+          "seed": 1525837845,
+          "baseline": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 736
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 737
+          }
+        },
+        {
+          "seed": 1525837846,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 948
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 934
+          }
+        },
+        {
+          "seed": 1525837847,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 572
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 583
+          }
+        },
+        {
+          "seed": 1525837848,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 626
+          },
+          "candidate": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 718
+          }
+        },
+        {
+          "seed": 1525837849,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 1050
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 804
+          }
+        },
+        {
+          "seed": 1525837850,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 512
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 660
+          }
+        },
+        {
+          "seed": 1525837851,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 864
+          },
+          "candidate": {
+            "wins": 8,
+            "losses": 4,
+            "draws": 0,
+            "turns": 731
+          }
+        },
+        {
+          "seed": 1525837852,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 626
+          },
+          "candidate": {
+            "wins": 8,
+            "losses": 4,
+            "draws": 0,
+            "turns": 768
+          }
+        },
+        {
+          "seed": 1525837853,
+          "baseline": {
+            "wins": 4,
+            "losses": 6,
+            "draws": 2,
+            "turns": 866
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 670
+          }
+        },
+        {
+          "seed": 1525837854,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 466
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 741
+          }
+        },
+        {
+          "seed": 1525837855,
+          "baseline": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 810
+          },
+          "candidate": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 817
+          }
+        },
+        {
+          "seed": 1525837856,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 544
+          },
+          "candidate": {
+            "wins": 1,
+            "losses": 11,
+            "draws": 0,
+            "turns": 701
+          }
+        },
+        {
+          "seed": 1525837857,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 968
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 933
+          }
+        },
+        {
+          "seed": 1525837858,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 556
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 703
+          }
+        },
+        {
+          "seed": 1525837859,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 778
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 797
+          }
+        },
+        {
+          "seed": 1525837860,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 774
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 607
+          }
+        },
+        {
+          "seed": 1525837861,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 1262
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 1094
+          }
+        },
+        {
+          "seed": 1525837862,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 730
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 905
+          }
+        },
+        {
+          "seed": 1525837863,
+          "baseline": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 818
+          },
+          "candidate": {
+            "wins": 10,
+            "losses": 2,
+            "draws": 0,
+            "turns": 862
+          }
+        },
+        {
+          "seed": 1525837864,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 900
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 702
+          }
+        },
+        {
+          "seed": 1525837865,
+          "baseline": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 600
+          },
+          "candidate": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 619
+          }
+        },
+        {
+          "seed": 1525837866,
+          "baseline": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 768
+          },
+          "candidate": {
+            "wins": 7,
+            "losses": 5,
+            "draws": 0,
+            "turns": 717
+          }
+        },
+        {
+          "seed": 1525837867,
+          "baseline": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 844
+          },
+          "candidate": {
+            "wins": 7,
+            "losses": 5,
+            "draws": 0,
+            "turns": 688
+          }
+        },
+        {
+          "seed": 1525837868,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 718
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 709
+          }
+        },
+        {
+          "seed": 1525837869,
+          "baseline": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 750
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 790
+          }
+        },
+        {
+          "seed": 1525837870,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 1278
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 964
+          }
+        },
+        {
+          "seed": 1525837871,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 592
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 698
+          }
+        },
+        {
+          "seed": 1525837872,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 540
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 612
+          }
+        },
+        {
+          "seed": 1525837873,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 678
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 7,
+            "draws": 1,
+            "turns": 914
+          }
+        },
+        {
+          "seed": 1525837874,
+          "baseline": {
+            "wins": 1,
+            "losses": 7,
+            "draws": 4,
+            "turns": 960
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 9,
+            "draws": 1,
+            "turns": 951
+          }
+        },
+        {
+          "seed": 1525837875,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 1134
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 944
+          }
+        },
+        {
+          "seed": 1525837876,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 720
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 866
+          }
+        },
+        {
+          "seed": 1525837877,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 734
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 844
+          }
+        },
+        {
+          "seed": 1525837878,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 948
+          },
+          "candidate": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 997
+          }
+        },
+        {
+          "seed": 1525837879,
+          "baseline": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 844
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 831
+          }
+        },
+        {
+          "seed": 1525837880,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 810
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 810
+          }
+        },
+        {
+          "seed": 1525837881,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 484
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 620
+          }
+        },
+        {
+          "seed": 1525837882,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 772
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 869
+          }
+        },
+        {
+          "seed": 1525837883,
+          "baseline": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 534
+          },
+          "candidate": {
+            "wins": 7,
+            "losses": 5,
+            "draws": 0,
+            "turns": 618
+          }
+        },
+        {
+          "seed": 1525837884,
+          "baseline": {
+            "wins": 5,
+            "losses": 5,
+            "draws": 2,
+            "turns": 1590
+          },
+          "candidate": {
+            "wins": 6,
+            "losses": 5,
+            "draws": 1,
+            "turns": 1213
+          }
+        },
+        {
+          "seed": 1525837885,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 1296
+          },
+          "candidate": {
+            "wins": 7,
+            "losses": 5,
+            "draws": 0,
+            "turns": 810
+          }
+        },
+        {
+          "seed": 1525837886,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 676
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 738
+          }
+        },
+        {
+          "seed": 1525837887,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 640
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 763
+          }
+        },
+        {
+          "seed": 1525837888,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 1182
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 703
+          }
+        },
+        {
+          "seed": 1525837889,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 502
+          },
+          "candidate": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 504
+          }
+        },
+        {
+          "seed": 1525837890,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 730
+          },
+          "candidate": {
+            "wins": 8,
+            "losses": 4,
+            "draws": 0,
+            "turns": 703
+          }
+        },
+        {
+          "seed": 1525837891,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 1146
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 773
+          }
+        },
+        {
+          "seed": 1525837892,
+          "baseline": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 606
+          },
+          "candidate": {
+            "wins": 7,
+            "losses": 5,
+            "draws": 0,
+            "turns": 1004
+          }
+        },
+        {
+          "seed": 1525837893,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 770
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 8,
+            "draws": 1,
+            "turns": 983
+          }
+        },
+        {
+          "seed": 1525837894,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 742
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 682
+          }
+        },
+        {
+          "seed": 1525837895,
+          "baseline": {
+            "wins": 3,
+            "losses": 7,
+            "draws": 2,
+            "turns": 872
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 6,
+            "draws": 2,
+            "turns": 884
+          }
+        },
+        {
+          "seed": 1525837896,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 916
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 762
+          }
+        },
+        {
+          "seed": 1525837897,
+          "baseline": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 752
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 7,
+            "draws": 1,
+            "turns": 830
+          }
+        },
+        {
+          "seed": 1525837898,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 844
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 1050
+          }
+        },
+        {
+          "seed": 1525837899,
+          "baseline": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 742
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 675
+          }
+        },
+        {
+          "seed": 1525837900,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 754
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 847
+          }
+        },
+        {
+          "seed": 1525837901,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 500
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 570
+          }
+        },
+        {
+          "seed": 1525837902,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 504
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 6,
+            "draws": 1,
+            "turns": 718
+          }
+        },
+        {
+          "seed": 1525837903,
+          "baseline": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 632
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 606
+          }
+        },
+        {
+          "seed": 1525837904,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 848
+          },
+          "candidate": {
+            "wins": 7,
+            "losses": 5,
+            "draws": 0,
+            "turns": 870
+          }
+        },
+        {
+          "seed": 1525837905,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 554
+          },
+          "candidate": {
+            "wins": 8,
+            "losses": 4,
+            "draws": 0,
+            "turns": 723
+          }
+        },
+        {
+          "seed": 1525837906,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 718
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 652
+          }
+        },
+        {
+          "seed": 1525837907,
+          "baseline": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 984
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 654
+          }
+        },
+        {
+          "seed": 1525837908,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 946
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 1097
+          }
+        },
+        {
+          "seed": 1525837909,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 994
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 1038
+          }
+        },
+        {
+          "seed": 1525837910,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 782
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 710
+          }
+        },
+        {
+          "seed": 1525837911,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 426
+          },
+          "candidate": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 445
+          }
+        },
+        {
+          "seed": 1525837912,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 668
+          },
+          "candidate": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 667
+          }
+        },
+        {
+          "seed": 1525837913,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 610
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 596
+          }
+        },
+        {
+          "seed": 1525837914,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 810
+          },
+          "candidate": {
+            "wins": 7,
+            "losses": 5,
+            "draws": 0,
+            "turns": 910
+          }
+        },
+        {
+          "seed": 1525837915,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 962
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 757
+          }
+        },
+        {
+          "seed": 1525837916,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 920
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 723
+          }
+        },
+        {
+          "seed": 1525837917,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 598
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 7,
+            "draws": 1,
+            "turns": 950
+          }
+        },
+        {
+          "seed": 1525837918,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 698
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 1153
+          }
+        },
+        {
+          "seed": 1525837919,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 742
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 758
+          }
+        },
+        {
+          "seed": 1525837920,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 814
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 1004
+          }
+        },
+        {
+          "seed": 1525837921,
+          "baseline": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 622
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 1029
+          }
+        },
+        {
+          "seed": 1525837922,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 886
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 737
+          }
+        },
+        {
+          "seed": 1525837923,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 848
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 882
+          }
+        },
+        {
+          "seed": 1525837924,
+          "baseline": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 676
+          },
+          "candidate": {
+            "wins": 7,
+            "losses": 5,
+            "draws": 0,
+            "turns": 563
+          }
+        },
+        {
+          "seed": 1525837925,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 770
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 811
+          }
+        },
+        {
+          "seed": 1525837926,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 672
+          },
+          "candidate": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 688
+          }
+        },
+        {
+          "seed": 1525837927,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 542
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 523
+          }
+        },
+        {
+          "seed": 1525837928,
+          "baseline": {
+            "wins": 3,
+            "losses": 7,
+            "draws": 2,
+            "turns": 974
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 6,
+            "draws": 1,
+            "turns": 804
+          }
+        }
+      ]
+    },
+    {
+      "peers": [
+        "best",
+        "best",
+        "random"
+      ],
+      "players": 4,
+      "independent_deals": 128,
+      "games_per_arm": 1536,
+      "layouts": [
+        [
+          "focal",
+          "best",
+          "best",
+          "random"
+        ],
+        [
+          "focal",
+          "best",
+          "random",
+          "best"
+        ],
+        [
+          "focal",
+          "random",
+          "best",
+          "best"
+        ],
+        [
+          "random",
+          "focal",
+          "best",
+          "best"
+        ],
+        [
+          "best",
+          "focal",
+          "best",
+          "random"
+        ],
+        [
+          "best",
+          "focal",
+          "random",
+          "best"
+        ],
+        [
+          "best",
+          "random",
+          "focal",
+          "best"
+        ],
+        [
+          "random",
+          "best",
+          "focal",
+          "best"
+        ],
+        [
+          "best",
+          "best",
+          "focal",
+          "random"
+        ],
+        [
+          "best",
+          "best",
+          "random",
+          "focal"
+        ],
+        [
+          "best",
+          "random",
+          "best",
+          "focal"
+        ],
+        [
+          "random",
+          "best",
+          "best",
+          "focal"
+        ]
+      ],
+      "baseline": {
+        "wins": 445,
+        "losses": 1082,
+        "draws": 9,
+        "turns": 107598,
+        "win_rate": 0.2897135416666667
+      },
+      "candidate": {
+        "wins": 474,
+        "losses": 1051,
+        "draws": 11,
+        "turns": 108683,
+        "win_rate": 0.30859375
+      },
+      "delta": 0.018880208333333332,
+      "paired_se": 0.010507105909054366,
+      "paired_ci95": [
+        -0.0017133408301612044,
+        0.03947375749682787
+      ],
+      "raw_deals": [
+        {
+          "seed": 1526837801,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 630
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 813
+          }
+        },
+        {
+          "seed": 1526837802,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 792
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 794
+          }
+        },
+        {
+          "seed": 1526837803,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 834
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 991
+          }
+        },
+        {
+          "seed": 1526837804,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 798
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 895
+          }
+        },
+        {
+          "seed": 1526837805,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 558
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 712
+          }
+        },
+        {
+          "seed": 1526837806,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 816
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 739
+          }
+        },
+        {
+          "seed": 1526837807,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 639
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 867
+          }
+        },
+        {
+          "seed": 1526837808,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 1026
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 876
+          }
+        },
+        {
+          "seed": 1526837809,
+          "baseline": {
+            "wins": 3,
+            "losses": 6,
+            "draws": 3,
+            "turns": 1638
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 8,
+            "draws": 2,
+            "turns": 1395
+          }
+        },
+        {
+          "seed": 1526837810,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 981
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 729
+          }
+        },
+        {
+          "seed": 1526837811,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 978
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 944
+          }
+        },
+        {
+          "seed": 1526837812,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 510
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 458
+          }
+        },
+        {
+          "seed": 1526837813,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 1062
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 1123
+          }
+        },
+        {
+          "seed": 1526837814,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 597
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 587
+          }
+        },
+        {
+          "seed": 1526837815,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 699
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 975
+          }
+        },
+        {
+          "seed": 1526837816,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 621
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 657
+          }
+        },
+        {
+          "seed": 1526837817,
+          "baseline": {
+            "wins": 3,
+            "losses": 6,
+            "draws": 3,
+            "turns": 1773
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 9,
+            "draws": 1,
+            "turns": 1344
+          }
+        },
+        {
+          "seed": 1526837818,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 897
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 841
+          }
+        },
+        {
+          "seed": 1526837819,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 1206
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 1054
+          }
+        },
+        {
+          "seed": 1526837820,
+          "baseline": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 849
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 944
+          }
+        },
+        {
+          "seed": 1526837821,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 780
+          },
+          "candidate": {
+            "wins": 7,
+            "losses": 5,
+            "draws": 0,
+            "turns": 969
+          }
+        },
+        {
+          "seed": 1526837822,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 414
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 426
+          }
+        },
+        {
+          "seed": 1526837823,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 768
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 797
+          }
+        },
+        {
+          "seed": 1526837824,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 996
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 943
+          }
+        },
+        {
+          "seed": 1526837825,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 777
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 963
+          }
+        },
+        {
+          "seed": 1526837826,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 1011
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 844
+          }
+        },
+        {
+          "seed": 1526837827,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 714
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 610
+          }
+        },
+        {
+          "seed": 1526837828,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 537
+          },
+          "candidate": {
+            "wins": 7,
+            "losses": 5,
+            "draws": 0,
+            "turns": 657
+          }
+        },
+        {
+          "seed": 1526837829,
+          "baseline": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 945
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 626
+          }
+        },
+        {
+          "seed": 1526837830,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 564
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 555
+          }
+        },
+        {
+          "seed": 1526837831,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 681
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 812
+          }
+        },
+        {
+          "seed": 1526837832,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 783
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 778
+          }
+        },
+        {
+          "seed": 1526837833,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 558
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 936
+          }
+        },
+        {
+          "seed": 1526837834,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 1692
+          },
+          "candidate": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 992
+          }
+        },
+        {
+          "seed": 1526837835,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 885
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 753
+          }
+        },
+        {
+          "seed": 1526837836,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 1503
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 927
+          }
+        },
+        {
+          "seed": 1526837837,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 606
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 801
+          }
+        },
+        {
+          "seed": 1526837838,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 1560
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 8,
+            "draws": 2,
+            "turns": 1540
+          }
+        },
+        {
+          "seed": 1526837839,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 852
+          },
+          "candidate": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 990
+          }
+        },
+        {
+          "seed": 1526837840,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 693
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 679
+          }
+        },
+        {
+          "seed": 1526837841,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 777
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 892
+          }
+        },
+        {
+          "seed": 1526837842,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 1326
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 1062
+          }
+        },
+        {
+          "seed": 1526837843,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 399
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 409
+          }
+        },
+        {
+          "seed": 1526837844,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 762
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 855
+          }
+        },
+        {
+          "seed": 1526837845,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 327
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 404
+          }
+        },
+        {
+          "seed": 1526837846,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 540
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 803
+          }
+        },
+        {
+          "seed": 1526837847,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 387
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 726
+          }
+        },
+        {
+          "seed": 1526837848,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 462
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 639
+          }
+        },
+        {
+          "seed": 1526837849,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 987
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 953
+          }
+        },
+        {
+          "seed": 1526837850,
+          "baseline": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 1233
+          },
+          "candidate": {
+            "wins": 7,
+            "losses": 5,
+            "draws": 0,
+            "turns": 1271
+          }
+        },
+        {
+          "seed": 1526837851,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 654
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 935
+          }
+        },
+        {
+          "seed": 1526837852,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 654
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 601
+          }
+        },
+        {
+          "seed": 1526837853,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 942
+          },
+          "candidate": {
+            "wins": 8,
+            "losses": 4,
+            "draws": 0,
+            "turns": 728
+          }
+        },
+        {
+          "seed": 1526837854,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 861
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 753
+          }
+        },
+        {
+          "seed": 1526837855,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 774
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 688
+          }
+        },
+        {
+          "seed": 1526837856,
+          "baseline": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 762
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 916
+          }
+        },
+        {
+          "seed": 1526837857,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 948
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 8,
+            "draws": 1,
+            "turns": 1019
+          }
+        },
+        {
+          "seed": 1526837858,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 702
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 777
+          }
+        },
+        {
+          "seed": 1526837859,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 975
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 897
+          }
+        },
+        {
+          "seed": 1526837860,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 984
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 914
+          }
+        },
+        {
+          "seed": 1526837861,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 978
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 919
+          }
+        },
+        {
+          "seed": 1526837862,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 795
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 883
+          }
+        },
+        {
+          "seed": 1526837863,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 750
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 938
+          }
+        },
+        {
+          "seed": 1526837864,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 843
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 999
+          }
+        },
+        {
+          "seed": 1526837865,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 1143
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 808
+          }
+        },
+        {
+          "seed": 1526837866,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 828
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 889
+          }
+        },
+        {
+          "seed": 1526837867,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 486
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 539
+          }
+        },
+        {
+          "seed": 1526837868,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 660
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 715
+          }
+        },
+        {
+          "seed": 1526837869,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 1212
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 1000
+          }
+        },
+        {
+          "seed": 1526837870,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 759
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 754
+          }
+        },
+        {
+          "seed": 1526837871,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 558
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 627
+          }
+        },
+        {
+          "seed": 1526837872,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 519
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 536
+          }
+        },
+        {
+          "seed": 1526837873,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 894
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 826
+          }
+        },
+        {
+          "seed": 1526837874,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 1128
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 924
+          }
+        },
+        {
+          "seed": 1526837875,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 693
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 556
+          }
+        },
+        {
+          "seed": 1526837876,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 936
+          },
+          "candidate": {
+            "wins": 0,
+            "losses": 12,
+            "draws": 0,
+            "turns": 1051
+          }
+        },
+        {
+          "seed": 1526837877,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 996
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 688
+          }
+        },
+        {
+          "seed": 1526837878,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 630
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 951
+          }
+        },
+        {
+          "seed": 1526837879,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 984
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 1038
+          }
+        },
+        {
+          "seed": 1526837880,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 774
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 811
+          }
+        },
+        {
+          "seed": 1526837881,
+          "baseline": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 690
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 788
+          }
+        },
+        {
+          "seed": 1526837882,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 1092
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 1031
+          }
+        },
+        {
+          "seed": 1526837883,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 756
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 862
+          }
+        },
+        {
+          "seed": 1526837884,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 732
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 631
+          }
+        },
+        {
+          "seed": 1526837885,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 1101
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 1101
+          }
+        },
+        {
+          "seed": 1526837886,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 990
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 1083
+          }
+        },
+        {
+          "seed": 1526837887,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 732
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 829
+          }
+        },
+        {
+          "seed": 1526837888,
+          "baseline": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 1653
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 8,
+            "draws": 1,
+            "turns": 1131
+          }
+        },
+        {
+          "seed": 1526837889,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 1203
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 1263
+          }
+        },
+        {
+          "seed": 1526837890,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 897
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 737
+          }
+        },
+        {
+          "seed": 1526837891,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 606
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 596
+          }
+        },
+        {
+          "seed": 1526837892,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 933
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 1013
+          }
+        },
+        {
+          "seed": 1526837893,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 861
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 630
+          }
+        },
+        {
+          "seed": 1526837894,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 357
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 429
+          }
+        },
+        {
+          "seed": 1526837895,
+          "baseline": {
+            "wins": 3,
+            "losses": 6,
+            "draws": 3,
+            "turns": 1347
+          },
+          "candidate": {
+            "wins": 6,
+            "losses": 5,
+            "draws": 1,
+            "turns": 1157
+          }
+        },
+        {
+          "seed": 1526837896,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 966
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 9,
+            "draws": 1,
+            "turns": 1155
+          }
+        },
+        {
+          "seed": 1526837897,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 879
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 755
+          }
+        },
+        {
+          "seed": 1526837898,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 555
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 722
+          }
+        },
+        {
+          "seed": 1526837899,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 1185
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 908
+          }
+        },
+        {
+          "seed": 1526837900,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 849
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 651
+          }
+        },
+        {
+          "seed": 1526837901,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 669
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 612
+          }
+        },
+        {
+          "seed": 1526837902,
+          "baseline": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 645
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 813
+          }
+        },
+        {
+          "seed": 1526837903,
+          "baseline": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 819
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 737
+          }
+        },
+        {
+          "seed": 1526837904,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 585
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 554
+          }
+        },
+        {
+          "seed": 1526837905,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 915
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 924
+          }
+        },
+        {
+          "seed": 1526837906,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 723
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 675
+          }
+        },
+        {
+          "seed": 1526837907,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 729
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 774
+          }
+        },
+        {
+          "seed": 1526837908,
+          "baseline": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 1323
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 1223
+          }
+        },
+        {
+          "seed": 1526837909,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 465
+          },
+          "candidate": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 574
+          }
+        },
+        {
+          "seed": 1526837910,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 849
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 889
+          }
+        },
+        {
+          "seed": 1526837911,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 657
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 782
+          }
+        },
+        {
+          "seed": 1526837912,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 663
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 755
+          }
+        },
+        {
+          "seed": 1526837913,
+          "baseline": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 921
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 1120
+          }
+        },
+        {
+          "seed": 1526837914,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 948
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 9,
+            "draws": 1,
+            "turns": 1509
+          }
+        },
+        {
+          "seed": 1526837915,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 900
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 897
+          }
+        },
+        {
+          "seed": 1526837916,
+          "baseline": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 765
+          },
+          "candidate": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 804
+          }
+        },
+        {
+          "seed": 1526837917,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 813
+          },
+          "candidate": {
+            "wins": 5,
+            "losses": 7,
+            "draws": 0,
+            "turns": 1176
+          }
+        },
+        {
+          "seed": 1526837918,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 513
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 8,
+            "draws": 1,
+            "turns": 741
+          }
+        },
+        {
+          "seed": 1526837919,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 1041
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 1186
+          }
+        },
+        {
+          "seed": 1526837920,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 645
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 702
+          }
+        },
+        {
+          "seed": 1526837921,
+          "baseline": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 1194
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 1052
+          }
+        },
+        {
+          "seed": 1526837922,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 621
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 617
+          }
+        },
+        {
+          "seed": 1526837923,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 960
+          },
+          "candidate": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 977
+          }
+        },
+        {
+          "seed": 1526837924,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 537
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 874
+          }
+        },
+        {
+          "seed": 1526837925,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 1110
+          },
+          "candidate": {
+            "wins": 6,
+            "losses": 6,
+            "draws": 0,
+            "turns": 1084
+          }
+        },
+        {
+          "seed": 1526837926,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 882
+          },
+          "candidate": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 843
+          }
+        },
+        {
+          "seed": 1526837927,
+          "baseline": {
+            "wins": 4,
+            "losses": 8,
+            "draws": 0,
+            "turns": 420
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 428
+          }
+        },
+        {
+          "seed": 1526837928,
+          "baseline": {
+            "wins": 2,
+            "losses": 10,
+            "draws": 0,
+            "turns": 657
+          },
+          "candidate": {
+            "wins": 3,
+            "losses": 9,
+            "draws": 0,
+            "turns": 859
+          }
+        }
+      ]
+    }
+  ]
+}

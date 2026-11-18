@@ -118,6 +118,12 @@ bounded memory. The verifier imports no game engine or benchmark evaluator.
 
 ### 2. Train the RL Agent
 
+The [multiplayer training and win-rate report](live_training/improvement_20261118/RESULTS.md)
+includes the frozen two- through four-player challenger, its training recipe,
+matched throughput measurements, and seat-rotated games against the incumbent
+24-suit MinGRU and RandomAgent. The [web release](live_training/production_20261118_search/README.md)
+describes the served player and its runtime checks.
+
 The `ppo2.py` script trains the neural network agent using Reinforcement Learning. It will periodically save model checkpoints (`ppo_actor_*.pth`, `ppo_critic_*.pth`).
 
 ```bash

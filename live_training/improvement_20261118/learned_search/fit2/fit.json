@@ -1,0 +1,1004 @@
+{
+  "seed": 1111111707,
+  "games": 32256,
+  "rows": 338486,
+  "training_rows": 277322,
+  "validation_rows": 61164,
+  "training_orbits": [
+    1,
+    4
+  ],
+  "validation_split": "entire first three shards of each consecutive eighteen",
+  "history": [
+    {
+      "epoch": 1,
+      "validation_nll": 1.028761386871338,
+      "validation_focal_brier": 0.1975744366645813
+    },
+    {
+      "epoch": 2,
+      "validation_nll": 1.0249390602111816,
+      "validation_focal_brier": 0.19651973247528076
+    },
+    {
+      "epoch": 3,
+      "validation_nll": 1.0220717191696167,
+      "validation_focal_brier": 0.19628438353538513
+    },
+    {
+      "epoch": 4,
+      "validation_nll": 1.020663857460022,
+      "validation_focal_brier": 0.19611386954784393
+    },
+    {
+      "epoch": 5,
+      "validation_nll": 1.01872718334198,
+      "validation_focal_brier": 0.19518423080444336
+    },
+    {
+      "epoch": 6,
+      "validation_nll": 1.0169237852096558,
+      "validation_focal_brier": 0.19533170759677887
+    },
+    {
+      "epoch": 7,
+      "validation_nll": 1.0152888298034668,
+      "validation_focal_brier": 0.1948815882205963
+    },
+    {
+      "epoch": 8,
+      "validation_nll": 1.0163264274597168,
+      "validation_focal_brier": 0.1952545940876007
+    },
+    {
+      "epoch": 9,
+      "validation_nll": 1.0153623819351196,
+      "validation_focal_brier": 0.19517450034618378
+    },
+    {
+      "epoch": 10,
+      "validation_nll": 1.0152122974395752,
+      "validation_focal_brier": 0.19512403011322021
+    },
+    {
+      "epoch": 11,
+      "validation_nll": 1.014771819114685,
+      "validation_focal_brier": 0.19494982063770294
+    },
+    {
+      "epoch": 12,
+      "validation_nll": 1.014571189880371,
+      "validation_focal_brier": 0.1949177384376526
+    },
+    {
+      "epoch": 13,
+      "validation_nll": 1.014760136604309,
+      "validation_focal_brier": 0.1949431151151657
+    },
+    {
+      "epoch": 14,
+      "validation_nll": 1.0146256685256958,
+      "validation_focal_brier": 0.19482390582561493
+    },
+    {
+      "epoch": 15,
+      "validation_nll": 1.0138075351715088,
+      "validation_focal_brier": 0.19481174647808075
+    },
+    {
+      "epoch": 16,
+      "validation_nll": 1.0136622190475464,
+      "validation_focal_brier": 0.19479399919509888
+    },
+    {
+      "epoch": 17,
+      "validation_nll": 1.0133864879608154,
+      "validation_focal_brier": 0.19494223594665527
+    },
+    {
+      "epoch": 18,
+      "validation_nll": 1.0127726793289185,
+      "validation_focal_brier": 0.19486583769321442
+    },
+    {
+      "epoch": 19,
+      "validation_nll": 1.0142216682434082,
+      "validation_focal_brier": 0.19526897370815277
+    },
+    {
+      "epoch": 20,
+      "validation_nll": 1.0129810571670532,
+      "validation_focal_brier": 0.1946432888507843
+    },
+    {
+      "epoch": 21,
+      "validation_nll": 1.0135250091552734,
+      "validation_focal_brier": 0.1946914941072464
+    },
+    {
+      "epoch": 22,
+      "validation_nll": 1.012760877609253,
+      "validation_focal_brier": 0.19471679627895355
+    },
+    {
+      "epoch": 23,
+      "validation_nll": 1.0128443241119385,
+      "validation_focal_brier": 0.19481271505355835
+    },
+    {
+      "epoch": 24,
+      "validation_nll": 1.012416958808899,
+      "validation_focal_brier": 0.1946735680103302
+    },
+    {
+      "epoch": 25,
+      "validation_nll": 1.0125657320022583,
+      "validation_focal_brier": 0.19476917386054993
+    },
+    {
+      "epoch": 26,
+      "validation_nll": 1.0123794078826904,
+      "validation_focal_brier": 0.19463542103767395
+    },
+    {
+      "epoch": 27,
+      "validation_nll": 1.0128419399261475,
+      "validation_focal_brier": 0.1949254274368286
+    },
+    {
+      "epoch": 28,
+      "validation_nll": 1.012433648109436,
+      "validation_focal_brier": 0.1946999430656433
+    }
+  ],
+  "heuristic_validation_nll": 1.205622911453247,
+  "heuristic_validation_focal_brier": 0.23960791528224945,
+  "best_epoch": {
+    "epoch": 26,
+    "validation_nll": 1.0123794078826904,
+    "validation_focal_brier": 0.19463542103767395
+  },
+  "weights_sha256": "4cae698a302bb886c1304c12b2ba7c10cd88be63b3048cee90ea7d2cd15796fd",
+  "shards": [
+    {
+      "file": "shard_0000.npz",
+      "hash": "150e1432b8c64e034a694ee4ae5575cab041afa2e3dc8c44384a0a6227c41c6b",
+      "games": 384,
+      "rows": 3347,
+      "players": 2,
+      "orbit": 1,
+      "seed_start": 1111000000,
+      "seed_end": 1111000384
+    },
+    {
+      "file": "shard_0001.npz",
+      "hash": "b97e9e2f97e069bebdfe00f1c6dbb9253e4420f626e491ca03383c843b4e3c24",
+      "games": 384,
+      "rows": 4062,
+      "players": 3,
+      "orbit": 1,
+      "seed_start": 1111000384,
+      "seed_end": 1111000768
+    },
+    {
+      "file": "shard_0002.npz",
+      "hash": "d738d61ba8fd2bf7d0f636ffb6fc16645a95e253ce8473a6282293ff7bcd066b",
+      "games": 384,
+      "rows": 4766,
+      "players": 4,
+      "orbit": 1,
+      "seed_start": 1111000768,
+      "seed_end": 1111001152
+    },
+    {
+      "file": "shard_0003.npz",
+      "hash": "2f3229d81b68852a8002fd210bc078ffb354d35103491edb4d2aed8f16b95290",
+      "games": 384,
+      "rows": 3498,
+      "players": 2,
+      "orbit": 1,
+      "seed_start": 1111001152,
+      "seed_end": 1111001536
+    },
+    {
+      "file": "shard_0004.npz",
+      "hash": "681c80ef9c2983061c807c8a03592993f70bee2f3aebb7be2b589ea39a0aed98",
+      "games": 384,
+      "rows": 3964,
+      "players": 3,
+      "orbit": 1,
+      "seed_start": 1111001536,
+      "seed_end": 1111001920
+    },
+    {
+      "file": "shard_0005.npz",
+      "hash": "2af7e05b1bb59dcce9d90b5d9d5e037a76fbd7e7b3464bcfbc1bfcf137f62b61",
+      "games": 384,
+      "rows": 4966,
+      "players": 4,
+      "orbit": 1,
+      "seed_start": 1111001920,
+      "seed_end": 1111002304
+    },
+    {
+      "file": "shard_0006.npz",
+      "hash": "583b7886ffcb54d33c601384a636c5b1c5f4585a2aea375b7eb6c6aa776f4e33",
+      "games": 384,
+      "rows": 3386,
+      "players": 2,
+      "orbit": 1,
+      "seed_start": 1111002304,
+      "seed_end": 1111002688
+    },
+    {
+      "file": "shard_0007.npz",
+      "hash": "ba1936225e1f201a65918b8e15c1bd7b0d87f01e3c4b9238b20b447faaa4c429",
+      "games": 384,
+      "rows": 3857,
+      "players": 3,
+      "orbit": 1,
+      "seed_start": 1111002688,
+      "seed_end": 1111003072
+    },
+    {
+      "file": "shard_0008.npz",
+      "hash": "6d3f3d431ef1bc4935a92e7bf7d907185417b485ade4dbba8d63caf9e67ad7de",
+      "games": 384,
+      "rows": 4760,
+      "players": 4,
+      "orbit": 1,
+      "seed_start": 1111003072,
+      "seed_end": 1111003456
+    },
+    {
+      "file": "shard_0009.npz",
+      "hash": "b41b0971e1cc6ea77813f6e1b16d34e7467886e4172376208a80591455c14384",
+      "games": 384,
+      "rows": 3072,
+      "players": 2,
+      "orbit": 1,
+      "seed_start": 1111003456,
+      "seed_end": 1111003840
+    },
+    {
+      "file": "shard_0010.npz",
+      "hash": "21fcb103ac698132d9582aab3d51b9be74b404fb28424ce9b4773626e157d634",
+      "games": 384,
+      "rows": 3818,
+      "players": 3,
+      "orbit": 1,
+      "seed_start": 1111003840,
+      "seed_end": 1111004224
+    },
+    {
+      "file": "shard_0011.npz",
+      "hash": "2bce293bacdfafd68f4558eb5cdb64c90f9da53549cbf4efc514789bc2e34f27",
+      "games": 384,
+      "rows": 4861,
+      "players": 4,
+      "orbit": 1,
+      "seed_start": 1111004224,
+      "seed_end": 1111004608
+    },
+    {
+      "file": "shard_0012.npz",
+      "hash": "0380162291187c7e5282c26eaa50202597b647a707207d6ba8e9d07301c34f03",
+      "games": 384,
+      "rows": 3019,
+      "players": 2,
+      "orbit": 1,
+      "seed_start": 1111004608,
+      "seed_end": 1111004992
+    },
+    {
+      "file": "shard_0013.npz",
+      "hash": "3101e7099c6a4af22420c11d928a1c65bb838d873e8699b7238bd36583af2e9c",
+      "games": 384,
+      "rows": 3797,
+      "players": 3,
+      "orbit": 1,
+      "seed_start": 1111004992,
+      "seed_end": 1111005376
+    },
+    {
+      "file": "shard_0014.npz",
+      "hash": "391ed2c894d97b8c2c4ece586d6c6eae5870c363b691d12e40258465c18abf2b",
+      "games": 384,
+      "rows": 4835,
+      "players": 4,
+      "orbit": 1,
+      "seed_start": 1111005376,
+      "seed_end": 1111005760
+    },
+    {
+      "file": "shard_0015.npz",
+      "hash": "8492770db354a4604e9fa53f5d28d4d2e0003ab89ab98d5b9f92df45eb3afe1f",
+      "games": 384,
+      "rows": 3171,
+      "players": 2,
+      "orbit": 1,
+      "seed_start": 1111005760,
+      "seed_end": 1111006144
+    },
+    {
+      "file": "shard_0016.npz",
+      "hash": "83c62922164caff71287a9bc5a211e9e238f2dd46728197ae18f2c6a77e1a6ee",
+      "games": 384,
+      "rows": 3964,
+      "players": 3,
+      "orbit": 1,
+      "seed_start": 1111006144,
+      "seed_end": 1111006528
+    },
+    {
+      "file": "shard_0017.npz",
+      "hash": "99ce5e6b01cb77b83ba1325b36cfe49b391f62b0e29b353c0b856f7f898902f5",
+      "games": 384,
+      "rows": 4724,
+      "players": 4,
+      "orbit": 1,
+      "seed_start": 1111006528,
+      "seed_end": 1111006912
+    },
+    {
+      "file": "shard_0018.npz",
+      "hash": "941106b6b9dfa890d358c0937dc136721035750b1f6e1db5cfdc51a3cdb85089",
+      "games": 384,
+      "rows": 3431,
+      "players": 2,
+      "orbit": 1,
+      "seed_start": 1111006912,
+      "seed_end": 1111007296
+    },
+    {
+      "file": "shard_0019.npz",
+      "hash": "dd04e4e776c717ddeb335cb38f6886d6ab58a077f2e9c84edd2ac02e3dfcbe2e",
+      "games": 384,
+      "rows": 3917,
+      "players": 3,
+      "orbit": 1,
+      "seed_start": 1111007296,
+      "seed_end": 1111007680
+    },
+    {
+      "file": "shard_0020.npz",
+      "hash": "71ca0c1e2eac8695032747a38d045909b249bde6de985f24ec914c0274a3872f",
+      "games": 384,
+      "rows": 4791,
+      "players": 4,
+      "orbit": 1,
+      "seed_start": 1111007680,
+      "seed_end": 1111008064
+    },
+    {
+      "file": "shard_0021.npz",
+      "hash": "afd8cc70cfcce4dff5f3897091be3e8e36f7ae611690f2c4a569afa4ef8da5c2",
+      "games": 384,
+      "rows": 3198,
+      "players": 2,
+      "orbit": 1,
+      "seed_start": 1111008064,
+      "seed_end": 1111008448
+    },
+    {
+      "file": "shard_0022.npz",
+      "hash": "d308092c555e83400da8398fb7e30ff9ec939124ecce6143c78114a1143eaf90",
+      "games": 384,
+      "rows": 3649,
+      "players": 3,
+      "orbit": 1,
+      "seed_start": 1111008448,
+      "seed_end": 1111008832
+    },
+    {
+      "file": "shard_0023.npz",
+      "hash": "135b0a063538bfb97b058a40314f6f6590497ed314d94f61ee03512385d4631a",
+      "games": 384,
+      "rows": 4881,
+      "players": 4,
+      "orbit": 1,
+      "seed_start": 1111008832,
+      "seed_end": 1111009216
+    },
+    {
+      "file": "shard_0024.npz",
+      "hash": "915021eef7b7b7cb2a8e59a29c7fefaa40b0c8a7aa0ac9a9f6e096f342ed60b2",
+      "games": 384,
+      "rows": 3349,
+      "players": 2,
+      "orbit": 1,
+      "seed_start": 1111009216,
+      "seed_end": 1111009600
+    },
+    {
+      "file": "shard_0025.npz",
+      "hash": "d9fafb2b9d14d7a7180177007799849aebf3f9b1d80fbbcb0b85271c8dd5c377",
+      "games": 384,
+      "rows": 3785,
+      "players": 3,
+      "orbit": 1,
+      "seed_start": 1111009600,
+      "seed_end": 1111009984
+    },
+    {
+      "file": "shard_0026.npz",
+      "hash": "e9aacb0b1a1b0f3bfac5ea6429f67cd4d409cbc98495742c0c689cf61ff6de73",
+      "games": 384,
+      "rows": 4911,
+      "players": 4,
+      "orbit": 1,
+      "seed_start": 1111009984,
+      "seed_end": 1111010368
+    },
+    {
+      "file": "shard_0027.npz",
+      "hash": "1e1022e2d4437da947aeee5e2f5edffc6388a9885083605925af143440967adc",
+      "games": 384,
+      "rows": 3309,
+      "players": 2,
+      "orbit": 1,
+      "seed_start": 1111010368,
+      "seed_end": 1111010752
+    },
+    {
+      "file": "shard_0028.npz",
+      "hash": "e4d1f298f0c8a31412af6f10c1db9833dd788feca6951f76e1c27c0f69cdff40",
+      "games": 384,
+      "rows": 4056,
+      "players": 3,
+      "orbit": 1,
+      "seed_start": 1111010752,
+      "seed_end": 1111011136
+    },
+    {
+      "file": "shard_0029.npz",
+      "hash": "88aff4932d8a3d01b979b2d51459bb4c2cd9f22552b6653db913aa2a3ce077ad",
+      "games": 384,
+      "rows": 4947,
+      "players": 4,
+      "orbit": 1,
+      "seed_start": 1111011136,
+      "seed_end": 1111011520
+    },
+    {
+      "file": "shard_0030.npz",
+      "hash": "c5a136afed4749cc9ead565b72d4407172fa1203ef4e2fc2d27de06574912032",
+      "games": 384,
+      "rows": 3359,
+      "players": 2,
+      "orbit": 1,
+      "seed_start": 1111011520,
+      "seed_end": 1111011904
+    },
+    {
+      "file": "shard_0031.npz",
+      "hash": "5eaee8603b60d5537f8628a73c8280f878340eb8132f26794a2be8b085387cda",
+      "games": 384,
+      "rows": 3899,
+      "players": 3,
+      "orbit": 1,
+      "seed_start": 1111011904,
+      "seed_end": 1111012288
+    },
+    {
+      "file": "shard_0032.npz",
+      "hash": "4a8b832b44180aa49ade644a64f4e624c6ff9c13940e307ca5384ca2f89b9944",
+      "games": 384,
+      "rows": 4812,
+      "players": 4,
+      "orbit": 1,
+      "seed_start": 1111012288,
+      "seed_end": 1111012672
+    },
+    {
+      "file": "shard_0033.npz",
+      "hash": "f0bfaae7cf4bc06a46722775dfc03723634f6962dc4fb38e40b1328b834143be",
+      "games": 384,
+      "rows": 3304,
+      "players": 2,
+      "orbit": 1,
+      "seed_start": 1111012672,
+      "seed_end": 1111013056
+    },
+    {
+      "file": "shard_0034.npz",
+      "hash": "fa16067c452eb67ef355b081b6013c21d732e999a201a2333f2132e4660660c9",
+      "games": 384,
+      "rows": 3856,
+      "players": 3,
+      "orbit": 1,
+      "seed_start": 1111013056,
+      "seed_end": 1111013440
+    },
+    {
+      "file": "shard_0035.npz",
+      "hash": "b1b37aa09dc28e5780c1326e14fb4435c2d1f5ec3a5cc32e85d027043ad4dbd5",
+      "games": 384,
+      "rows": 5199,
+      "players": 4,
+      "orbit": 1,
+      "seed_start": 1111013440,
+      "seed_end": 1111013824
+    },
+    {
+      "file": "shard_0036.npz",
+      "hash": "640abbd7084cfbcadea0eb26b108be5b112677f939e4510e6d347c87a8dcd29e",
+      "games": 384,
+      "rows": 3337,
+      "players": 2,
+      "orbit": 1,
+      "seed_start": 1111013824,
+      "seed_end": 1111014208
+    },
+    {
+      "file": "shard_0037.npz",
+      "hash": "0f9f38748c4b9e6fe7b2a38b2ef9280debd3836400966f0e63df7e437e6260b1",
+      "games": 384,
+      "rows": 3986,
+      "players": 3,
+      "orbit": 1,
+      "seed_start": 1111014208,
+      "seed_end": 1111014592
+    },
+    {
+      "file": "shard_0038.npz",
+      "hash": "4d66b84541d058cc86821394a955d7948032b678db35fb29010f13f5b037e390",
+      "games": 384,
+      "rows": 4655,
+      "players": 4,
+      "orbit": 1,
+      "seed_start": 1111014592,
+      "seed_end": 1111014976
+    },
+    {
+      "file": "shard_0039.npz",
+      "hash": "02855ebb30747987b07e4b816234626ceff25f6da7f892bf22acc252836e02a6",
+      "games": 384,
+      "rows": 3346,
+      "players": 2,
+      "orbit": 1,
+      "seed_start": 1111014976,
+      "seed_end": 1111015360
+    },
+    {
+      "file": "shard_0040.npz",
+      "hash": "0937f7928706b58eb4ce4193f5eb135c5d5585456d6b3b74e9471177f4b97f9e",
+      "games": 384,
+      "rows": 3791,
+      "players": 3,
+      "orbit": 1,
+      "seed_start": 1111015360,
+      "seed_end": 1111015744
+    },
+    {
+      "file": "shard_0041.npz",
+      "hash": "6f43f114210f5e74734f413f8d7d0cce1d53a3dee40a287bffa33d6f4dac2737",
+      "games": 384,
+      "rows": 4713,
+      "players": 4,
+      "orbit": 1,
+      "seed_start": 1111015744,
+      "seed_end": 1111016128
+    },
+    {
+      "file": "shard_0042.npz",
+      "hash": "01301597d32f3142e229975206e75f624dcd76292bc9624f021a1eacdebb4c4c",
+      "games": 384,
+      "rows": 3382,
+      "players": 2,
+      "orbit": 1,
+      "seed_start": 1111016128,
+      "seed_end": 1111016512
+    },
+    {
+      "file": "shard_0043.npz",
+      "hash": "b6cd1807a5348badf2151ea4192d0a1d0ece3b5cf31f8437d7ee421cfd2bc5bc",
+      "games": 384,
+      "rows": 3754,
+      "players": 3,
+      "orbit": 1,
+      "seed_start": 1111016512,
+      "seed_end": 1111016896
+    },
+    {
+      "file": "shard_0044.npz",
+      "hash": "08097f3ca067352c99212a8f0bf3ae143311e4ade99d0ffd381b18dbd8c9e311",
+      "games": 384,
+      "rows": 5032,
+      "players": 4,
+      "orbit": 1,
+      "seed_start": 1111016896,
+      "seed_end": 1111017280
+    },
+    {
+      "file": "shard_0045.npz",
+      "hash": "93dc6c5a98ecb1e8d36e14a55edce653a5682f9e2328ba219de5e45de98d33ae",
+      "games": 384,
+      "rows": 3392,
+      "players": 2,
+      "orbit": 1,
+      "seed_start": 1111017280,
+      "seed_end": 1111017664
+    },
+    {
+      "file": "shard_0046.npz",
+      "hash": "29da7e675e476b87b7c7f139da185a48b480853eedc9120f186166d27fae516e",
+      "games": 384,
+      "rows": 3618,
+      "players": 3,
+      "orbit": 1,
+      "seed_start": 1111017664,
+      "seed_end": 1111018048
+    },
+    {
+      "file": "shard_0047.npz",
+      "hash": "27b44da58af66d5d9e9d26a5ef3bcc89adf52ac19f354f5ae5a61f57a756aa27",
+      "games": 384,
+      "rows": 4838,
+      "players": 4,
+      "orbit": 1,
+      "seed_start": 1111018048,
+      "seed_end": 1111018432
+    },
+    {
+      "file": "shard_0048.npz",
+      "hash": "8a82944f7a0f89573fad6995b6e101d255677f5cc3458a6eeee0e6b157778351",
+      "games": 384,
+      "rows": 3201,
+      "players": 2,
+      "orbit": 1,
+      "seed_start": 1111018432,
+      "seed_end": 1111018816
+    },
+    {
+      "file": "shard_0049.npz",
+      "hash": "d43e7342caab0d250b7f4ba0306bd9baf990f189691909ce68d0399bc9ecf3b3",
+      "games": 384,
+      "rows": 4263,
+      "players": 3,
+      "orbit": 1,
+      "seed_start": 1111018816,
+      "seed_end": 1111019200
+    },
+    {
+      "file": "shard_0050.npz",
+      "hash": "8dd53a6ba47b54d4102abe13e804ce99d5b73b0a7c4a102493dca880617e2110",
+      "games": 384,
+      "rows": 4792,
+      "players": 4,
+      "orbit": 1,
+      "seed_start": 1111019200,
+      "seed_end": 1111019584
+    },
+    {
+      "file": "shard_0051.npz",
+      "hash": "5bb95a3415a5a1aaced5f48b257d94b5a7f2a108aac2323b0bcd2204f165bc8e",
+      "games": 384,
+      "rows": 3481,
+      "players": 2,
+      "orbit": 1,
+      "seed_start": 1111019584,
+      "seed_end": 1111019968
+    },
+    {
+      "file": "shard_0052.npz",
+      "hash": "22c09b10f98a5ab26f656afe7fe3f6bb77555d9c63e0b34aec9b4abbe7e444d0",
+      "games": 384,
+      "rows": 3757,
+      "players": 3,
+      "orbit": 1,
+      "seed_start": 1111019968,
+      "seed_end": 1111020352
+    },
+    {
+      "file": "shard_0053.npz",
+      "hash": "3907ad1a7ed85dc3cb4a88edc11b38a0970db241c498f2e752f318da91128184",
+      "games": 384,
+      "rows": 4889,
+      "players": 4,
+      "orbit": 1,
+      "seed_start": 1111020352,
+      "seed_end": 1111020736
+    },
+    {
+      "file": "shard_0054.npz",
+      "hash": "3fa97a2e9f232805fd79ea7b76158f19bb787de626afa764059f2cb28a9d3375",
+      "games": 384,
+      "rows": 3387,
+      "players": 2,
+      "orbit": 1,
+      "seed_start": 1111020736,
+      "seed_end": 1111021120
+    },
+    {
+      "file": "shard_0055.npz",
+      "hash": "a78326b7a6af31d14340f0a5541008f94e72607ba95c2ed53a78975df70082ba",
+      "games": 384,
+      "rows": 4296,
+      "players": 3,
+      "orbit": 1,
+      "seed_start": 1111021120,
+      "seed_end": 1111021504
+    },
+    {
+      "file": "shard_0056.npz",
+      "hash": "97338b1731ffd09ca806c698a07ceb278457061a68ce9a66564b845ec9dd81f5",
+      "games": 384,
+      "rows": 4912,
+      "players": 4,
+      "orbit": 1,
+      "seed_start": 1111021504,
+      "seed_end": 1111021888
+    },
+    {
+      "file": "shard_0057.npz",
+      "hash": "43ed6eee6b9b94db8f0da25a0d6e799c5a6f218e3103afdb03ac278554513040",
+      "games": 384,
+      "rows": 3431,
+      "players": 2,
+      "orbit": 1,
+      "seed_start": 1111021888,
+      "seed_end": 1111022272
+    },
+    {
+      "file": "shard_0058.npz",
+      "hash": "3d3a6bd3d04d75b12ace1bf5144bdbf210bf8f11b26c2080a0573884de5e9394",
+      "games": 384,
+      "rows": 3819,
+      "players": 3,
+      "orbit": 1,
+      "seed_start": 1111022272,
+      "seed_end": 1111022656
+    },
+    {
+      "file": "shard_0059.npz",
+      "hash": "5ab08e1e26af19eab366e7732a56b6c14b1873abb5246b9205d2a48d75aa894c",
+      "games": 384,
+      "rows": 4939,
+      "players": 4,
+      "orbit": 1,
+      "seed_start": 1111022656,
+      "seed_end": 1111023040
+    },
+    {
+      "file": "shard_0060.npz",
+      "hash": "4f285fd72ea949236763cc68934039c3b04b34a74cc30c18d843b21c37496497",
+      "games": 384,
+      "rows": 3299,
+      "players": 2,
+      "orbit": 4,
+      "seed_start": 1111023040,
+      "seed_end": 1111023424
+    },
+    {
+      "file": "shard_0061.npz",
+      "hash": "30d5a213c64045c35b76aa17fc7e70b296ce7ddf0313741a300a89d04dbf8936",
+      "games": 384,
+      "rows": 3740,
+      "players": 3,
+      "orbit": 4,
+      "seed_start": 1111023424,
+      "seed_end": 1111023808
+    },
+    {
+      "file": "shard_0062.npz",
+      "hash": "42b75e2a74e4a086a9f218a632849e66189e465b09880c2c4fcc33cb30a18511",
+      "games": 384,
+      "rows": 4811,
+      "players": 4,
+      "orbit": 4,
+      "seed_start": 1111023808,
+      "seed_end": 1111024192
+    },
+    {
+      "file": "shard_0063.npz",
+      "hash": "794ff92a748120d282c0dfba69337a34c311bf783710d7b752a2403f8c89367e",
+      "games": 384,
+      "rows": 3322,
+      "players": 2,
+      "orbit": 4,
+      "seed_start": 1111024192,
+      "seed_end": 1111024576
+    },
+    {
+      "file": "shard_0064.npz",
+      "hash": "3b9eaf40a14f77a4bcd1b84c7efdbd3c0a40a33c1acdd2a463f1cb8868e91917",
+      "games": 384,
+      "rows": 3909,
+      "players": 3,
+      "orbit": 4,
+      "seed_start": 1111024576,
+      "seed_end": 1111024960
+    },
+    {
+      "file": "shard_0065.npz",
+      "hash": "082ae352691b122850c600c202e1e7d63011d1468e15dda9f69798127434be51",
+      "games": 384,
+      "rows": 4961,
+      "players": 4,
+      "orbit": 4,
+      "seed_start": 1111024960,
+      "seed_end": 1111025344
+    },
+    {
+      "file": "shard_0066.npz",
+      "hash": "4c15db92ec2170ab9f7f29a163abb474ac2ee60f63456a677ead0e9335b4f8d7",
+      "games": 384,
+      "rows": 3220,
+      "players": 2,
+      "orbit": 4,
+      "seed_start": 1111025344,
+      "seed_end": 1111025728
+    },
+    {
+      "file": "shard_0067.npz",
+      "hash": "fb4ed4ca073ebddff1fdabdf8c5df7a6c77658f7f4ca3e816b5fb7b433002bcf",
+      "games": 384,
+      "rows": 3761,
+      "players": 3,
+      "orbit": 4,
+      "seed_start": 1111025728,
+      "seed_end": 1111026112
+    },
+    {
+      "file": "shard_0068.npz",
+      "hash": "43b85db21bd8d03343f329275a7d44835499316331a4400d7f080260ca1c1429",
+      "games": 384,
+      "rows": 4783,
+      "players": 4,
+      "orbit": 4,
+      "seed_start": 1111026112,
+      "seed_end": 1111026496
+    },
+    {
+      "file": "shard_0069.npz",
+      "hash": "40b27b121f8145aebcc10fde0854137084351d8ba843e632404920406dde5e29",
+      "games": 384,
+      "rows": 3200,
+      "players": 2,
+      "orbit": 4,
+      "seed_start": 1111026496,
+      "seed_end": 1111026880
+    },
+    {
+      "file": "shard_0070.npz",
+      "hash": "3418017d31bbc149d594f0f879fc37e6f481c5b5edd6a7b493a006f078a00251",
+      "games": 384,
+      "rows": 3863,
+      "players": 3,
+      "orbit": 4,
+      "seed_start": 1111026880,
+      "seed_end": 1111027264
+    },
+    {
+      "file": "shard_0071.npz",
+      "hash": "a9c78fdc23e19ea13e61455ecad97a03bd235a52e217250a83d721afa46f387b",
+      "games": 384,
+      "rows": 4735,
+      "players": 4,
+      "orbit": 4,
+      "seed_start": 1111027264,
+      "seed_end": 1111027648
+    },
+    {
+      "file": "shard_0072.npz",
+      "hash": "cc1933bc732da52a573a6aa582306c3940c414973e723eb57c5beb1d57b7c150",
+      "games": 384,
+      "rows": 3170,
+      "players": 2,
+      "orbit": 4,
+      "seed_start": 1111027648,
+      "seed_end": 1111028032
+    },
+    {
+      "file": "shard_0073.npz",
+      "hash": "72819e321ca897e65ade25190a233a29bd5c6622f2cad5eccae985a653bab645",
+      "games": 384,
+      "rows": 4062,
+      "players": 3,
+      "orbit": 4,
+      "seed_start": 1111028032,
+      "seed_end": 1111028416
+    },
+    {
+      "file": "shard_0074.npz",
+      "hash": "bcf6ff90e89c2dd84f4c70515b63a643de261d06149a5ed664e82882ee472828",
+      "games": 384,
+      "rows": 5045,
+      "players": 4,
+      "orbit": 4,
+      "seed_start": 1111028416,
+      "seed_end": 1111028800
+    },
+    {
+      "file": "shard_0075.npz",
+      "hash": "37186cc4503667c5a975652492e273a3606a310c81589f4e60bb6027d49c1f07",
+      "games": 384,
+      "rows": 3289,
+      "players": 2,
+      "orbit": 4,
+      "seed_start": 1111028800,
+      "seed_end": 1111029184
+    },
+    {
+      "file": "shard_0076.npz",
+      "hash": "39e720ba5d19f5807b5a088ee1510680fab2df24112c0b7323f6ab1d5c1e108a",
+      "games": 384,
+      "rows": 3942,
+      "players": 3,
+      "orbit": 4,
+      "seed_start": 1111029184,
+      "seed_end": 1111029568
+    },
+    {
+      "file": "shard_0077.npz",
+      "hash": "710d2d66b4f4f27efe37397e017c8b0b2804b48e5e12615b3ac4f48ee77c73e4",
+      "games": 384,
+      "rows": 4993,
+      "players": 4,
+      "orbit": 4,
+      "seed_start": 1111029568,
+      "seed_end": 1111029952
+    },
+    {
+      "file": "shard_0078.npz",
+      "hash": "f948afca755bca6014508f98098edc0b6a38cee1c0a25b4a6b514466c0afc24d",
+      "games": 384,
+      "rows": 3424,
+      "players": 2,
+      "orbit": 4,
+      "seed_start": 1111029952,
+      "seed_end": 1111030336
+    },
+    {
+      "file": "shard_0079.npz",
+      "hash": "b572ad8a264e985d65584414edd565347ae4fff52c5e06d5bde931c9fadbe29b",
+      "games": 384,
+      "rows": 4040,
+      "players": 3,
+      "orbit": 4,
+      "seed_start": 1111030336,
+      "seed_end": 1111030720
+    },
+    {
+      "file": "shard_0080.npz",
+      "hash": "d4a0ab64a8ae3a542133316d63a2e269bf2ec58ac05fefcf32470223f0c4e4e5",
+      "games": 384,
+      "rows": 4744,
+      "players": 4,
+      "orbit": 4,
+      "seed_start": 1111030720,
+      "seed_end": 1111031104
+    },
+    {
+      "file": "shard_0081.npz",
+      "hash": "51fe0f81cdbe5470a8bba482bab4d36f531d822189df3dc626c9e02965879995",
+      "games": 384,
+      "rows": 3436,
+      "players": 2,
+      "orbit": 4,
+      "seed_start": 1111031104,
+      "seed_end": 1111031488
+    },
+    {
+      "file": "shard_0082.npz",
+      "hash": "0bdc3938acf02929158a746cb49cd38b0c890facaa483005827fa2ba9fed967d",
+      "games": 384,
+      "rows": 4072,
+      "players": 3,
+      "orbit": 4,
+      "seed_start": 1111031488,
+      "seed_end": 1111031872
+    },
+    {
+      "file": "shard_0083.npz",
+      "hash": "bdf4e0af253ac4da948c6d39fab91dd2767c4da2b02788fac9cf15baacf5d3a0",
+      "games": 384,
+      "rows": 5134,
+      "players": 4,
+      "orbit": 4,
+      "seed_start": 1111031872,
+      "seed_end": 1111032256
+    }
+  ]
+}

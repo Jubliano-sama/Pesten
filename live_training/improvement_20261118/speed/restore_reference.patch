@@ -1,0 +1,338 @@
+--- a/packed_puffer_rollout.py
++++ b/packed_puffer_rollout.py
+@@ -40,8 +40,7 @@
+     token_count = sum(
+         len(step.decision.public_events) + 1 for step in trajectory
+     )
+-    event_values = getattr(policy, "_event_values", None)
+-    tokens = np.zeros((token_count, NATIVE_INPUT_SIZE), dtype=np.float32)
++    tokens = np.empty((token_count, NATIVE_INPUT_SIZE), dtype=np.float32)
+     decision_indices = np.empty(len(trajectory), dtype=np.int32)
+     legal_masks = np.empty((len(trajectory), 55), dtype=np.bool_)
+     actions = np.empty(len(trajectory), dtype=np.int64)
+@@ -49,16 +48,11 @@
+     behavior_values = np.empty(len(trajectory), dtype=np.float32)
+     token_cursor = 0
+     for decision_index, step in enumerate(trajectory):
+-        events = step.decision.public_events
+-        event_end = token_cursor + len(events)
+-        if events:
+-            if event_values is not None:
+-                tokens[token_cursor:event_end, OBSERVATION_SIZE:-1] = [
+-                    event_values(event) for event in events
+-                ]
+-            else:
+-                tokens[token_cursor:event_end] = policy._event_features(step.decision)
+-        token_cursor = event_end
++        event_rows = policy._event_features(step.decision)
++        if event_rows:
++            event_count = len(event_rows)
++            tokens[token_cursor : token_cursor + event_count] = event_rows
++            token_cursor += event_count
+         tokens[token_cursor] = policy._decision_features(step.decision)
+         decision_indices[decision_index] = token_cursor
+         legal_masks[decision_index] = step.decision.legal_actions
+--- a/temporal_batched_speed.py
++++ b/temporal_batched_speed.py
+@@ -397,9 +397,11 @@
+     runtimes: Sequence[TemporalSeatRuntime],
+     states: tuple[torch.Tensor, ...],
+ ) -> None:
+-    split_parts = [part.detach().split(1, dim=1) for part in states]
+-    for runtime, state in zip(runtimes, zip(*split_parts)):
+-        runtime.state = state
++    for batch_index, runtime in enumerate(runtimes):
++        runtime.state = tuple(
++            part[:, batch_index : batch_index + 1].detach()
++            for part in states
++        )
+ 
+ 
+ def _next_sampling_uniform(runtime: TemporalSeatRuntime) -> torch.Tensor:
+@@ -412,24 +414,6 @@
+     draw = draws[runtime.sampling_uniform_cursor]
+     runtime.sampling_uniform_cursor += 1
+     return draw
+-
+-
+-def _sample_seat_actions(
+-    probabilities: torch.Tensor, runtimes: Sequence[TemporalSeatRuntime]
+-) -> list[int]:
+-    """Batch one categorical draw per seat while preserving its own CPU RNG."""
+-    if len(runtimes) == 1:
+-        return torch.multinomial(
+-            probabilities[0], 1, generator=runtimes[0].generator
+-        ).tolist()
+-    if not torch.isfinite(probabilities).all():
+-        raise RuntimeError("policy produced non-finite action probabilities")
+-    # PyTorch's one-sample multinomial draws Exp(1) noise for every action
+-    # and takes argmax(p / noise). Only the draws need distinct generators.
+-    noise = torch.empty_like(probabilities)
+-    for row, runtime in zip(noise.unbind(), runtimes):
+-        row.exponential_(generator=runtime.generator)
+-    return torch.div(probabilities, noise, out=noise).argmax(dim=1).tolist()
+ 
+ 
+ def _advance_event_states(
+@@ -518,23 +502,38 @@
+     feature_started = time.perf_counter()
+     if max_public_events is not None and max_public_events < 1:
+         raise ValueError("max_public_events must be positive when provided")
+-    event_token_encoder = getattr(policy, "_event_tokens_from_events", None)
+-    event_feature_encoder = getattr(policy, "_event_features_from_events", None)
+-    if event_token_encoder is not None:
++    recent_event_encoder = getattr(
++        policy, "_event_features_from_events", None
++    )
++    recent_event_token_encoder = (
++        getattr(policy, "_event_tokens_from_events", None)
++        if max_public_events is not None
++        else None
++    )
++    if (
++        max_public_events is not None
++        and recent_event_token_encoder is not None
++    ):
+         event_rows = [
+-            decision.public_events if max_public_events is None
+-            else decision.public_events[-max_public_events:]
++            decision.public_events[-max_public_events:]
+             for decision in decisions
+         ]
+-    elif max_public_events is not None and event_feature_encoder is not None:
++    elif max_public_events is not None and recent_event_encoder is not None:
+         event_rows = [
+-            event_feature_encoder(decision.public_events[-max_public_events:])
++            recent_event_encoder(decision.public_events[-max_public_events:])
+             for decision in decisions
+         ]
+     else:
+-        event_rows = [policy._event_features(decision) for decision in decisions]
+-        if max_public_events is not None:
+-            event_rows = [rows[-max_public_events:] for rows in event_rows]
++        event_rows = [
++            policy._event_features(decision) for decision in decisions
++        ]
++    if max_public_events is not None and recent_event_encoder is None:
++        # This is an intentionally approximate behavior-policy optimization.
++        # Keep recent public context, which matters most for the current turn,
++        # while bounding recurrent calls in seven/eight-player games. The
++        # original DecisionInput remains in each trajectory, so PPO replay and
++        # the full learner still receive the complete information-safe history.
++        event_rows = [rows[-max_public_events:] for rows in event_rows]
+     if stats is not None:
+         stats.temporal_feature_encoding_seconds += (
+             time.perf_counter() - feature_started
+@@ -565,8 +564,8 @@
+             selected_events = [
+                 event_rows[index][event_index] for index in selected
+             ]
+-            if event_token_encoder is not None:
+-                tokens = event_token_encoder(
++            if recent_event_token_encoder is not None:
++                tokens = recent_event_token_encoder(
+                     selected_events,
+                     device=device,
+                     dtype=dtype,
+@@ -739,11 +738,17 @@
+         )
+     else:
+         assert probabilities is not None
+-        actions = _sample_seat_actions(probabilities, runtimes)
+-
+-    action_indices = torch.as_tensor(actions, device=device).unsqueeze(1)
+-    chosen_logs = log_probabilities.gather(1, action_indices).flatten().tolist()
+-    public_values = values.reshape(len(entries)).tolist()
++        actions = [
++            int(
++                torch.multinomial(
++                    probabilities[index],
++                    1,
++                    generator=runtime.generator,
++                ).item()
++            )
++            for index, runtime in enumerate(runtimes)
++        ]
++
+     for index, (runtime, decision) in enumerate(entries):
+         action = actions[index]
+         runtime.safe_history.append(decision)
+@@ -751,8 +756,12 @@
+             TrajectoryStep(
+                 decision=decision,
+                 action=action,
+-                old_log_prob=chosen_logs[index],
+-                value=privileged_values.get(index, public_values[index]),
++                old_log_prob=float(
++                    log_probabilities[index, action].item()
++                ),
++                value=privileged_values.get(
++                    index, float(values[index].reshape(-1)[0].item())
++                ),
+                 privileged_snapshot=privileged_by_index.get(index),
+             )
+         )
+--- a/temporal_puffer_v4.py
++++ b/temporal_puffer_v4.py
+@@ -102,22 +102,20 @@
+         )
+ 
+     @staticmethod
+-    def _event_values(event) -> tuple[float, ...]:
+-        return (
+-            int(event.kind) / 3.0,
+-            event.actor_relative / 12.0,
+-            (event.card_id + 1) / 50.0,
+-            (event.suit_id + 1) / 5.0,
+-            event.count / 54.0,
+-        )
+-
+-    @staticmethod
+     def _event_features_from_events(events) -> list[tuple[float, ...]]:
+-        prefix = (0.0,) * OBSERVATION_SIZE
+-        return [
+-            prefix + NativePufferTemporalPolicy._event_values(event) + (0.0,)
+-            for event in events
+-        ]
++        rows = []
++        for event in events:
++            event_values = (
++                int(event.kind) / 3.0,
++                event.actor_relative / 12.0,
++                (event.card_id + 1) / 50.0,
++                (event.suit_id + 1) / 5.0,
++                event.count / 54.0,
++            )
++            rows.append(
++                (0.0,) * OBSERVATION_SIZE + event_values + (0.0,)
++            )
++        return rows
+ 
+     @staticmethod
+     def _event_features(decision: DecisionInput) -> list[tuple[float, ...]]:
+@@ -133,12 +131,31 @@
+         dtype: torch.dtype,
+     ) -> torch.Tensor:
+         """Materialize sparse event features without 94 Python zeros each."""
+-        tokens = np.zeros((len(events), NATIVE_INPUT_SIZE), dtype=np.float32)
+-        if len(events):
+-            tokens[:, OBSERVATION_SIZE:-1] = [
+-                NativePufferTemporalPolicy._event_values(event) for event in events
+-            ]
+-        return torch.from_numpy(tokens).to(device=device, dtype=dtype)
++        tokens = torch.zeros(
++            (len(events), NATIVE_INPUT_SIZE),
++            device=device,
++            dtype=dtype,
++        )
++        values = np.asarray(
++            [
++                (
++                    int(event.kind) / 3.0,
++                    event.actor_relative / 12.0,
++                    (event.card_id + 1) / 50.0,
++                    (event.suit_id + 1) / 5.0,
++                    event.count / 54.0,
++                )
++                for event in events
++            ],
++            dtype=np.float32,
++        )
++        value_tensor = torch.from_numpy(values)
++        if device.type != "cpu" or dtype != torch.float32:
++            value_tensor = value_tensor.to(device=device, dtype=dtype)
++        tokens[:, OBSERVATION_SIZE : OBSERVATION_SIZE + EVENT_TOKEN_SIZE] = (
++            value_tensor
++        )
++        return tokens
+ 
+     @staticmethod
+     def _decision_features(decision: DecisionInput) -> tuple[float, ...]:
+--- a/vector_puffer_rollout.py
++++ b/vector_puffer_rollout.py
+@@ -70,7 +70,7 @@
+ 
+ 
+ class _TracedMinGRURolloutCore(torch.nn.Module):
+-    """Shape-polymorphic decision and event graphs for a CPU MinGRU."""
++    """Shape-polymorphic traced eval graphs for a weight-only INT8 MinGRU."""
+ 
+     def __init__(self, core: torch.nn.Module) -> None:
+         super().__init__()
+@@ -131,25 +131,6 @@
+         state: tuple[torch.Tensor, ...],
+     ) -> tuple[torch.Tensor, ...]:
+         return (self.event_graph(tokens, state[0]),)
+-
+-
+-def _trace_worker_min_gru(policy, *, shared_float_weights=False) -> None:
+-    """Trace a worker-owned MinGRU, keeping its live parameter storage."""
+-    core = policy.puffer_policy
+-    if (
+-        core.__class__.__name__ == "Policy"
+-        and getattr(core, "network", None).__class__.__name__ == "MinGRU"
+-    ):
+-        traced = _TracedMinGRURolloutCore(core)
+-        if shared_float_weights:
+-            # Keep the source module and its canonical state_dict intact.
+-            # The traced methods reference those same live parameters.
+-            core.forward_eval = traced.forward_eval
+-            core.forward_events_eval = traced.forward_events_eval
+-        else:
+-            policy.puffer_policy = traced
+-        policy._rollout_device = torch.device("cpu")
+-        policy._rollout_dtype = torch.float32
+ 
+ 
+ def _recurrent_networks(policy) -> tuple[torch.nn.Module, ...]:
+@@ -217,8 +198,18 @@
+                 dtype=torch.qint8,
+                 inplace=True,
+             )
+-    if trace_min_gru:
+-        _trace_worker_min_gru(quantized)
++    core = quantized.puffer_policy
++    if (
++        trace_min_gru
++        and core.__class__.__name__ == "Policy"
++        and getattr(core, "network", None).__class__.__name__ == "MinGRU"
++    ):
++        # Dynamic INT8 makes each matrix multiply cheap enough that Python
++        # dispatch around thousands of small recurrent calls becomes visible.
++        # Trace both the decision graph and decoder-free event graph once per
++        # policy generation. The traced operations are numerically identical
++        # and remain dynamic in batch size.
++        quantized.puffer_policy = _TracedMinGRURolloutCore(core)
+     for parameter in quantized.parameters():
+         parameter.requires_grad_(False)
+     # The traced graph exposes duplicated module trees, making a fresh
+@@ -303,11 +294,6 @@
+                 trace_min_gru=trace_min_gru,
+             )
+         )
+-    if rollout_precision == ROLLOUT_PRECISION_FLOAT32 and trace_min_gru:
+-        # Tracing (without freezing) preserves the parameters installed with
+-        # assign=True. The current graph sees every in-place shared refresh.
+-        for worker_policy in (policy, *_WORKER_FIXED_HISTORICAL):
+-            _trace_worker_min_gru(worker_policy, shared_float_weights=True)
+     _WORKER_HISTORICAL = list(_WORKER_FIXED_HISTORICAL)
+ 
+ 
+--- a/train_puffer_fast.py
++++ b/train_puffer_fast.py
+@@ -527,12 +527,12 @@
+         ),
+     )
+     parser.add_argument(
+-        "--trace-int8-rollouts", "--trace-rollouts",
++        "--trace-int8-rollouts",
+         action=argparse.BooleanOptionalAction,
+         default=True,
+         help=(
+-            "trace CPU MinGRU decision/event graphs for FP32 or quantized "
+-            "rollouts; existing shared FP32 weights update in place"
++            "trace quantized MinGRU decision/event graphs to remove Python "
++            "dispatch while preserving exact actor outputs"
+         ),
+     )
+     parser.add_argument(

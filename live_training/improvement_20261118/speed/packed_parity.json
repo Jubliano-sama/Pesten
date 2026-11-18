@@ -1,0 +1,47 @@
+{
+  "comparison": "Original eager FP32 CPU collection and packing versus sparse event packing, batched seat sampling/state extraction and traced CPU MinGRU",
+  "actor": "models/best/puffer_min_gru_192x2_plateau_teacher_epoch4387.pt",
+  "schedule": [
+    "current_selfplay",
+    "canonical_random"
+  ],
+  "schedule_offset": 0,
+  "max_turns": 1000,
+  "threads": 1,
+  "digest_order": "Per episode in league order, update SHA256 with C-order array bytes for tokens, decision_indices, legal_masks, actions, old_log_probabilities, behavior_values; append str(outcome).encode().",
+  "all_digests_matched": true,
+  "rows": [
+    {
+      "players": 2,
+      "games": 32,
+      "seed": 202611330,
+      "controlled_decisions": 1477,
+      "actions_sha256": "5369c4deeea31b8f6f2e74fbbe58bb869dfb687114552453224b13534d44233c",
+      "all_fields_and_outcomes_sha256": "199a029799cff797214d76e952ec4fa4a369287b925a75cfe3a83447ea35e6e0"
+    },
+    {
+      "players": 2,
+      "games": 192,
+      "seed": 19827610,
+      "controlled_decisions": 8096,
+      "actions_sha256": "748b7ddb0285da773b9a1cdafcff1b4459fbd73c5bc0eceeb2581aef6ea8e3ef",
+      "all_fields_and_outcomes_sha256": "c87a8c5c1d5a032185ac19cd8e69bf29d7026a9bc8292ab095728542c176c378"
+    },
+    {
+      "players": 3,
+      "games": 192,
+      "seed": 59827704,
+      "controlled_decisions": 9381,
+      "actions_sha256": "0a89222fec9d1835eaa3982a3a6d0d58519039d84fb6f7da2e8e62eed8e65b99",
+      "all_fields_and_outcomes_sha256": "dfe49db3f6f1a4c457928172681f2ac51d7a943f634cbb80b47d2b3cc33d3a8c"
+    },
+    {
+      "players": 4,
+      "games": 192,
+      "seed": 10239945,
+      "controlled_decisions": 10556,
+      "actions_sha256": "f6ed0533f1bab0051bb3136e90dd3f7340ac47b3d914bb2c63ec3f22fd996ae3",
+      "all_fields_and_outcomes_sha256": "ecf3cb184df2e6300194a25c1ec2975c6adb1adb051524924fcaf4399d779c7a"
+    }
+  ]
+}

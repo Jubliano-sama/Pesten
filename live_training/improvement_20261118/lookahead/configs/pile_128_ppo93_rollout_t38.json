@@ -1,0 +1,21 @@
+{
+  "kind": "pesten_public_lookahead",
+  "samples": 128,
+  "horizon": 72,
+  "trust": 38,
+  "infer_voids": true,
+  "posterior": {
+    "path": "live_training/improvement_20261118/lookahead/hand_frequencies.json",
+    "sha256": "9727824e7132f494e1804fafabfe2451c3652aacfe8914aefd83bea140363fd0"
+  },
+  "track_pile": true,
+  "prior": {
+    "kind": "native",
+    "path": "live_training/improvement_20261118/ppo/phase2/puffer_epoch_004480.pt",
+    "sha256": "6f3f859c4785cfc8e6b6fa68f36f116e07a710744fd55d0e2cb90eaaf4c681ed"
+  },
+  "rollout": {
+    "path": "live_training/improvement_20261118/lookahead/rollout_weights.npy",
+    "sha256": "3b1dde3c721d23cea5bf26366227d7e53ca7869f944118dd026aff9bdec4b9a4"
+  }
+}

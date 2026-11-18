@@ -1,0 +1,52 @@
+{
+  "games": 41472,
+  "decisions": 1042077,
+  "train_games": 34560,
+  "validation_games": 6912,
+  "first_seed": 510000000,
+  "last_seed": 510041471,
+  "baseline_mse": 0.014456558972597122,
+  "dimensions": [
+    38,
+    30
+  ],
+  "arguments": {
+    "operation": "fit",
+    "directory": "/tmp/pesten_outcome_rollouts_20261118",
+    "output": "live_training/improvement_20261118/recipe/full",
+    "base": "models/best/puffer_min_gru_192x2_plateau_teacher_epoch4387.pt",
+    "chunks": 108,
+    "fit_seed": 513000001,
+    "value_epochs": 7,
+    "head_epochs": 8,
+    "td_lambda": 0.65,
+    "learning_rate": 0.001,
+    "scales": [
+      24.0
+    ],
+    "orbits": [
+      "suit24"
+    ]
+  },
+  "history": {
+    "value_mse": [
+      0.20038793981075287,
+      0.19935563206672668,
+      0.20100420713424683,
+      0.20108391344547272,
+      0.2032337635755539,
+      0.2006503939628601,
+      0.19902199506759644
+    ],
+    "advantage_mse": [
+      0.01434178277850151,
+      0.014352268539369106,
+      0.01432367879897356,
+      0.014319582842290401,
+      0.014318563975393772,
+      0.014317679218947887,
+      0.01431626919656992,
+      0.014311590231955051
+    ]
+  }
+}

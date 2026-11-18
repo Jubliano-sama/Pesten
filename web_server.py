@@ -14,7 +14,7 @@ import secrets
 import string
 import uuid
 from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from threading import Lock, Timer
 import logging
 
@@ -27,6 +27,9 @@ from flask_socketio import SocketIO, emit, join_room, leave_room, rooms
 import card
 import deck
 from supervisedAgent import StudentNet
+from web_temporal_player import (
+    WebTemporalPlayer, normalize_card, production_model_status,
+)
 from ai_observation import (
     ACTION_COUNT,
     COMPATIBLE_START,
@@ -191,15 +194,25 @@ class GameState:
     waiting_for_suit_choice: bool = False  # True when waiting for human to choose suit
     turn_order: List[str] = None  # Player IDs in turn order from current player
     direction_just_changed: bool = False  # Flag for client to know direction just changed
+    public_history: List[dict] = field(default_factory=list)
+    starting_player_count: int = 0
 
 class AIPlayer:
-    """AI Player using the trained PPO model"""
+    """Promoted recurrent teacher, with the legacy MLP for oversized tables."""
     
     def __init__(self, model_path: str = "ppo_actor_100run3.pth"):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = None
         self.model_loaded = False
         self.fallback_reason = ""
+        self.temporal_player = None
+        self.temporal_load_error = ""
+        self._reported_fallback_counts = set()
+        try:
+            self.temporal_player = WebTemporalPlayer()
+        except Exception as error:
+            self.temporal_load_error = f"{type(error).__name__}: {error}"
+            logger.error("Promoted temporal AI is not ready: %s", self.temporal_load_error)
         
         # Try multiple model paths
         model_paths = [
@@ -245,9 +258,32 @@ class AIPlayer:
         
         if not self.model_loaded:
             self.fallback_reason = f"No valid model found in paths: {model_paths}"
-            logger.error(f"AI Model Loading Failed: {self.fallback_reason}")
-            logger.info("AI will use random strategy as fallback")
+            logger.error(f"Legacy MLP fallback is unavailable: {self.fallback_reason}")
             self.model = None
+
+    def reset_episode(self):
+        if self.temporal_player is not None:
+            self.temporal_player.reset()
+
+    def _temporal_action(self, player, game_state, *, is_change_sort=False, drawn_card=None):
+        # Legacy test adapters and explicitly constructed old AI objects retain
+        # their 121-feature API. Normal room instances always have this field.
+        if not hasattr(self, "temporal_player"):
+            return None
+        if WebTemporalPlayer.supports(game_state):
+            if self.temporal_player is None:
+                raise RuntimeError(f"promoted temporal AI is unavailable: {self.temporal_load_error}")
+            return self.temporal_player.choose_action(
+                player, game_state, is_change_sort=is_change_sort, drawn_card=drawn_card,
+            )
+        count = sum(not other.is_observer for other in game_state.players)
+        self.fallback_reason = f"{count} active players is outside the recurrent player's supported schema; using legacy MLP"
+        if count not in self._reported_fallback_counts:
+            logger.warning(self.fallback_reason)
+            self._reported_fallback_counts.add(count)
+        if self.model is None:
+            raise RuntimeError(f"legacy MLP fallback is unavailable: {self.fallback_reason}")
+        return None
 
     def get_observation(self, player: PlayerState, game_state: GameState) -> np.ndarray:
         """Create observation vector for AI player"""
@@ -301,6 +337,9 @@ class AIPlayer:
 
     def choose_action(self, player: PlayerState, game_state: GameState, is_change_sort: bool = False) -> int:
         """Choose action using AI model"""
+        temporal_action = self._temporal_action(player, game_state, is_change_sort=is_change_sort)
+        if temporal_action is not None:
+            return temporal_action
         if is_change_sort:
             logger.info(f"AI {player.name} received request to change sort after playing Jack or Joker penalty")
         else:
@@ -344,6 +383,9 @@ class AIPlayer:
     
     def choose_action_with_drawn_card(self, player: PlayerState, game_state: GameState, drawn_card: int) -> int:
         """Choose action considering a newly drawn card that could be played"""
+        temporal_action = self._temporal_action(player, game_state, drawn_card=drawn_card)
+        if temporal_action is not None:
+            return temporal_action
         if self.model is None:
             return self._random_action_with_drawn_card(player, game_state, drawn_card)
         
@@ -479,12 +521,15 @@ class GameRoom:
     
     def _reset_game(self):
         """Reset game state and deal cards"""
+        self.game_state.public_history.clear()
+        self.ai_player.reset_episode()
         # Randomize player order
         random.shuffle(self.game_state.players)
         logger.info(f"Player order randomized: {[p.name for p in self.game_state.players]}")
         
         # Calculate number of decks needed: ceil((players * 7) / 53)
         num_players = len(self.game_state.players)
+        self.game_state.starting_player_count = num_players
         cards_needed = num_players * 7
         num_decks = max(1, (cards_needed + 52) // 53)  # Ceiling division, at least 1 deck (53 cards per deck)
         
@@ -535,10 +580,13 @@ class GameRoom:
         self.game_state.winner = None
         self.game_state.turn_count = 0
         self.game_state.sorts_played = [0, 0, 0, 0, 0]
+        self.game_state.has_drawn_this_turn = False
+        self.game_state.waiting_for_suit_choice = False
         
         # Reset all players' timeout counts
         for player in self.game_state.players:
             player.consecutive_timeouts = 0
+            player.is_observer = False
         
         # Initialize turn order
         self._update_turn_order()
@@ -689,6 +737,7 @@ class GameRoom:
                 sorts = ["harten", "ruiten", "schoppen", "klaveren", "special"]
                 new_sort = sorts[new_sort_action - 50]
                 self.game_state.current_sort = new_sort
+                self._record_suit_choice(player, new_sort)
                 logger.info(f"JOKER AI CHOICE: {player.name} chose suit {new_sort}")
                 self._next_turn()
                 return {"success": True, "action": "penalty_and_sort_change", "new_sort": new_sort}
@@ -714,6 +763,11 @@ class GameRoom:
         # Update game state
         self.game_state.current_sort = card_data["sort"]
         self.game_state.current_true_number = card_data["truenumber"]
+        self.game_state.public_history.append({
+            "turn": self.game_state.turn_count, "player_id": player.id,
+            "action": "play", "card": normalize_card(card_num),
+            "sort": "special" if card_data["truenumber"] == 13 else card_data["sort"],
+        })
         
         # Update suits played
         sorts = ["harten", "ruiten", "schoppen", "klaveren", "special"]
@@ -790,6 +844,7 @@ class GameRoom:
                 sorts = ["harten", "ruiten", "schoppen", "klaveren", "special"]
                 new_sort = sorts[new_sort_action - 50]
                 self.game_state.current_sort = new_sort
+                self._record_suit_choice(player, new_sort)
                 result["new_sort"] = new_sort
             else:
                 result["choose_sort"] = True
@@ -827,6 +882,12 @@ class GameRoom:
         logger.info("GAME TIE: No cards in grab deck and game deck too small, ending game in a tie")
         self._end_game_in_tie()
         return None
+
+    def _record_suit_choice(self, player, new_sort):
+        self.game_state.public_history.append({
+            "turn": self.game_state.turn_count, "player_id": player.id,
+            "action": "choose_sort", "sort": new_sort,
+        })
     
     def _end_game_in_tie(self):
         """End the game in a tie and notify all players"""
@@ -1047,11 +1108,13 @@ class GameRoom:
                     sorts = ["harten", "ruiten", "schoppen", "klaveren", "special"]
                     new_sort = sorts[new_sort_action - 50]
                     self.game_state.current_sort = new_sort
+                    self._record_suit_choice(player, new_sort)
                     result = {"success": True, "action": "penalty_and_sort_change", "new_sort": new_sort}
                     logger.info(f"AUTO-PASS: AI {player.name} chose suit {new_sort}")
                 else:
                     # Human gets default suit (hearts)
                     self.game_state.current_sort = "harten"
+                    self._record_suit_choice(player, "harten")
                     result = {"success": True, "action": "penalty_and_sort_change", "new_sort": "harten"}
                     logger.info("AUTO-PASS: Human timed out, automatically chose hearts")
             else:
@@ -1196,6 +1259,7 @@ class GameRoom:
         
         old_sort = self.game_state.current_sort
         self.game_state.current_sort = new_sort
+        self._record_suit_choice(self.game_state.players[player_idx], new_sort)
         self.game_state.waiting_for_suit_choice = False
         old_player_index = self.game_state.current_player_index
         self._next_turn()
@@ -1335,6 +1399,14 @@ def generate_room_code() -> str:
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
 # Flask routes
+@app.route('/health')
+def health():
+    try:
+        return jsonify(production_model_status())
+    except Exception as error:
+        logger.error("Production model health check failed: %s", error)
+        return jsonify({"status": "error", "error": f"{type(error).__name__}: {error}"}), 503
+
 @app.route('/')
 def index():
     return render_template('index.html')

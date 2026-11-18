@@ -1,0 +1,68 @@
+{
+  "locked_utc": "2026-11-18T17:36:41.052057+00:00",
+  "seed": 1813247161,
+  "blocks_per_cell": 320,
+  "rule": "Highest equal-weight six-cell outright win rate. Rank the three no-search actors by the same rule for the independent standalone comparison. All groups share incumbent outcomes, deal seeds and seat rotations.",
+  "groups": {
+    "first": {
+      "prior_search": {
+        "file": "live_training/improvement_20261118/lookahead/configs/128_72_72_1.json",
+        "sha256": "e1e1e53cab6d6f1d6db1e7fdf90aaf40f2ff1e26cbe157315d8537a27645f06d"
+      },
+      "branch_search": {
+        "file": "live_training/improvement_20261118/combined/fork65.json",
+        "sha256": "f7d38f291a1374c0b321c4647e96e91008606b23372507e3a455d8ff460623aa"
+      }
+    },
+    "learned_rollout": {
+      "learned_rollout": {
+        "file": "live_training/improvement_20261118/lookahead/configs/pile_128_rollout.json",
+        "sha256": "cb108a848d766516616b10f9eca1c852500e7d6ebd2ddda1cfd957845ff54761"
+      }
+    },
+    "actor": {
+      "belief195": {
+        "file": "live_training/improvement_20261118/recipe/belief_model1/branch_195.pt",
+        "sha256": "e887de486f6b97189f2b579ebffb1de35f5f6782140d44e18e515a298c1cc00d"
+      },
+      "branch65": {
+        "file": "live_training/improvement_20261118/recipe/fork_graph1/branch_65.pt",
+        "sha256": "3a5803ede937cfca5f980d265a989eee34eeefe81e0395732981ebcfa0d3133c"
+      },
+      "ppo93": {
+        "file": "live_training/improvement_20261118/ppo/phase2/puffer_epoch_004480.pt",
+        "sha256": "6f3f859c4785cfc8e6b6fa68f36f116e07a710744fd55d0e2cb90eaaf4c681ed"
+      }
+    },
+    "belief_rollout": {
+      "belief_rollout": {
+        "file": "live_training/improvement_20261118/combined/belief195_rollout.json",
+        "sha256": "9514f05838951277b22597b27500cda582e5a414a5375b3aed17cf1ef4406fef"
+      }
+    },
+    "learned_cards_rollout": {
+      "learned_cards_rollout": {
+        "file": "live_training/improvement_20261118/card_belief/profile.json",
+        "sha256": "03c8c111927fdfe6d3355fe47b6bc1d12e260ea31514622392e5de8aced08426"
+      }
+    },
+    "adaptive_cards_rollout": {
+      "adaptive_cards_rollout": {
+        "file": "live_training/improvement_20261118/combined/style_cards_rollout.json",
+        "sha256": "0822be81dac171970595c300ea3a1fc8bfedd4e42140b0ff36c18a7554de4feb"
+      }
+    },
+    "learned_actor_cards_rollout": {
+      "learned_actor_cards_rollout": {
+        "file": "live_training/improvement_20261118/combined/belief195_cards_rollout.json",
+        "sha256": "00409c6e568aa80fec52eb6273dde38c5d67fb8e2798074e74f988aed5c1f92d"
+      }
+    },
+    "ppo_rollout": {
+      "ppo_rollout": {
+        "file": "live_training/improvement_20261118/lookahead/configs/pile_128_ppo93_rollout.json",
+        "sha256": "59f6239aeb1c17e7f18d1cdbe1bc979e1d0872b26a341086fc0757d5aa65c6b3"
+      }
+    }
+  }
+}

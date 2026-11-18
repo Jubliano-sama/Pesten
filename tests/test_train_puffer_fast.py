@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 
 import pytest
+import torch
 
 from privileged_critic import (
     DEFAULT_GAMMA,
@@ -9,9 +10,30 @@ from privileged_critic import (
 )
 from train_puffer_fast import (
     DEFAULT_PRIVILEGED_CRITIC,
+    _update_autocast,
     _validate_privileged_target_gamma,
     parse_args,
 )
+
+
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_bfloat16_forwards_observe_each_optimizer_step_inside_update_context(device):
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA unavailable")
+    policy = torch.nn.Linear(1, 1, bias=False, device=device)
+    with torch.no_grad():
+        policy.weight.fill_(1)
+    optimizer = torch.optim.SGD(policy.parameters(), lr=.25)
+    inputs = torch.ones(1, 1, device=device)
+    forwards = []
+    with _update_autocast(device, "bfloat16"):
+        for _ in range(3):
+            optimizer.zero_grad()
+            prediction = policy(inputs)
+            forwards.append(float(prediction.detach()))
+            prediction.float().square().sum().backward()
+            optimizer.step()
+    assert forwards == pytest.approx([1, .5, .25])
 
 
 def _parse(monkeypatch, *extra: str):

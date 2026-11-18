@@ -747,6 +747,32 @@ def test_int8_worker_repacks_current_policy_after_shared_generation_refresh():
     )
 
 
+def test_fp32_traces_read_refreshed_weights_with_unchanged_state_dict():
+    torch.manual_seed(274)
+    current = NativePufferTemporalPolicy(hidden_size=16, num_layers=2).eval()
+    vector_puffer_rollout._initialize_worker(
+        current.state_dict(), policy_model_config(current), "ppo_actor_100run3.pth", ()
+    )
+    tokens = torch.randn(7, 100)
+    state = current.initial_state(len(tokens))
+    before_logits = None
+    with torch.no_grad():
+        for generation in range(2):
+            _refresh_worker_policy(generation)
+            worker = vector_puffer_rollout._WORKER_POLICY
+            assert worker.state_dict().keys() == current.state_dict().keys()
+            logits, values, next_states = current.puffer_policy.forward_eval(tokens, state)
+            actual_logits, actual_values, actual_states = worker.puffer_policy.forward_eval(tokens, state)
+            assert torch.equal(actual_logits, logits)
+            assert torch.equal(actual_values, values)
+            assert torch.equal(actual_states[0], next_states[0])
+            assert torch.equal(worker.puffer_policy.forward_events_eval(tokens, state)[0], next_states[0])
+            if generation:
+                assert not torch.equal(actual_logits, before_logits)
+            before_logits = actual_logits
+            current.puffer_policy.network.layers[0].weight.add_(0.125)
+
+
 def test_vector_pool_reports_int8_behavior_precision():
     torch.manual_seed(84)
     policy = NativePufferTemporalPolicy(

@@ -1,0 +1,11 @@
+{
+  "purpose": "Measure the trained actor without decision-time simulations when the primary finalist uses online search.",
+  "selection": "Choose the best standalone actor by six-cell mean win-rate improvement on the 320-deals-per-cell development bank starting at 1813247161. Freeze this actor and the primary finalist before opening either test bank. Always report this supplementary comparison when run.",
+  "base_seed": 3118463807,
+  "blocks_per_cell": 800,
+  "seed_stride": 1000000,
+  "cell_order": ["teacher2", "teacher3", "teacher4", "random2", "random3", "random4"],
+  "games_per_policy": 14400,
+  "total_games": 28800,
+  "scoring": "Use the same frozen opponents, all seat rotations, raw wins and equal-weight six-cell mean as the primary benchmark."
+}

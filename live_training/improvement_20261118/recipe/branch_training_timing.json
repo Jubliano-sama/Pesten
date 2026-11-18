@@ -1,0 +1,317 @@
+{
+  "scope": "CPU-only counterfactual collection, compression, 16-epoch graph fit, checkpoint writes and process startup; shared pretrained auxiliary inputs",
+  "threads": 1,
+  "cpu": "2",
+  "python": "3.12.12",
+  "games_per_shard": 96,
+  "shards_per_run": 6,
+  "teacher_sha256": "f8f0aece2d759eadc60b3cbccca30c321c01da13322f7cae511a73c8da3a9f93",
+  "leaf_sha256": "4cae698a302bb886c1304c12b2ba7c10cd88be63b3048cee90ea7d2cd15796fd",
+  "style_sha256": "9175717d9f1012e8a85c49ddb839632524f5f39d76b33180665cacd88ca77ee9",
+  "frequency_sha256": "9727824e7132f494e1804fafabfe2451c3652aacfe8914aefd83bea140363fd0",
+  "source_sha256": {
+    "branch_outcome_policy.py": "1340be70e11c863cebe41f9d2bc1dc1077e47bacc8562331bc135d28fffe1109",
+    "branch_public_belief.py": "946fc871449573715fdf0012db9fec5df1144a184f28ffdd8fc34d589e9f6a9c",
+    "opponent_style.py": "04bf9c104e7ed6732ab4dffa26130cbc73da0c31438179e339e3f9955c127f70",
+    "public_card_belief.py": "077779677c4844b40864cd5422b65c44a9d62ee0f6361e0fe6613c7c38fa092b",
+    "public_lookahead.py": "43654cda669b979a888ca279a10f17c40923ebd696c5977a2d617cf9913a5e28",
+    "public_lookahead_leaf.py": "217646277a5056b24bc091bede4b0ad9cb9e4912b7b932fbfe444d797038f416",
+    "public_rollout_policy.py": "e0aebfc9b0b3c79af08492923b4e2edd73d5816f1f6de4e5410b700f764348fa",
+    "rollout_policy_improvement.py": "bebcb2bac48c8a34db7cf929fa241b84c348689c2510668f6715c909450e84d1",
+    "strongest_policy_search.py": "20032a7fe259cf7e3e8fdbbb67a2ebe76e1583183c3ec2915b157519ec97de7b",
+    "train_outcome_residual.py": "e8725c40429dc19eee44b02d2bab4b34b6b55d84b3810a3d51a3543924d8837a"
+  },
+  "shared_engine_hashes": {
+    "packed_puffer_rollout.py": {
+      "before": "611fd07c4f60ed397925e1ccb9e7ab96dffd668916c2f81d131483fe78a1661c",
+      "after": "27d1828e1ef0d6f4f820152ff3832dc9f5a7a4d851d811912065a3e946e2afb4"
+    },
+    "temporal_batched_speed.py": {
+      "before": "f684546918acc7042573badedcb3968948b3cb4eafd2f5d672e07688b01092b9",
+      "after": "110ed40ce4c6737df03965f0668b042e503316da46bf241042f5beb73ea5b401"
+    },
+    "temporal_puffer_v4.py": {
+      "before": "302f45f674dfb1550e6ee062f232321df21ed185cec4f7d1c1740499f335a1f7",
+      "after": "02971d8991756d9bb799d92c11b85864077edd22e480ee9d134b940c7a978a47"
+    },
+    "vector_puffer_rollout.py": {
+      "before": "e5e7db35449d52e0a47016aecbb69a8bb74ea34a6c455a9311efbab53ee77843",
+      "after": "caab0aeaacffb237c0b335347abc92cb41e851d684517667a1f70f0681f1ee11"
+    },
+    "train_puffer_fast.py": {
+      "before": "4851da69789eef64684b5a958b6b115f3336a067cc1a0f8ce9dacd2b44d40e3b",
+      "after": "416bf257a6995d5d0870272f3931b4211ea71c05d10dc9be9bf3bdd166c436d5"
+    },
+    "privileged_critic.py": {
+      "before": "003aa419469cead6a6b0f6f67f5b6ed161d84ae086904719751945768cb5eb6c",
+      "after": "003aa419469cead6a6b0f6f67f5b6ed161d84ae086904719751945768cb5eb6c"
+    }
+  },
+  "pairs": [
+    {
+      "seed": 647100000,
+      "order": [
+        "before",
+        "after"
+      ],
+      "before": {
+        "collection_seconds": 41.5279061649926,
+        "fit_seconds": 3.2325055850087665,
+        "shard_sha256": [
+          "650bb2236cee5545d89de7e3dcebad8e1d7894ed50d3764adb13b168fc6a91d6",
+          "e4e66b2e5b46a96dbd3ab09d7d32b20a6082e68877529bfc0c8481bd6db1df27",
+          "407495cd5012d27cf4b2154913be2766534ca828b14e54b4825e12bcddc3788d",
+          "fab9b0776dfa9534973ba05e1d284861c891d3eb9a3e488fe5a4c67106751c44",
+          "f81df39d968544aef34b930e7595363a00a2b953af1791855320c193f4c3db0d",
+          "0949a4cc2effa7465ca7ee28cc30f24e7ddef893c425688e3634ffc9e889e9f5"
+        ],
+        "head_sha256": "dcb50cf13103532fed9583457441aeb8d3559d0f8b1d662a8fabd213b6e2ca84",
+        "history": [
+          0.0065530577042921525,
+          0.006562234393866925,
+          0.006575231520651743,
+          0.006591916023271865,
+          0.006594890915927873,
+          0.006595942617832929,
+          0.006592263241737396,
+          0.006597058462171719,
+          0.006604621897654972,
+          0.006618036068547731,
+          0.0066311312775159705,
+          0.006643960464360385,
+          0.006651442492616245,
+          0.00665465442506575,
+          0.0066563912057157225,
+          0.006656986316558959
+        ],
+        "games": 576,
+        "roots": 3560,
+        "simulated_actions": 8501,
+        "training_roots": 1820,
+        "validation_roots": 1740,
+        "process_wall_seconds": 46.62436582100054
+      },
+      "after": {
+        "collection_seconds": 34.45147815000382,
+        "fit_seconds": 3.704955269000493,
+        "shard_sha256": [
+          "650bb2236cee5545d89de7e3dcebad8e1d7894ed50d3764adb13b168fc6a91d6",
+          "e4e66b2e5b46a96dbd3ab09d7d32b20a6082e68877529bfc0c8481bd6db1df27",
+          "407495cd5012d27cf4b2154913be2766534ca828b14e54b4825e12bcddc3788d",
+          "fab9b0776dfa9534973ba05e1d284861c891d3eb9a3e488fe5a4c67106751c44",
+          "f81df39d968544aef34b930e7595363a00a2b953af1791855320c193f4c3db0d",
+          "0949a4cc2effa7465ca7ee28cc30f24e7ddef893c425688e3634ffc9e889e9f5"
+        ],
+        "head_sha256": "dcb50cf13103532fed9583457441aeb8d3559d0f8b1d662a8fabd213b6e2ca84",
+        "history": [
+          0.0065530577042921525,
+          0.006562234393866925,
+          0.006575231520651743,
+          0.006591916023271865,
+          0.006594890915927873,
+          0.006595942617832929,
+          0.006592263241737396,
+          0.006597058462171719,
+          0.006604621897654972,
+          0.006618036068547731,
+          0.0066311312775159705,
+          0.006643960464360385,
+          0.006651442492616245,
+          0.00665465442506575,
+          0.0066563912057157225,
+          0.006656986316558959
+        ],
+        "games": 576,
+        "roots": 3560,
+        "simulated_actions": 8501,
+        "training_roots": 1820,
+        "validation_roots": 1740,
+        "process_wall_seconds": 40.104880519997096
+      },
+      "all_outputs_exact": true
+    },
+    {
+      "seed": 647200000,
+      "order": [
+        "after",
+        "before"
+      ],
+      "after": {
+        "collection_seconds": 31.604608381996513,
+        "fit_seconds": 3.282454283005791,
+        "shard_sha256": [
+          "df3d1b8fa5d295ee68dd2358dbc7f9d1aecba0bfc0d9ad3347bdbedca032f2e3",
+          "2a0e9c9d724214ad7ed975a575332cca450690e8ee86921605a0c5257ae39285",
+          "f62c961357f1e2671ef23973abad5d317d4797a364a285bb25747204769b7c4c",
+          "27971d551a668dc4a1f937f171467471c5cf545e491e283e3d10deb889b29c34",
+          "14f6c778b765adc85fe108a6e94fb894b1f57159e4e7bb3fbb7a43dc54b0a69f",
+          "53051104039129ab76ff9e4427e16d64f40302271e299c108d136f587796503d"
+        ],
+        "head_sha256": "d2f2f9b53c891669f19501e10cdc00630e2a2b17fb4eac9fe3c6bf9982243f75",
+        "history": [
+          0.006811886688927319,
+          0.00680419703735539,
+          0.0068102614981275355,
+          0.006818182881873475,
+          0.00682064365706314,
+          0.0068281854310115265,
+          0.0068366875338190004,
+          0.006842686285944347,
+          0.006848917912589454,
+          0.006859181266000146,
+          0.006866582228467328,
+          0.006870898852710869,
+          0.006874399720907913,
+          0.006878747760965392,
+          0.006883308410005193,
+          0.006886852274696377
+        ],
+        "games": 576,
+        "roots": 3463,
+        "simulated_actions": 8234,
+        "training_roots": 1680,
+        "validation_roots": 1783,
+        "process_wall_seconds": 36.70245084799535
+      },
+      "before": {
+        "collection_seconds": 37.777129677997436,
+        "fit_seconds": 3.3855652670026757,
+        "shard_sha256": [
+          "df3d1b8fa5d295ee68dd2358dbc7f9d1aecba0bfc0d9ad3347bdbedca032f2e3",
+          "2a0e9c9d724214ad7ed975a575332cca450690e8ee86921605a0c5257ae39285",
+          "f62c961357f1e2671ef23973abad5d317d4797a364a285bb25747204769b7c4c",
+          "27971d551a668dc4a1f937f171467471c5cf545e491e283e3d10deb889b29c34",
+          "14f6c778b765adc85fe108a6e94fb894b1f57159e4e7bb3fbb7a43dc54b0a69f",
+          "53051104039129ab76ff9e4427e16d64f40302271e299c108d136f587796503d"
+        ],
+        "head_sha256": "d2f2f9b53c891669f19501e10cdc00630e2a2b17fb4eac9fe3c6bf9982243f75",
+        "history": [
+          0.006811886688927319,
+          0.00680419703735539,
+          0.0068102614981275355,
+          0.006818182881873475,
+          0.00682064365706314,
+          0.0068281854310115265,
+          0.0068366875338190004,
+          0.006842686285944347,
+          0.006848917912589454,
+          0.006859181266000146,
+          0.006866582228467328,
+          0.006870898852710869,
+          0.006874399720907913,
+          0.006878747760965392,
+          0.006883308410005193,
+          0.006886852274696377
+        ],
+        "games": 576,
+        "roots": 3463,
+        "simulated_actions": 8234,
+        "training_roots": 1680,
+        "validation_roots": 1783,
+        "process_wall_seconds": 43.17722898100328
+      },
+      "all_outputs_exact": true
+    },
+    {
+      "seed": 647300000,
+      "order": [
+        "before",
+        "after"
+      ],
+      "before": {
+        "collection_seconds": 37.5232953819941,
+        "fit_seconds": 3.2122797850024654,
+        "shard_sha256": [
+          "6faa1276ff1157fd68898efc2e3cae49417e7fc6dabeef1a8620c08fc372aa24",
+          "58b2ff27f066d83682645aac8b9eb2928dd9ece8fb61a8eeee1021c3b1186e86",
+          "59d8633d3b675014134ab87be5dcec1cb00f03df48d70f0f52072341051717bf",
+          "c7a3d109754fdfe4655dbff99436e137fc0b6524dad5241cf83079f0c200a97e",
+          "cbb2ae6a4e19c0c855b859ab56ce4608798be8bff177d56467466f7fec4a509c",
+          "d6c1b7a26903f98aaa65db38d6f10780f79056307916a60ba3db13069d386f2a"
+        ],
+        "head_sha256": "590833ab0bc02e219bd2858f71e9ce1240479bfd5ef21c6b643e62fa116ca3bc",
+        "history": [
+          0.006345607154071331,
+          0.006353486236184836,
+          0.006369822211563587,
+          0.006406033001840114,
+          0.006442700177431106,
+          0.006476929448544979,
+          0.006507564745843411,
+          0.006518316976726055,
+          0.006519974395632744,
+          0.00651465192437172,
+          0.006499415896832943,
+          0.0064854476973414425,
+          0.00648075170814991,
+          0.006477222256362439,
+          0.006475614234805107,
+          0.0064745451509952544
+        ],
+        "games": 576,
+        "roots": 3264,
+        "simulated_actions": 7667,
+        "training_roots": 1664,
+        "validation_roots": 1600,
+        "process_wall_seconds": 42.71554507200199
+      },
+      "after": {
+        "collection_seconds": 31.986058351001702,
+        "fit_seconds": 3.6120544750010595,
+        "shard_sha256": [
+          "6faa1276ff1157fd68898efc2e3cae49417e7fc6dabeef1a8620c08fc372aa24",
+          "58b2ff27f066d83682645aac8b9eb2928dd9ece8fb61a8eeee1021c3b1186e86",
+          "59d8633d3b675014134ab87be5dcec1cb00f03df48d70f0f52072341051717bf",
+          "c7a3d109754fdfe4655dbff99436e137fc0b6524dad5241cf83079f0c200a97e",
+          "cbb2ae6a4e19c0c855b859ab56ce4608798be8bff177d56467466f7fec4a509c",
+          "d6c1b7a26903f98aaa65db38d6f10780f79056307916a60ba3db13069d386f2a"
+        ],
+        "head_sha256": "590833ab0bc02e219bd2858f71e9ce1240479bfd5ef21c6b643e62fa116ca3bc",
+        "history": [
+          0.006345607154071331,
+          0.006353486236184836,
+          0.006369822211563587,
+          0.006406033001840114,
+          0.006442700177431106,
+          0.006476929448544979,
+          0.006507564745843411,
+          0.006518316976726055,
+          0.006519974395632744,
+          0.00651465192437172,
+          0.006499415896832943,
+          0.0064854476973414425,
+          0.00648075170814991,
+          0.006477222256362439,
+          0.006475614234805107,
+          0.0064745451509952544
+        ],
+        "games": 576,
+        "roots": 3264,
+        "simulated_actions": 7667,
+        "training_roots": 1664,
+        "validation_roots": 1600,
+        "process_wall_seconds": 37.50575668500096
+      },
+      "all_outputs_exact": true
+    }
+  ],
+  "totals": {
+    "before": {
+      "collection_seconds": 116.82833122498414,
+      "fit_seconds": 9.830350637013908,
+      "process_wall_seconds": 132.5171398740058,
+      "games": 1728,
+      "roots": 10287,
+      "simulated_actions": 24402
+    },
+    "after": {
+      "collection_seconds": 98.04214488300204,
+      "fit_seconds": 10.599464027007343,
+      "process_wall_seconds": 114.31308805299341,
+      "games": 1728,
+      "roots": 10287,
+      "simulated_actions": 24402
+    }
+  },
+  "speedup": 1.1592473104442191
+}

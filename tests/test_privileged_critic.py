@@ -154,6 +154,44 @@ def test_snapshot_schema_has_no_outcome_or_rng_leakage_fields():
     }
 
 
+def test_rollout_snapshot_cache_refreshes_changed_seats_and_preserves_prior_snapshots():
+    engine = make_engine(players=4)
+    seat = int(engine.current_player[0])
+    decision = build_safe_decision(engine, 0, seat, SafeEventCursor())
+    states = [(torch.arange(16.0).view(4, 4).t(),) for _ in range(4)]
+    other = (seat + 1) % 4
+    states[(seat + 2) % 4] = (torch.arange(5.0),)
+    states[(seat + 3) % 4] = None
+    cache = {}
+
+    def capture(cache):
+        return capture_privileged_snapshot(
+            engine, 0, seat,
+            safe_observation=decision.observation.values,
+            absolute_roles=("current",) * 4,
+            actor_probabilities=np.asarray(decision.legal_actions) / sum(decision.legal_actions),
+            actor_memory=states[seat],
+            public_value=0.0,
+            all_actor_memories=states,
+            rollout_memory_cache=cache,
+        )
+
+    original = capture(cache)
+    assert original.player_actor_memory_mask.sum() == 2
+    original_other = cache[(0, other)]
+    old_weights = original.player_actor_memory.copy()
+    old_scales = original.player_actor_memory_scale.copy()
+    for changed in (seat, other):
+        states[changed] = (states[changed][0] + 2.75,)
+        cached, eager = capture(cache), capture(None)
+        for field in fields(PrivilegedSnapshot):
+            np.testing.assert_array_equal(getattr(cached, field.name), getattr(eager, field.name))
+        assert len(cache) == 3
+        assert (cache[(0, other)] is original_other) == (changed == seat)
+    np.testing.assert_array_equal(original.player_actor_memory, old_weights)
+    np.testing.assert_array_equal(original.player_actor_memory_scale, old_scales)
+
+
 def test_snapshot_and_gru_support_thirteen_players():
     engine = make_engine(seed=883, players=13)
     policy = TinyCausalPolicy()

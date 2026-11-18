@@ -1,0 +1,34 @@
+{
+  "candidate_path": "live_training/improvement_20261118/card_belief/profile.json",
+  "candidate_sha256": "03c8c111927fdfe6d3355fe47b6bc1d12e260ea31514622392e5de8aced08426",
+  "seed": 1663209400,
+  "stride": 1000000,
+  "blocks_per_cell": 6,
+  "games": 108,
+  "decisions": 2951,
+  "repeats": 4,
+  "action_changes": 171,
+  "protocol": "Single CPU thread, batch size one. Same public teacher-played scalar Game histories across six cells, all seat rotations. Time policy.step including public-event processing, legal mask and argmax. Exclude dealing, state initialization, model load and compilation.",
+  "baseline": {
+    "mean_ms": 2.316138529905117,
+    "median_ms": 2.216239,
+    "p95_ms": 4.29049185,
+    "repeat_mean_ms": [
+      2.33582880447306,
+      2.3250293002372078,
+      2.3053230328702137,
+      2.2983729820399867
+    ]
+  },
+  "candidate": {
+    "mean_ms": 4.104730205354118,
+    "median_ms": 3.5849539999999998,
+    "p95_ms": 8.8679975,
+    "repeat_mean_ms": [
+      4.14240716773975,
+      4.1130732931209755,
+      4.089436916977296,
+      4.074003443578449
+    ]
+  }
+}

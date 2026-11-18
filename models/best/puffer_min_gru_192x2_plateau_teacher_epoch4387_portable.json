@@ -1,0 +1,33 @@
+{
+  "actor_information": "own hand, public state, public event history and legal actions only",
+  "device": "cpu",
+  "dtype": "float32",
+  "export_source_sha256": "a48d87e973bb0271c792a153bfe63259abca8811ab39370b3ebb6bbea1d33e23",
+  "export_torch_version": "2.13.0+cu130",
+  "format": "pesten-portable-teacher4387-v1",
+  "inference": "native eval arithmetic, full observed public history, deterministic legal argmax; no suit averaging",
+  "inference_source_sha256": "1cfac6610366411ffc9ca6cdd58997673e9d500c72e45296f1c5ff7e6d42cc69",
+  "model": {
+    "action_head": "mode_conditioned_55",
+    "architecture": "min_gru",
+    "hidden_size": 192,
+    "mode_conditioned_heads": true,
+    "num_layers": 2
+  },
+  "parameters": 251384,
+  "promotion": "portable re-encoding of existing promoted teacher4387; no new learned policy",
+  "source_checkpoint": "../../models/best/puffer_min_gru_192x2_plateau_teacher_epoch4387.pt",
+  "source_checkpoint_sha256": "f8f0aece2d759eadc60b3cbccca30c321c01da13322f7cae511a73c8da3a9f93",
+  "state_shape": [
+    2,
+    "batch",
+    192
+  ],
+  "token_shape": [
+    "batch",
+    100
+  ],
+  "weights_bytes": 1010629,
+  "weights_file": "puffer_min_gru_192x2_plateau_teacher_epoch4387_portable.pt",
+  "weights_sha256": "14cb8f5b7f552c923ad4b6af6b333da1c97d444e09d4e8df56f97d65f2dc2afc"
+}

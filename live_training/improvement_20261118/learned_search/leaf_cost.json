@@ -1,0 +1,41 @@
+{
+  "validation": {
+    "states": 48887,
+    "decisive": 48135,
+    "heuristic_decisive_nll": 1.1384453193735358,
+    "leaf_decisive_nll": 0.9590905904769897,
+    "heuristic_focal_brier_all": 0.2381600932198568,
+    "leaf_focal_brier_all": 0.194412499666214,
+    "states_with_any_hand_above_30": 158,
+    "heuristic_check": "numpy computation from uncapped archived raw hand sizes and actual card identities"
+  },
+  "positions_per_format": 96,
+  "scope": "Monte Carlo planner only, multi-card public decisions, uniform determinizations, one CPU thread, compiled Numba; exclude teacher inference",
+  "milliseconds_per_decision": {
+    "h4_leaf": [
+      0.6458103368155813,
+      0.6416771701272713,
+      0.6433365277997736
+    ],
+    "h14_leaf": [
+      0.8638465277625882,
+      0.8498489930591151,
+      0.8584021353878294
+    ],
+    "h32_leaf": [
+      1.287650836830936,
+      1.2875861874716874,
+      1.304294802088811
+    ],
+    "h32_heuristic": [
+      0.9448041111378794,
+      0.9117634201377061,
+      0.9403750729385744
+    ],
+    "h80_heuristic": [
+      2.1156301527803913,
+      2.1713476458494876,
+      2.1237982014099543
+    ]
+  }
+}

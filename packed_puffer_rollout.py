@@ -40,7 +40,8 @@ def pack_puffer_trajectory(
     token_count = sum(
         len(step.decision.public_events) + 1 for step in trajectory
     )
-    tokens = np.empty((token_count, NATIVE_INPUT_SIZE), dtype=np.float32)
+    event_values = getattr(policy, "_event_values", None)
+    tokens = np.zeros((token_count, NATIVE_INPUT_SIZE), dtype=np.float32)
     decision_indices = np.empty(len(trajectory), dtype=np.int32)
     legal_masks = np.empty((len(trajectory), 55), dtype=np.bool_)
     actions = np.empty(len(trajectory), dtype=np.int64)
@@ -48,11 +49,16 @@ def pack_puffer_trajectory(
     behavior_values = np.empty(len(trajectory), dtype=np.float32)
     token_cursor = 0
     for decision_index, step in enumerate(trajectory):
-        event_rows = policy._event_features(step.decision)
-        if event_rows:
-            event_count = len(event_rows)
-            tokens[token_cursor : token_cursor + event_count] = event_rows
-            token_cursor += event_count
+        events = step.decision.public_events
+        event_end = token_cursor + len(events)
+        if events:
+            if event_values is not None:
+                tokens[token_cursor:event_end, OBSERVATION_SIZE:-1] = [
+                    event_values(event) for event in events
+                ]
+            else:
+                tokens[token_cursor:event_end] = policy._event_features(step.decision)
+        token_cursor = event_end
         tokens[token_cursor] = policy._decision_features(step.decision)
         decision_indices[decision_index] = token_cursor
         legal_masks[decision_index] = step.decision.legal_actions

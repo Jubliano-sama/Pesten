@@ -1,0 +1,279 @@
+{
+  "result_sha256": "3b915c2a57edb896eec038b227ba40344ff3724d142ec184413ad2eae88ee6ca",
+  "games_per_policy": 14400,
+  "deal_blocks_per_cell": 800,
+  "resamples": 20000,
+  "bootstrap_seed": 243111826,
+  "macro": {
+    "baseline": 0.47871527777777784,
+    "candidate": 0.49222222222222217,
+    "delta": 0.013506944444444335,
+    "standard_error": 0.003618187475891456,
+    "paired_ci95": [
+      0.006415427302383198,
+      0.020598461586505475
+    ],
+    "bootstrap_delta_ci95": [
+      0.00637152777777783,
+      0.020451388888888866
+    ],
+    "baseline_bootstrap_ci95": [
+      0.47345442708333335,
+      0.4838372395833333
+    ],
+    "candidate_bootstrap_ci95": [
+      0.48519097222222224,
+      0.49925347222222216
+    ]
+  },
+  "by_opponent": {
+    "self_anchor": {
+      "baseline": 0.3597916666666667,
+      "candidate": 0.37881944444444443,
+      "delta": 0.019027777777777755,
+      "standard_error": 0.005003434345643271,
+      "paired_ci95": [
+        0.009221226661306214,
+        0.028834328894249295
+      ],
+      "bootstrap_delta_ci95": [
+        0.00947916666666665,
+        0.028576388888888915
+      ]
+    },
+    "canonical_random": {
+      "baseline": 0.5976388888888888,
+      "candidate": 0.605625,
+      "delta": 0.007986111111111138,
+      "standard_error": 0.005227883624529952,
+      "paired_ci95": [
+        -0.0022603525083342846,
+        0.01823257473055656
+      ],
+      "bootstrap_delta_ci95": [
+        -0.0022222222222222365,
+        0.018263888888888857
+      ]
+    }
+  },
+  "by_players": {
+    "2": {
+      "baseline": 0.6487499999999999,
+      "candidate": 0.675,
+      "delta": 0.026250000000000107,
+      "standard_error": 0.007321015641632744,
+      "paired_ci95": [
+        0.011901073012145538,
+        0.040598926987854674
+      ],
+      "bootstrap_delta_ci95": [
+        0.01187500000000008,
+        0.04062500000000002
+      ]
+    },
+    "3": {
+      "baseline": 0.45083333333333336,
+      "candidate": 0.4666666666666667,
+      "delta": 0.01583333333333331,
+      "standard_error": 0.006546887572987556,
+      "paired_ci95": [
+        0.003001669479444859,
+        0.028664997187221763
+      ],
+      "bootstrap_delta_ci95": [
+        0.0029166666666666785,
+        0.028541666666666687
+      ]
+    },
+    "4": {
+      "baseline": 0.3365625,
+      "candidate": 0.33499999999999996,
+      "delta": -0.0015625000000000222,
+      "standard_error": 0.004621960469098571,
+      "paired_ci95": [
+        -0.010621376057401074,
+        0.007496376057401029
+      ],
+      "bootstrap_delta_ci95": [
+        -0.010624999999999996,
+        0.007500000000000007
+      ]
+    }
+  },
+  "cells": [
+    {
+      "opponent": "self_anchor",
+      "players": 2,
+      "games_per_policy": 1600,
+      "counts": {
+        "baseline": {
+          "wins": 799,
+          "losses": 799,
+          "draws": 2
+        },
+        "candidate": {
+          "wins": 865,
+          "losses": 733,
+          "draws": 2
+        }
+      },
+      "baseline": 0.499375,
+      "candidate": 0.540625,
+      "delta": 0.04125000000000001,
+      "standard_error": 0.010733338370036935,
+      "paired_ci95": [
+        0.020213043360845773,
+        0.06228695663915425
+      ],
+      "bootstrap_delta_ci95": [
+        0.020625000000000004,
+        0.0625
+      ]
+    },
+    {
+      "opponent": "self_anchor",
+      "players": 3,
+      "games_per_policy": 2400,
+      "counts": {
+        "baseline": {
+          "wins": 798,
+          "losses": 1596,
+          "draws": 6
+        },
+        "candidate": {
+          "wins": 842,
+          "losses": 1554,
+          "draws": 4
+        }
+      },
+      "baseline": 0.3325,
+      "candidate": 0.35083333333333333,
+      "delta": 0.018333333333333313,
+      "standard_error": 0.00862122646850002,
+      "paired_ci95": [
+        0.0014360399525098384,
+        0.03523062671415679
+      ],
+      "bootstrap_delta_ci95": [
+        0.0016666666666666496,
+        0.03500000000000003
+      ]
+    },
+    {
+      "opponent": "self_anchor",
+      "players": 4,
+      "games_per_policy": 3200,
+      "counts": {
+        "baseline": {
+          "wins": 792,
+          "losses": 2376,
+          "draws": 32
+        },
+        "candidate": {
+          "wins": 784,
+          "losses": 2374,
+          "draws": 42
+        }
+      },
+      "baseline": 0.2475,
+      "candidate": 0.245,
+      "delta": -0.0025000000000000022,
+      "standard_error": 0.005981563246643137,
+      "paired_ci95": [
+        -0.014223648534669025,
+        0.00922364853466902
+      ],
+      "bootstrap_delta_ci95": [
+        -0.014062500000000006,
+        0.009374999999999994
+      ]
+    },
+    {
+      "opponent": "canonical_random",
+      "players": 2,
+      "games_per_policy": 1600,
+      "counts": {
+        "baseline": {
+          "wins": 1277,
+          "losses": 320,
+          "draws": 3
+        },
+        "candidate": {
+          "wins": 1295,
+          "losses": 304,
+          "draws": 1
+        }
+      },
+      "baseline": 0.798125,
+      "candidate": 0.809375,
+      "delta": 0.011249999999999982,
+      "standard_error": 0.009959142911637428,
+      "paired_ci95": [
+        -0.008269561423696743,
+        0.030769561423696707
+      ],
+      "bootstrap_delta_ci95": [
+        -0.008124999999999938,
+        0.030625000000000013
+      ]
+    },
+    {
+      "opponent": "canonical_random",
+      "players": 3,
+      "games_per_policy": 2400,
+      "counts": {
+        "baseline": {
+          "wins": 1366,
+          "losses": 1028,
+          "draws": 6
+        },
+        "candidate": {
+          "wins": 1398,
+          "losses": 1001,
+          "draws": 1
+        }
+      },
+      "baseline": 0.5691666666666667,
+      "candidate": 0.5825,
+      "delta": 0.013333333333333308,
+      "standard_error": 0.009855019114755193,
+      "paired_ci95": [
+        -0.005982149198540673,
+        0.03264881586520729
+      ],
+      "bootstrap_delta_ci95": [
+        -0.005833333333333357,
+        0.032500000000000084
+      ]
+    },
+    {
+      "opponent": "canonical_random",
+      "players": 4,
+      "games_per_policy": 3200,
+      "counts": {
+        "baseline": {
+          "wins": 1362,
+          "losses": 1829,
+          "draws": 9
+        },
+        "candidate": {
+          "wins": 1360,
+          "losses": 1833,
+          "draws": 7
+        }
+      },
+      "baseline": 0.425625,
+      "candidate": 0.425,
+      "delta": -0.0006249999999999867,
+      "standard_error": 0.007047763860831857,
+      "paired_ci95": [
+        -0.014438363338773384,
+        0.01318836333877341
+      ],
+      "bootstrap_delta_ci95": [
+        -0.014687499999999964,
+        0.013437499999999991
+      ]
+    }
+  ]
+}

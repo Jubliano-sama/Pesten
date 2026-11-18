@@ -14,8 +14,9 @@ from __future__ import annotations
 
 from collections import Counter
 from contextlib import nullcontext
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 import hashlib
+from itertools import islice
 import random
 import time
 from typing import Hashable, Mapping, Sequence
@@ -396,11 +397,9 @@ def _scatter_states(
     runtimes: Sequence[TemporalSeatRuntime],
     states: tuple[torch.Tensor, ...],
 ) -> None:
-    for batch_index, runtime in enumerate(runtimes):
-        runtime.state = tuple(
-            part[:, batch_index : batch_index + 1].detach()
-            for part in states
-        )
+    split_parts = [part.detach().split(1, dim=1) for part in states]
+    for runtime, state in zip(runtimes, zip(*split_parts)):
+        runtime.state = state
 
 
 def _next_sampling_uniform(runtime: TemporalSeatRuntime) -> torch.Tensor:
@@ -413,6 +412,24 @@ def _next_sampling_uniform(runtime: TemporalSeatRuntime) -> torch.Tensor:
     draw = draws[runtime.sampling_uniform_cursor]
     runtime.sampling_uniform_cursor += 1
     return draw
+
+
+def _sample_seat_actions(
+    probabilities: torch.Tensor, runtimes: Sequence[TemporalSeatRuntime]
+) -> list[int]:
+    """Batch one categorical draw per seat while preserving its own CPU RNG."""
+    if len(runtimes) == 1:
+        return torch.multinomial(
+            probabilities[0], 1, generator=runtimes[0].generator
+        ).tolist()
+    if not torch.isfinite(probabilities).all():
+        raise RuntimeError("policy produced non-finite action probabilities")
+    # PyTorch's one-sample multinomial draws Exp(1) noise for every action
+    # and takes argmax(p / noise). Only the draws need distinct generators.
+    noise = torch.empty_like(probabilities)
+    for row, runtime in zip(noise.unbind(), runtimes):
+        row.exponential_(generator=runtime.generator)
+    return torch.div(probabilities, noise, out=noise).argmax(dim=1).tolist()
 
 
 def _advance_event_states(
@@ -476,6 +493,7 @@ def _batch_temporal_actions(
     all_runtimes: Mapping[tuple[int, int], TemporalSeatRuntime] | None = None,
     privileged_critic_runtime: object | None = None,
     capture_privileged_snapshots: bool = False,
+    privileged_memory_cache: dict | None = None,
     max_public_events: int | None = None,
 ) -> list[int]:
     """Advance variable-length event streams, then sample one action per seat."""
@@ -501,38 +519,23 @@ def _batch_temporal_actions(
     feature_started = time.perf_counter()
     if max_public_events is not None and max_public_events < 1:
         raise ValueError("max_public_events must be positive when provided")
-    recent_event_encoder = getattr(
-        policy, "_event_features_from_events", None
-    )
-    recent_event_token_encoder = (
-        getattr(policy, "_event_tokens_from_events", None)
-        if max_public_events is not None
-        else None
-    )
-    if (
-        max_public_events is not None
-        and recent_event_token_encoder is not None
-    ):
+    event_token_encoder = getattr(policy, "_event_tokens_from_events", None)
+    event_feature_encoder = getattr(policy, "_event_features_from_events", None)
+    if event_token_encoder is not None:
         event_rows = [
-            decision.public_events[-max_public_events:]
+            decision.public_events if max_public_events is None
+            else decision.public_events[-max_public_events:]
             for decision in decisions
         ]
-    elif max_public_events is not None and recent_event_encoder is not None:
+    elif max_public_events is not None and event_feature_encoder is not None:
         event_rows = [
-            recent_event_encoder(decision.public_events[-max_public_events:])
+            event_feature_encoder(decision.public_events[-max_public_events:])
             for decision in decisions
         ]
     else:
-        event_rows = [
-            policy._event_features(decision) for decision in decisions
-        ]
-    if max_public_events is not None and recent_event_encoder is None:
-        # This is an intentionally approximate behavior-policy optimization.
-        # Keep recent public context, which matters most for the current turn,
-        # while bounding recurrent calls in seven/eight-player games. The
-        # original DecisionInput remains in each trajectory, so PPO replay and
-        # the full learner still receive the complete information-safe history.
-        event_rows = [rows[-max_public_events:] for rows in event_rows]
+        event_rows = [policy._event_features(decision) for decision in decisions]
+        if max_public_events is not None:
+            event_rows = [rows[-max_public_events:] for rows in event_rows]
     if stats is not None:
         stats.temporal_feature_encoding_seconds += (
             time.perf_counter() - feature_started
@@ -563,8 +566,8 @@ def _batch_temporal_actions(
             selected_events = [
                 event_rows[index][event_index] for index in selected
             ]
-            if recent_event_token_encoder is not None:
-                tokens = recent_event_token_encoder(
+            if event_token_encoder is not None:
+                tokens = event_token_encoder(
                     selected_events,
                     device=device,
                     dtype=dtype,
@@ -677,6 +680,7 @@ def _batch_temporal_actions(
         assert probabilities is not None
         assert engine is not None and roles is not None
         assert all_runtimes is not None
+        snapshot_values = values.reshape(len(entries)).tolist()
         for index, (runtime, decision) in enumerate(entries):
             role_name = roles[(runtime.game_index, runtime.seat)][0]
             if role_name != ROLE_CURRENT:
@@ -701,8 +705,9 @@ def _batch_temporal_actions(
                 absolute_roles=absolute_roles,
                 actor_probabilities=probabilities[index].numpy(),
                 actor_memory=runtime.state,
-                public_value=float(values[index].reshape(-1)[0].item()),
+                public_value=snapshot_values[index],
                 all_actor_memories=memories,
+                rollout_memory_cache=privileged_memory_cache,
             )
             snapshots.append(snapshot)
             snapshot_indices.append(index)
@@ -715,9 +720,9 @@ def _batch_temporal_actions(
             ):
                 privileged_values[index] = float(value)
 
-    # Sampling happens only after the immutable baseline inputs and values have
-    # been captured.  This makes the chronology match the no-action schema,
-    # rather than merely relying on the snapshot builder not to accept actions.
+    # Sampling happens only after the immutable baseline inputs are captured.
+    # Stateless critics may evaluate those same snapshots after the rollout;
+    # neither their values nor subsequent actions enter the actor's inputs.
     sampling_started = time.perf_counter()
     if deterministic:
         actions = masked_logits.argmax(dim=-1).cpu().tolist()
@@ -737,17 +742,11 @@ def _batch_temporal_actions(
         )
     else:
         assert probabilities is not None
-        actions = [
-            int(
-                torch.multinomial(
-                    probabilities[index],
-                    1,
-                    generator=runtime.generator,
-                ).item()
-            )
-            for index, runtime in enumerate(runtimes)
-        ]
+        actions = _sample_seat_actions(probabilities, runtimes)
 
+    action_indices = torch.as_tensor(actions, device=device).unsqueeze(1)
+    chosen_logs = log_probabilities.gather(1, action_indices).flatten().tolist()
+    public_values = snapshot_values if capture_privileged else values.reshape(len(entries)).tolist()
     for index, (runtime, decision) in enumerate(entries):
         action = actions[index]
         runtime.safe_history.append(decision)
@@ -755,12 +754,8 @@ def _batch_temporal_actions(
             TrajectoryStep(
                 decision=decision,
                 action=action,
-                old_log_prob=float(
-                    log_probabilities[index, action].item()
-                ),
-                value=privileged_values.get(
-                    index, float(values[index].reshape(-1)[0].item())
-                ),
+                old_log_prob=chosen_logs[index],
+                value=privileged_values.get(index, public_values[index]),
                 privileged_snapshot=privileged_by_index.get(index),
             )
         )
@@ -1022,6 +1017,32 @@ def _make_vector_layout(
     return vector_absolute_indices, policy_kinds, actor_keys, roles
 
 
+def _evaluate_deferred_privileged_values(
+    trajectories: Sequence[list[TrajectoryStep]],
+    runtime: object,
+    batch_size: int,
+) -> None:
+    """Fill frozen MLP baselines before any trajectory can reach PPO replay."""
+
+    pending = (
+        (trajectory, index)
+        for trajectory in trajectories
+        for index in range(len(trajectory))
+    )
+    while rows := list(islice(pending, batch_size)):
+        snapshots = [
+            trajectory[index].privileged_snapshot for trajectory, index in rows
+        ]
+        if any(snapshot is None for snapshot in snapshots):
+            raise RuntimeError("deferred critic requires every pre-action snapshot")
+        # Only new, native MLP runtimes reach this helper. Their streaming state
+        # is None; reusable row IDs satisfy the runtime's uniqueness check and
+        # keep its empty-state cache bounded by the inference batch size.
+        outputs = runtime.evaluate(snapshots, range(len(rows)))
+        for (trajectory, index), value in zip(rows, outputs["value"].tolist()):
+            trajectory[index] = replace(trajectory[index], value=float(value))
+
+
 def collect_league_batch_batched(
     policy: torch.nn.Module,
     champion_factory,
@@ -1039,6 +1060,7 @@ def collect_league_batch_batched(
     game_indices: Sequence[int] | None = None,
     privileged_critic: object | None = None,
     capture_privileged_snapshots: bool = False,
+    privileged_critic_batch_size: int | None = 512,
     max_public_events: int | None = None,
 ) -> tuple[list[tuple[Sequence[TrajectoryStep], bool | None]], dict]:
     """Collect an explicit league schedule with batched neural decisions.
@@ -1054,7 +1076,10 @@ def collect_league_batch_batched(
     environment-side baseline: its pre-action values replace only
     ``TrajectoryStep.value`` for GAE, while the actor continues to receive the
     exact same safe ``DecisionInput``.  Captured snapshots can be retained for
-    an external critic update without entering actor tokens.
+    an external critic update without entering actor tokens. Native MLP critics
+    evaluate their immutable snapshots in bounded batches after the games end;
+    ``privileged_critic_batch_size=None`` retains online evaluation. Recurrent
+    critics and caller-supplied runtimes always retain online evaluation.
     """
 
     if games < 0:
@@ -1063,6 +1088,11 @@ def collect_league_batch_batched(
         raise ValueError("player_count must be at least two")
     if max_public_events is not None and max_public_events < 1:
         raise ValueError("max_public_events must be positive when provided")
+    if (
+        privileged_critic_batch_size is not None
+        and privileged_critic_batch_size < 1
+    ):
+        raise ValueError("privileged_critic_batch_size must be positive or None")
     selected_game_indices = tuple(
         range(games) if game_indices is None else game_indices
     )
@@ -1092,10 +1122,12 @@ def collect_league_batch_batched(
     if stats is None:
         stats = BatchRolloutStats()
     privileged_runtime = None
+    deferred_privileged_runtime = None
     if privileged_critic is not None:
         from privileged_critic import (
             AveragedPrivilegedCritic,
             AveragedPrivilegedCriticRuntime,
+            CausalTemporalValueModel,
             PrivilegedCriticRuntime,
         )
 
@@ -1107,6 +1139,21 @@ def collect_league_batch_batched(
             )
         else:
             privileged_runtime = PrivilegedCriticRuntime(privileged_critic)
+        # The MLP's GRUs encode history inside each snapshot; they do not carry
+        # temporal state between decisions. Preserve the online contract for
+        # arbitrary runtime/model subclasses, even if they advertise an MLP.
+        members = (
+            tuple(privileged_critic.models)
+            if type(privileged_critic) is AveragedPrivilegedCritic
+            else (privileged_critic,)
+        )
+        if privileged_critic_batch_size is not None and all(
+            type(member) is CausalTemporalValueModel
+            and member.backbone_name == "mlp"
+            for member in members
+        ):
+            deferred_privileged_runtime = privileged_runtime
+            privileged_runtime = None
     (
         vector_absolute_indices,
         policy_kinds,
@@ -1230,6 +1277,11 @@ def collect_league_batch_batched(
                     }
                 )
 
+        # Memories are replaced, never mutated, when their seat acts. Keep
+        # only the latest critic encoding of each seat for this cohort.
+        privileged_memory_cache = (
+            {} if capture_privileged_snapshots or privileged_critic is not None else None
+        )
         vector_started = time.perf_counter()
         while True:
             active = engine.active_games()
@@ -1332,7 +1384,9 @@ def collect_league_batch_batched(
                     privileged_critic_runtime=privileged_runtime,
                     capture_privileged_snapshots=(
                         capture_privileged_snapshots
+                        or deferred_privileged_runtime is not None
                     ),
+                    privileged_memory_cache=privileged_memory_cache,
                     max_public_events=max_public_events,
                 )
                 for (runtime, _), action in zip(entries, chosen):
@@ -1395,6 +1449,17 @@ def collect_league_batch_batched(
                 time.perf_counter() - rules_started
             )
 
+        if deferred_privileged_runtime is not None:
+            assert privileged_critic_batch_size is not None
+            _evaluate_deferred_privileged_values(
+                [
+                    runtime.trajectory
+                    for key, runtime in runtimes.items()
+                    if roles[key][0] == ROLE_CURRENT
+                ],
+                deferred_privileged_runtime,
+                privileged_critic_batch_size,
+            )
         stats.vector_seconds = time.perf_counter() - vector_started
         total_turns += int(engine.turn_counts.sum())
         for vector_index, absolute_index in enumerate(

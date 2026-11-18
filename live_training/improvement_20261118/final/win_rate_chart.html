@@ -1,0 +1,33 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Held-out Pesten win rates</title>
+<style>
+:root {color-scheme:light dark}
+html, body {margin:0; font-family:var(--font-sans,system-ui),sans-serif}
+figure {margin:0;display:grid;gap:8px}
+figcaption {font-size:16px;font-weight:600;color:var(--foreground,currentColor)}
+small,.axis {font-size:11px;color:var(--muted-foreground,GrayText)}
+.group {font-size:13px;font-weight:600;padding-top:3px}
+.row,.ticks {display:grid;grid-template-columns:82px 1fr 66px;align-items:center;column-gap:8px}
+.row {font-size:13px;min-height:22px}
+.row .num {text-align:right;font-variant-numeric:tabular-nums}
+.plot,.axis {position:relative;height:22px}
+.axis {height:18px}
+.zero {position:absolute;top:-5px;bottom:-5px;border-left:1px dashed var(--muted-foreground,GrayText)}
+.interval {position:absolute;top:10px;height:3px;border-radius:3px;background:var(--tone)}
+.interval:before,.interval:after {content:"";position:absolute;height:9px;background:var(--tone);width:1px;top:-3px}
+.interval:before {left:0}.interval:after {right:0}
+.point {position:absolute;width:9px;height:9px;border-radius:50%;background:var(--tone);top:7px;transform:translateX(-50%)}
+.axis span {position:absolute;transform:translateX(-50%);font-variant-numeric:tabular-nums}
+.chart-note {line-height:1.45;margin:1px 0 0}
+@media(max-width:440px){.row,.ticks {grid-template-columns:62px 1fr 50px;column-gap:5px}}
+</style>
+</head><body><figure aria-label="Paired win-rate changes on the frozen final test">
+<figcaption>Change in win rate by opponent</figcaption>
+<div class="group">Against the previous best</div>
+<div class="row" style="--tone:var(--chart-1,#5278bf)" title="1v1: +3.91 percentage points, paired 95% interval +2.41 to +5.40 pp" aria-label="1v1: +3.91 percentage points, paired 95% interval +2.41 to +5.40 pp"><span>1v1</span><span class="plot"><i class="zero" style="left:25.00%"></i><i class="interval" style="left:55.11%;width:37.43%"></i><i class="point" style="left:73.83%"></i></span><span class="num">+3.91</span></div>
+<div class="row" style="--tone:var(--chart-1,#5278bf)" title="1v1v1: +3.46 percentage points, paired 95% interval +2.28 to +4.64 pp" aria-label="1v1v1: +3.46 percentage points, paired 95% interval +2.28 to +4.64 pp"><span>1v1v1</span><span class="plot"><i class="zero" style="left:25.00%"></i><i class="interval" style="left:53.51%;width:29.43%"></i><i class="point" style="left:68.23%"></i></span><span class="num">+3.46</span></div>
+<div class="row" style="--tone:var(--chart-1,#5278bf)" title="1v1v1v1: +2.19 percentage points, paired 95% interval +1.26 to +3.11 pp" aria-label="1v1v1v1: +2.19 percentage points, paired 95% interval +1.26 to +3.11 pp"><span>1v1v1v1</span><span class="plot"><i class="zero" style="left:25.00%"></i><i class="interval" style="left:40.81%;width:23.07%"></i><i class="point" style="left:52.34%"></i></span><span class="num">+2.19</span></div>
+<div class="group">Against RandomAgent</div>
+<div class="row" style="--tone:var(--chart-2,#228667)" title="1v1: +0.81 percentage points, paired 95% interval -0.77 to +2.39 pp" aria-label="1v1: +0.81 percentage points, paired 95% interval -0.77 to +2.39 pp"><span>1v1</span><span class="plot"><i class="zero" style="left:25.00%"></i><i class="interval" style="left:15.40%;width:39.52%"></i><i class="point" style="left:35.16%"></i></span><span class="num">+0.81</span></div>
+<div class="row" style="--tone:var(--chart-2,#228667)" title="1v1v1: +3.38 percentage points, paired 95% interval +1.89 to +4.86 pp" aria-label="1v1v1: +3.38 percentage points, paired 95% interval +1.89 to +4.86 pp"><span>1v1v1</span><span class="plot"><i class="zero" style="left:25.00%"></i><i class="interval" style="left:48.61%;width:37.15%"></i><i class="point" style="left:67.19%"></i></span><span class="num">+3.38</span></div>
+<div class="row" style="--tone:var(--chart-2,#228667)" title="1v1v1v1: +1.31 percentage points, paired 95% interval +0.10 to +2.53 pp" aria-label="1v1v1v1: +1.31 percentage points, paired 95% interval +0.10 to +2.53 pp"><span>1v1v1v1</span><span class="plot"><i class="zero" style="left:25.00%"></i><i class="interval" style="left:26.25%;width:30.32%"></i><i class="point" style="left:41.41%"></i></span><span class="num">+1.31</span></div>
+<div class="ticks"><span></span><div class="axis"><span style="left:0%">-2</span> <span style="left:25%">0</span> <span style="left:50%">+2</span> <span style="left:75%">+4</span> <span style="left:100%">+6</span></div><span></span></div><small class="chart-note">Percentage points. Whiskers show paired 95% intervals across independent deals.</small></figure></body></html>

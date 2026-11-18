@@ -1,0 +1,55 @@
+{
+  "comparison": "Same full-history FP32 teacher with eagerly evaluated versus traced MinGRU layers, before applying orbit and data-collection wrappers",
+  "inputs": "Three-player exploratory games: 12 games, temperature=2, epsilon=.04, first seed=542100100+orbit*1000. Four-player paired interventions: 10 deal pairs, first seed=542200100+orbit*1000.",
+  "digest": "SHA-256 of sorted keys with array dtype, shape and C-order bytes; includes all actions, teacher outputs, relative public history and game results.",
+  "rows": [
+    {
+      "orbit": 1,
+      "collector": "exploratory",
+      "players": 3,
+      "units": 12,
+      "match": true,
+      "data_sha256": "52112b14a4e7f278300c40473fead19026661a23ba70ee00470b7325833eb70d"
+    },
+    {
+      "orbit": 1,
+      "collector": "paired",
+      "players": 4,
+      "units": 10,
+      "match": true,
+      "data_sha256": "1986e238f87adf99fc69f090cffce4fe8e4e0dff7e5159cb5f49761aa4784a93"
+    },
+    {
+      "orbit": 4,
+      "collector": "exploratory",
+      "players": 3,
+      "units": 12,
+      "match": true,
+      "data_sha256": "782b6d8c0be2da04979cb836d68603d5aef7ac454f3091fdd7ef4b4487a62ead"
+    },
+    {
+      "orbit": 4,
+      "collector": "paired",
+      "players": 4,
+      "units": 10,
+      "match": true,
+      "data_sha256": "507dbd4edc42ab7ff4c951ce559cb7a21a0adec027053ab56bae972625cc2f59"
+    },
+    {
+      "orbit": 24,
+      "collector": "exploratory",
+      "players": 3,
+      "units": 12,
+      "match": true,
+      "data_sha256": "1cce33b879205b34070e791078b9aee961fb629c07c31224678da05e660b4621"
+    },
+    {
+      "orbit": 24,
+      "collector": "paired",
+      "players": 4,
+      "units": 10,
+      "match": true,
+      "data_sha256": "c87c02916eeb0bb7a668f89d650e5366d0bfa6cb84fd6973e3c5f2d5e8fe420b"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "kind": "pesten_public_lookahead",
+  "samples": 128,
+  "horizon": 72,
+  "trust": 72,
+  "infer_voids": true,
+  "posterior": {
+    "path": "live_training/improvement_20261118/lookahead/hand_frequencies.json",
+    "sha256": "9727824e7132f494e1804fafabfe2451c3652aacfe8914aefd83bea140363fd0"
+  },
+  "track_pile": true,
+  "rollout": {
+    "path": "live_training/improvement_20261118/lookahead/rollout_weights.npy",
+    "sha256": "3b1dde3c721d23cea5bf26366227d7e53ca7869f944118dd026aff9bdec4b9a4"
+  },
+  "card_belief": {
+    "path": "live_training/improvement_20261118/card_belief/fit/card_odds.npy",
+    "sha256": "09b4c8c15faf4a8babda75fe6e9aac57a5940af3cec18d4349e3aff56b09a005"
+  },
+  "prior": {
+    "kind": "outcome_residual",
+    "path": "live_training/improvement_20261118/recipe/belief_model1/branch_195.pt",
+    "sha256": "e887de486f6b97189f2b579ebffb1de35f5f6782140d44e18e515a298c1cc00d"
+  }
+}

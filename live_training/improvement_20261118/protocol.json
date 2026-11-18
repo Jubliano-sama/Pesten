@@ -1,0 +1,11 @@
+{
+  "objective": "Maximize raw focal win rate, equal mean of each of six opponent-by-player-count cells, on canonical Pesten training rules.",
+  "baseline": {"checkpoint": "models/best/puffer_min_gru_192x2_plateau_teacher_epoch4387.pt", "sha256": "f8f0aece2d759eadc60b3cbccca30c321c01da13322f7cae511a73c8da3a9f93", "orbit": 24, "aggregation": "inverse-mapped mean of unmasked logits", "alpha": 1, "precision": "cpu float32", "actions": "deterministic masked argmax"},
+  "seat_layout": "One focal seat rotated through all positions on each deal, all other seats belong to the same frozen opponent.",
+  "opponents": ["frozen orbit24 teacher", "canonical randomAgent.AgentRandom"],
+  "players": [2, 3, 4],
+  "selection": "Use development games only. Prefer higher six-cell mean delta. Inspect per-opponent and format robustness. Freeze one candidate and its inference code before final comparison.",
+  "holdout": {"base_seed": 2867841213, "stride_per_cell": 1000000, "order": ["teacher2", "teacher3", "teacher4", "random2", "random3", "random4"], "independent_deals_per_cell": 1600, "games_per_policy": 28800, "total_games": 57600},
+  "statistics": "Wins divided by all games including draws. Candidate minus the original teacher on identical deal/seat/opponent configurations. Pointwise two-sided 95 percent paired normal intervals using independent deals within cell; propagate cell-mean variance with equal weights for aggregate interval.",
+  "speed": "Matched steady-state wall time for full public PPO training epochs, equal schedule, games, optimizer work and model. Verify equivalent work. Report separate from candidate strength."
+}

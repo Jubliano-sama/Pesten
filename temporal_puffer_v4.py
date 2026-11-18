@@ -102,20 +102,22 @@ class NativePufferTemporalPolicy(nn.Module):
         )
 
     @staticmethod
+    def _event_values(event) -> tuple[float, ...]:
+        return (
+            int(event.kind) / 3.0,
+            event.actor_relative / 12.0,
+            (event.card_id + 1) / 50.0,
+            (event.suit_id + 1) / 5.0,
+            event.count / 54.0,
+        )
+
+    @staticmethod
     def _event_features_from_events(events) -> list[tuple[float, ...]]:
-        rows = []
-        for event in events:
-            event_values = (
-                int(event.kind) / 3.0,
-                event.actor_relative / 12.0,
-                (event.card_id + 1) / 50.0,
-                (event.suit_id + 1) / 5.0,
-                event.count / 54.0,
-            )
-            rows.append(
-                (0.0,) * OBSERVATION_SIZE + event_values + (0.0,)
-            )
-        return rows
+        prefix = (0.0,) * OBSERVATION_SIZE
+        return [
+            prefix + NativePufferTemporalPolicy._event_values(event) + (0.0,)
+            for event in events
+        ]
 
     @staticmethod
     def _event_features(decision: DecisionInput) -> list[tuple[float, ...]]:
@@ -131,31 +133,12 @@ class NativePufferTemporalPolicy(nn.Module):
         dtype: torch.dtype,
     ) -> torch.Tensor:
         """Materialize sparse event features without 94 Python zeros each."""
-        tokens = torch.zeros(
-            (len(events), NATIVE_INPUT_SIZE),
-            device=device,
-            dtype=dtype,
-        )
-        values = np.asarray(
-            [
-                (
-                    int(event.kind) / 3.0,
-                    event.actor_relative / 12.0,
-                    (event.card_id + 1) / 50.0,
-                    (event.suit_id + 1) / 5.0,
-                    event.count / 54.0,
-                )
-                for event in events
-            ],
-            dtype=np.float32,
-        )
-        value_tensor = torch.from_numpy(values)
-        if device.type != "cpu" or dtype != torch.float32:
-            value_tensor = value_tensor.to(device=device, dtype=dtype)
-        tokens[:, OBSERVATION_SIZE : OBSERVATION_SIZE + EVENT_TOKEN_SIZE] = (
-            value_tensor
-        )
-        return tokens
+        tokens = np.zeros((len(events), NATIVE_INPUT_SIZE), dtype=np.float32)
+        if len(events):
+            tokens[:, OBSERVATION_SIZE:-1] = [
+                NativePufferTemporalPolicy._event_values(event) for event in events
+            ]
+        return torch.from_numpy(tokens).to(device=device, dtype=dtype)
 
     @staticmethod
     def _decision_features(decision: DecisionInput) -> tuple[float, ...]:
