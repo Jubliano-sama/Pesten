@@ -10,6 +10,8 @@ RUN python -m pip install --disable-pip-version-check --only-binary=:all: --no-c
 COPY ai_observation.py supervisedAgent.py web_server.py production_temporal_policy.py \
      web_temporal_player.py temporal_observation.py card.py batched_pesten.py \
      public_lookahead.py public_lookahead_leaf.py public_rollout_policy.py public_card_belief.py web_search.py /app/
+COPY templates/ /app/templates/
+COPY static/ /app/static/
 COPY models/best/puffer_min_gru_192x2_plateau_teacher_epoch4387_portable.pt \
      models/best/puffer_min_gru_192x2_plateau_teacher_epoch4387_portable.json /app/models/best/
 COPY live_training/improvement_20261118/card_belief/profile.json /app/live_training/improvement_20261118/card_belief/

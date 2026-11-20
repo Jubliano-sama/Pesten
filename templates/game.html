@@ -1,162 +1,142 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Pesten Game - Room {{ room_code }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#111715">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/png">
+    <title>Pesten · Room {{ room_code }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=2) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css', v=2) }}">
 </head>
-<body>
-    <div class="game-container">
-        <header class="game-header">
-            <div class="room-info">
-                <h1>🃏 Pesten</h1>
-                <div class="room-code">Room: <span id="room-code">{{ room_code }}</span></div>
-            </div>
-            <div class="game-controls">
-                <div class="audio-controls" role="group" aria-label="Audio controls">
-                    <button id="sound-toggle" class="audio-control" type="button" aria-pressed="true" title="Toggle sound effects">
-                        <span class="audio-control-icon" aria-hidden="true">🔔</span>
-                        <span class="audio-control-label">Sound on</span>
-                    </button>
-                    <button id="music-toggle" class="audio-control" type="button" aria-pressed="false" title="Toggle background music">
-                        <span class="audio-control-icon" aria-hidden="true">♫</span>
-                        <span class="audio-control-label">Music off</span>
-                    </button>
+<body class="room-page">
+    <div class="room-shell">
+        <header class="site-header room-header">
+            <a class="brand" href="/" aria-label="Pesten home"><span class="brand-mark" aria-hidden="true">♠</span>Pesten<span class="brand-dot">.</span></a>
+            <span class="room-tag">ROOM <strong id="room-code">{{ room_code }}</strong></span>
+            <div class="header-actions">
+                <div id="view-controls" class="segments view-controls" role="group" aria-label="Table view" hidden>
+                    <button type="button" data-view="3d" aria-pressed="false">3D</button>
+                    <button type="button" data-view="2d" aria-pressed="true">2D</button>
                 </div>
-                <button id="leave-game" class="btn btn-danger">Leave Game</button>
+                <button id="sound-toggle" class="btn btn-quiet audio-control" type="button" aria-pressed="true">
+                    <span class="audio-control-icon" aria-hidden="true">◖</span><span class="audio-control-label">Sound on</span>
+                </button>
+                <button id="music-toggle" class="btn btn-quiet audio-control" type="button" aria-pressed="false">
+                    <span class="audio-control-icon" aria-hidden="true">♪</span><span class="audio-control-label">Music off</span>
+                </button>
+                <button id="leave-game" class="btn btn-quiet leave-button" type="button">Leave <span aria-hidden="true">↗</span></button>
             </div>
         </header>
 
-        <!-- Lobby Section -->
-        <div id="lobby-section" class="lobby-section">
-            <div class="lobby-content">
-                <h2>Waiting for Players</h2>
-                <div class="players-list" id="players-list">
-                    <!-- Players will be populated here -->
-                </div>
-                <div class="lobby-controls">
-                    <button id="add-ai-btn" class="btn btn-secondary">Add AI Player</button>
-                    <button id="start-game-btn" class="btn btn-primary" disabled>Start Game</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Game Section -->
-        <div id="game-section" class="game-section" style="display: none;">
-            <div class="table-status-row" aria-label="Table status">
-                <div class="direction-badge" id="direction-badge" role="status" aria-live="polite">
-                    <span class="direction-glyph" id="game-direction" aria-hidden="true">↻</span>
-                    <span class="direction-copy">
-                        <span class="direction-kicker">Play direction</span>
-                        <strong id="direction-label">Clockwise</strong>
-                        <span class="direction-description" id="direction-description">Play moves clockwise around the table</span>
-                    </span>
-                </div>
-                <div class="table-hint">
-                    <span class="table-hint-dot" aria-hidden="true"></span>
-                    <span>Players are seated around the table</span>
-                </div>
-            </div>
-
-            <!-- Round Table Area -->
-            <section class="game-table" aria-label="Pesten round table">
-                <div class="round-table" id="round-table" data-direction="clockwise">
-                    <div class="table-surface">
-                        <div class="direction-orbit" id="direction-orbit" data-direction="clockwise" aria-hidden="true">
-                            <span class="orbit-arrow orbit-arrow-top-right">➜</span>
-                            <span class="orbit-arrow orbit-arrow-bottom-right">➜</span>
-                            <span class="orbit-arrow orbit-arrow-bottom-left">➜</span>
-                        </div>
-
-                        <div class="table-center">
-                            <div class="table-center-label">The table</div>
-                            <div class="deck-area">
-                                <div class="draw-pile deck-pile">
-                                    <span class="pile-label">Draw pile</span>
-                                    <div class="card-back" id="draw-pile" role="button" tabindex="0" aria-label="Draw a card or pass">
-                                        <span id="draw-pile-count">0</span>
-                                    </div>
-                                </div>
-                                <div class="discard-pile deck-pile">
-                                    <span class="pile-label">Discard</span>
-                                    <div id="top-card" class="card" aria-label="Top discard card">
-                                        <!-- Top card will be rendered here -->
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="game-info">
-                                <div class="current-turn" id="current-turn" role="status" aria-live="polite">Waiting for game to start...</div>
-                                <div class="turn-caption">The highlighted seat plays next</div>
-                                <div class="penalty-info" id="penalty-info" style="display: none;">
-                                    <span class="penalty-text">Penalty: +<span id="penalty-amount">0</span> cards</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="player-queue" class="player-queue" role="list" aria-label="Players seated around the table">
-                        <!-- Players will be positioned around the table by game.js -->
-                    </div>
-                </div>
+        <main>
+            <section id="room-entry" class="room-entry panel">
+                <p class="eyebrow">ROOM {{ room_code }}</p>
+                <h1>Join the table</h1>
+                <p id="entry-status" role="status">Connecting to the room…</p>
+                <form id="name-form" hidden>
+                    <label for="guest-name">Your name</label>
+                    <input id="guest-name" required minlength="2" maxlength="20" autocomplete="nickname" placeholder="Enter your name">
+                    <button class="btn btn-primary" type="submit">Join room <span aria-hidden="true">→</span></button>
+                </form>
+                <a class="nav-link" href="/">Back to Pesten</a>
             </section>
 
-            <!-- Player Hand Area -->
-            <div class="player-hand-area">
-                <div class="hand-info">
-                    <span class="hand-heading"><span id="player-name">You</span><span class="hand-subtitle">Your hand</span></span>
-                    <span id="hand-count">7 cards</span>
+            <section id="lobby-section" class="lobby-layout" aria-labelledby="lobby-title" hidden>
+                <div class="lobby-copy">
+                    <p class="eyebrow"><span class="status-dot"></span> GAME LOBBY</p>
+                    <h1 id="lobby-title">Take a seat<em>.</em></h1>
+                    <p>Share an invite to bring friends to the table, or add a computer player to get started.</p>
+                    <button id="copy-invite" class="btn btn-secondary" type="button">Copy invite link <span aria-hidden="true">↗</span></button>
+                    <a class="nav-link lobby-rules" href="/#rules" target="_blank" rel="noopener">How to play ↗</a>
                 </div>
-                <div id="player-hand" class="player-hand">
-                    <!-- Player's cards will be rendered here -->
-                </div>
-                <div class="hand-controls">
-                    <button id="pass-btn" class="btn btn-secondary">Draw / Pass</button>
-                </div>
-            </div>
-        </div>
+                <section class="panel lobby-panel" aria-labelledby="lobby-players-title">
+                    <div class="panel-heading">
+                        <h2 id="lobby-players-title">At the table</h2>
+                        <span id="lobby-count" class="count"></span>
+                    </div>
+                    <ul class="seats lobby-seats" id="players-list"></ul>
+                    <div class="lobby-controls">
+                        <button id="add-ai-btn" class="btn btn-secondary" type="button" disabled>Add AI player</button>
+                        <button id="start-game-btn" class="btn btn-primary" type="button" disabled>Start game <span aria-hidden="true">→</span></button>
+                    </div>
+                    <p id="lobby-hint" class="form-message" role="status"></p>
+                </section>
+            </section>
 
-        <!-- Sort Selection Modal -->
-        <div id="sort-modal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <h3>Choose a Suit</h3>
-                <div class="sort-options">
-                    <button class="sort-btn" data-sort="harten">♥️</button>
-                    <button class="sort-btn" data-sort="ruiten">♦️</button>
-                    <button class="sort-btn" data-sort="schoppen">♠️</button>
-                    <button class="sort-btn" data-sort="klaveren">♣️</button>
+            <section id="game-section" class="game-layout" hidden>
+                <div class="play-area">
+                    <div class="round-heading">
+                        <div>
+                            <p class="eyebrow"><span class="status-dot"></span> AT THE TABLE</p>
+                            <h1 id="current-turn" aria-live="polite">Your table</h1>
+                        </div>
+                        <div class="round-meta">
+                            <span id="turn-timer" class="table-chip timer-chip" hidden></span>
+                            <span id="direction-badge" class="table-chip"><span id="game-direction" aria-hidden="true">↻</span><span id="direction-label">Clockwise</span></span>
+                        </div>
+                    </div>
+                    <section class="game-table" id="round-table" data-view="2d" aria-label="Draw and discard piles">
+                        <div class="flat-felt" aria-hidden="true"></div>
+                        <div id="table-scene" class="table-scene" aria-hidden="true"></div>
+                        <div class="table-topline">
+                            <span class="table-chip" id="active-suit">Active suit</span>
+                            <span class="table-chip penalty-chip" id="penalty-info" hidden></span>
+                        </div>
+                        <div class="pile pile-draw">
+                            <button class="pile-target card-back" id="draw-pile" type="button" disabled>
+                                <span class="card-back-center" aria-hidden="true">♠</span>
+                            </button>
+                            <span class="pile-label" id="draw-pile-count">Draw pile</span>
+                        </div>
+                        <div class="pile pile-discard">
+                            <div class="pile-target playing-card" id="top-card" role="img" aria-label="Top discard"></div>
+                            <span class="pile-label" id="discard-label">Discard</span>
+                        </div>
+                    </section>
+                    <div class="hand-area panel">
+                        <div class="hand-heading">
+                            <div>
+                                <h2>Your hand <span id="hand-count" class="count"></span></h2>
+                                <p id="hand-hint" class="hand-hint"></p>
+                            </div>
+                            <button id="pass-btn" class="btn btn-primary draw-action" type="button" disabled>Draw card</button>
+                        </div>
+                        <div id="player-hand" class="player-hand" role="group" aria-label="Your cards"></div>
+                    </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Game Log -->
-        <div class="game-log" id="game-log">
-            <div class="log-header">Game Log</div>
-            <div class="log-content" id="log-content">
-                <!-- Game events will be logged here -->
-            </div>
-        </div>
+                <aside class="table-sidebar" aria-label="Players and activity">
+                    <section class="panel seats-panel">
+                        <div class="panel-heading"><h2>Players</h2><span id="seat-count" class="count"></span></div>
+                        <ul id="player-queue" class="seats"></ul>
+                    </section>
+                    <section class="panel log-panel">
+                        <div class="panel-heading"><h2>Table activity</h2></div>
+                        <ol class="log-content" id="log-content" aria-label="Recent moves"></ol>
+                    </section>
+                </aside>
+            </section>
+        </main>
     </div>
 
-    <!-- Toast Notifications -->
-    <div id="toast-container" class="toast-container"></div>
-
-    <!-- Game Popup Notifications -->
-    <div id="popup-container" class="popup-container"></div>
-
-    <!-- Win Screen Modal -->
-    <div id="win-modal" class="win-modal" style="display: none;">
-        <div class="win-modal-content">
-            <div class="win-celebration">🎉</div>
-            <h1 id="win-player-name" class="win-title">Player Wins!</h1>
-            <div id="win-message" class="win-message">Congratulations!</div>
-            <button id="win-close-btn" class="btn btn-primary win-close-btn">Close</button>
+    <dialog id="sort-modal" class="game-dialog" aria-labelledby="suit-heading">
+        <h2 id="suit-heading">Choose the next suit</h2>
+        <div class="sort-options">
+            <button class="sort-btn red" type="button" data-sort="harten"><span aria-hidden="true">♥</span>Hearts</button>
+            <button class="sort-btn red" type="button" data-sort="ruiten"><span aria-hidden="true">♦</span>Diamonds</button>
+            <button class="sort-btn" type="button" data-sort="schoppen"><span aria-hidden="true">♠</span>Spades</button>
+            <button class="sort-btn" type="button" data-sort="klaveren"><span aria-hidden="true">♣</span>Clubs</button>
         </div>
-    </div>
+    </dialog>
+    <dialog id="win-modal" class="game-dialog" aria-labelledby="win-player-name">
+        <span class="dialog-suit" aria-hidden="true">♠</span>
+        <h2 id="win-player-name"></h2>
+        <p id="win-message"></p>
+        <form method="dialog"><button class="btn btn-primary" type="submit">Back to table</button></form>
+    </dialog>
+    <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
-    <script src="{{ url_for('static', filename='js/game.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/socket.io-4.8.4.min.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='js/game.js', v=2) }}"></script>
 </body>
 </html>

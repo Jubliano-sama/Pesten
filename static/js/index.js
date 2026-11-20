@@ -1,133 +1,102 @@
-// Index page JavaScript
-const socket = io();
+import { forgetSeat, rememberSeat, resumeToken } from './room-session.js';
 
-// DOM elements
-const createRoomForm = document.getElementById('create-room-form');
-const joinRoomForm = document.getElementById('join-room-form');
-const loadingOverlay = document.getElementById('loading');
+const form = document.getElementById('room-form');
+const nameField = document.getElementById('player-name');
+const codeField = document.getElementById('room-code');
+const codeGroup = document.getElementById('code-field');
+const submit = document.getElementById('enter-room');
+const errorMessage = document.getElementById('entry-error');
+const tabs = [...document.querySelectorAll('[data-mode]')];
+let mode = 'create';
+let pending = false;
+let queuedRequest = null;
 
-// Form handlers
-createRoomForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    const playerName = document.getElementById('player-name').value.trim();
-    
-    if (!playerName) {
-        showToast('Please enter your name', 'error');
-        return;
+nameField.value = localStorage.getItem('playerName') ?? '';
+
+function setError(message = '') {
+    errorMessage.textContent = message;
+    errorMessage.hidden = !message;
+}
+
+function updateForm() {
+    const joining = mode === 'join';
+    codeGroup.hidden = !joining;
+    codeField.required = joining;
+    submit.firstChild.nodeValue = pending ? 'Connecting… ' : joining ? 'Join room ' : 'Create room ';
+    submit.disabled = pending;
+    for (const tab of tabs) {
+        tab.setAttribute('aria-pressed', String(tab.dataset.mode === mode));
+        tab.disabled = pending;
     }
-    
-    showLoading();
-    
-    // Store player name for later use
-    localStorage.setItem('playerName', playerName);
-    
-    socket.emit('create_room', {
-        player_name: playerName
+}
+
+for (const tab of tabs) {
+    tab.addEventListener('click', () => {
+        mode = tab.dataset.mode;
+        setError();
+        updateForm();
     });
-});
+}
 
-joinRoomForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    const playerName = document.getElementById('join-player-name').value.trim();
-    const roomCode = document.getElementById('room-code').value.trim().toUpperCase();
-    
-    if (!playerName || !roomCode) {
-        showToast('Please enter both name and room code', 'error');
+const socket = window.io();
+
+function requestFailed(message) {
+    pending = false;
+    queuedRequest = null;
+    updateForm();
+    setError(message);
+}
+
+form.addEventListener('submit', event => {
+    event.preventDefault();
+    const playerName = nameField.value.trim();
+    if (playerName.length < 2) {
+        setError('Enter a name with at least two characters.');
+        nameField.focus();
         return;
     }
-    
-    if (roomCode.length !== 6) {
-        showToast('Room code must be 6 characters', 'error');
-        return;
-    }
-    
-    showLoading();
-    
-    // Store player name for later use
+
+    const roomCode = codeField.value.toUpperCase();
+    pending = true;
+    setError();
+    updateForm();
     localStorage.setItem('playerName', playerName);
-    
-    socket.emit('join_room', {
-        player_name: playerName,
-        room_code: roomCode
-    });
+    queuedRequest = mode === 'create' ?
+        ['create_room', { player_name: playerName }] :
+        ['join_room', {
+            room_code: roomCode,
+            player_name: playerName,
+            resume_token: resumeToken(roomCode),
+        }];
+    sendRequest();
 });
 
-// Auto-uppercase room code input
-document.getElementById('room-code').addEventListener('input', (e) => {
-    e.target.value = e.target.value.toUpperCase();
-});
-
-// Socket event handlers
-socket.on('room_created', (data) => {
-    hideLoading();
-    
-    // Store player info in localStorage
-    localStorage.setItem('playerId', data.player_id);
-    localStorage.setItem('roomCode', data.room_code);
-    
-    showToast('Room created successfully!', 'success');
-    
-    // Redirect to game room
-    setTimeout(() => {
-        window.location.href = `/room/${data.room_code}`;
-    }, 1000);
-});
-
-socket.on('joined_room', (data) => {
-    hideLoading();
-    
-    // Store player info in localStorage
-    localStorage.setItem('playerId', data.player_id);
-    localStorage.setItem('roomCode', data.room_code);
-    
-    showToast('Joined room successfully!', 'success');
-    
-    // Redirect to game room
-    setTimeout(() => {
-        window.location.href = `/room/${data.room_code}`;
-    }, 1000);
-});
-
-socket.on('error', (data) => {
-    hideLoading();
-    showToast(data.message, 'error');
-});
-
-// Utility functions
-function showLoading() {
-    loadingOverlay.style.display = 'flex';
+function sendRequest() {
+    if (!socket.connected || !queuedRequest) return;
+    socket.emit(...queuedRequest);
+    queuedRequest = null;
 }
 
-function hideLoading() {
-    loadingOverlay.style.display = 'none';
+function enterRoom(data) {
+    rememberSeat(data);
+    location.assign(`/room/${encodeURIComponent(data.room_code)}`);
 }
 
-function showToast(message, type = 'info') {
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-    
-    // Create container if it doesn't exist
-    let container = document.getElementById('toast-container');
-    if (!container) {
-        container = document.createElement('div');
-        container.id = 'toast-container';
-        container.className = 'toast-container';
-        document.body.appendChild(container);
-    }
-    
-    container.appendChild(toast);
-    
-    // Remove toast after 3 seconds
-    setTimeout(() => {
-        if (toast.parentNode) {
-            toast.parentNode.removeChild(toast);
-        }
-    }, 3000);
-}
+socket.on('room_created', enterRoom);
+socket.on('joined_room', enterRoom);
+socket.on('error', ({ message, code }) => {
+    if (code === 'seat_expired') forgetSeat(codeField.value.toUpperCase());
+    requestFailed(message);
+});
+socket.on('connect', () => {
+    sendRequest();
+    if (!pending) setError();
+});
+socket.on('connect_error', () => requestFailed('Could not connect to Pesten. Check your connection and try again.'));
+socket.on('disconnect', () => {
+    if (pending) requestFailed('Connection lost. Please try again.');
+});
 
-// Clear any existing player data when page loads
-localStorage.removeItem('playerId');
-localStorage.removeItem('roomCode');
+import('./table3d.js?v=2')
+    .then(({ mountHero }) => mountHero(document.getElementById('hero-scene')))
+    .catch(() => {});

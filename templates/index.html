@@ -1,88 +1,75 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pesten Online</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#111715">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/png">
+    <title>Pesten · Dutch card game</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=2) }}">
 </head>
-<body>
-    <div class="container">
-        <header>
-            <h1>🃏 Pesten Online</h1>
-            <p>Play the classic Dutch card game with friends and AI opponents!</p>
-        </header>
+<body class="home">
+    <header class="site-header">
+        <a class="brand" href="/" aria-label="Pesten home"><span class="brand-mark" aria-hidden="true">♠</span>Pesten<span class="brand-dot">.</span></a>
+        <a class="nav-link" href="#rules">How to play <span aria-hidden="true">↘</span></a>
+    </header>
 
-        <main>
-            <div class="menu-section">
-                <div class="card">
-                    <h2>Create New Room</h2>
-                    <form id="create-room-form">
-                        <div class="form-group">
-                            <label for="player-name">Your Name:</label>
-                            <input type="text" id="player-name" required maxlength="20" placeholder="Enter your name">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Create Room</button>
-                    </form>
-                </div>
+    <main class="home-main">
+        <section class="welcome" aria-labelledby="welcome-title">
+            <div class="welcome-copy">
+                <p class="eyebrow"><span class="status-dot"></span> THE DUTCH CARD GAME</p>
+                <h1 id="welcome-title">The table<br> is <em>yours.</em></h1>
+                <p class="intro">Deal in your friends or take on the computer. Try to empty your hand first.</p>
 
-                <div class="card">
-                    <h2>Join Existing Room</h2>
-                    <form id="join-room-form">
-                        <div class="form-group">
-                            <label for="join-player-name">Your Name:</label>
-                            <input type="text" id="join-player-name" required maxlength="20" placeholder="Enter your name">
+                <div class="entry-panel">
+                    <div class="segments entry-tabs" role="group" aria-label="Room action">
+                        <button type="button" data-mode="create" aria-pressed="true">Create a room</button>
+                        <button type="button" data-mode="join" aria-pressed="false">Join a room</button>
+                    </div>
+                    <form id="room-form">
+                        <label for="player-name">Your name</label>
+                        <input id="player-name" name="player_name" required maxlength="20" minlength="2" autocomplete="nickname" placeholder="Enter your name">
+                        <div id="code-field" class="code-field" hidden>
+                            <label for="room-code">Room code</label>
+                            <input id="room-code" name="room_code" maxlength="6" pattern="[A-Za-z0-9]{6}" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="Six-character code">
                         </div>
-                        <div class="form-group">
-                            <label for="room-code">Room Code:</label>
-                            <input type="text" id="room-code" required maxlength="6" placeholder="Enter room code" style="text-transform: uppercase">
-                        </div>
-                        <button type="submit" class="btn btn-secondary">Join Room</button>
+                        <p id="entry-error" class="form-message" role="alert" hidden></p>
+                        <button id="enter-room" type="submit" class="btn btn-primary">Create room <span aria-hidden="true">→</span></button>
                     </form>
                 </div>
             </div>
 
-            <div class="rules-section">
-                <div class="card">
-                    <h2>How to Play Pesten</h2>
-                    <div class="rules-content">
-                        <h3>🎯 Objective</h3>
-                        <p>Be the first player to get rid of all your cards!</p>
-                        
-                        <h3>🃏 Card Basics</h3>
-                        <ul>
-                            <li>Each player starts with 7 cards</li>
-                            <li>Play cards that match the suit or number of the top card</li>
-                            <li>Draw a card if you can't play</li>
-                        </ul>
-                        
-                        <h3>🎴 Special Cards</h3>
-                        <ul>
-                            <li><strong>7:</strong> Play again</li>
-                            <li><strong>8:</strong> Skip next player</li>
-                            <li><strong>Ace:</strong> Reverse direction</li>
-                            <li><strong>2:</strong> Next player draws 2 cards</li>
-                            <li><strong>Jack:</strong> Change suit</li>
-                            <li><strong>Joker:</strong> Next player draws 5 cards + change suit</li>
-                        </ul>
-                        
-                        <h3>⚡ Penalty Rules</h3>
-                        <ul>
-                            <li>Playing a special card as your last card forces you to draw 2 more cards</li>
-                            <li>Penalty cards (2, Joker) stack - play the same number to pass the penalty</li>
-                        </ul>
+            <div class="hero-visual" aria-hidden="true">
+                <div id="hero-scene" class="hero-scene"></div>
+                <div class="hero-fallback">
+                    <div class="hero-felt"></div>
+                    <div class="hero-cards">
+                        <div class="playing-card hero-card"><span class="card-corner">7 ♣</span><span class="card-pip">♣</span></div>
+                        <div class="playing-card hero-card red"><span class="card-corner">Q ♥</span><span class="card-pip">♥</span></div>
+                        <div class="playing-card hero-card"><span class="card-corner">A ♠</span><span class="card-pip">♠</span></div>
                     </div>
                 </div>
+                <div class="suit-strip"><span>♠</span><span>♥</span><span>♣</span><span>♦</span></div>
             </div>
-        </main>
-    </div>
+        </section>
 
-    <div id="loading" class="loading-overlay" style="display: none;">
-        <div class="loading-spinner"></div>
-        <p>Connecting to game...</p>
-    </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
-    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+        <section class="rules" id="rules" aria-labelledby="rules-title">
+            <div class="rules-intro">
+                <h2 id="rules-title">How to play</h2>
+                <p>Start with seven cards. On your turn, match the suit or rank, or play a Jack or Joker. If you draw a playable card, you can play a compatible card or pass.</p>
+            </div>
+            <dl class="rule-cards">
+                <div><dt>2</dt><dd>Next player draws two.</dd></div>
+                <div><dt>7</dt><dd>Play again.</dd></div>
+                <div><dt>8</dt><dd>Skip the next player.</dd></div>
+                <div><dt>A</dt><dd>Reverse play.</dd></div>
+                <div><dt>J</dt><dd>Choose the next suit.</dd></div>
+                <div><dt>★</dt><dd>Next player draws five and chooses the suit.</dd></div>
+            </dl>
+            <p class="rules-note">Stack penalties by playing the same rank. Any legal card can be your last card. In a game with three or more players, you can watch after going out.</p>
+        </section>
+    </main>
+    <script src="{{ url_for('static', filename='vendor/socket.io-4.8.4.min.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='js/index.js', v=2) }}"></script>
 </body>
 </html>

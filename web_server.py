@@ -7,25 +7,23 @@ Supports room-based multiplayer, mixed human/AI games, and real-time updates via
 """
 
 import os
-import json
 import random
 import re
 import secrets
 import string
+import time
 import uuid
 from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, asdict, field
-from threading import Lock, Timer
+from dataclasses import dataclass, field
+from threading import Lock, Timer, current_thread
 import logging
 
 import torch
 import numpy as np
 from flask import Flask, render_template, request, jsonify
-from flask_socketio import SocketIO, emit, join_room, leave_room, rooms
+from flask_socketio import SocketIO, emit, join_room, leave_room
 
 # Import game components
-import card
-import deck
 from supervisedAgent import StudentNet
 from web_temporal_player import (
     WebTemporalPlayer, normalize_card, production_model_status,
@@ -174,6 +172,7 @@ class PlayerState:
     socket_id: Optional[str] = None
     is_observer: bool = False  # Player finished game and is now observing
     consecutive_timeouts: int = 0  # Number of consecutive timeouts (reset when player acts)
+    resume_token: str = field(default_factory=lambda: secrets.token_urlsafe(32), repr=False)
 
 @dataclass
 class GameState:
@@ -476,7 +475,10 @@ class GameRoom:
         self.started = False
         self.current_turn_timer: Optional[Timer] = None
         self.turn_timeout_seconds = 60
-        self.timer_lock = Lock()  # Synchronize timer operations
+        self.timer_lock = Lock()
+        self.turn_deadline_ms: Optional[int] = None
+        self.ai_flow_running = False
+        self.first_out: Optional[dict] = None
         
     def add_player(self, player_name: str, socket_id: str, is_ai: bool = False) -> tuple[bool, str]:
         """Add a player to the room. Returns (success, error_message)"""
@@ -527,18 +529,18 @@ class GameRoom:
         random.shuffle(self.game_state.players)
         logger.info(f"Player order randomized: {[p.name for p in self.game_state.players]}")
         
-        # Calculate number of decks needed: ceil((players * 7) / 53)
+        # Each deck contains 54 cards. Reserve one card for the opening discard.
         num_players = len(self.game_state.players)
         self.game_state.starting_player_count = num_players
         cards_needed = num_players * 7
-        num_decks = max(1, (cards_needed + 52) // 53)  # Ceiling division, at least 1 deck (53 cards per deck)
+        num_decks = max(1, (cards_needed + 54) // 54)
         
         logger.info(f"Game setup: {num_players} players, {cards_needed} cards needed, using {num_decks} deck(s)")
         
         # Create multiple decks if needed
         all_cards = []
         for deck_num in range(num_decks):
-            # Standard deck: 48 regular cards + 1 joker + 4 suit-specific jacks
+            # Standard deck: 48 regular cards + 2 jokers + 4 suit-specific jacks
             deck_cards = list(range(48))  # 0-47 are regular cards (excluding card 48 which was generic Jack)
             deck_cards.append(49)  # Joker (card 49)
             deck_cards.append(49)  # Joker (card 49)
@@ -550,34 +552,28 @@ class GameRoom:
         
         random.shuffle(all_cards)
         
-        # Deal 7 cards to each player
-        card_index = 0
-        for player in self.game_state.players:
-            player.hand = all_cards[card_index:card_index + 7]
-            card_index += 7
-        
-        # Set up game and grab decks
-        self.game_state.grab_deck = all_cards[card_index:]
-        
-        # Find valid starting card
-        while True:
-            if not self.game_state.grab_deck:
-                break
-            start_card_num = self.game_state.grab_deck.pop(0)
-            start_card_data = get_web_card_data(start_card_num)
-            # Avoid special cards as starting card (no Jacks, Jokers, Aces, 7s, 8s, 2s)
-            if start_card_data["truenumber"] not in (13, 0, 1, 7, 8, 2):
-                self.game_state.game_deck = [start_card_num]
-                self.game_state.current_sort = start_card_data["sort"]
-                self.game_state.current_true_number = start_card_data["truenumber"]
-                break
-        
+        # Set aside a normal starting card before dealing.
+        start_index = next(
+            index for index, number in enumerate(all_cards)
+            if get_web_card_data(number)["truenumber"] not in (13, 0, 1, 7, 8, 2)
+        )
+        start_card = all_cards.pop(start_index)
+        start_data = get_web_card_data(start_card)
+        self.game_state.game_deck = [start_card]
+        self.game_state.current_sort = start_data["sort"]
+        self.game_state.current_true_number = start_data["truenumber"]
+        self.game_state.grab_deck = all_cards[cards_needed:]
+
+        for index, player in enumerate(self.game_state.players):
+            player.hand = all_cards[index * 7:(index + 1) * 7]
+
         # Reset other game state
         self.game_state.current_player_index = 0
         self.game_state.direction = 1
         self.game_state.penalty_amount = 0
         self.game_state.game_over = False
         self.game_state.winner = None
+        self.first_out = None
         self.game_state.turn_count = 0
         self.game_state.sorts_played = [0, 0, 0, 0, 0]
         self.game_state.has_drawn_this_turn = False
@@ -618,59 +614,26 @@ class GameRoom:
         player = self.game_state.players[player_idx]
         logger.info(f"PLAY_CARD START: {player.name} (AI: {player.is_ai}) wants to play {card_num}, penalty_amount: {self.game_state.penalty_amount}")
         
-        # Stop the turn timer since player is acting
+        if player.is_observer or self.game_state.waiting_for_suit_choice:
+            return {"success": False, "error": "Choose the next suit before playing"}
+
+        if card_num is not None:
+            if type(card_num) is not int or not 0 <= card_num <= 53:
+                return {"success": False, "error": "Invalid card"}
+            if card_num not in player.hand:
+                return {"success": False, "error": "Card not in hand"}
+            if not is_web_card_playable(card_num, self.game_state):
+                return {"success": False, "error": "Card not compatible"}
+
         self._stop_turn_timer()
-        
-        # Handle pass
+        player.consecutive_timeouts = 0
         if card_num is None:
             result = self._handle_pass(player)
-            # Update turn order after pass
-            self._update_turn_order()
-            return result
-        
-        # Validate card is in hand
-        if card_num not in player.hand:
-            return {"success": False, "error": "Card not in hand"}
-        
-        # Validate card number
-        if not isinstance(card_num, int) or card_num < 0 or card_num > 53:
-            logger.error(f"Invalid card number {card_num} from player {player.name}")
-            return {"success": False, "error": "Invalid card"}
-        
-        # Validate card compatibility
-        card_data = get_web_card_data(card_num)
-        
-        # Check if card data is valid
-        if card_data["truenumber"] == -1 or card_data["sort"] == "unknown":
-            logger.error(f"Invalid card data for card {card_num} from player {player.name}")
-            return {"success": False, "error": "Invalid card"}
-        logger.info(f"Checking compatibility: card {card_num} ({card_data['truenumber']} of {card_data['sort']}) vs table {self.game_state.current_true_number} of {self.game_state.current_sort}, penalty: {self.game_state.penalty_amount}")
-        
-        if not is_web_card_compatible(card_num, self.game_state.current_sort, self.game_state.current_true_number):
-            if self.game_state.penalty_amount == 0:
-                logger.warning(f"Card {card_num} not compatible with {self.game_state.current_true_number} of {self.game_state.current_sort}")
-                return {"success": False, "error": "Card not compatible"}
-            else:
-                logger.info(f"Card {card_num} doesn't match penalty card, applying penalty")
-                result = self._apply_penalty(player)
-                # Update turn order after penalty
-                self._update_turn_order()
-                return result
-        
-        # Additional penalty validation: during penalty, only matching numbers are allowed
-        if self.game_state.penalty_amount > 0 and card_data['truenumber'] != self.game_state.current_true_number:
-            logger.info(f"During penalty, card {card_num} (number {card_data['truenumber']}) doesn't match penalty card number {self.game_state.current_true_number}")
-            result = self._apply_penalty(player)
-            # Update turn order after penalty
-            self._update_turn_order()
-            return result
-        
-        # Play the card
-        result = self._process_card_play(player, card_num, card_data)
-        # Update turn order after any action
+        else:
+            result = self._process_card_play(player, card_num, get_web_card_data(card_num))
         self._update_turn_order()
         return result
-    
+
     def _handle_pass(self, player: PlayerState) -> Dict[str, Any]:
         """Handle when player passes"""
         if self.game_state.penalty_amount > 0:
@@ -725,9 +688,12 @@ class GameRoom:
     def _apply_penalty(self, player: PlayerState) -> Dict[str, Any]:
         """Apply penalty to player"""
         for _ in range(self.game_state.penalty_amount):
-            self._draw_card(player)
-        
+            if self._draw_card(player) is None:
+                break
+
         self.game_state.penalty_amount = 0
+        if self.game_state.game_over:
+            return {"success": True, "action": "penalty"}
         
         # Handle sort change for joker
         if self.game_state.current_true_number == 0:
@@ -780,6 +746,8 @@ class GameRoom:
         if len(player.hand) == 0:
             # Set player as observer instead of ending game
             player.is_observer = True
+            if self.first_out is None:
+                self.first_out = {"id": player.id, "name": player.name}
             logger.info(f"Player {player.name} wins and becomes observer")
             
             # Check if only one active player remains (game should end)
@@ -817,6 +785,7 @@ class GameRoom:
         
         if card_data["truenumber"] == 7:  # Another turn
             result["card_effects"].append("another_turn")
+            self.game_state.has_drawn_this_turn = False
             result["skip_turn"] = True
         elif card_data["truenumber"] == 8:  # Skip next player
             result["card_effects"].append("skip_player")
@@ -862,7 +831,7 @@ class GameRoom:
             card_num = self.game_state.grab_deck.pop(0)
             player.hand.append(card_num)
             return card_num
-        elif len(self.game_state.game_deck) > 1:
+        if len(self.game_state.game_deck) > 1:
             # Reshuffle game deck into grab deck (keep top card)
             self.game_state.grab_deck = self.game_state.game_deck[:-1]
             random.shuffle(self.game_state.grab_deck)
@@ -905,6 +874,8 @@ class GameRoom:
     
     def _next_turn(self):
         """Move to next player's turn, skipping observers"""
+        if self.game_state.game_over:
+            return
         original_index = self.game_state.current_player_index
         attempts = 0
         max_attempts = len(self.game_state.players)
@@ -994,251 +965,158 @@ class GameRoom:
             logger.info(f"Skipped {skipped_count} observer turn(s), now at player {self.game_state.current_player_index}")
     
     def _start_turn_timer(self):
-        """Start a timer for the current player's turn"""
+        """Keep one authoritative deadline for the current decision."""
         with self.timer_lock:
-            self._stop_turn_timer_unsafe()  # Clear any existing timer
-            
-            if (self.game_state.current_player_index >= len(self.game_state.players) or 
-                self.game_state.game_over):
+            if self.current_turn_timer or self.game_state.game_over:
                 return
-            
-            current_player = self.game_state.players[self.game_state.current_player_index]
-            
-            # Only start timer for human players (not AI or observers)
-            if not current_player.is_ai and not current_player.is_observer and current_player.is_connected:
-                logger.info(f"Starting {self.turn_timeout_seconds}s timer for {current_player.name}")
-                self.current_turn_timer = Timer(self.turn_timeout_seconds, self._handle_turn_timeout)
-                self.current_turn_timer.start()
-    
+            if not 0 <= self.game_state.current_player_index < len(self.game_state.players):
+                return
+            current = self.game_state.players[self.game_state.current_player_index]
+            if current.is_ai or current.is_observer:
+                return
+            self.turn_deadline_ms = int((time.time() + self.turn_timeout_seconds) * 1000)
+            self.current_turn_timer = Timer(self.turn_timeout_seconds, self._handle_turn_timeout)
+            self.current_turn_timer.daemon = True
+            self.current_turn_timer.start()
+
     def _stop_turn_timer(self):
-        """Stop the current turn timer (thread-safe)"""
         with self.timer_lock:
-            self._stop_turn_timer_unsafe()
-    
-    def _stop_turn_timer_unsafe(self):
-        """Stop the current turn timer (NOT thread-safe - use only within timer_lock)"""
-        if self.current_turn_timer:
-            self.current_turn_timer.cancel()
-            self.current_turn_timer = None
-    
+            if self.current_turn_timer:
+                self.current_turn_timer.cancel()
+                self.current_turn_timer = None
+            self.turn_deadline_ms = None
+
     def _handle_turn_timeout(self):
-        """Handle when a player's turn times out"""
-        with self.timer_lock:
-            # Check if this timeout is still valid (game/player might have changed)
-            if (self.game_state.game_over or 
-                self.game_state.current_player_index >= len(self.game_state.players)):
-                logger.info("Turn timeout triggered but game is over or invalid player index")
-                return
-            
-            current_player = self.game_state.players[self.game_state.current_player_index]
-            
-            # Check if player is still the current player and not AI
-            if current_player.is_ai or current_player.is_observer:
-                logger.info(f"Turn timeout triggered for {current_player.name} but they are now AI/observer")
-                return
-            
-            logger.info(f"Player {current_player.name} timed out")
-            
-            # Clear the timer since we're handling the timeout
-            self.current_turn_timer = None
-        
-        # Increment consecutive timeouts
-        current_player.consecutive_timeouts += 1
-        
-        # Check if player should be kicked (3 consecutive timeouts)
-        if current_player.consecutive_timeouts >= 3:
-            logger.info(f"Kicking player {current_player.name} for 3 consecutive timeouts")
-            self._kick_player(current_player)
-        else:
-            # Auto-pass for the player
-            logger.info(f"Auto-passing for {current_player.name} (timeout {current_player.consecutive_timeouts}/3)")
-            self._auto_pass_player(current_player)
-    
-    def _kick_player(self, player: PlayerState):
-        """Remove a player from the game"""
-        logger.info(f"Removing player {player.name} from the game")
-        
-        # Send kick notification to the specific player first
-        if player.id:  # Only send to human players
-            socketio.emit('player_kicked', {
-                'player_name': player.name,
-                'reason': 'Three consecutive timeouts',
-                'game_state': self.get_public_state()
-            }, room=player.id)
-        
-        # Remove from players list
-        self.game_state.players.remove(player)
-        
-        # Adjust current player index if needed
-        if self.game_state.current_player_index >= len(self.game_state.players):
-            self.game_state.current_player_index = 0
-        
-        # Broadcast player removal to remaining players
-        socketio.emit('player_kicked', {
-            'player_name': player.name,
-            'reason': 'Three consecutive timeouts',
-            'game_state': self.get_public_state()
-        }, room=self.room_code)
-        
-        # Check if game should end
-        active_players = [p for p in self.game_state.players if not p.is_observer]
-        if len(active_players) <= 1:
-            self.game_state.game_over = True
-        
-        # Continue with next player
-        self._skip_observer_turns()
-        self._start_turn_timer()
-    
+        with rooms_lock:
+            with self.timer_lock:
+                if self.current_turn_timer is not current_thread() or self.game_state.game_over:
+                    return
+                self.current_turn_timer = None
+                self.turn_deadline_ms = None
+
+            player = self.game_state.players[self.game_state.current_player_index]
+            player.consecutive_timeouts += 1
+            if player.consecutive_timeouts >= 3:
+                self.remove_seat(player)
+                self.publish("player_kicked", player_name=player.name)
+                self.remove_empty_room()
+            else:
+                self._auto_pass_player(player)
+
+    def remove_seat(self, player: PlayerState):
+        """Remove a seat while preserving whose turn it is in either direction."""
+        state = self.game_state
+        index = state.players.index(player)
+        was_current = index == state.current_player_index
+        winner = state.players[state.winner] if state.winner is not None else None
+        state.players.pop(index)
+        state.grab_deck.extend(player.hand)
+        state.winner = state.players.index(winner) if winner in state.players else None
+
+        if was_current:
+            self._stop_turn_timer()
+            if state.waiting_for_suit_choice:
+                self._record_suit_choice(player, "harten")
+                state.current_sort = "harten"
+                state.waiting_for_suit_choice = False
+            state.has_drawn_this_turn = False
+            if state.players:
+                state.current_player_index = (
+                    index - (state.direction == -1)
+                ) % len(state.players)
+        elif index < state.current_player_index:
+            state.current_player_index -= 1
+
+        if self.started and not state.game_over:
+            active = [seat for seat in state.players if not seat.is_observer]
+            if len(active) <= 1:
+                state.game_over = True
+                state.penalty_amount = 0
+                state.winner = state.players.index(active[0]) if active else None
+                self._stop_turn_timer()
+            else:
+                self._skip_observer_turns()
+                self._continue_game_flow()
+        self._update_turn_order()
+
+    def remove_empty_room(self):
+        if not any(not player.is_ai for player in self.game_state.players):
+            self._stop_turn_timer()
+            game_rooms.pop(self.room_code, None)
+
     def _auto_pass_player(self, player: PlayerState):
-        """Automatically pass for a player who timed out"""
-        old_player_index = self.game_state.current_player_index
-        logger.info(f"AUTO-PASS: Player {player.name} timed out, current index: {old_player_index}")
-        
-        # Apply penalty if there is one, otherwise just pass
-        if self.game_state.penalty_amount > 0:
-            # Draw penalty cards
-            for _ in range(self.game_state.penalty_amount):
-                self._draw_card(player)
-            
-            # Handle joker suit choice if needed
-            if self.game_state.current_true_number == 0:  # Joker penalty
-                if player.is_ai:
-                    # AI chooses suit
-                    new_sort_action = self.ai_player.choose_action(player, self.game_state, is_change_sort=True)
-                    sorts = ["harten", "ruiten", "schoppen", "klaveren", "special"]
-                    new_sort = sorts[new_sort_action - 50]
-                    self.game_state.current_sort = new_sort
-                    self._record_suit_choice(player, new_sort)
-                    result = {"success": True, "action": "penalty_and_sort_change", "new_sort": new_sort}
-                    logger.info(f"AUTO-PASS: AI {player.name} chose suit {new_sort}")
-                else:
-                    # Human gets default suit (hearts)
-                    self.game_state.current_sort = "harten"
-                    self._record_suit_choice(player, "harten")
-                    result = {"success": True, "action": "penalty_and_sort_change", "new_sort": "harten"}
-                    logger.info("AUTO-PASS: Human timed out, automatically chose hearts")
-            else:
-                result = {"success": True, "action": "penalty"}
-            
-            self.game_state.penalty_amount = 0
-        else:
-            # Normal pass - just draw one card
+        """Resolve the same pending decision the player saw, then advance."""
+        state = self.game_state
+        if state.waiting_for_suit_choice or (state.penalty_amount and state.current_true_number == 0):
+            state.current_sort = "harten"
+            self._record_suit_choice(player, "harten")
+        if state.penalty_amount:
+            for _ in range(state.penalty_amount):
+                if self._draw_card(player) is None:
+                    break
+        elif not state.waiting_for_suit_choice and not state.has_drawn_this_turn:
             self._draw_card(player)
-            result = {"success": True, "action": "pass"}
-        
-        # Always advance turn after auto-pass (no option to play drawn card)
+
+        state.penalty_amount = 0
+        state.waiting_for_suit_choice = False
         self._next_turn()
-        self._skip_observer_turns()
-        
-        new_player_index = self.game_state.current_player_index
-        logger.info(f"AUTO-PASS: After pass/penalty, current index: {new_player_index} (was {old_player_index})")
-        
-        if new_player_index < len(self.game_state.players):
-            current_player = self.game_state.players[new_player_index]
-            logger.info(f"AUTO-PASS: Next player is {current_player.name} (AI: {current_player.is_ai}, Observer: {current_player.is_observer})")
-        
-        # Log the broadcast attempt
-        logger.info(f"AUTO-PASS: Broadcasting player_auto_passed event to room {self.room_code}")
-        
-        # Send auto-pass event to the specific player first (before they potentially disconnect)
-        if player.socket_id:
-            logger.info(f"AUTO-PASS: Sending event to specific player {player.name} at socket {player.socket_id}")
-            socketio.emit('player_auto_passed', {
-                'player_name': player.name,
-                'action': result.get('action', 'pass'),
-                'consecutive_timeouts': player.consecutive_timeouts,
-                'game_state': self.get_public_state(),
-                'details': result,
-                'acting_player': {'name': player.name, 'id': player.id}
-            }, room=player.socket_id)
-        
-        # Broadcast the auto-pass to all players in the room
-        logger.info(f"AUTO-PASS: Broadcasting to room {self.room_code} with {len(self.game_state.players)} players")
-        socketio.emit('player_auto_passed', {
-            'player_name': player.name,
-            'action': result.get('action', 'pass'),
-            'consecutive_timeouts': player.consecutive_timeouts,
-            'game_state': self.get_public_state(),
-            'details': result,
-            'acting_player': {'name': player.name, 'id': player.id}
-        }, room=self.room_code)
-        
-        logger.info(f"AUTO-PASS: Event broadcast completed")
-        
-        # Continue game flow: handle AI turns or start timer for human
         self._continue_game_flow()
-    
-    def _continue_game_flow_background(self):
-        """Background task wrapper to continue game flow in proper thread context"""
-        logger.info("BACKGROUND TASK: Starting _continue_game_flow_background")
-        try:
-            self._continue_game_flow()
-            logger.info("BACKGROUND TASK: Completed _continue_game_flow_background")
-        except Exception as e:
-            logger.error(f"BACKGROUND TASK: Error in _continue_game_flow_background: {e}")
-            import traceback
-            traceback.print_exc()
-    
+        self.publish("player_auto_passed", player_name=player.name,
+                     consecutive_timeouts=player.consecutive_timeouts)
+
     def _continue_game_flow(self):
-        """Continue the game flow after a turn change - handle AI turns or start human timer"""
-        if self.game_state.game_over:
+        state = self.game_state
+        if state.game_over or not state.players:
             return
-            
-        # Handle AI turns
-        ai_turn_count = 0
-        max_ai_turns = 20  # Safety limit to prevent infinite loops
-        
-        logger.info(f"CONTINUE FLOW: game_over={self.game_state.game_over}, current_player={self.game_state.current_player_index}, is_ai={self.game_state.players[self.game_state.current_player_index].is_ai if self.game_state.current_player_index < len(self.game_state.players) else 'OUT_OF_BOUNDS'}, waiting_for_suit={self.game_state.waiting_for_suit_choice}")
-        
-        while (not self.game_state.game_over and 
-               self.game_state.current_player_index < len(self.game_state.players) and
-               self.game_state.players[self.game_state.current_player_index].is_ai and
-               not self.game_state.players[self.game_state.current_player_index].is_observer and
-               not self.game_state.waiting_for_suit_choice and
-               ai_turn_count < max_ai_turns):
-            
-            ai_turn_count += 1
-            logger.info(f"AI turn in continue flow {ai_turn_count}: Player {self.game_state.current_player_index}")
-            
-            # Get the AI player before the turn (in case turn advances)
-            ai_player_before_turn = self.game_state.players[self.game_state.current_player_index]
-            
-            # No delay - process AI immediately
-            
-            ai_result = self.handle_ai_turn()
-            logger.info(f"AI result in continue flow: {ai_result}")
-            
-            if ai_result and ai_result.get('success', False):
-                public_state = self.get_public_state()
-                socketio.emit('ai_move', {
-                    'action': ai_result['action'],
-                    'game_state': public_state,
-                    'details': ai_result,
-                    'acting_player': {'name': ai_player_before_turn.name, 'id': ai_player_before_turn.id}
-                }, room=self.room_code)
-                
-                # Send updated private hands to human players
-                for player in self.game_state.players:
-                    if not player.is_ai and player.socket_id:
-                        socketio.emit('private_state', {
-                            'hand': player.hand
-                        }, room=player.socket_id)
-                
-                # If AI won and became observer, the while loop condition will naturally fail
-                # and we'll continue to the next iteration or exit the loop
-            else:
-                logger.error("AI turn returned None - breaking loop to prevent hang")
-                break
-        
-        # Start timer for human player if it's their turn
-        if (not self.game_state.game_over and 
-            not self.game_state.waiting_for_suit_choice and
-            self.game_state.current_player_index < len(self.game_state.players)):
-            current_player = self.game_state.players[self.game_state.current_player_index]
-            if not current_player.is_ai and not current_player.is_observer:
-                logger.info(f"Starting timer for human player {current_player.name}")
-                self._start_turn_timer()
-    
+        current = state.players[state.current_player_index]
+        if not current.is_ai:
+            self._start_turn_timer()
+        elif not self.ai_flow_running and not state.waiting_for_suit_choice:
+            self.ai_flow_running = True
+            socketio.start_background_task(self._run_ai_turns)
+
+    def _run_ai_turns(self):
+        while True:
+            socketio.sleep(.7)
+            with rooms_lock:
+                state = self.game_state
+                if (game_rooms.get(self.room_code) is not self or state.game_over or
+                        state.waiting_for_suit_choice or not state.players):
+                    self.ai_flow_running = False
+                    return
+                player = state.players[state.current_player_index]
+                if not player.is_ai:
+                    self.ai_flow_running = False
+                    return
+                try:
+                    result = self.handle_ai_turn()
+                    if result and not result.get("success"):
+                        result = self.play_card(player.id, None)
+                    if not result or not result.get("success"):
+                        raise RuntimeError("No successful AI move")
+                    self._continue_game_flow()
+                    self.publish("ai_move", action=result["action"], details=result,
+                                 acting_player={"name": player.name, "id": player.id})
+                except Exception:
+                    logger.exception("AI turn failed in room %s", self.room_code)
+                    self.ai_flow_running = False
+                    return
+
+    def private_state(self, player: PlayerState):
+        state = self.game_state
+        playable = []
+        if (self.started and not state.game_over and not state.waiting_for_suit_choice and
+                not player.is_observer and state.players[state.current_player_index] is player):
+            playable = [number for number in player.hand if is_web_card_playable(number, state)]
+        return {"hand": list(player.hand), "playable_cards": playable}
+
+    def publish(self, event, *, skip_sid=None, **details):
+        socketio.emit(event, {"game_state": self.get_public_state(), **details},
+                      to=self.room_code, skip_sid=skip_sid)
+        for player in self.game_state.players:
+            if player.socket_id and player.socket_id != skip_sid:
+                socketio.emit("private_state", self.private_state(player), to=player.socket_id)
+
     def change_sort(self, player_id: str, new_sort: str) -> Dict[str, Any]:
         """Change the current sort"""
         player_idx = None
@@ -1250,13 +1128,10 @@ class GameRoom:
         if player_idx != self.game_state.current_player_index:
             return {"success": False, "error": "Not your turn"}
         
-        # Stop the turn timer since player is acting
-        self._stop_turn_timer()
-        
-        sorts = ["harten", "ruiten", "schoppen", "klaveren", "special"]
-        if new_sort not in sorts[:4]:
+        if new_sort not in ("harten", "ruiten", "schoppen", "klaveren"):
             return {"success": False, "error": "Invalid sort"}
-        
+
+        self._stop_turn_timer()
         old_sort = self.game_state.current_sort
         self.game_state.current_sort = new_sort
         self._record_suit_choice(self.game_state.players[player_idx], new_sort)
@@ -1269,7 +1144,6 @@ class GameRoom:
         
         # Reset timeout count for successful action and start timer for next player
         self.game_state.players[player_idx].consecutive_timeouts = 0
-        self._start_turn_timer()
         
         logger.info(f"SUIT CHANGED: {old_sort} -> {new_sort} by player {player_idx}, turn advanced from {old_player_index} to {self.game_state.current_player_index}")
         
@@ -1360,18 +1234,22 @@ class GameRoom:
             "top_card": self.game_state.game_deck[-1] if self.game_state.game_deck else None,
             "game_over": self.game_state.game_over,
             "winner": self.game_state.winner,
+            "first_out": self.first_out,
             "turn_count": self.game_state.turn_count,
             "turn_order": self.game_state.turn_order,
             "direction_changed": (
                 direction_changed_value if check_direction_changed else False
             ),
             "started": self.started,
+            "has_drawn_this_turn": self.game_state.has_drawn_this_turn,
+            "waiting_for_suit_choice": self.game_state.waiting_for_suit_choice,
+            "turn_deadline_ms": self.turn_deadline_ms,
             "grab_deck_size": len(self.game_state.grab_deck)
         }
 
 def validate_player_name(name: str) -> tuple[bool, str]:
     """Validate player name and return (is_valid, error_message)"""
-    if not name or not name.strip():
+    if not isinstance(name, str) or not name.strip():
         return False, "Player name cannot be empty"
     
     name = name.strip()
@@ -1387,9 +1265,9 @@ def validate_player_name(name: str) -> tuple[bool, str]:
         return False, "Player name contains invalid characters"
     
     # Prevent names that are too similar to AI naming pattern
-    if name.lower().startswith('ai ') or name.lower() == 'mechahhitler':
+    if name.lower().startswith('ai '):
         return False, "Player name conflicts with AI naming pattern"
-    if name.lower().startswith('You!'):
+    if name.startswith('You!'):
         return False, "Player name conflicts with other players You Representaton"
     
     return True, ""
@@ -1413,529 +1291,212 @@ def index():
 
 @app.route('/room/<room_code>')
 def room(room_code):
-    return render_template('game.html', room_code=room_code)
+    return render_template('game.html', room_code=room_code.upper())
 
 # Socket.IO events
-@socketio.on('create_room')
+def room_identity(room, player):
+    return {
+        "room_code": room.room_code,
+        "player_id": player.id,
+        "resume_token": player.resume_token,
+        "game_state": room.get_public_state(player.id),
+        "private_state": room.private_state(player),
+    }
+
+
+def find_room(data):
+    code = data.get("room_code")
+    room = game_rooms.get(code.upper()) if isinstance(code, str) else None
+    if room is None:
+        emit("error", {"message": "Room not found"})
+    return room
+
+
+def find_seat(room, data=None):
+    player = next((seat for seat in room.game_state.players if seat.socket_id == request.sid), None)
+    if player and (not data or not data.get("player_id") or data["player_id"] == player.id):
+        return player
+    emit("error", {"message": "Join this room before taking an action"})
+    return None
+
+
+@socketio.on("create_room")
 def handle_create_room(data):
-    """Create a new game room"""
-    player_name = data.get('player_name', 'Anonymous')
-    
-    # Validate player name
-    is_valid, error_msg = validate_player_name(player_name)
-    if not is_valid:
-        emit('error', {'message': f'Invalid player name: {error_msg}'})
+    name = data.get("player_name", "")
+    valid, error = validate_player_name(name)
+    if not valid:
+        emit("error", {"message": error})
         return
-    
-    player_name = player_name.strip()  # Clean up the name
-    logger.info(f"Creating room for player '{player_name}', socket: {request.sid}")
-    
-    with rooms_lock:
-        # Generate unique room code
-        while True:
-            room_code = generate_room_code()
-            if room_code not in game_rooms:
-                break
-        
-        logger.info(f"Generated room code: {room_code}")
-        
-        # Create room
-        game_room = GameRoom(room_code)
-        success, error_msg = game_room.add_player(player_name, request.sid)
-        if not success:
-            emit('error', {'message': error_msg})
-            return
-        game_rooms[room_code] = game_room
-        
-        logger.info(f"Room {room_code} created with {len(game_room.game_state.players)} players")
-        logger.info(f"Current rooms: {list(game_rooms.keys())}")
-        
-        join_room(room_code)
-        
-        emit('room_created', {
-            'room_code': room_code,
-            'player_id': game_room.game_state.players[0].id,
-            'game_state': game_room.get_public_state(game_room.game_state.players[0].id)
-        })
-        
-        logger.info(f"Room creation complete for {room_code}, emitted to socket {request.sid}")
 
-@socketio.on('join_room')
+    with rooms_lock:
+        code = generate_room_code()
+        while code in game_rooms:
+            code = generate_room_code()
+        room = GameRoom(code)
+        room.add_player(name.strip(), request.sid)
+        game_rooms[code] = room
+        join_room(code)
+        emit("room_created", room_identity(room, room.game_state.players[-1]))
+
+
+@socketio.on("join_room")
 def handle_join_room(data):
-    """Join an existing game room"""
-    room_code = data.get('room_code', '').upper()
-    player_name = data.get('player_name', 'Anonymous')
-    
-    # Validate player name
-    is_valid, error_msg = validate_player_name(player_name)
-    if not is_valid:
-        emit('error', {'message': f'Invalid player name: {error_msg}'})
-        return
-    
-    player_name = player_name.strip()  # Clean up the name
-    logger.info(f"Player '{player_name}' trying to join room '{room_code}', socket: {request.sid}")
-    logger.info(f"Available rooms: {list(game_rooms.keys())}")
-    
     with rooms_lock:
-        if room_code not in game_rooms:
-            logger.error(f"Room '{room_code}' not found! Available: {list(game_rooms.keys())}")
-            emit('error', {'message': 'Room not found'})
+        room = find_room(data)
+        if room is None:
             return
-        
-        game_room = game_rooms[room_code]
-        
-        # Check if player is already in the room (reconnecting)
-        existing_player = None
-        for player in game_room.game_state.players:
-            if player.socket_id == request.sid:
-                existing_player = player
-                break
-        
-        # Also check if a player with the same name exists (reconnecting after page navigation)
-        if not existing_player:
-            for player in game_room.game_state.players:
-                if player.name == player_name and not player.is_ai:
-                    logger.info(f"Reconnecting player {player_name} to room {room_code}")
-                    # Update the socket_id for this player
-                    player.socket_id = request.sid
-                    player.is_connected = True
-                    existing_player = player
-                    break
-        
-        if existing_player:
-            # Player is reconnecting
-            join_room(room_code)
-            logger.info(f"Player {player_name} successfully reconnected to room {room_code}")
-            emit('joined_room', {
-                'room_code': room_code,
-                'player_id': existing_player.id,
-                'game_state': game_room.get_public_state(existing_player.id)
-            })
-            return
-        
-        if game_room.started:
-            emit('error', {'message': 'Game already started'})
-            return
-        
-        success, error_msg = game_room.add_player(player_name, request.sid)
-        if not success:
-            emit('error', {'message': error_msg})
-            return
-        
-        join_room(room_code)
-        
-        # Get the newly added player
-        new_player = game_room.game_state.players[-1]
-        
-        emit('joined_room', {
-            'room_code': room_code,
-            'player_id': new_player.id,
-            'game_state': game_room.get_public_state(new_player.id)
-        })
-        
-        # Notify other players
-        socketio.emit('player_joined', {
-            'player_name': player_name,
-            'game_state': game_room.get_public_state()
-        }, room=room_code)
+        seats = room.game_state.players
+        token = data.get("resume_token")
+        player = next((seat for seat in seats if seat.socket_id == request.sid), None)
+        if player is None and isinstance(token, str):
+            player = next((seat for seat in seats if not seat.is_ai and seat.resume_token == token), None)
+            if player is None:
+                emit("error", {"message": "Your saved seat is no longer available", "code": "seat_expired"})
+                return
 
-@socketio.on('add_ai_player')
+        if player:
+            old_socket = player.socket_id
+            was_disconnected = not player.is_connected
+            if old_socket and old_socket != request.sid:
+                leave_room(room.room_code, sid=old_socket)
+                socketio.emit("seat_moved", to=old_socket)
+            player.socket_id = request.sid
+            player.is_connected = True
+            join_room(room.room_code)
+            emit("joined_room", room_identity(room, player))
+            if was_disconnected:
+                room.publish("player_reconnected", player_name=player.name, skip_sid=request.sid)
+            return
+
+        if room.started:
+            emit("error", {"message": "Game already started"})
+            return
+
+        name = data.get("player_name", "")
+        valid, error = validate_player_name(name)
+        if valid:
+            valid, error = room.add_player(name.strip(), request.sid)
+        if not valid:
+            emit("error", {"message": error})
+            return
+
+        player = room.game_state.players[-1]
+        join_room(room.room_code)
+        emit("joined_room", room_identity(room, player))
+        room.publish("player_joined", player_name=player.name, skip_sid=request.sid)
+
+
+@socketio.on("add_ai_player")
 def handle_add_ai_player(data):
-    """Add an AI player to the room"""
-    room_code = data.get('room_code', '').upper()
-    
-    logger.info(f"Adding AI player to room '{room_code}', socket: {request.sid}")
-    logger.info(f"Available rooms: {list(game_rooms.keys())}")
-    
     with rooms_lock:
-        if room_code not in game_rooms:
-            logger.error(f"Room '{room_code}' not found for AI add! Available: {list(game_rooms.keys())}")
-            emit('error', {'message': 'Room not found'})
+        room = find_room(data)
+        if room is None or not find_seat(room, data):
             return
-        
-        game_room = game_rooms[room_code]
-        
-        if game_room.started:
-            emit('error', {'message': 'Game already started'})
+        if room.started:
+            emit("error", {"message": "Game already started"})
             return
-        
-        ai_names = [
+
+        names = [
             "AI Jelle", "AI Luc", "AI Tadeema", "AI Ronald", "AI Ramon",
             "AI Remco", "AI Pim", "AI Lars", "AI Martin", "AI Levi",
-            "AI Thomas", "AI Otger", "MechaHitler", "AI Dribbel",
-            "AI Bartje", "AI Bowy", "AI Gertje", "AI Liesbeth",
+            "AI Thomas", "AI Otger", "AI Dribbel", "AI Bartje", "AI Bowy",
+            "AI Gertje", "AI Liesbeth",
         ]
-        np.random.shuffle(ai_names)
-        ai_name = ai_names[len([p for p in game_room.game_state.players if p.is_ai]) % len(ai_names)]
-        
-        success, error_msg = game_room.add_player(ai_name, None, is_ai=True)
+        used = {player.name for player in room.game_state.players}
+        available = [name for name in names if name not in used]
+        name = random.choice(available) if available else f"AI {len(used) + 1}"
+        success, error = room.add_player(name, None, is_ai=True)
         if not success:
-            emit('error', {'message': error_msg})
+            emit("error", {"message": error})
             return
-        
-        socketio.emit('ai_player_added', {
-            'ai_name': ai_name,
-            'game_state': game_room.get_public_state()
-        }, room=room_code)
+        room.publish("ai_player_added", ai_name=name)
 
-@socketio.on('start_game')
+
+@socketio.on("start_game")
 def handle_start_game(data):
-    """Start the game"""
-    room_code = data.get('room_code', '').upper()
-    
     with rooms_lock:
-        if room_code not in game_rooms:
-            emit('error', {'message': 'Room not found'})
+        room = find_room(data)
+        if room is None or not find_seat(room, data):
             return
-        
-        game_room = game_rooms[room_code]
-        
-        if not game_room.start_game():
-            emit('error', {'message': 'Cannot start game'})
+        ready = sum(player.is_connected for player in room.game_state.players)
+        if ready < 2 or not room.start_game():
+            emit("error", {"message": "Cannot start game"})
             return
-        
-        socketio.emit('game_started', {
-            'game_state': game_room.get_public_state()
-        }, room=room_code)
-        
-        # Send private hand info to each player
-        for player in game_room.game_state.players:
-            if not player.is_ai and player.socket_id:
-                logger.info(f"Sending private hand to {player.name}: {len(player.hand)} cards")
-                socketio.emit('private_state', {
-                    'hand': player.hand
-                }, room=player.socket_id)
+        room.publish("game_started")
 
-@socketio.on('play_card')
+
+@socketio.on("play_card")
 def handle_play_card(data):
-    """Handle card play"""
-    room_code = data.get('room_code', '').upper()
-    player_id = data.get('player_id')
-    card_num = data.get('card_num')  # None for pass
-    
-    logger.info(f"🎮 PLAY_CARD received: room={room_code}, player={player_id}, card={card_num}")
-    
-    # Process the human player's action first
     with rooms_lock:
-        if room_code not in game_rooms:
-            logger.error(f"❌ Room not found: {room_code}")
-            emit('error', {'message': 'Room not found'})
+        room = find_room(data)
+        if room is None:
             return
-        
-        game_room = game_rooms[room_code]
-        logger.info(f"🎯 Calling play_card for player {player_id}")
-        result = game_room.play_card(player_id, card_num)
-        logger.info(f"📋 play_card result: {result}")
-        
-        if not result['success']:
-            logger.info(f"❌ Emitting error: {result['error']}")
-            emit('error', {'message': result['error']})
+        player = find_seat(room, data)
+        if player is None:
             return
-        
-        # Find the player who performed the action
-        acting_player = None
-        try:
-            for player in game_room.game_state.players:
-                if player.id == player_id:
-                    acting_player = player
-                    break
-        except Exception as e:
-            logger.error(f"Error finding acting player {player_id}: {e}")
-            acting_player = None
-        
-        # Broadcast game update
-        public_state = game_room.get_public_state()
-        socketio.emit('game_update', {
-            'action': result['action'],
-            'game_state': public_state,
-            'details': result,
-            'acting_player': {'name': acting_player.name, 'id': acting_player.id} if acting_player else None
-        }, room=room_code)
-        
-        
-        # Send updated private hands
-        for player in game_room.game_state.players:
-            if not player.is_ai and player.socket_id:
-                logger.info(f"Sending updated private hand to {player.name}: {len(player.hand)} cards")
-                socketio.emit('private_state', {
-                    'hand': player.hand
-                }, room=player.socket_id)
-    
-    # Handle AI turns outside the lock to prevent deadlock with other player requests
-    ai_turn_count = 0
-    max_ai_turns = 100  # Safety limit to prevent infinite loops
-    
-    logger.info(f"🤖 AI LOOP START: game_over={game_room.game_state.game_over}, current_player={game_room.game_state.current_player_index}, is_ai={game_room.game_state.players[game_room.game_state.current_player_index].is_ai}, waiting_for_suit={game_room.game_state.waiting_for_suit_choice}")
-    
-    while (not game_room.game_state.game_over and 
-           game_room.game_state.current_player_index < len(game_room.game_state.players) and
-           game_room.game_state.players[game_room.game_state.current_player_index].is_ai and
-           not game_room.game_state.players[game_room.game_state.current_player_index].is_observer and
-           not game_room.game_state.waiting_for_suit_choice and
-           ai_turn_count < max_ai_turns):
-            
-            logger.info(f"🔄 AI LOOP iteration {ai_turn_count + 1}: processing AI turn")
-            
-            ai_turn_count += 1
-            logger.info(f"AI turn {ai_turn_count}: Player {game_room.game_state.current_player_index}")
-            
-            # Get the AI player before the turn (in case turn advances)
-            ai_player_before_turn = game_room.game_state.players[game_room.game_state.current_player_index]
-            
-            # Add 1-second delay for AI moves (non-blocking)
-            socketio.sleep(2)
-            
-            ai_result = game_room.handle_ai_turn()
-            logger.info(f"AI result: {ai_result}")
-            
-            if ai_result and ai_result.get('success', False):
-                public_state = game_room.get_public_state()
-                socketio.emit('ai_move', {
-                    'action': ai_result['action'],
-                    'game_state': public_state,
-                    'details': ai_result,
-                    'acting_player': {'name': ai_player_before_turn.name, 'id': ai_player_before_turn.id}
-                }, room=room_code)
-                
-                
-            elif ai_result and not ai_result.get('success', False):
-                logger.error(f"AI turn failed: {ai_result.get('error', 'Unknown error')}")
-                # Break the loop to prevent infinite retries
-                break
-            
-            # Update private hands after AI move (only for successful moves)
-            if ai_result and ai_result.get('success', False):
-                for player in game_room.game_state.players:
-                    if not player.is_ai and player.socket_id:
-                        socketio.emit('private_state', {
-                            'hand': player.hand
-                        }, room=player.socket_id)
-            else:
-                logger.error("AI turn returned None - breaking loop to prevent hang")
-                break
-        
-    logger.info(f"AI LOOP END: game_over={game_room.game_state.game_over}, current_player={game_room.game_state.current_player_index}, is_ai={game_room.game_state.players[game_room.game_state.current_player_index].is_ai if game_room.game_state.current_player_index < len(game_room.game_state.players) else 'INDEX_OUT_OF_BOUNDS'}, waiting_for_suit={game_room.game_state.waiting_for_suit_choice}, ai_turns={ai_turn_count}")
-    
-    if ai_turn_count >= max_ai_turns:
-        logger.error(f"AI turn limit reached ({max_ai_turns}) - potential infinite loop prevented")
-    
-    # Start timer for human player if it's their turn and game is still active
-    if (not game_room.game_state.game_over and 
-        not game_room.game_state.waiting_for_suit_choice and
-        game_room.game_state.current_player_index < len(game_room.game_state.players)):
-        current_player = game_room.game_state.players[game_room.game_state.current_player_index]
-        if not current_player.is_ai and not current_player.is_observer:
-            logger.info(f"Starting timer for human player {current_player.name} after AI processing")
-            game_room._start_turn_timer()
+        if not room.started:
+            emit("error", {"message": "Game has not started"})
+            return
 
-@socketio.on('change_sort')
+        result = room.play_card(player.id, data.get("card_num"))
+        if not result["success"]:
+            emit("error", {"message": result["error"]})
+            return
+
+        # The drawn card is private until someone plays it.
+        public_details = {key: value for key, value in result.items() if key != "card"}
+        room._continue_game_flow()
+        room.publish("game_update", action=result["action"], details=public_details,
+                     acting_player={"name": player.name, "id": player.id})
+
+
+@socketio.on("change_sort")
 def handle_change_sort(data):
-    """Handle sort change"""
-    room_code = data.get('room_code', '').upper()
-    player_id = data.get('player_id')
-    new_sort = data.get('new_sort')
-    
-    logger.info(f"SORT CHANGE REQUEST: player {player_id} wants to change suit to {new_sort} in room {room_code}")
-    
     with rooms_lock:
-        if room_code not in game_rooms:
-            emit('error', {'message': 'Room not found'})
+        room = find_room(data)
+        if room is None:
             return
-        
-        game_room = game_rooms[room_code]
-        result = game_room.change_sort(player_id, new_sort)
-        
-        if not result['success']:
-            logger.error(f"SORT CHANGE FAILED: {result['error']}")
-            emit('error', {'message': result['error']})
+        player = find_seat(room, data)
+        if player is None:
             return
-        
-        logger.info(f"SORT CHANGE SUCCESS: broadcasted to room {room_code}")
-        
-        # Broadcast sort change
-        socketio.emit('sort_changed', {
-            'new_sort': new_sort,
-            'game_state': game_room.get_public_state()
-        }, room=room_code)
-        
-        # After suit change, check if AI should continue
-        logger.info(f"CHECKING AI CONTINUATION: current_player={game_room.game_state.current_player_index}, is_ai={game_room.game_state.players[game_room.game_state.current_player_index].is_ai}, waiting_for_suit={game_room.game_state.waiting_for_suit_choice}")
-        
-        # Handle AI turns after suit change
-        ai_turn_count = 0
-        max_ai_turns = 20
-        
-        while (not game_room.game_state.game_over and 
-               game_room.game_state.current_player_index < len(game_room.game_state.players) and
-               game_room.game_state.players[game_room.game_state.current_player_index].is_ai and
-               not game_room.game_state.players[game_room.game_state.current_player_index].is_observer and
-               not game_room.game_state.waiting_for_suit_choice and
-               ai_turn_count < max_ai_turns):
-            
-            ai_turn_count += 1
-            logger.info(f"AI turn after suit change {ai_turn_count}: Player {game_room.game_state.current_player_index}")
-            
-            # Get the AI player before the turn (in case turn advances)
-            ai_player_before_turn_2 = game_room.game_state.players[game_room.game_state.current_player_index]
-            
-            # Add 1-second delay for AI moves (non-blocking)
-            socketio.sleep(2)
-            
-            ai_result = game_room.handle_ai_turn()
-            logger.info(f"AI result after suit change: {ai_result}")
-            
-            if ai_result and ai_result.get('success', False):
-                public_state = game_room.get_public_state()
-                socketio.emit('ai_move', {
-                    'action': ai_result['action'],
-                    'game_state': public_state,
-                    'details': ai_result,
-                    'acting_player': {'name': ai_player_before_turn_2.name, 'id': ai_player_before_turn_2.id}
-                }, room=room_code)
-                
-                # Update private hands after AI move
-                for player in game_room.game_state.players:
-                    if not player.is_ai and player.socket_id:
-                        socketio.emit('private_state', {
-                            'hand': player.hand
-                        }, room=player.socket_id)
-            elif ai_result and not ai_result.get('success', False):
-                logger.error(f"AI turn failed after suit change: {ai_result.get('error', 'Unknown error')}")
-                break
-            else:
-                logger.error("AI turn returned None after suit change - breaking loop")
-                break
+        if room.game_state.game_over or not room.game_state.waiting_for_suit_choice:
+            emit("error", {"message": "There is no suit choice pending"})
+            return
 
-@socketio.on('leave_room')
+        result = room.change_sort(player.id, data.get("new_sort"))
+        if not result["success"]:
+            emit("error", {"message": result["error"]})
+            return
+        room._continue_game_flow()
+        room.publish("sort_changed", new_sort=result["new_sort"])
+
+
+@socketio.on("leave_room")
 def handle_leave_room(data):
-    """Handle explicit room leaving"""
-    room_code = data.get('room_code', '').upper()
-    player_id = data.get('player_id')
-    
-    logger.info(f"Player {player_id} explicitly leaving room {room_code}")
-    
     with rooms_lock:
-        if room_code not in game_rooms:
+        room = find_room(data)
+        if room is None:
             return
-        
-        game_room = game_rooms[room_code]
-        
-        # Remove player completely
-        for i, player in enumerate(game_room.game_state.players):
-            if player.id == player_id:
-                logger.info(f"Removing player {player.name} from room {room_code}")
-                # Stop timer if this was the current player
-                if i == game_room.game_state.current_player_index:
-                    game_room._stop_turn_timer()
-                game_room.game_state.players.pop(i)
-                # Adjust current player index if needed
-                if game_room.game_state.current_player_index >= len(game_room.game_state.players):
-                    game_room.game_state.current_player_index = 0
-                # Start timer for next player if game is still running
-                if not game_room.game_state.game_over and game_room.game_state.players:
-                    game_room._skip_observer_turns()
-                    game_room._start_turn_timer()
-                break
-        
-        # Check if room should be deleted
-        human_players = [p for p in game_room.game_state.players if not p.is_ai]
-        if not human_players:
-            logger.info(f"Deleting room {room_code} - player explicitly left and no humans remain")
-            del game_rooms[room_code]
-        else:
-            socketio.emit('player_left', {
-                'game_state': game_room.get_public_state()
-            }, room=room_code)
-
-@socketio.on('check_direction_changed')
-def handle_check_direction_changed(data):
-    """Handle client request to check if direction changed"""
-    room_code = data.get('room_code', '').upper()
-
-    logger.info(f"CLIENT CHECK: Direction changed request for room {room_code}")
-
-    # Don't use rooms_lock here to avoid deadlock - just check if room exists
-    if room_code not in game_rooms:
-        emit('error', {'message': 'Room not found'})
-        return
-
-    game_room = game_rooms[room_code]
-    public_state = game_room.get_public_state(check_direction_changed=True)
-
-    emit('direction_status', {
-        'direction_changed': public_state['direction_changed'],
-        'direction': public_state['direction']
-    })
-
-@socketio.on('player_timeout')
-def handle_player_timeout(data):
-    """Handle client-side timeout notification"""
-    room_code = data.get('room_code', '').upper()
-    player_id = data.get('player_id')
-    
-    logger.info(f"CLIENT TIMEOUT: Player {player_id} in room {room_code} signaled timeout from client")
-    
-    with rooms_lock:
-        if room_code not in game_rooms:
-            emit('error', {'message': 'Room not found'})
+        player = find_seat(room, data)
+        if player is None:
             return
-        
-        game_room = game_rooms[room_code]
-        
-        # Find the player
-        player = None
-        for p in game_room.game_state.players:
-            if p.id == player_id:
-                player = p
-                break
-        
-        if not player:
-            logger.error(f"CLIENT TIMEOUT: Player {player_id} not found in room {room_code}")
-            return
-        
-        # Check if it's actually this player's turn
-        current_player = game_room.game_state.players[game_room.game_state.current_player_index]
-        if current_player.id != player_id:
-            logger.warning(f"CLIENT TIMEOUT: Player {player_id} sent timeout but it's not their turn (current: {current_player.name})")
-            return
-        
-        logger.info(f"CLIENT TIMEOUT: Processing timeout for {player.name} on their turn")
-        
-        # Cancel any existing server-side timer to avoid race condition
-        with game_room.timer_lock:
-            if game_room.current_turn_timer:
-                logger.info(f"CLIENT TIMEOUT: Cancelling server timer to avoid race condition")
-                game_room.current_turn_timer.cancel()
-                game_room.current_turn_timer = None
-        
-        # Process the auto-pass
-        game_room._auto_pass_player(player)
+        room.remove_seat(player)
+        leave_room(room.room_code)
+        room.publish("player_left", player_name=player.name)
+        room.remove_empty_room()
+        return {"ok": True}
 
-@socketio.on('connect')
-def handle_connect():
-    """Handle new socket connection"""
-    logger.info(f"New socket connection: {request.sid}")
 
-@socketio.on('disconnect')
+@socketio.on("disconnect")
 def handle_disconnect():
-    """Handle player disconnect"""
-    logger.info(f"Socket disconnected: {request.sid}")
-    
     with rooms_lock:
-        # Find player in any room and mark as disconnected
-        for room_code, game_room in list(game_rooms.items()):
-            for player in game_room.game_state.players:
-                if player.socket_id == request.sid:
-                    logger.info(f"Player {player.name} disconnected from room {room_code}, keeping room alive")
-                    player.is_connected = False
-                    player.socket_id = None
-                    
-                    # Don't delete rooms on disconnection - they persist for reconnection
-                    # Rooms will be cleaned up when explicitly requested or on server restart
-                    socketio.emit('player_left', {
-                        'game_state': game_room.get_public_state()
-                    }, room=room_code)
-                    return
+        for room in game_rooms.values():
+            player = next((seat for seat in room.game_state.players if seat.socket_id == request.sid), None)
+            if player:
+                player.is_connected = False
+                player.socket_id = None
+                room.publish("player_left", player_name=player.name, disconnected=True)
+
 
 if __name__ == '__main__':
     debug_mode = os.environ.get("FLASK_DEBUG", "").lower() in {
