@@ -56,6 +56,7 @@ def test_draw_stays_private_and_reload_resumes_the_draw_decision(table):
     host.emit("play_card", {"room_code": room.room_code, "card_num": None})
     update = event(guest, "game_update")
     assert update["action"] == "draw_and_play_option"
+    assert update["details"]["drawn_count"] == 1
     assert "card" not in update["details"]
     assert all("hand" not in player for player in update["game_state"]["players"])
     assert update["game_state"]["has_drawn_this_turn"]
@@ -69,7 +70,9 @@ def test_draw_stays_private_and_reload_resumes_the_draw_decision(table):
         assert joined["game_state"]["has_drawn_this_turn"]
         assert joined["private_state"] == {"hand": [3, 28, 4], "playable_cards": [3, 4]}
         resumed.emit("play_card", {"room_code": room.room_code, "card_num": None})
-        assert event(resumed, "game_update")["action"] == "pass"
+        passed = event(resumed, "game_update")
+        assert passed["action"] == "pass"
+        assert not passed["details"].get("drawn_count")
         assert room.game_state.players[0].hand == [3, 28, 4]
         assert room.game_state.current_player_index == 1
     finally:
@@ -112,7 +115,9 @@ def test_suit_timeout_clears_modal_and_rejected_actions_keep_timer(table):
     room._stop_turn_timer()
     with web_server.rooms_lock:
         room._auto_pass_player(room.game_state.players[0])
-    update = event(guest, "player_auto_passed")["game_state"]
+    timeout = event(guest, "player_auto_passed")
+    assert timeout["drawn_count"] == 0
+    update = timeout["game_state"]
     assert not update["waiting_for_suit_choice"]
     assert update["current_sort"] == "harten"
     assert update["current_player_index"] == 1
@@ -150,3 +155,33 @@ def test_multiplayer_summary_remembers_who_went_out_first(table):
     last = event(guest, "game_update")["game_state"]
     assert last["game_over"]
     assert last["first_out"] == first["first_out"]
+
+
+def test_penalty_and_timeout_report_actual_public_draw_count(table):
+    room, host, guest, _, _ = table
+    configure_round(room, rank=2, top=1, draw=(4, 12, 24))
+    room.game_state.penalty_amount = 2
+    host.emit("play_card", {"room_code": room.room_code, "card_num": None})
+    penalty = event(guest, "game_update")
+    assert penalty["details"] == {"success": True, "action": "penalty", "drawn_count": 2}
+    assert penalty["game_state"]["players"][0]["hand_size"] == 4
+
+    room._stop_turn_timer()
+    player = room.game_state.players[1]
+    with web_server.rooms_lock:
+        room._auto_pass_player(player)
+    timeout = event(guest, "player_auto_passed")
+    assert timeout["acting_player"]["id"] == player.id
+    assert timeout["drawn_count"] == 1
+
+
+def test_ai_can_draw_and_play_without_a_net_hand_size_change(table):
+    room, _, _, _, _ = table
+    configure_round(room)
+    player = room.game_state.players[0]
+    player.is_ai = True
+    room.ai_player.choose_action_with_drawn_card = lambda player, state, drawn: drawn
+    result = room.play_card(player.id, None)
+    assert result["action"] == "play"
+    assert result["drawn_count"] == 1
+    assert player.hand == [3, 28]

@@ -7,7 +7,7 @@
     <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/png">
     <title>Pesten · Room {{ room_code }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=2) }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css', v=2) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css', v=3) }}">
 </head>
 <body class="room-page">
     <div class="room-shell">
@@ -76,23 +76,28 @@
                             <span id="direction-badge" class="table-chip"><span id="game-direction" aria-hidden="true">↻</span><span id="direction-label">Clockwise</span></span>
                         </div>
                     </div>
-                    <section class="game-table" id="round-table" data-view="2d" aria-label="Draw and discard piles">
-                        <div class="flat-felt" aria-hidden="true"></div>
-                        <div id="table-scene" class="table-scene" aria-hidden="true"></div>
+                    <section class="game-table" id="round-table" data-view="2d" aria-label="Table and card counts">
                         <div class="table-topline">
                             <span class="table-chip" id="active-suit">Active suit</span>
                             <span class="table-chip penalty-chip" id="penalty-info" hidden></span>
                         </div>
-                        <div class="pile pile-draw">
-                            <button class="pile-target card-back" id="draw-pile" type="button" disabled>
-                                <span class="card-back-center" aria-hidden="true">♠</span>
-                            </button>
-                            <span class="pile-label" id="draw-pile-count">Draw pile</span>
+                        <ul id="opponent-seats" class="table-seats" aria-label="Other players' card counts"></ul>
+                        <div class="table-field">
+                            <div class="flat-felt" aria-hidden="true"></div>
+                            <div id="table-scene" class="table-scene" aria-hidden="true"></div>
+                            <div class="pile pile-draw">
+                                <button class="pile-target card-back" id="draw-pile" type="button" disabled>
+                                    <span class="card-back-center" aria-hidden="true">♠</span>
+                                </button>
+                                <span class="pile-label" id="draw-pile-count">Draw pile</span>
+                            </div>
+                            <div class="pile pile-discard">
+                                <div class="pile-target playing-card" id="top-card" role="img" aria-label="Top discard"></div>
+                                <span class="pile-label" id="discard-label">Discard</span>
+                            </div>
                         </div>
-                        <div class="pile pile-discard">
-                            <div class="pile-target playing-card" id="top-card" role="img" aria-label="Top discard"></div>
-                            <span class="pile-label" id="discard-label">Discard</span>
-                        </div>
+                        <div id="your-seat" class="your-seat"></div>
+                        <div id="draw-animations" class="draw-animations" aria-hidden="true"></div>
                     </section>
                     <div class="hand-area panel">
                         <div class="hand-heading">
@@ -137,6 +142,6 @@
     <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
     <script src="{{ url_for('static', filename='vendor/socket.io-4.8.4.min.js') }}"></script>
-    <script type="module" src="{{ url_for('static', filename='js/game.js', v=2) }}"></script>
+    <script type="module" src="{{ url_for('static', filename='js/game.js', v=3) }}"></script>
 </body>
 </html>

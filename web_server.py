@@ -665,35 +665,40 @@ class GameRoom:
                             if ai_action == drawn_card:
                                 card_data = get_web_card_data(drawn_card)
                                 logger.info(f"AI {player.name} decided to play the drawn card {drawn_card}")
-                                return self._process_card_play(player, drawn_card, card_data)
+                                return {
+                                    **self._process_card_play(player, drawn_card, card_data),
+                                    "drawn_count": 1,
+                                }
                             else:
                                 logger.info(f"AI {player.name} decided not to play the drawn card {drawn_card}")
                                 self._next_turn()
-                                return {"success": True, "action": "pass"}
+                                return {"success": True, "action": "pass", "drawn_count": 1}
                         except Exception as e:
                             logger.error(f"AI decision error for {player.name}: {e}")
                             # Default to not playing the drawn card
                             self._next_turn()
-                            return {"success": True, "action": "pass"}
+                            return {"success": True, "action": "pass", "drawn_count": 1}
                     else:
                         # Human gets option to play the drawn card
-                        return {"success": True, "action": "draw_and_play_option", "card": drawn_card}
+                        return {"success": True, "action": "draw_and_play_option", "card": drawn_card, "drawn_count": 1}
             
             # If no card was drawn or drawn card is not playable, end turn
             self._next_turn()
             # Auto-skip observer turns after pass
             self._skip_observer_turns()
-            return {"success": True, "action": "pass"}
+            return {"success": True, "action": "pass", "drawn_count": int(drawn_card is not None)}
     
     def _apply_penalty(self, player: PlayerState) -> Dict[str, Any]:
         """Apply penalty to player"""
+        hand_size = len(player.hand)
         for _ in range(self.game_state.penalty_amount):
             if self._draw_card(player) is None:
                 break
 
+        result = {"success": True, "action": "penalty", "drawn_count": len(player.hand) - hand_size}
         self.game_state.penalty_amount = 0
         if self.game_state.game_over:
-            return {"success": True, "action": "penalty"}
+            return result
         
         # Handle sort change for joker
         if self.game_state.current_true_number == 0:
@@ -706,17 +711,17 @@ class GameRoom:
                 self._record_suit_choice(player, new_sort)
                 logger.info(f"JOKER AI CHOICE: {player.name} chose suit {new_sort}")
                 self._next_turn()
-                return {"success": True, "action": "penalty_and_sort_change", "new_sort": new_sort}
+                return {**result, "action": "penalty_and_sort_change", "new_sort": new_sort}
             else:
                 # Don't advance turn - player needs to choose suit first
                 logger.info(f"JOKER HUMAN CHOICE: {player.name} needs to choose suit")
                 self.game_state.waiting_for_suit_choice = True
-                return {"success": True, "action": "penalty_and_choose_sort"}
+                return {**result, "action": "penalty_and_choose_sort"}
         
         self._next_turn()
         # Auto-skip observer turns after penalty
         self._skip_observer_turns()
-        return {"success": True, "action": "penalty"}
+        return result
     
     def _process_card_play(self, player: PlayerState, card_num: int, card_data: Dict[str, Any]) -> Dict[str, Any]:
         """Process a valid card play"""
@@ -1047,6 +1052,7 @@ class GameRoom:
     def _auto_pass_player(self, player: PlayerState):
         """Resolve the same pending decision the player saw, then advance."""
         state = self.game_state
+        hand_size = len(player.hand)
         if state.waiting_for_suit_choice or (state.penalty_amount and state.current_true_number == 0):
             state.current_sort = "harten"
             self._record_suit_choice(player, "harten")
@@ -1062,6 +1068,8 @@ class GameRoom:
         self._next_turn()
         self._continue_game_flow()
         self.publish("player_auto_passed", player_name=player.name,
+                     acting_player={"id": player.id, "name": player.name},
+                     drawn_count=len(player.hand) - hand_size,
                      consecutive_timeouts=player.consecutive_timeouts)
 
     def _continue_game_flow(self):

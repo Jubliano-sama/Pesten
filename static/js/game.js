@@ -14,6 +14,9 @@ const table = $('round-table');
 const viewControls = $('view-controls');
 const viewButtons = [...viewControls.querySelectorAll('button')];
 const suitButtons = [...suitDialog.querySelectorAll('button')];
+const tableSeats = new Map();
+const drawBatches = new WeakMap();
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
 let identity = null;
 let seatReady = false;
@@ -22,6 +25,7 @@ let state = null;
 let hand = [];
 let playable = new Set();
 let pending = false;
+let finishingSuitDraw = false;
 let handVersion = '';
 let discardVersion;
 let lastTurn;
@@ -93,8 +97,6 @@ function renderScene() {
     table3d.update({
         topCard: state.top_card,
         deckSize: state.grab_deck_size,
-        players: state.players,
-        currentPlayerId: state.game_over ? null : current()?.id,
     });
 }
 
@@ -113,7 +115,7 @@ async function selectView(view) {
     loading3d = true;
     button.disabled = true;
     try {
-        const { mountTable } = await import('./table3d.js?v=2');
+        const { mountTable } = await import('./table3d.js?v=3');
         if (preferredView !== '3d') return;
         table3d = mountTable($('table-scene'), {
             onLost() {
@@ -193,6 +195,122 @@ function pluralCards(count) {
     return `${count} ${count === 1 ? 'card' : 'cards'}`;
 }
 
+function makeTableSeat(player, ownSeat) {
+    const element = document.createElement(ownSeat ? 'div' : 'li');
+    element.className = 'table-seat';
+    element.dataset.playerId = player.id;
+    const header = document.createElement('div');
+    header.className = 'table-seat-header';
+    const name = document.createElement('span');
+    name.className = 'table-seat-name';
+    name.textContent = ownSeat ? 'You' : player.name;
+    name.title = player.name;
+    const count = document.createElement('span');
+    count.className = 'table-seat-count';
+    count.setAttribute('role', 'img');
+    header.append(name, count);
+    const backs = document.createElement('div');
+    backs.className = 'table-seat-cards';
+    backs.setAttribute('aria-hidden', 'true');
+    element.append(header, backs);
+    return { element, count, backs };
+}
+
+function renderTableSeats() {
+    const opponents = $('opponent-seats');
+    const own = $('your-seat');
+    const visible = new Set();
+    const opponentElements = [];
+    const active = state.game_over ? null : current()?.id;
+    for (const player of state.players) {
+        const ownSeat = player.id === identity;
+        let seat = tableSeats.get(player.id);
+        if (!seat) {
+            seat = makeTableSeat(player, ownSeat);
+            tableSeats.set(player.id, seat);
+        }
+        const { element, count, backs } = seat;
+        const size = player.hand_size;
+        visible.add(player.id);
+        element.dataset.active = String(player.id === active);
+        if (element.dataset.cardCount !== String(size)) {
+            element.dataset.cardCount = size;
+            count.textContent = size;
+            count.setAttribute('aria-label', pluralCards(size));
+            const missing = size - backs.childElementCount;
+            if (missing < 0) {
+                backs.replaceChildren(...Array.from(backs.children).slice(0, size));
+            }
+            for (let i = 0; i < missing; i++) {
+                const back = document.createElement('span');
+                back.className = 'seat-card-back';
+                backs.append(back);
+            }
+        }
+        if (ownSeat) {
+            if (element.parentNode !== own) own.replaceChildren(element);
+        } else {
+            opponentElements.push(element);
+        }
+    }
+    for (const [id, { element }] of tableSeats) {
+        if (visible.has(id)) continue;
+        element.remove();
+        tableSeats.delete(id);
+    }
+    if (opponentElements.some((element, i) => opponents.children[i] !== element)) {
+        opponents.replaceChildren(...opponentElements);
+    }
+    opponents.style.setProperty('--seat-columns', Math.max(1, Math.min(4, opponentElements.length)));
+}
+
+function animateDraw(playerId, amount) {
+    const seat = tableSeats.get(playerId);
+    if (!seat || !Number.isSafeInteger(amount) || amount <= 0) return;
+    playSoundEffect('card');
+    if (reducedMotion.matches || document.hidden) return;
+
+    const layer = $('draw-animations');
+    const bounds = layer.getBoundingClientRect();
+    const source = drawPile.getBoundingClientRect();
+    if (!bounds.width || !source.width) return;
+
+    const batch = Symbol();
+    drawBatches.set(seat.element, batch);
+    seat.element.dataset.drawing = '';
+    const width = Math.min(source.width, 64);
+    const height = Math.min(source.height, 86);
+    const startX = source.left + source.width / 2 - bounds.left;
+    const startY = source.top + source.height / 2 - bounds.top;
+    const playersBacks = Array.from(seat.backs.children).slice(-amount);
+    const stagger = Math.min(75, 450 / Math.max(1, amount - 1));
+    const animations = [];
+
+    for (let i = 0; i < amount; i++) {
+        const target = (playersBacks[i] ?? seat.count).getBoundingClientRect();
+        const endX = target.left + target.width / 2 - bounds.left;
+        const endY = target.top + target.height / 2 - bounds.top;
+        const arc = (endX > startX ? -1 : 1) * Math.min(44, bounds.width / 10);
+        const transform = (x, y, angle, scale) =>
+            `translate3d(${x - width / 2}px, ${y - height / 2}px, 0) rotate(${angle}deg) scale(${scale})`;
+        const card = document.createElement('span');
+        card.className = 'flying-card';
+        card.style.width = `${width}px`;
+        card.style.height = `${height}px`;
+        layer.append(card);
+        const animation = card.animate([
+            { transform: transform(startX, startY, -8, 1), opacity: 0 },
+            { transform: transform(startX, startY - 6, -11, 1), opacity: 1, offset: .12 },
+            { transform: transform((startX + endX) / 2 + arc, (startY + endY) / 2 - 12, arc / 2, .78), opacity: 1, offset: .56 },
+            { transform: transform(endX, endY, 0, Math.min(target.width / width, .3)), opacity: .9 },
+        ], { duration: 480, delay: i * stagger, fill: 'both', easing: 'cubic-bezier(.23,.72,.30,1)' });
+        animations.push(animation.finished.catch(() => {}).then(() => card.remove()));
+    }
+    return Promise.all(animations).then(() => {
+        if (drawBatches.get(seat.element) === batch) delete seat.element.dataset.drawing;
+    });
+}
+
 function renderHand() {
     const version = hand.join(',');
     if (version !== handVersion) {
@@ -256,7 +374,7 @@ function renderActions() {
         state.has_drawn_this_turn ? 'Play a highlighted card or pass.' :
         playable.size ? 'Choose a highlighted card to play.' : `No playable cards. ${drawLabel}.`;
     for (const button of suitButtons) button.disabled = pending || !handReady;
-    if (choosing && !suitDialog.open) suitDialog.showModal();
+    if (choosing && !finishingSuitDraw && !suitDialog.open) suitDialog.showModal();
     if (!choosing && suitDialog.open) suitDialog.close();
 }
 
@@ -300,6 +418,7 @@ function displayState(next, privateState = null) {
         acting ? `${acting.name}’s turn` : 'Waiting for players';
     $('current-turn').textContent = title;
     $('seat-count').textContent = state.players.length;
+    renderTableSeats();
     renderSeats($('player-queue'));
     $('hand-count').textContent = pluralCards(self()?.hand_size ?? 0);
     $('direction-label').textContent = state.direction === -1 ? 'Counterclockwise' : 'Clockwise';
@@ -352,12 +471,24 @@ function gameUpdate({ action, details = {}, acting_player: player, game_state: n
     pending = false;
     const oldTop = state?.top_card;
     const alreadyOut = self()?.is_observer;
+    const drawsBeforeSuit = details.drawn_count > 0 && next.waiting_for_suit_choice && player?.id === identity;
+    if (drawsBeforeSuit) finishingSuitDraw = true;
     displayState(next);
     const name = player?.id === identity ? 'You' : player?.name ?? 'A player';
+    if (details.drawn_count) {
+        const flight = animateDraw(player?.id, details.drawn_count);
+        if (drawsBeforeSuit) {
+            Promise.resolve(flight).then(() => {
+                finishingSuitDraw = false;
+                renderActions();
+            });
+        }
+        log(`${name} drew ${pluralCards(details.drawn_count)}.`);
+    }
     if (action === 'play' || action === 'win') {
         const card = cardData(next.top_card)?.label ?? 'a card';
         log(`${name} played ${card}.`);
-        if (next.top_card !== oldTop) playSoundEffect('card');
+        if (!details.drawn_count && next.top_card !== oldTop) playSoundEffect('card');
         for (const effect of details.card_effects ?? []) {
             if (effect === 'skip_player') {
                 log('The next turn was skipped.');
@@ -372,14 +503,8 @@ function gameUpdate({ action, details = {}, acting_player: player, game_state: n
                 showOutcome('You’re out', 'You cleared your hand. You can watch the remaining players finish.');
             }
         }
-    } else if (action?.startsWith('penalty')) {
-        log(`${name} drew the penalty.`);
-    } else if (action === 'draw_and_play_option') {
-        log(`${name} drew a card.`);
-        playSoundEffect('card');
-    } else if (action === 'pass') {
+    } else if (action === 'pass' && !details.drawn_count) {
         log(`${name} passed.`);
-        playSoundEffect('card');
     }
     if (details.new_sort) log(`Suit changed to ${suits[details.new_sort]?.name ?? 'wild'}.`);
 }
@@ -481,6 +606,7 @@ socket.on('player_reconnected', data => {
 socket.on('player_auto_passed', data => {
     pending = false;
     displayState(data.game_state);
+    animateDraw(data.acting_player?.id, data.drawn_count);
     log(`${data.player_name} timed out and passed.`);
 });
 socket.on('player_kicked', data => {

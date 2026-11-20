@@ -5,8 +5,8 @@ import {
 } from '../vendor/three-r187.js';
 import { cardData } from './cards.js';
 
-const drawSpot = -1.1;
-const discardSpot = 1.1;
+const drawSpot = -1.25;
+const discardSpot = 1.25;
 const cardWidth = 1.18;
 const cardLength = 1.67;
 
@@ -146,7 +146,6 @@ function createScene(host, { hero = false, onLost = () => {}, onPiles = () => {}
     const cardBody = new BoxGeometry(cardWidth * .98, .041, cardLength * .985);
     const cardSurface = new PlaneGeometry(cardWidth, cardLength);
     const cardEdge = material(0xe6d7b8);
-    const activeEdge = material(0xe0a745);
     const backs = new MeshBasicMaterial({ map: cardTexture(null), alphaTest: .5 });
     const faceMaterials = new Map();
 
@@ -162,7 +161,7 @@ function createScene(host, { hero = false, onLost = () => {}, onPiles = () => {}
         group.rotation.y = rotation;
         group.scale.setScalar(scale);
         scene.add(group);
-        return { group, faceMesh, edge };
+        return { group, faceMesh };
     }
 
     function faceFor(number) {
@@ -174,7 +173,6 @@ function createScene(host, { hero = false, onLost = () => {}, onPiles = () => {}
 
     const drawCards = [];
     let discard;
-    const fans = [];
     if (hero) {
         for (let i = 0; i < 5; i++) makeCard(-2.9 + i * .018, .06 + i * .047, -.94, -.16, backs, 1.02);
         makeCard(-1.38, .10, .43, .38, faceFor(42), 1.65);
@@ -184,16 +182,6 @@ function createScene(host, { hero = false, onLost = () => {}, onPiles = () => {}
         for (let i = 0; i < 5; i++) drawCards.push(makeCard(drawSpot + i * .031, .056 + i * .045, .17, -.08));
         discard = makeCard(discardSpot, .06, .17, .12);
         discard.group.visible = false;
-        for (let i = 0; i < 7; i++) {
-            const fan = new Group();
-            for (let j = 0; j < 3; j++) {
-                const card = makeCard((j - 1) * .23, .048 + j * .023, Math.abs(j - 1) * .06, (1 - j) * .14, backs, .46);
-                fan.add(card.group);
-                (fan.userData.cards ??= []).push(card);
-            }
-            scene.add(fan);
-            fans.push(fan);
-        }
     }
 
     let visible = true;
@@ -281,7 +269,7 @@ function createScene(host, { hero = false, onLost = () => {}, onPiles = () => {}
             visible = active;
             if (active) resize();
         },
-        update({ topCard, deckSize, players, currentPlayerId }) {
+        update({ topCard, deckSize }) {
             drawCards.forEach((card, i) => {
                 card.group.visible = i < Math.max(1, Math.min(5, deckSize));
             });
@@ -292,19 +280,6 @@ function createScene(host, { hero = false, onLost = () => {}, onPiles = () => {}
                 if (lastCard != null && visible && !reducedMotion.matches) animationStart = performance.now();
                 lastCard = topCard;
             }
-            const active = players.filter(player => !player.is_observer).slice(0, 7);
-            fans.forEach((fan, i) => {
-                const player = active[i];
-                fan.visible = Boolean(player);
-                if (!player) return;
-                const angle = Math.PI + (i - (active.length - 1) / 2) * (active.length > 4 ? .44 : .6);
-                fan.position.set(Math.sin(angle) * 3.95, 0, Math.cos(angle) * 2.57);
-                fan.rotation.y = Math.sin(angle) * .66;
-                fan.userData.cards.forEach((card, j) => {
-                    card.group.visible = j < player.hand_size;
-                    card.edge.material = player.id === currentPlayerId ? activeEdge : cardEdge;
-                });
-            });
             requestRender();
         },
     };
